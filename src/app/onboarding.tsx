@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { SEEK_TOLERANCE_MILLIS } from '@/config/appConfig';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 
@@ -131,8 +132,14 @@ function QuestionPhase({
 
   const playSegment = () => {
     if (!resolved) return;
-    player.seekTo(resolved.startSec);
-    player.play();
+    // seekTo は非同期のため、完了後に play する (文頭からの区間再生を保証する)
+    player
+      .seekTo(resolved.startSec, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
+      .then(() => player.play())
+      .catch(() => {
+        player.seekTo(resolved.startSec);
+        player.play();
+      });
   };
 
   useEffect(() => {
@@ -240,13 +247,12 @@ function QuestionPhase({
             </ThemedText>
           </Pressable>
         </View>
-      ) : (
-        <Pressable onPress={onSkip} style={styles.skipButton}>
-          <ThemedText variant="caption" color="muted">
-            スキップしてライブラリへ
-          </ThemedText>
-        </Pressable>
-      )}
+      ) : null}
+      <Pressable onPress={onSkip} style={styles.skipButton}>
+        <ThemedText variant="caption" color="muted">
+          スキップしてライブラリへ
+        </ThemedText>
+      </Pressable>
     </Screen>
   );
 }
@@ -310,7 +316,10 @@ function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFi
           </ThemedText>
           <Pressable
             style={[styles.primaryButton, { backgroundColor: colors.primary }]}
-            onPress={() => router.push(`/lesson?lesson=${recommendation.lessonId}`)}
+            onPress={() => {
+              onFinish(); // 診断完了を記録してからレッスンへ遷移する (再表示防止)
+              router.push(`/lesson?lesson=${recommendation.lessonId}`);
+            }}
           >
             <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
               このレッスンをはじめる

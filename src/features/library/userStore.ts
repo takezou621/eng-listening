@@ -109,7 +109,8 @@ export function loadUserDataAsync(): Promise<void> {
           const parsed = parseUserData(await STORAGE_FILE.text());
           // 読み込み待ち中のトグル操作を上書きで消さないようマージする
           updateUserData((current) => ({
-            ...current,
+            // 完了済みフラグは読み込み結果で false に戻さない (毎回オンボーディングに戻るのを防ぐ)
+            onboardingDone: current.onboardingDone || parsed.onboardingDone,
             favoriteLessons: Array.from(
               new Set([...current.favoriteLessons, ...parsed.favoriteLessons])
             ),
