@@ -1,9 +1,10 @@
-import { useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_CONFIG } from '@/config/appConfig';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -22,12 +23,28 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 /** 設定 (骨格)。永続化は次フェーズで AsyncStorage 導入 */
+
 export default function SettingsScreen() {
   const router = useRouter();
   const { scheme, colors } = useTheme();
 
   return (
     <Screen>
+      <Pressable
+        onPress={() => router.push('/onboarding')}
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: colors.secondarySurface,
+          borderRadius: 12,
+          padding: 14,
+          marginBottom: 16,
+        }}
+      >
+        <ThemedText>聞き取り診断をもう一度行う</ThemedText>
+        <ThemedText color="muted">›</ThemedText>
+      </Pressable>
       <ThemedText variant="title">設定</ThemedText>
 
       <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
