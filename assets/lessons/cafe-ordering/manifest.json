@@ -1,0 +1,109 @@
+{
+ "config_hash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lesson_id": "cafe-ordering",
+ "lines": {
+  "L01_female.wav": {
+   "index": 1,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Good morning! Welcome to Sunbeam Coffee. What can I get started for you?",
+   "chars": 72,
+   "durationSec": 4.573,
+   "config_hash": "1b1725b9a69efe25"
+  },
+  "L02_male.wav": {
+   "index": 2,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Hi. I'd like a medium latte with oat milk, please.",
+   "chars": 50,
+   "durationSec": 3.426,
+   "config_hash": "1b1725b9a69efe25"
+  },
+  "L03_female.wav": {
+   "index": 3,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Sure. Would you like whipped cream on that?",
+   "chars": 43,
+   "durationSec": 2.558,
+   "config_hash": "1b1725b9a69efe25"
+  },
+  "L04_male.wav": {
+   "index": 4,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "No, thanks. Just the latte is fine.",
+   "chars": 35,
+   "durationSec": 2.958,
+   "config_hash": "1b1725b9a69efe25"
+  },
+  "L05_female.wav": {
+   "index": 5,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Anything to eat? Our blueberry muffin is fresh out of the oven.",
+   "chars": 63,
+   "durationSec": 3.859,
+   "config_hash": "1b1725b9a69efe25"
+  },
+  "L06_male.wav": {
+   "index": 6,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "That sounds great. I'll take one muffin too.",
+   "chars": 44,
+   "durationSec": 3.023,
+   "config_hash": "1b1725b9a69efe25"
+  },
+  "L07_female.wav": {
+   "index": 7,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Perfect. That comes to nine fifty. Can I get your name?",
+   "chars": 55,
+   "durationSec": 4.041,
+   "config_hash": "1b1725b9a69efe25"
+  },
+  "L08_male.wav": {
+   "index": 8,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "It's Ken. Ken Tanaka.",
+   "chars": 21,
+   "durationSec": 1.879,
+   "config_hash": "1b1725b9a69efe25"
+  },
+  "L09_female.wav": {
+   "index": 9,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Thanks, Ken. We'll call your name at the counter in a few minutes.",
+   "chars": 66,
+   "durationSec": 4.313,
+   "config_hash": "1b1725b9a69efe25"
+  },
+  "L10_male.wav": {
+   "index": 10,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Awesome. Thank you so much!",
+   "chars": 27,
+   "durationSec": 1.866,
+   "config_hash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 476,
+  "lessonRequests": 10,
+  "monthChars": 1073,
+  "monthRequests": 17,
+  "monthlyStopChars": 900000
+ }
+}

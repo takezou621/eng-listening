@@ -1,0 +1,102 @@
+{
+ "lesson": "cafe-ordering",
+ "config_hash": "1b1725b9a69efe25",
+ "thresholds": {
+  "f0DeviationMax": 0.15,
+  "rateDeviationMax": 0.25,
+  "rateUnit": "words/sec"
+ },
+ "rows": [
+  {
+   "file": "L01_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 229.7,
+   "rateWps": 2.84,
+   "durationSec": 4.57,
+   "flag": ""
+  },
+  {
+   "file": "L02_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 130.1,
+   "rateWps": 2.92,
+   "durationSec": 3.43,
+   "flag": ""
+  },
+  {
+   "file": "L03_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 228.6,
+   "rateWps": 3.13,
+   "durationSec": 2.56,
+   "flag": ""
+  },
+  {
+   "file": "L04_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 134.1,
+   "rateWps": 2.37,
+   "durationSec": 2.96,
+   "flag": ""
+  },
+  {
+   "file": "L05_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 218.2,
+   "rateWps": 3.11,
+   "durationSec": 3.86,
+   "flag": ""
+  },
+  {
+   "file": "L06_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 129.7,
+   "rateWps": 2.65,
+   "durationSec": 3.02,
+   "flag": ""
+  },
+  {
+   "file": "L07_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 230.8,
+   "rateWps": 2.72,
+   "durationSec": 4.04,
+   "flag": ""
+  },
+  {
+   "file": "L08_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 141.6,
+   "rateWps": 2.13,
+   "durationSec": 1.88,
+   "flag": ""
+  },
+  {
+   "file": "L09_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 216.2,
+   "rateWps": 3.01,
+   "durationSec": 4.31,
+   "flag": ""
+  },
+  {
+   "file": "L10_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 148.1,
+   "rateWps": 2.68,
+   "durationSec": 1.87,
+   "flag": ""
+  }
+ ],
+ "flagged": []
+}

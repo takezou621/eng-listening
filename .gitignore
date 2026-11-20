@@ -28,6 +28,9 @@ yarn-error.*
 .env
 .env*.local
 
+# content pipeline intermediates (行 WAV / 連結 master は再生成可能)
+tools/content/build/
+
 # eas
 .eas/credentials
 credentials.json
@@ -37,3 +40,6 @@ credentials.json
 
 expo-env.d.ts
 # @end expo-cli
+
+# Python
+__pycache__/
