@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { type ComponentRef } from 'react';
 import {
+  createAudioPlayer,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
   setAudioModeAsync,
   useAudioPlayer,
   useAudioPlayerStatus,
+  useAudioRecorder,
+  type AudioPlayer,
+  type RecordingStatus,
 } from 'expo-audio';
+import { deleteAsync } from 'expo-file-system';
 import { useLocalSearchParams } from 'expo-router';
 
 import { Chip } from '@/components/Chip';
@@ -32,6 +40,11 @@ import {
   togglePlayerPrefsChunkJa,
   type ChunkDisplayMode,
 } from '@/features/player/playerPrefs';
+import {
+  addShadowingCount,
+  getShadowingCounts,
+  lessonShadowingTotal,
+} from '@/features/player/shadowingStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -51,7 +64,19 @@ function chunkWordRanges(sentence: LessonSentence): { from: number; to: number }
   return ranges;
 }
 
-function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoParam: boolean }) {
+function LessonPlayerScreen({
+  bundle,
+  demoParam,
+  initialSentenceIndex,
+  autorecordParam,
+}: {
+  bundle: LessonBundle;
+  demoParam: boolean;
+  /** 深い位置の文へ自動スクロールする (deep link の ?sentence=<n>) */
+  initialSentenceIndex: number | null;
+  /** 自動録音デモ (スクロール後に録音開始 → 4 秒で停止) */
+  autorecordParam: boolean;
+}) {
   const lesson = bundle.data;
   const { colors } = useTheme();
   const prefs = getPlayerPrefs();
@@ -193,6 +218,106 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
     append('AB リピート解除');
   };
 
+  // --- シャドーイング録音と比較再生 (Issue #10) ---
+  // 録音は端末内のみ (GM 決定: 外部送信は一切しない)。ファイルはキャッシュ領域に置き、
+  // レッスンを離れたら破棄する。録音回数 (文ごと / レッスンごと) はアプリ再起動まで保持。
+  const [recordingSentence, setRecordingSentence] = useState<number | null>(null);
+  const [recorderStatus, setRecorderStatus] = useState<RecordingStatus | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY, (recStatus) =>
+    setRecorderStatus(recStatus)
+  );
+  const [micDenied, setMicDenied] = useState(false);
+  const [lastRecordings, setLastRecordings] = useState<
+    Record<number, { uri: string; durationSec: number }>
+  >({});
+  const [shadowingCounts, setShadowingCounts] = useState<Record<number, number>>(() =>
+    getShadowingCounts(lesson.id)
+  );
+  const [comparing, setComparing] = useState<{ index: number; source: 'model' | 'user' } | null>(
+    null
+  );
+  const userAudioRef = useRef<AudioPlayer | null>(null);
+  const lastRecordingsRef = useRef(lastRecordings);
+  useEffect(() => {
+    lastRecordingsRef.current = lastRecordings;
+  }, [lastRecordings]);
+
+  const startRecording = async (sentenceIndex: number) => {
+    // 録音中はレッスン音声・比較再生と競合しないよう止める (GM 決定)
+    player.pause();
+    userAudioRef.current?.pause();
+    const permission = await requestRecordingPermissionsAsync();
+    if (!permission.granted) {
+      setMicDenied(true);
+      append('マイク権限が拒否されています');
+      return;
+    }
+    setMicDenied(false);
+    try {
+      // iOS で録音するには allowsRecording: true が必要 (停止後に解除してスピーカー再生に戻す)
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      recorder.record();
+      setRecordingSentence(sentenceIndex);
+      append(`録音開始: 文${sentenceIndex + 1}`);
+    } catch {
+      append('録音の開始に失敗しました');
+    }
+  };
+
+  const stopRecording = (sentenceIndex: number) => {
+    try {
+      recorder.stop();
+    } catch {
+      append('録音の停止に失敗しました');
+      setRecordingSentence(null);
+      return;
+    }
+    const duration = recorder.currentTime;
+    const uri = recorder.uri;
+    setRecordingSentence(null);
+    void setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true }).catch(() => {});
+    if (!uri) {
+      append('録音ファイルを取得できませんでした');
+      return;
+    }
+    setLastRecordings((prev) => ({ ...prev, [sentenceIndex]: { uri, durationSec: duration } }));
+    setShadowingCounts(addShadowingCount(lesson.id, sentenceIndex));
+    append(`録音完了: 文${sentenceIndex + 1} ${duration.toFixed(1)} 秒`);
+  };
+
+  // お手本 = 該当文の区間再生 (レッスン音声)。文の終端で自動停止する
+  const playModel = (sentenceIndex: number) => {
+    const sentence = sentences.find((s) => s.index === sentenceIndex);
+    if (!sentence) return;
+    userAudioRef.current?.pause();
+    setComparing({ index: sentenceIndex, source: 'model' });
+    seekTo(sentence.startSec, `お手本再生: 文${sentenceIndex + 1}`, () => play());
+  };
+
+  const playUserRecording = (sentenceIndex: number) => {
+    const rec = lastRecordings[sentenceIndex];
+    if (!rec) return;
+    player.pause();
+    userAudioRef.current?.release();
+    userAudioRef.current = createAudioPlayer(rec.uri);
+    userAudioRef.current.play();
+    setComparing({ index: sentenceIndex, source: 'user' });
+    append(`自分の録音を再生: 文${sentenceIndex + 1} (${rec.durationSec.toFixed(1)} 秒)`);
+  };
+
+  // レッスンを離れたら録音プレイヤーとキャッシュ内の録音ファイルを破棄する (GM 決定)
+  useEffect(() => {
+    return () => {
+      userAudioRef.current?.release();
+      userAudioRef.current = null;
+      for (const rec of Object.values(lastRecordingsRef.current)) {
+        if (rec.uri.startsWith('file://')) {
+          void deleteAsync(rec.uri, { idempotent: true }).catch(() => {});
+        }
+      }
+    };
+  }, []);
+
   // ?demo=1: 再生→速度変更→文シーク→カラオケ確認→停止を自動実行
   // (手動操作と同じ操作関数を呼ぶ。ログは操作関数側で一度だけ記録される)
   const demoRanRef = useRef(false);
@@ -218,6 +343,23 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demoParam, player]);
+
+  // ?autorecord=1: 自動スクロール後に録音を開始し、4 秒で自動停止する
+  // (シミュレータでの録音フロー自動検証用。手動操作と同じ startRecording / stopRecording を呼ぶ)
+  const autoRecordRanRef = useRef(false);
+  useEffect(() => {
+    if (!autorecordParam || autoRecordRanRef.current) return;
+    autoRecordRanRef.current = true;
+    const target = initialSentenceIndex ?? 0;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const at = (delayMs: number, fn: () => void) => {
+      timers.push(setTimeout(fn, delayMs));
+    };
+    at(1800, () => void startRecording(target));
+    at(6800, () => stopRecording(target));
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autorecordParam]);
 
   // 文リピート (スパイク画面と同じ終端判定)。シーク先込み中の重複発行をガードし、
   // 完了時には「リピートがまだ有効か」を ref で確認してから再開する
@@ -293,6 +435,16 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
     if (!activeSentence) return -1;
     return activeSentence.words.findIndex((w) => t >= w.startSec && t < w.endSec);
   }, [activeSentence, t]);
+  // お手本の区間再生: 文の終端に来たら一時停止して比較再生を止める
+  useEffect(() => {
+    if (comparing?.source !== 'model') return;
+    const sentence = sentences.find((s) => s.index === comparing.index);
+    if (!sentence) return;
+    if (t >= sentence.endSec) {
+      player.pause();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [comparing, t]);
   // このレッスンに登場する音の変化の種類 (凡例表示用)
   const legendTypes = useMemo(() => {
     const set = new Set<LessonLinkingNote['type']>();
@@ -316,8 +468,27 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
 
   const progress = status.duration > 0 ? Math.min(1, status.currentTime / status.duration) : 0;
 
+  // ?sentence=<n> 指定時: 該当文カードまで自動スクロールする (録音導線のショートカット)
+  const scrollRef = useRef<ComponentRef<typeof ScrollView> | null>(null);
+  const sentenceCardRefs = useRef<
+    Record<number, { measureInWindow: (cb: (x: number, y: number, w: number, h: number) => void) => void } | null>
+  >({});
+  const autoScrolledRef = useRef(false);
+  useEffect(() => {
+    if (initialSentenceIndex === null || autoScrolledRef.current) return;
+    const timer = setTimeout(() => {
+      const card = sentenceCardRefs.current[initialSentenceIndex];
+      if (!card) return;
+      card.measureInWindow((x: number, y: number, _w: number, _h: number) => {
+        scrollRef.current?.scrollTo({ y: Math.max(y - 200, 0), animated: true });
+        autoScrolledRef.current = true;
+      });
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [initialSentenceIndex]);
+
   return (
-    <Screen>
+    <Screen scrollRef={scrollRef}>
       <ThemedText variant="caption" color="muted">
         パイプライン生成レッスン (Google Cloud TTS Neural2 + faster-whisper)
       </ThemedText>
@@ -484,11 +655,33 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
       )}
 
       <ThemedText variant="heading" style={styles.sectionTitle}>
+        シャドーイング (録音して比較再生 ・ 合計 {lessonShadowingTotal(lesson.id)} 回)
+      </ThemedText>
+      <ThemedText variant="caption" color="muted">
+        文の 🎙 録音 → 🔊 お手本 / 🎤 自分の録音 で聞き比べ。録音は端末内にのみ保存され、
+        レッスンを離れると破棄されます (このレッスンの録音合計:{' '}
+        {lessonShadowingTotal(lesson.id)} 回)
+      </ThemedText>
+      {micDenied ? (
+        <ThemedText variant="caption" style={styles.micDeniedText}>
+          マイク権限が拒否されています。iOS 設定 &gt; プライバシーとセキュリティ &gt; マイク
+          でこのアプリを許可すると録音できます。
+        </ThemedText>
+      ) : null}
+      {recorderStatus?.hasError ? (
+        <ThemedText variant="caption" style={styles.micDeniedText}>
+          録音中にエラーが発生しました: {recorderStatus.error ?? '原因不明のエラー'}
+        </ThemedText>
+      ) : null}
+      <ThemedText variant="heading" style={styles.sectionTitle}>
         スクリプト (タップで冒頭へシーク ・ 長押しでリピート)
       </ThemedText>
       {sentences.map((sentence) => (
         <Pressable
           key={sentence.index}
+          ref={(node) => {
+            sentenceCardRefs.current[sentence.index] = node;
+          }}
           onPress={() =>
             seekTo(sentence.startSec, `seekTo(${sentence.startSec}) // 文${sentence.index + 1} 冒頭`)
           }
@@ -509,6 +702,59 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
           <ThemedText variant="caption" color="muted">
             {sentence.translationJa}
           </ThemedText>
+          {/* シャドーイング録音と比較再生 (Issue #10)。録音は端末内のみ */}
+          <View style={styles.shadowingRow}>
+            {recordingSentence === sentence.index ? (
+              <Pressable
+                onPress={() => stopRecording(sentence.index)}
+                style={[styles.shadowingButton, { backgroundColor: colors.secondarySurface }]}
+              >
+                <ThemedText variant="caption" style={styles.recordingText}>
+                  ⏹ 録音停止 ({recorder.currentTime.toFixed(1)} 秒)
+                </ThemedText>
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={() => startRecording(sentence.index)}
+                style={[styles.shadowingButton, { backgroundColor: colors.secondarySurface }]}
+              >
+                <ThemedText variant="caption">
+                  🎙 録音{lastRecordings[sentence.index] ? ' (録り直す)' : ''}
+                </ThemedText>
+              </Pressable>
+            )}
+            <Pressable
+              onPress={() => playModel(sentence.index)}
+              disabled={comparing?.index === sentence.index && comparing.source === 'model'}
+              style={[
+                styles.shadowingButton,
+                { backgroundColor: colors.secondarySurface },
+                comparing?.index === sentence.index &&
+                  comparing.source === 'model' && { opacity: 0.5 },
+              ]}
+            >
+              <ThemedText variant="caption">🔊 お手本</ThemedText>
+            </Pressable>
+            {lastRecordings[sentence.index] ? (
+              <Pressable
+                onPress={() => playUserRecording(sentence.index)}
+                disabled={comparing?.index === sentence.index && comparing.source === 'user'}
+                style={[
+                  styles.shadowingButton,
+                  { backgroundColor: colors.secondarySurface },
+                  comparing?.index === sentence.index &&
+                    comparing.source === 'user' && { opacity: 0.5 },
+                ]}
+              >
+                <ThemedText variant="caption">🎤 自分の録音</ThemedText>
+              </Pressable>
+            ) : null}
+            {shadowingCounts[sentence.index] ? (
+              <ThemedText variant="caption" color="muted">
+                録音 {shadowingCounts[sentence.index]} 回
+              </ThemedText>
+            ) : null}
+          </View>
         </Pressable>
       ))}
 
@@ -663,6 +909,20 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   linkingBox: { marginTop: 4, gap: 2 },
+  shadowingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+  },
+  shadowingButton: {
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  recordingText: { color: '#DC2626', fontWeight: '700' },
+  micDeniedText: { color: '#DC2626', marginTop: 4 },
   sentence: {
     marginTop: 8,
     borderRadius: 10,
@@ -679,16 +939,27 @@ const styles = StyleSheet.create({
   },
 });
 
-/** ルート: ?lesson=<id>&demo=1 でレッスンを選択 (既定は cafe-ordering) */
+/** ルート: ?lesson=<id>&sentence=<n>&autorecord=1&demo=1 で対象文を選択 (既定は cafe-ordering)。
+ *  autorecord=1 は自動スクロール後に録音を開始して数秒で停止する
+ *  (自動検証用。?demo=1 と同じく既存の操作関数を呼ぶだけ) */
 export default function LessonRoute() {
-  const params = useLocalSearchParams<{ demo?: string; lesson?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    demo?: string;
+    lesson?: string | string[];
+    sentence?: string | string[];
+    autorecord?: string | string[];
+  }>();
   const lessonParam = Array.isArray(params.lesson) ? params.lesson[0] : params.lesson;
+  const sentenceParam = Array.isArray(params.sentence) ? params.sentence[0] : params.sentence;
   const bundle = getLessonBundle(lessonParam);
+  const sentenceNumber = Number.parseInt(sentenceParam ?? '', 10);
   return (
     <LessonPlayerScreen
       key={bundle.data.id}
       bundle={bundle}
       demoParam={params.demo === '1'}
+      initialSentenceIndex={Number.isFinite(sentenceNumber) ? sentenceNumber - 1 : null}
+      autorecordParam={params.autorecord === '1'}
     />
   );
 }

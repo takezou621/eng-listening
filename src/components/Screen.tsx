@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ComponentRef, type ReactNode, type RefObject } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,9 +9,11 @@ interface ScreenProps {
   /** True のとき縦スクロール可能にする (デフォルト) */
   scroll?: boolean;
   padded?: boolean;
+  /** スクロールをプログラムで制御したい場合に渡す (深い位置の要素へのジャンプなど) */
+  scrollRef?: RefObject<ComponentRef<typeof ScrollView> | null>;
 }
 
-export function Screen({ children, scroll = true, padded = true }: ScreenProps) {
+export function Screen({ children, scroll = true, padded = true, scrollRef }: ScreenProps) {
   const { colors } = useTheme();
   // 背景色はコンテナとスクロール領域の両方に敷く (バウンス時の露出防止)
   const paddedStyle = [styles.content, { backgroundColor: colors.background }, padded && styles.padded];
@@ -20,6 +22,7 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
       {scroll ? (
         <ScrollView
+          ref={scrollRef}
           style={styles.flex}
           contentContainerStyle={paddedStyle}
           showsVerticalScrollIndicator={false}
