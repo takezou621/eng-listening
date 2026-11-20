@@ -116,10 +116,13 @@ export function loadUserDataAsync(): Promise<void> {
             weakSentences: mergeWeakSentences(parsed.weakSentences, current.weakSentences),
           }));
         }
+        // 読み込み成功時のみ保存を許可する (失敗時に既存ファイルを空データで
+        // 上書きする経路を排除。PR #34 の progressStore と同じ方針)
+        canPersist = true;
       } catch (e) {
+        // 読み込み失敗時は canPersist を true にしない (既存ファイルの保護)
         console.error('Failed to load user data:', e);
       } finally {
-        canPersist = true; // 読み込み成功後のみ保存を許可する (空データでの上書き防止)
         isLoaded = true;
         notify();
       }
