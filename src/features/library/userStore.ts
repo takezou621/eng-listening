@@ -25,10 +25,35 @@ const defaultData: UserData = {
   weakSentences: [],
 };
 
-// インメモリのキャッシュ
+// インメモリのキャッシュ。変更時は必ず新しい参照を作る (React の再描画検知のため)
 let cachedData: UserData = { ...defaultData };
 let isLoaded = false;
+let loadPromise: Promise<void> | null = null;
 const listeners = new Set<() => void>();
+
+/** JSON 文字列を検証して UserData に変換する (不正な形は既定値にフォールバック) */
+function parseUserData(json: string): UserData {
+  const parsed: unknown = JSON.parse(json);
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return { ...defaultData };
+  }
+  const obj = parsed as Partial<UserData>;
+  return {
+    favoriteLessons: Array.isArray(obj.favoriteLessons)
+      ? obj.favoriteLessons.filter((id) => typeof id === 'string')
+      : [],
+    weakSentences: Array.isArray(obj.weakSentences)
+      ? obj.weakSentences.filter(
+          (s): s is WeakSentence =>
+            typeof s === 'object' &&
+            s !== null &&
+            typeof s.lessonId === 'string' &&
+            typeof s.sentenceIndex === 'number' &&
+            typeof s.addedAtMs === 'number'
+        )
+      : [],
+  };
+}
 
 function notify() {
   for (const listener of listeners) {
@@ -36,30 +61,37 @@ function notify() {
   }
 }
 
-async function save() {
-  try {
-    STORAGE_FILE.write(JSON.stringify(cachedData));
-  } catch (e) {
-    console.error('Failed to save user data:', e);
-  }
+/** 変更は必ずこの関数経由で行い、新しい参照を通知する */
+function updateUserData(mutate: (current: UserData) => UserData) {
+  cachedData = mutate(cachedData);
+  notify();
+  STORAGE_FILE.write(JSON.stringify(cachedData));
 }
 
-export async function loadUserDataAsync() {
-  if (isLoaded) return;
-  try {
-    if (STORAGE_FILE.exists) {
-      const json = await STORAGE_FILE.text();
-      cachedData = JSON.parse(json);
-      // マイグレーション用 (将来用)
-      cachedData.favoriteLessons ??= [];
-      cachedData.weakSentences ??= [];
-    }
-  } catch (e) {
-    console.error('Failed to load user data:', e);
-  } finally {
-    isLoaded = true;
-    notify();
+/** 読み込みは 1 回だけ実行し、並走呼び出しを dedupe する (Promise をキャッシュ) */
+export function loadUserDataAsync(): Promise<void> {
+  if (!loadPromise) {
+    loadPromise = (async () => {
+      try {
+        if (STORAGE_FILE.exists) {
+          const parsed = parseUserData(await STORAGE_FILE.text());
+          // 読み込み待ち中のトグル操作を上書きで消さないようマージする
+          updateUserData((current) => ({
+            favoriteLessons:
+              current.favoriteLessons.length > 0 ? current.favoriteLessons : parsed.favoriteLessons,
+            weakSentences:
+              current.weakSentences.length > 0 ? current.weakSentences : parsed.weakSentences,
+          }));
+        }
+      } catch (e) {
+        console.error('Failed to load user data:', e);
+      } finally {
+        isLoaded = true;
+        notify();
+      }
+    })();
   }
+  return loadPromise;
 }
 
 export function useUserData() {
@@ -79,34 +111,35 @@ export function useUserData() {
   return {
     ...data,
     toggleFavoriteLesson: (lessonId: string) => {
-      const isFav = cachedData.favoriteLessons.includes(lessonId);
-      if (isFav) {
-        cachedData.favoriteLessons = cachedData.favoriteLessons.filter((id) => id !== lessonId);
-      } else {
-        cachedData.favoriteLessons = [...cachedData.favoriteLessons, lessonId];
-      }
-      notify();
-      void save();
+      updateUserData((current) => {
+        const isFav = current.favoriteLessons.includes(lessonId);
+        return {
+          ...current,
+          favoriteLessons: isFav
+            ? current.favoriteLessons.filter((id) => id !== lessonId)
+            : [...current.favoriteLessons, lessonId],
+        };
+      });
     },
-    isLessonFavorite: (lessonId: string) => cachedData.favoriteLessons.includes(lessonId),
+    isLessonFavorite: (lessonId: string) => data.favoriteLessons.includes(lessonId),
     toggleWeakSentence: (lessonId: string, sentenceIndex: number) => {
-      const isWeak = cachedData.weakSentences.some(
-        (s) => s.lessonId === lessonId && s.sentenceIndex === sentenceIndex
-      );
-      if (isWeak) {
-        cachedData.weakSentences = cachedData.weakSentences.filter(
-          (s) => !(s.lessonId === lessonId && s.sentenceIndex === sentenceIndex)
+      updateUserData((current) => {
+        const isWeak = current.weakSentences.some(
+          (s) => s.lessonId === lessonId && s.sentenceIndex === sentenceIndex
         );
-      } else {
-        cachedData.weakSentences = [
-          { lessonId, sentenceIndex, addedAtMs: Date.now() },
-          ...cachedData.weakSentences,
-        ];
-      }
-      notify();
-      void save();
+        return {
+          ...current,
+          weakSentences: isWeak
+            ? current.weakSentences.filter(
+                (s) => !(s.lessonId === lessonId && s.sentenceIndex === sentenceIndex)
+              )
+            : [{ lessonId, sentenceIndex, addedAtMs: Date.now() }, ...current.weakSentences],
+        };
+      });
     },
     isSentenceWeak: (lessonId: string, sentenceIndex: number) =>
-      cachedData.weakSentences.some((s) => s.lessonId === lessonId && s.sentenceIndex === sentenceIndex),
+      data.weakSentences.some(
+        (s) => s.lessonId === lessonId && s.sentenceIndex === sentenceIndex
+      ),
   };
 }
