@@ -1,5 +1,5 @@
 import { AppState, Pressable, StyleSheet, View } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 
 import { Screen } from '@/components/Screen';
@@ -15,6 +15,8 @@ import {
 } from '@/features/progress/progressStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 import { useEntitlement } from '@/features/billing/billingStore';
+import { useUserData } from '@/features/library/userStore';
+import { getLessonList } from '@/features/lesson/registry';
 
 const HEAT_MINUTES = [0, 15, 30];
 
@@ -34,6 +36,22 @@ export default function ProgressScreen() {
   const { colors } = useTheme();
   const days = useProgressData();
   const { isPremium } = useEntitlement();
+  const { weakSentences } = useUserData();
+  const lessonList = getLessonList();
+
+  // 苦手フレーズの音の変化タイプ別集計 (プレミアムの詳細分析)
+  const weakByType = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const w of weakSentences) {
+      const bundle = lessonList.find((l) => l.entry.id === w.lessonId)?.bundle;
+      const sentence = bundle?.data.sentences[w.sentenceIndex];
+      for (const note of sentence?.linking ?? []) {
+        const t = note.type;
+        counts[t] = (counts[t] ?? 0) + 1;
+      }
+    }
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [weakSentences, lessonList]) as [string, number][];
   // ローカル日を状態として保持し、AppState 復帰時に更新する
   // (進捗画面を開いたまま日付をまたいでも表示が正しく更新されるように)
   const [today, setToday] = useState(todayStr());
@@ -163,13 +181,30 @@ export default function ProgressScreen() {
       </ThemedText>
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         {isPremium ? (
-          <ThemedText variant="caption" color="muted">
-            プレミアムが有効です。診断結果に基づく詳細な種類別分析がここに表示されます。
-          </ThemedText>
+          <>
+            <ThemedText variant="heading">苦手フレーズの音の変化 内訳</ThemedText>
+            {weakByType.length > 0 ? (
+              weakByType.map(([type, count]) => (
+                <View key={type} style={styles.missedRow}>
+                  <ThemedText variant="caption">{type}</ThemedText>
+                  <ThemedText variant="caption" color="muted">
+                    {count} 件
+                  </ThemedText>
+                </View>
+              ))
+            ) : (
+              <ThemedText variant="caption" color="muted">
+                苦手フレーズを登録すると、音の変化のタイプ別に集計して表示されます。
+              </ThemedText>
+            )}
+            <ThemedText variant="caption" color="muted" style={styles.gap}>
+              苦手フレーズ帳 (合計 {weakSentences.length} 件) と学習履歴に基づく分析です。
+            </ThemedText>
+          </>
         ) : (
           <>
             <ThemedText variant="caption" color="muted">
-              プレミアムでは、診断結果と学習履歴に基づいた詳細な種類別分析が利用できます。
+              プレミアムでは、苦手フレーズと学習履歴に基づいた詳細な種類別分析が利用できます。
             </ThemedText>
             <Pressable
               onPress={() => router.push('/paywall?from=progress')}
@@ -206,6 +241,7 @@ const styles = StyleSheet.create({
   sectionTitle: { marginTop: 20, marginBottom: 8 },
   emptyLink: { borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 8 },
   premiumLink: { borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 8 },
+  missedRow: { flexDirection: 'row', justifyContent: 'space-between' },
   heatmap: { flexDirection: 'row', flexWrap: 'wrap', gap: 3 },
   heatCell: { width: 16, height: 16, borderRadius: 3 },
   heatLegend: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10 },

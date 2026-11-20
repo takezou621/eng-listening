@@ -1,11 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
-import { DISPLAY_PRICES, PRODUCT_IDS } from '@/features/billing/config';
-import { initBillingAsync, useEntitlement } from '@/features/billing/billingStore';
+import { DISPLAY_PRICES } from '@/features/billing/config';
+import {
+  fetchOfferingsAsync,
+  initBillingAsync,
+  purchaseAsync,
+  restorePurchasesAsync,
+  useEntitlement,
+} from '@/features/billing/billingStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
@@ -37,6 +43,10 @@ export default function PaywallScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { isAvailable, isPremium, isLoading } = useEntitlement();
+  const [hasProducts, setHasProducts] = useState(false);
+  const [monthlyProductId, setMonthlyProductId] = useState<string | null>(null);
+  const [purchasing, setPurchasing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
 
   useEffect(() => {
     void initBillingAsync();
@@ -44,13 +54,37 @@ export default function PaywallScreen() {
     logEvent('paywall_viewed', { from: fromParam ?? 'settings' });
   }, [fromParam]);
 
-  const productsConfigured = false; // ストア側の実商品が未作成のため常に false (設定後に PRODUCT_IDS 連動へ)
+  // Offerings から購入可能な商品を取得する (ストア側に実商品がある場合のみ商品が返る)
+  useEffect(() => {
+    if (!isAvailable) return;
+    void fetchOfferingsAsync().then((result) => {
+      setHasProducts(result.hasProducts);
+      setMonthlyProductId(result.monthlyProductId);
+    });
+  }, [isAvailable]);
 
-  const handlePurchase = () => {
-    // 実購入はストア商品と RevenueCat の設定後に有効化する。
-    // 現状はこのハンドラに到達しない (ボタン無効化)。
-    // 実装時: purchases.purchaseProduct() → 成功コールバックで
-    // logEvent('purchase_completed', { productId }) を発火する。
+  const canPurchase = isAvailable && hasProducts && !purchasing && !isPremium;
+
+  const handlePurchase = async () => {
+    // 実購入: RevenueCat の purchaseProduct → 成功時のみ purchase_completed を発火する
+    if (!canPurchase || !monthlyProductId) return;
+    setPurchasing(true);
+    const ok = await purchaseAsync(monthlyProductId);
+    setPurchasing(false);
+    if (ok) {
+      logEvent('purchase_completed', { productId: monthlyProductId });
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!isAvailable) return;
+    setRestoring(true);
+    const ok = await restorePurchasesAsync();
+    setRestoring(false);
+    if (ok) {
+      // 復元成功は purchase_completed と同義 (RevenueCat の entitlement が復元される)
+      logEvent('purchase_completed', { productId: 'restored' });
+    }
   };
 
   return (
@@ -99,29 +133,39 @@ export default function PaywallScreen() {
         </ThemedText>
       </View>
 
-      {/* 実商品が設定されていないため購入ボタンは無効 (理由を画面上に表示) */}
+      {/* ストア商品が取得できない環境では購入ボタンを無効化 (理由を画面上に表示) */}
       <Pressable
         onPress={handlePurchase}
-        disabled={!isAvailable || isLoading || !productsConfigured}
+        disabled={!canPurchase}
         style={[
           styles.purchaseButton,
           { backgroundColor: colors.primary },
-          (!isAvailable || isLoading || !productsConfigured) && { opacity: 0.4 },
+          !canPurchase && { opacity: 0.4 },
         ]}
       >
         <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-          {isLoading ? '読み込み中…' : '購入する'}
+          {isLoading || purchasing ? '読み込み中…' : isPremium ? 'プレミアム済み' : '購入する'}
         </ThemedText>
       </Pressable>
-      {!productsConfigured || !isAvailable ? (
+      {!canPurchase ? (
         <ThemedText variant="caption" color="muted" style={styles.purchaseNote}>
-          {isLoading
+          {isLoading || purchasing
             ? '課金機能の状態を確認しています…'
-            : !isAvailable
-              ? '⚠ 課金機能がこのビルドで有効になっていません (RevenueCat の API キー未設定またはネイティブ SDK 未同梱)。無料版としてご利用いただけます。'
-              : '⚠ ストア側のサブスクリプション商品がまだ作成されていないため、購入は現在できません。商品の準備ができ次第、購入できるようになります。'}
+            : isPremium
+              ? 'プレミアムエンタイトルメントが有効です。'
+              : !isAvailable
+                ? '⚠ 課金機能がこのビルドで有効になっていません (RevenueCat の API キー未設定またはネイティブ SDK 未同梱)。無料版としてご利用いただけます。'
+                : !hasProducts
+                  ? '⚠ ストア側のサブスクリプション商品がまだ作成されていないため、購入は現在できません。商品の準備ができ次第、購入できるようになります。'
+                  : ''}
         </ThemedText>
       ) : null}
+
+      <Pressable onPress={handleRestore} disabled={!isAvailable || restoring} style={styles.restoreButton}>
+        <ThemedText variant="caption" color="primary">
+          {restoring ? '復元中…' : '購入を復元'}
+        </ThemedText>
+      </Pressable>
 
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ThemedText variant="heading">解約方法</ThemedText>
@@ -142,9 +186,11 @@ export default function PaywallScreen() {
             プライバシーポリシー
           </ThemedText>
         </Pressable>
-        <ThemedText variant="caption" color="muted">
-          商品 ID: {PRODUCT_IDS.monthly} / {PRODUCT_IDS.annual}
-        </ThemedText>
+        <Pressable onPress={() => router.push('/legal?doc=tokushoho')}>
+          <ThemedText variant="caption" color="primary">
+            特定商取引法に基づく表記
+          </ThemedText>
+        </Pressable>
       </View>
     </Screen>
   );
@@ -168,5 +214,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   purchaseNote: { marginTop: 8, lineHeight: 18 },
+  restoreButton: { alignItems: 'center', marginTop: 10, padding: 8 },
   legalRow: { flexDirection: 'row', gap: 16, alignItems: 'center', marginTop: 16, flexWrap: 'wrap' },
 });
