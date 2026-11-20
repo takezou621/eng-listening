@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import os
 import sys
 import time
 import wave
@@ -85,7 +86,13 @@ def check_generation_sidecar(chash: str, lesson_id: str, ldir: Path) -> None:
     """
     sidecar = HERE / "build" / lesson_id / "generation.json"
     if sidecar.exists():
-        gen_info = json.loads(sidecar.read_text(encoding="utf-8"))
+        try:
+            gen_info = json.loads(sidecar.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            raise SystemExit(
+                f"ABORT: {sidecar} が壊れています (中途半端な書き込みの可能性)。"
+                "tools/content/build/<id>/ を消してから再実行してください。"
+            )
         if gen_info.get("configHash") != chash:
             raise SystemExit(
                 f"ABORT: {sidecar} の記録 (ハッシュ {gen_info.get('configHash')}) と現在の "
@@ -99,7 +106,8 @@ def check_generation_sidecar(chash: str, lesson_id: str, ldir: Path) -> None:
             "混在を防ぐため中止します。作り直す場合は tools/content/build/<id>/ を消してから再実行してください。"
         )
     sidecar.parent.mkdir(parents=True, exist_ok=True)
-    sidecar.write_text(
+    tmp = sidecar.with_suffix(".json.tmp")
+    tmp.write_text(
         json.dumps({
             "configHash": chash,
             "lessonId": lesson_id,
@@ -107,6 +115,7 @@ def check_generation_sidecar(chash: str, lesson_id: str, ldir: Path) -> None:
         }, ensure_ascii=False, indent=1) + "\n",
         encoding="utf-8",
     )
+    os.replace(tmp, sidecar)
 
 
 def wav_write(path: Path, audio: bytes, sample_rate: int) -> float:

@@ -68,7 +68,12 @@ export default function LessonPlayerScreen() {
     if (__DEV__) console.log(`[lesson] ${at} ${action}`);
   };
 
-  const seekTo = (seconds: number, label: string, onDone?: () => void) => {
+  const seekTo = (
+    seconds: number,
+    label: string,
+    onDone?: () => void,
+    onFail?: () => void
+  ) => {
     const clamped = Math.min(Math.max(seconds, 0), status.duration || CAFE_LESSON.durationSec);
     player
       .seekTo(clamped, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
@@ -77,8 +82,10 @@ export default function LessonPlayerScreen() {
         append(label);
       })
       .catch(() => {
-        // シーク失敗は再生中の位置を変えないだけで、致命的ではない
+        // シーク失敗は再生位置を変えないだけで致命的ではないが、
+        // 失敗時の後処理 (ガード解除など) は必ず実行する
         append(`seekTo(${clamped}) 失敗`);
+        onFail?.();
       });
   };
 
@@ -160,12 +167,23 @@ export default function LessonPlayerScreen() {
     if (seekingRef.current) return;
     if (status.didJustFinish || status.currentTime >= endThreshold) {
       seekingRef.current = true;
-      seekTo(sentence.startSec, `文リピート: ${sentence.startSec.toFixed(2)}s へ戻す`, () => {
-        seekingRef.current = false;
-        if (repeatSentenceRef.current === sentence.index) {
-          play();
+      // シーク発行時の再生状態を記録しておき、完了時にそれを優先する
+      // (シーク中のユーザーの一時停止を上書きしない)
+      const wasPlaying = status.playing;
+      seekTo(
+        sentence.startSec,
+        `文リピート: ${sentence.startSec.toFixed(2)}s へ戻す`,
+        () => {
+          seekingRef.current = false;
+          if (wasPlaying && repeatSentenceRef.current === sentence.index) {
+            play();
+          }
+        },
+        () => {
+          // シーク失敗でもガードは必ず解除する (リピートが永久停止しないように)
+          seekingRef.current = false;
         }
-      });
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.currentTime, status.playing, status.didJustFinish, status.duration, repeatSentence]);

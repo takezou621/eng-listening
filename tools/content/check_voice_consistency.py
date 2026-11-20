@@ -44,7 +44,12 @@ def read_wav(path: Path) -> tuple[np.ndarray, int]:
 
 
 def wav_digest(path: Path) -> str:
-    """検査対象 WAV のダイジェスト (先頭16文字)。レポートと音声の結び付けに使う。"""
+    """検査対象 WAV のダイジェスト。レポートと音声の結び付けに使う。
+
+    偶発的な入れ替わり (ゲート実行後の再生成など) を検出するための値。
+    改ざん検出を目的としないため先頭 16 文字 (64bit) に打ち切り。
+    build 側はこの関数を単一ソースとして利用する (実装の重複で不一致を起こさない)。
+    """
     return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
 
 
@@ -103,6 +108,7 @@ def main() -> int:
         # 英語なので発話速度は words/sec (本家は chars/sec)
         words = len(ln["text"].split())
         rate = words / dur if dur > 0 else 0.0
+        # ダイジェストは上位の digests マップが唯一の表現 (行ごとの重複は持たない)
         rows.append({
             "file": name,
             "speaker": ln["speaker"],
@@ -110,7 +116,6 @@ def main() -> int:
             "f0Hz": round(f0, 1),
             "rateWps": round(rate, 2),
             "durationSec": round(dur, 2),
-            "sha256": digests[name],
             "flag": "",
         })
 

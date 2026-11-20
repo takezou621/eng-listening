@@ -26,7 +26,6 @@
    "f0Hz": 230.8,
    "rateWps": 2.84,
    "durationSec": 4.57,
-   "sha256": "de7ba132c5b9a5dc",
    "flag": ""
   },
   {
@@ -36,7 +35,6 @@
    "f0Hz": 130.1,
    "rateWps": 2.92,
    "durationSec": 3.42,
-   "sha256": "15785b3dddf5b9b4",
    "flag": ""
   },
   {
@@ -46,7 +44,6 @@
    "f0Hz": 230.8,
    "rateWps": 3.13,
    "durationSec": 2.56,
-   "sha256": "2db6c2091d6f8be0",
    "flag": ""
   },
   {
@@ -56,7 +53,6 @@
    "f0Hz": 134.1,
    "rateWps": 2.37,
    "durationSec": 2.96,
-   "sha256": "c094438aeb37f504",
    "flag": ""
   },
   {
@@ -66,7 +62,6 @@
    "f0Hz": 218.2,
    "rateWps": 3.11,
    "durationSec": 3.86,
-   "sha256": "eace6cca1be205a1",
    "flag": ""
   },
   {
@@ -76,7 +71,6 @@
    "f0Hz": 129.4,
    "rateWps": 2.65,
    "durationSec": 3.02,
-   "sha256": "2025c6399af8102d",
    "flag": ""
   },
   {
@@ -86,7 +80,6 @@
    "f0Hz": 230.8,
    "rateWps": 2.72,
    "durationSec": 4.04,
-   "sha256": "3c3527fd2082dfec",
    "flag": ""
   },
   {
@@ -96,7 +89,6 @@
    "f0Hz": 141.6,
    "rateWps": 2.13,
    "durationSec": 1.88,
-   "sha256": "8c2b4276e92d5d61",
    "flag": ""
   },
   {
@@ -106,7 +98,6 @@
    "f0Hz": 217.2,
    "rateWps": 3.01,
    "durationSec": 4.31,
-   "sha256": "1b2784e42d327fe7",
    "flag": ""
   },
   {
@@ -116,7 +107,6 @@
    "f0Hz": 147.2,
    "rateWps": 2.68,
    "durationSec": 1.87,
-   "sha256": "7d767eb34663e181",
    "flag": ""
   }
  ],

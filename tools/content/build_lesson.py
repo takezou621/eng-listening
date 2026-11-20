@@ -16,10 +16,10 @@ from __future__ import annotations
 
 import argparse
 import difflib
-import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import wave
@@ -30,6 +30,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import cloud_tts  # noqa: E402
+from check_voice_consistency import wav_digest  # noqa: E402
 from generate_lesson import assets_dir, lines_dir, line_wav_name, load_lesson  # noqa: E402
 
 
@@ -231,7 +232,8 @@ def main() -> int:
             "ゲートを再実行してレポートを更新してください。"
         )
     for wav_path in target_wavs:
-        current = hashlib.sha256(wav_path.read_bytes()).hexdigest()[:16]
+        # ダイジェスト計算はゲート側の wav_digest を単一ソースとして使う
+        current = wav_digest(wav_path)
         recorded = report_digests.get(wav_path.name)
         if recorded != current:
             raise SystemExit(
@@ -316,10 +318,26 @@ def main() -> int:
     }
     next_json.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
-    # --- 公開: 一組として置き換える (途中失敗時は既存の一組を維持) ---
+    # --- 公開: 一組として置き換える。2 回の replace 間の失敗に備えて
+    #     旧ペアを退避し、失敗したらロールバックする ---
     m4a_path = out_assets / "audio.m4a"
-    os.replace(next_m4a, m4a_path)
-    os.replace(next_json, out_assets / "lesson.json")
+    json_path = out_assets / "lesson.json"
+    prev_m4a = build_dir / "audio.prev.m4a"
+    prev_json = build_dir / "lesson.prev.json"
+    if m4a_path.exists():
+        shutil.copy2(m4a_path, prev_m4a)
+    if json_path.exists():
+        shutil.copy2(json_path, prev_json)
+    try:
+        os.replace(next_m4a, m4a_path)
+        os.replace(next_json, json_path)
+    except OSError:
+        # 1 つ目だけが成功した状態 (新 audio + 旧 json) を避けて旧ペアへ戻す
+        if prev_m4a.exists():
+            shutil.copy2(prev_m4a, m4a_path)
+        if prev_json.exists():
+            shutil.copy2(prev_json, json_path)
+        raise
     print(f"DONE lesson.json + audio.m4a lines={len(sentences)} duration={total_dur:.2f}s "
           f"config={chash}", flush=True)
     return 0
