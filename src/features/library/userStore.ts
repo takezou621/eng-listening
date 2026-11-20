@@ -86,10 +86,8 @@ function notify() {
 let canPersist = false;
 let saveQueue: Promise<void> = Promise.resolve();
 
-/** 変更は必ずこの関数経由で行い、新しい参照を通知する */
-function updateUserData(mutate: (current: UserData) => UserData) {
-  cachedData = mutate(cachedData);
-  notify();
+/** 読み込み完了後に保留中の書き込みを実行する */
+function flushPendingSave() {
   saveQueue = saveQueue.then(async () => {
     if (!canPersist) return;
     try {
@@ -98,6 +96,15 @@ function updateUserData(mutate: (current: UserData) => UserData) {
       console.error('Failed to save user data:', e);
     }
   });
+}
+
+/** 変更は必ずこの関数経由で行い、新しい参照を通知する */
+function updateUserData(mutate: (current: UserData) => UserData) {
+  cachedData = mutate(cachedData);
+  notify();
+  if (canPersist) {
+    flushPendingSave();
+  }
 }
 
 /** 読み込みは 1 回だけ実行し、並走呼び出しを dedupe する (Promise をキャッシュ) */
@@ -121,6 +128,8 @@ export function loadUserDataAsync(): Promise<void> {
         // 読み込み成功時のみ保存を許可する (失敗時に既存ファイルを空データで
         // 上書きする経路を排除。PR #34 の progressStore と同じ方針)
         canPersist = true;
+        // 読み込み待ち中に保留された変更があればここで永続化する
+        flushPendingSave();
       } catch (e) {
         // 読み込み失敗時は canPersist を true にしない (既存ファイルの保護)
         console.error('Failed to load user data:', e);
