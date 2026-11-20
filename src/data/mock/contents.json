@@ -1,0 +1,158 @@
+{
+  "contents": [
+    {
+      "id": "c001",
+      "title": "Booking a Table at a Restaurant",
+      "titleJa": "レストランの予約",
+      "type": "conversation",
+      "level": "beginner",
+      "category": "daily",
+      "durationSec": 14,
+      "audioSource": "bundled-spike-sample",
+      "sentences": [
+        {
+          "index": 0,
+          "startSec": 0.0,
+          "endSec": 4.64,
+          "text": "Can you help me book a table for two tonight? I'd like something around seven thirty.",
+          "translationJa": "今夜2人分の席を予約したいんですが、7時半ごろでお願いできますか。"
+        },
+        {
+          "index": 1,
+          "startSec": 5.14,
+          "endSec": 10.73,
+          "text": "Sure, what name should I put the reservation under? We have a window seat available if you prefer.",
+          "translationJa": "かしこまりました。ご予約名はいかがしましょう。ご希望なら窓際の席もご用意できます。"
+        },
+        {
+          "index": 2,
+          "startSec": 11.23,
+          "endSec": 14.24,
+          "text": "That sounds great. Thank you so much for your help.",
+          "translationJa": "それは助かります。本当にありがとうございます。"
+        }
+      ]
+    },
+    {
+      "id": "c002",
+      "title": "Asking for Directions",
+      "titleJa": "道を尋ねる",
+      "type": "conversation",
+      "level": "beginner",
+      "category": "travel",
+      "durationSec": 45,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "c003",
+      "title": "Ordering Coffee",
+      "titleJa": "カフェで注文する",
+      "type": "conversation",
+      "level": "beginner",
+      "category": "daily",
+      "durationSec": 40,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "c004",
+      "title": "A Phone Call to the Doctor",
+      "titleJa": "病院への電話",
+      "type": "conversation",
+      "level": "intermediate",
+      "category": "daily",
+      "durationSec": 60,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "c005",
+      "title": "Small Talk at a Conference",
+      "titleJa": "カンファレンスでの雑談",
+      "type": "conversation",
+      "level": "intermediate",
+      "category": "business",
+      "durationSec": 75,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "c006",
+      "title": "Checking In at the Hotel",
+      "titleJa": "ホテルのチェックイン",
+      "type": "conversation",
+      "level": "beginner",
+      "category": "travel",
+      "durationSec": 50,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "c007",
+      "title": "Trouble with an Online Order",
+      "titleJa": "ネット注文のトラブル",
+      "type": "conversation",
+      "level": "intermediate",
+      "category": "daily",
+      "durationSec": 80,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "c008",
+      "title": "Negotiating a Deadline",
+      "titleJa": "納期の調整",
+      "type": "conversation",
+      "level": "intermediate",
+      "category": "business",
+      "durationSec": 90,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "m001",
+      "title": "My Morning Routine",
+      "titleJa": "朝のルーティンについて",
+      "type": "monologue",
+      "level": "beginner",
+      "category": "daily",
+      "durationSec": 60,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "m002",
+      "title": "A Trip to Kyoto",
+      "titleJa": "京都旅行の思い出",
+      "type": "monologue",
+      "level": "beginner",
+      "category": "travel",
+      "durationSec": 75,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "m003",
+      "title": "Why I Started Running",
+      "titleJa": "ランニングを始めた理由",
+      "type": "monologue",
+      "level": "intermediate",
+      "category": "daily",
+      "durationSec": 90,
+      "audioSource": null,
+      "sentences": []
+    },
+    {
+      "id": "m004",
+      "title": "The Future of Remote Work",
+      "titleJa": "リモートワークの未来",
+      "type": "monologue",
+      "level": "intermediate",
+      "category": "business",
+      "durationSec": 120,
+      "audioSource": null,
+      "sentences": []
+    }
+  ]
+}
