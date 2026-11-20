@@ -1,0 +1,23 @@
+{
+ "month": "2026-11",
+ "chars": 1549,
+ "requests": 27,
+ "lessons": {
+  "_manual_connectivity_check": {
+   "chars": 3,
+   "requests": 1,
+   "pendingChars": 0
+  },
+  "_voice_audition": {
+   "chars": 594,
+   "requests": 6,
+   "pendingChars": 0
+  },
+  "cafe-ordering": {
+   "chars": 952,
+   "requests": 20,
+   "pendingChars": 0
+  }
+ },
+ "pendingChars": 0
+}

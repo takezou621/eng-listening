@@ -43,11 +43,17 @@ export default function PlayerScreen() {
         </ThemedText>
         <Pressable
           style={[styles.spikeButton, { backgroundColor: colors.primary }]}
-          onPress={() => router.push('/spike')}
+          onPress={() => router.push('/lesson')}
         >
           <ThemedText style={{ color: colors.primaryText, fontWeight: '600' }}>
-            オーディオスパイクを開く
+            生成レッスンを再生 (TTS パイプライン)
           </ThemedText>
+        </Pressable>
+        <Pressable
+          style={[styles.spikeButton, { backgroundColor: colors.secondarySurface }]}
+          onPress={() => router.push('/spike')}
+        >
+          <ThemedText style={{ fontWeight: '600' }}>オーディオスパイクを開く</ThemedText>
         </Pressable>
       </View>
 

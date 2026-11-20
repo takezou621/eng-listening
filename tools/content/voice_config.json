@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "engine": "google-cloud-tts",
+  "apiEndpoint": "https://texttospeech.googleapis.com/v1/text:synthesize",
+  "quotaProject": "muse-gemini-514814",
+  "gcloudAccount": "takezou621@gmail.com",
+  "languageCode": "en-US",
+  "audio": {
+    "audioEncoding": "LINEAR16",
+    "sampleRateHertz": 24000,
+    "speakingRate": 1.0,
+    "pitch": 0.0,
+    "effectsProfileId": ["headphone-class-device"]
+  },
+  "voices": {
+    "female": {
+      "voiceName": "en-US-Neural2-F",
+      "roleJa": "会話レッスンの女性話者 (カフェ注文レッスンではバリスタ)"
+    },
+    "male": {
+      "voiceName": "en-US-Neural2-D",
+      "roleJa": "会話レッスンの男性話者 (カフェ注文レッスンでは客)"
+    },
+    "narrator": {
+      "voiceName": "en-US-Neural2-A",
+      "roleJa": "モノローグレッスンのナレーター (会話レッスンでは不使用)"
+    }
+  },
+  "limits": {
+    "monthlyFreeTierChars": 1000000,
+    "monthlyStopChars": 900000
+  },
+  "watchdog": {
+    "timeoutSec": 180,
+    "maxRetries": 3,
+    "backoffSec": [15, 30, 60]
+  },
+  "requestDelaySec": 1.0,
+  "gapSecBetweenLines": 0.5,
+  "consistencyGate": {
+    "f0DeviationMax": 0.15,
+    "rateDeviationMax": 0.25,
+    "rateUnit": "words/sec"
+  },
+  "whisper": {
+    "model": "base.en",
+    "device": "cpu",
+    "computeType": "int8",
+    "language": "en"
+  },
+  "rules": [
+    "声・言語・話速などの生成パラメータは全レッスン・全行でこのファイルの値のみを使う。行ごとの場当たり的な変更をしない。",
+    "Neural2 系の声のみを使う (無料枠: 月100万文字)。Studio / Chirp 等の有料単価の高い声は使わない。",
+    "障害時も別エンジン・別声へ切り替えない (待って再開する)。",
+    "月間累計文字数が monthlyStopChars (90万) に達したら生成を停止して報告する。再生成分も累計に含める。",
+    "課金が発生する設定変更 (API の追加有効化、予算設定の変更など) は行わない。必要になったら止めて報告する。",
+    "設定ハッシュが異なる既存音声が同じ出力先にある場合、生成を中止する (混在防止)。",
+    "生成後は check_voice_consistency.py のゲートを通す。外れ値の行は削除して再生成する。",
+    "API キーやアクセストークンの値をログ・PR・コミットに出さない。認証は既存 gcloud ユーザー認証を使う。"
+  ]
+}
