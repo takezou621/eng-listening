@@ -11,10 +11,10 @@ import { assertValidLesson, type LessonData } from '@/features/lesson/types';
  * (Metro がアセットを静的に解決できるよう require のパスはリテラルで書く)。
  */
 
-const cafeLesson = hotelLike(cafeLessonJson, 'cafe-ordering');
-const hotelLesson = hotelLike(hotelLessonJson, 'hotel-checkin');
+const cafeLesson = loadLesson(cafeLessonJson, 'cafe-ordering');
+const hotelLesson = loadLesson(hotelLessonJson, 'hotel-checkin');
 
-function hotelLike(json: unknown, id: string): LessonData {
+function loadLesson(json: unknown, id: string): LessonData {
   const lesson = json as LessonData;
   assertValidLesson(lesson);
   if (lesson.id !== id) {

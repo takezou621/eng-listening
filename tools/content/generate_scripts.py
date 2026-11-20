@@ -321,15 +321,14 @@ def main() -> int:
         lid = entry["id"]
         if args.lesson and lid not in args.lesson:
             continue
-        if args.all or args.lesson:
-            # cafe-ordering は既存ファイルが正。--force でも再生成しない
-            if lid == "cafe-ordering":
-                continue
-            existing = LESSONS_DIR / f"{lid}.json"
-            if existing.exists() and not args.force and not args.lesson:
-                print(f"skip {lid} (既存)", flush=True)
-                continue
-            targets.append(entry)
+        # cafe-ordering は既存ファイルが正。--force でも再生成しない
+        if lid == "cafe-ordering":
+            continue
+        existing = LESSONS_DIR / f"{lid}.json"
+        if existing.exists() and not args.force and not args.lesson:
+            print(f"skip {lid} (既存)", flush=True)
+            continue
+        targets.append(entry)
 
     if args.lesson:
         missing = set(args.lesson) - {e["id"] for e in targets} - {"cafe-ordering"}
@@ -365,7 +364,7 @@ def main() -> int:
                 n_links = sum(len(ln.get("linking", [])) for ln in script["lines"])
                 print(f"  OK -> {out_path} lines={len(script['lines'])} linking={n_links}",
                       flush=True)
-                results.append((lid, True, attempt, []))
+                results.append((lid, attempt))
                 break
             last_errors = errors
             for e in errors[:8]:
@@ -381,8 +380,8 @@ def main() -> int:
             return 2
 
     print("--- summary ---", flush=True)
-    for lid, ok, attempt, errs in results:
-        print(f"{lid}: {'PASS' if ok else 'FAIL'} (attempts={attempt})", flush=True)
+    for lid, attempt in results:
+        print(f"{lid}: PASS (attempts={attempt})", flush=True)
     print(f"DONE {len(results)} lesson(s)", flush=True)
     return 0
 

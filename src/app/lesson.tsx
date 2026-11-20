@@ -398,8 +398,9 @@ const styles = StyleSheet.create({
 
 /** ルート: ?lesson=<id>&demo=1 でレッスンを選択 (既定は cafe-ordering) */
 export default function LessonRoute() {
-  const params = useLocalSearchParams<{ demo?: string; lesson?: string }>();
-  const bundle = getLessonBundle(params.lesson);
+  const params = useLocalSearchParams<{ demo?: string; lesson?: string | string[] }>();
+  const lessonParam = Array.isArray(params.lesson) ? params.lesson[0] : params.lesson;
+  const bundle = getLessonBundle(lessonParam);
   return (
     <LessonPlayerScreen
       key={bundle.data.id}
