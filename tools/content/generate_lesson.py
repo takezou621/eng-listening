@@ -8,7 +8,7 @@
 - 既存の行 WAV はスキップし、欠けている行だけ再生成する (削除 → 再実行で再生成)。
 
 Usage (リポジトリ ルートで):
-  uv run --python 3.12 --with numpy python tools/content/generate_lesson.py \
+  uv run --project tools/content python tools/content/generate_lesson.py \
       --lesson cafe-ordering
 """
 

@@ -9,7 +9,7 @@
 検出された行は削除して generate_lesson.py で再生成する (ゲートは exit 1)。
 
 Usage (リポジトリ ルートで):
-  uv run --python 3.12 --with numpy python tools/content/check_voice_consistency.py \
+  uv run --project tools/content python tools/content/check_voice_consistency.py \
       --lesson cafe-ordering
 """
 
@@ -73,6 +73,7 @@ def main() -> int:
     gate = cfg["consistencyGate"]
     f0_max = float(gate["f0DeviationMax"])
     rate_max = float(gate["rateDeviationMax"])
+    rate_unit = gate.get("rateUnit", "words/sec")
 
     lesson = load_lesson(args.lesson)
     ldir = lines_dir(args.lesson)
@@ -121,7 +122,7 @@ def main() -> int:
         "lesson": args.lesson,
         "config_hash": cloud_tts.config_hash(cfg),
         "thresholds": {"f0DeviationMax": f0_max, "rateDeviationMax": rate_max,
-                       "rateUnit": "words/sec"},
+                       "rateUnit": rate_unit},
         "rows": rows,
         "flagged": flagged,
     }

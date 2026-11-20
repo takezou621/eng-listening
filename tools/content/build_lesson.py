@@ -9,8 +9,7 @@
 4. アプリが読む assets/lessons/<id>/lesson.json を出力する。
 
 Usage (リポジトリ ルートで):
-  uv run --python 3.12 --with faster-whisper --with numpy \
-      python tools/content/build_lesson.py --lesson cafe-ordering
+  uv run --project tools/content python tools/content/build_lesson.py --lesson cafe-ordering
 """
 
 from __future__ import annotations
