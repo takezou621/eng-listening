@@ -42,14 +42,14 @@
 | 4-3. **両商品を Entitlement `premium` に紐づけ** | ⬜ | RevenueCat の Entitlement 画面で、月額・年額の**両方の商品を Attach** する。**Offering への追加だけでは購入しても entitlements.active.premium が有効にならず、購入者をプレミアム扱いできない** (アプリの checkEntitlement が entitlements.active.premium を参照するため必須) |
 | 4-4. Offering への追加 | ⬜ | current Offering に月額・年額パッケージを追加 (ペイウォールの getOfferings で取得) |
 | 4-5. 公開 API キーの設定 (ローカル) | ⬜ | RevenueCat の公開 API キーをローカルの `.env` に `EXPO_PUBLIC_REVENUECAT_API_KEY=...` として設定 (コードに埋め込まない) |
-| 4-6. **公開 API キーを EAS 環境に設定** | ⬜ | ローカルの `.env` は Git 管理対象外のため EAS のクラウドビルドに含まれない。`eas secret:create --scope production --name EXPO_PUBLIC_REVENUECAT_API_KEY --value ...` (または eas.json の production environment) に登録する。**未設定の場合、production ビルドのペイウォールは購入不可のまま表示される** (フォールバック動作) |
+| 4-6. **公開 API キーを EAS の production 環境に設定** | ⬜ | ローカルの `.env` は Git 管理対象外のため EAS のクラウドビルドに含まれない。現行 EAS CLI では `eas env:set --name EXPO_PUBLIC_REVENUECAT_API_KEY --value ... --environment production` で production 環境に登録する (`eas secret:create --scope ...` は production 環境の変数登録には使えない)。**未設定の場合、production ビルドのペイウォールは購入不可のまま表示される** (フォールバック動作)。なお、production 環境の値をビルドに渡すには eas.json の production プロファイルに `environment: "production"` の割り当てが必要 (手順 5-1) |
 | 4-7. config.ts の PRODUCT_IDS について | — | **コードでは未使用** (購入用 ID は getOfferings() の current.monthly/annual.product.identifier から動的に取得する)。プレースホルダ定義として保持しているが、商品設定は 4-2〜4-4 の RevenueCat / ASC 側で完結する |
 
 ## 5. production プロファイルでのビルド (⬜ 未実施)
 
 | 手順 | 状態 | 内容 |
 |---|---|---|
-| 5-1. eas.json の production プロファイル確認 | ⬜ | auto-increment / distribution: store を推奨 |
+| 5-1. eas.json の production プロファイル設定 | ⬜ | 現在の eas.json には environment と distribution が未設定のため、**production プロファイルへ `environment: "production"` を割り当て (4-6 で登録した変数がビルドに渡る)、`distribution: "store"` を設定する**。increment は auto-increment を推奨。※ eas.json 自体の変更は別作業 (オーナー承認後) |
 | 5-2. `eas build --platform ios --profile production` | ⬜ | 対外操作。ビルドには RevenueCat のネイティブ SDK が含まれる (現開発クライアントには未同梱) |
 | 5-3. ビルド成果物の動作確認 | ⬜ | TestFlight または実機にインストールし、購入フローまで確認 |
 
