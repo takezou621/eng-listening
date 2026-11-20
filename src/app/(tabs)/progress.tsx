@@ -14,6 +14,7 @@ import {
   useProgressData,
 } from '@/features/progress/progressStore';
 import { useTheme } from '@/theme/AppThemeProvider';
+import { useEntitlement } from '@/features/billing/billingStore';
 
 const HEAT_MINUTES = [0, 15, 30];
 
@@ -32,6 +33,7 @@ export default function ProgressScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const days = useProgressData();
+  const { isPremium } = useEntitlement();
   // ローカル日を状態として保持し、AppState 復帰時に更新する
   // (進捗画面を開いたまま日付をまたいでも表示が正しく更新されるように)
   const [today, setToday] = useState(todayStr());
@@ -154,6 +156,32 @@ export default function ProgressScreen() {
           </ThemedText>
         </View>
       </View>
+
+      {/* プレミアムゲート (Issue #19): 詳細な弱点分析。既存機能は無料のまま */}
+      <ThemedText variant="heading" style={styles.sectionTitle}>
+        詳細な弱点分析 (プレミアム)
+      </ThemedText>
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        {isPremium ? (
+          <ThemedText variant="caption" color="muted">
+            プレミアムが有効です。診断結果に基づく詳細な種類別分析がここに表示されます。
+          </ThemedText>
+        ) : (
+          <>
+            <ThemedText variant="caption" color="muted">
+              プレミアムでは、診断結果と学習履歴に基づいた詳細な種類別分析が利用できます。
+            </ThemedText>
+            <Pressable
+              onPress={() => router.push('/paywall?from=progress')}
+              style={[styles.premiumLink, { backgroundColor: colors.primary }]}
+            >
+              <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
+                プレミアムについて見る
+              </ThemedText>
+            </Pressable>
+          </>
+        )}
+      </View>
     </Screen>
   );
 }
@@ -177,6 +205,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { marginTop: 20, marginBottom: 8 },
   emptyLink: { borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 8 },
+  premiumLink: { borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 8 },
   heatmap: { flexDirection: 'row', flexWrap: 'wrap', gap: 3 },
   heatCell: { width: 16, height: 16, borderRadius: 3 },
   heatLegend: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10 },

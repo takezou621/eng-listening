@@ -39,10 +39,25 @@ export default function SettingsScreen() {
           backgroundColor: colors.secondarySurface,
           borderRadius: 12,
           padding: 14,
-          marginBottom: 16,
+          marginBottom: 8,
         }}
       >
         <ThemedText>聞き取り診断をもう一度行う</ThemedText>
+        <ThemedText color="muted">›</ThemedText>
+      </Pressable>
+      <Pressable
+        onPress={() => router.push('/paywall')}
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: colors.secondarySurface,
+          borderRadius: 12,
+          padding: 14,
+          marginBottom: 16,
+        }}
+      >
+        <ThemedText>プレミアムについて</ThemedText>
         <ThemedText color="muted">›</ThemedText>
       </Pressable>
       <ThemedText variant="title">設定</ThemedText>
