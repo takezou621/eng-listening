@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://cubic.dev/schema/cubic-repository-config.schema.json
+
+version: 1
+
+reviews:
+  # PR 作成時に自動レビューを発火させる(マスタースイッチ)
+  enabled: true
+  # PR に新しいコミットが push されたときも自動で再レビューする
+  incremental_commits: true
+  # ドラフト PR も作成直後にレビューする場合は true に変更
+  check_drafts: false
+  # 外部コントリビューターの PR も自動レビュー対象にする
+  external_contributors_require_manual_review: false
