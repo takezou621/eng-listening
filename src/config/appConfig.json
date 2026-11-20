@@ -1,0 +1,8 @@
+{
+  "appName": "EngListening",
+  "slug": "eng-listening",
+  "scheme": "englistening",
+  "version": "0.1.0",
+  "iosBundleIdentifier": "com.takezou.englistening",
+  "androidPackageName": "com.takezou.englistening"
+}
