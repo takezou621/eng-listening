@@ -42,7 +42,7 @@ let canPersist = false;
 let saveQueue: Promise<void> = Promise.resolve();
 const listeners = new Set<() => void>();
 
-function localDateStr(d: Date = new Date()): string {
+export function localDateStr(d: Date = new Date()): string {
   const y = d.getFullYear();
   const m = `${d.getMonth() + 1}`.padStart(2, '0');
   const day = `${d.getDate()}`.padStart(2, '0');
@@ -172,13 +172,13 @@ export function useProgressData() {
   return data;
 }
 
-/** 実際に再生が進行した秒数を今日の記録に加算する */
-export function addStudySeconds(lessonId: string, seconds: number) {
+/** 実際に再生が進行した秒数を指定日の記録に加算する (省略時は今日) */
+export function addStudySeconds(lessonId: string, seconds: number, date?: string) {
   if (seconds <= 0) return;
-  const date = localDateStr();
+  const targetDate = date ?? localDateStr();
   updateData((current) => {
-    const day: DayRecord = current[date] ?? {
-      date,
+    const day: DayRecord = current[targetDate] ?? {
+      date: targetDate,
       seconds: 0,
       shadowingCount: 0,
       playedLessons: [],
@@ -186,7 +186,7 @@ export function addStudySeconds(lessonId: string, seconds: number) {
     };
     return {
       ...current,
-      [date]: {
+      [targetDate]: {
         ...day,
         seconds: day.seconds + seconds,
         playedLessons: day.playedLessons.includes(lessonId)

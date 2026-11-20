@@ -49,6 +49,7 @@ import { useUserData } from '@/features/library/userStore';
 import {
   addShadowingRecord,
   addStudySeconds,
+  localDateStr,
   markLessonCompleted,
 } from '@/features/progress/progressStore';
 import { useTheme } from '@/theme/AppThemeProvider';
@@ -407,6 +408,8 @@ function LessonPlayerScreen({
   // --- 学習進捗の記録 (Issue #13): 実際に再生が進行した秒数のみを累計する ---
   const playedSecondsRef = useRef(0);
   const lastPlaybackTRef = useRef(0);
+  // 日またぎ対応: 累計開始時のローカル日を保持し、日付変更時に分割フラッシュする
+  const playedDateRef = useRef<string>(localDateStr());
   const abRef = useRef<{ a: number; b: number } | null>(null);
   useEffect(() => {
     repeatSentenceRef.current = repeatSentence;
@@ -481,18 +484,25 @@ function LessonPlayerScreen({
       playedSecondsRef.current += t - lastPlaybackTRef.current;
     }
     lastPlaybackTRef.current = t;
-  }, [t, status.playing]);
+    // 日またぎ検出: ローカル日が変わったら蓄積分を前日でフラッシュする
+    const today = localDateStr();
+    if (today !== playedDateRef.current && playedSecondsRef.current >= 1) {
+      addStudySeconds(lesson.id, playedSecondsRef.current, playedDateRef.current);
+      playedSecondsRef.current = 0;
+      playedDateRef.current = today;
+    }
+  }, [t, status.playing, lesson.id]);
   // 一時停止への遷移・レッスン完了・アンマウントのタイミングで記録をフラッシュする
   useEffect(() => {
     if (playedSecondsRef.current >= 1) {
-      addStudySeconds(lesson.id, playedSecondsRef.current);
+      addStudySeconds(lesson.id, playedSecondsRef.current, playedDateRef.current);
       playedSecondsRef.current = 0;
     }
   }, [status.playing, status.didJustFinish, lesson.id]);
   useEffect(() => {
     return () => {
       if (playedSecondsRef.current >= 1) {
-        addStudySeconds(lesson.id, playedSecondsRef.current);
+        addStudySeconds(lesson.id, playedSecondsRef.current, playedDateRef.current);
         playedSecondsRef.current = 0;
       }
     };
