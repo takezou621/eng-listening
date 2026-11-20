@@ -48,6 +48,23 @@ export default function SettingsScreen() {
       <ThemedText variant="title">設定</ThemedText>
 
       <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        {([
+          { doc: 'privacy', label: 'プライバシーポリシー' },
+          { doc: 'terms', label: '利用規約' },
+          { doc: 'tokushoho', label: '特定商取引法に基づく表記' },
+        ] as const).map((item) => (
+          <Pressable
+            key={item.doc}
+            onPress={() => router.push(`/legal?doc=${item.doc}`)}
+            style={[styles.legalRow, { borderBottomColor: colors.border }]}
+          >
+            <ThemedText>{item.label}</ThemedText>
+            <ThemedText color="muted">›</ThemedText>
+          </Pressable>
+        ))}
+      </View>
+
+      <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Row label="テーマ" value={scheme === 'dark' ? 'ダーク (システム追従)' : 'ライト (システム追従)'} />
         <Row label="バージョン" value={`v${APP_CONFIG.version}`} />
         <Row label="iOS Bundle ID (仮)" value={APP_CONFIG.iosBundleIdentifier} />
@@ -78,6 +95,14 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  legalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
   rowLabel: { flexShrink: 1 },
   rowValue: { flexShrink: 1, textAlign: 'right' },
   section: {
