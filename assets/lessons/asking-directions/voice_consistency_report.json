@@ -1,0 +1,115 @@
+{
+ "lesson": "asking-directions",
+ "configHash": "1b1725b9a69efe25",
+ "thresholds": {
+  "f0DeviationMax": 0.15,
+  "rateDeviationMax": 0.25,
+  "rateUnit": "words/sec"
+ },
+ "digests": {
+  "L01_female.wav": "da4fcbe5b6c1ba98",
+  "L02_male.wav": "7d975c1057b76b52",
+  "L03_male.wav": "0adac23ec5b23a16",
+  "L04_female.wav": "734e181b7fd18f49",
+  "L05_male.wav": "f13036f9bb40facf",
+  "L06_female.wav": "36f1343ed2dc9399",
+  "L07_male.wav": "9375d92e645480eb",
+  "L08_female.wav": "78e0c7b28e270735",
+  "L09_male.wav": "fc2abd6f49b3aa7c",
+  "L10_female.wav": "5a75ad6cf16d06f5"
+ },
+ "rows": [
+  {
+   "file": "L01_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 212.4,
+   "rateWps": 3.35,
+   "durationSec": 3.88,
+   "flag": ""
+  },
+  {
+   "file": "L02_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 129.0,
+   "rateWps": 3.76,
+   "durationSec": 2.4,
+   "flag": ""
+  },
+  {
+   "file": "L03_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 134.1,
+   "rateWps": 2.97,
+   "durationSec": 3.03,
+   "flag": ""
+  },
+  {
+   "file": "L04_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 224.3,
+   "rateWps": 3.14,
+   "durationSec": 2.55,
+   "flag": ""
+  },
+  {
+   "file": "L05_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 127.7,
+   "rateWps": 3.48,
+   "durationSec": 2.87,
+   "flag": ""
+  },
+  {
+   "file": "L06_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 211.5,
+   "rateWps": 3.05,
+   "durationSec": 2.29,
+   "flag": ""
+  },
+  {
+   "file": "L07_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 130.4,
+   "rateWps": 3.87,
+   "durationSec": 2.85,
+   "flag": ""
+  },
+  {
+   "file": "L08_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 226.4,
+   "rateWps": 3.73,
+   "durationSec": 1.87,
+   "flag": ""
+  },
+  {
+   "file": "L09_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 141.2,
+   "rateWps": 3.82,
+   "durationSec": 2.36,
+   "flag": ""
+  },
+  {
+   "file": "L10_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 230.8,
+   "rateWps": 2.88,
+   "durationSec": 3.83,
+   "flag": ""
+  }
+ ],
+ "flagged": [],
+ "missing": []
+}

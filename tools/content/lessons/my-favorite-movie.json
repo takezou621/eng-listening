@@ -124,19 +124,19 @@
   {
    "index": 7,
    "speaker": "narrator",
-   "text": "I will not tell you the end of the film.",
+   "text": "I will not tell you how the film ends, so please watch it yourself.",
    "chunks": [
     "I will not tell you",
-    "the end of",
-    "the film."
+    "how the film ends,",
+    "so please watch it yourself."
    ],
    "translationJa": "映画の結末は言わないでおきますね。",
    "linking": [
     {
-     "span": "end of",
+     "span": "tell you",
      "type": "linking",
-     "ipa": "/ɛndəv/",
-     "noteJa": "end の d 音と of の弱い母音がつながり、「エンダヴ」のように聞こえます。"
+     "ipa": "/tɛljuː/",
+     "noteJa": "tell の語尾 /l/ と you の /j/ がつながり、「テルユー」のように滑らかに聞こえます。"
     }
    ]
   },

@@ -1,7 +1,7 @@
 {
  "month": "2026-11",
- "chars": 2191,
- "requests": 41,
+ "chars": 7962,
+ "requests": 145,
  "lessons": {
   "_manual_connectivity_check": {
    "chars": 3,
@@ -21,6 +21,56 @@
   "hotel-checkin": {
    "chars": 642,
    "requests": 14,
+   "pendingChars": 0
+  },
+  "asking-directions": {
+   "chars": 459,
+   "requests": 10,
+   "pendingChars": 0
+  },
+  "shopping-clothes": {
+   "chars": 357,
+   "requests": 9,
+   "pendingChars": 0
+  },
+  "restaurant-order": {
+   "chars": 695,
+   "requests": 10,
+   "pendingChars": 0
+  },
+  "phone-appointment": {
+   "chars": 572,
+   "requests": 11,
+   "pendingChars": 0
+  },
+  "at-the-airport": {
+   "chars": 554,
+   "requests": 10,
+   "pendingChars": 0
+  },
+  "small-talk-coworker": {
+   "chars": 528,
+   "requests": 8,
+   "pendingChars": 0
+  },
+  "my-morning-routine": {
+   "chars": 682,
+   "requests": 13,
+   "pendingChars": 0
+  },
+  "weekend-in-kyoto": {
+   "chars": 796,
+   "requests": 10,
+   "pendingChars": 0
+  },
+  "introducing-my-hometown": {
+   "chars": 602,
+   "requests": 11,
+   "pendingChars": 0
+  },
+  "my-favorite-movie": {
+   "chars": 526,
+   "requests": 12,
    "pendingChars": 0
   }
  },

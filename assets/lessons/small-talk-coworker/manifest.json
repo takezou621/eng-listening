@@ -1,0 +1,91 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "small-talk-coworker",
+ "lines": {
+  "L01_female.wav": {
+   "index": 1,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Did you get a chance to enjoy the sunshine yesterday afternoon?",
+   "chars": 63,
+   "durationSec": 3.29,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_male.wav": {
+   "index": 2,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Not really, because I had to finish up our quarterly budget report.",
+   "chars": 67,
+   "durationSec": 3.865,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_female.wav": {
+   "index": 3,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "That sounds tough, but at least the weather is going to stay nice.",
+   "chars": 66,
+   "durationSec": 4.197,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_male.wav": {
+   "index": 4,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "I hope so, since I want to go camping with my brother this weekend.",
+   "chars": 67,
+   "durationSec": 3.827,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_female.wav": {
+   "index": 5,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "That would be great, but do you have time for a quick question?",
+   "chars": 63,
+   "durationSec": 3.74,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_male.wav": {
+   "index": 6,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Sure, what do you need to talk about before our afternoon meeting?",
+   "chars": 66,
+   "durationSec": 3.587,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_female.wav": {
+   "index": 7,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "I was wondering if we could go over the slides together before lunch.",
+   "chars": 69,
+   "durationSec": 4.031,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_male.wav": {
+   "index": 8,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Sounds good, so let's meet in the conference room at eleven thirty.",
+   "chars": 67,
+   "durationSec": 3.969,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 528,
+  "lessonRequests": 8,
+  "monthChars": 5356,
+  "monthRequests": 99,
+  "monthlyStopChars": 900000
+ }
+}

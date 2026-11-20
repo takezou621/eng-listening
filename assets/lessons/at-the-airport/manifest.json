@@ -1,0 +1,109 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "at-the-airport",
+ "lines": {
+  "L01_female.wav": {
+   "index": 1,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Good morning! Could I see your passport and ticket, please?",
+   "chars": 59,
+   "durationSec": 3.803,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_male.wav": {
+   "index": 2,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Sure, here you go. Can I check these two bags to Chicago?",
+   "chars": 57,
+   "durationSec": 3.666,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_female.wav": {
+   "index": 3,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Certainly. Please place them on the scale one at a time.",
+   "chars": 56,
+   "durationSec": 3.482,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_male.wav": {
+   "index": 4,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "All right. I hope they are not over the weight limit.",
+   "chars": 53,
+   "durationSec": 2.845,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_female.wav": {
+   "index": 5,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Both are within the limit, but your gate has been changed to B12.",
+   "chars": 65,
+   "durationSec": 4.211,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_male.wav": {
+   "index": 6,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Oh, really? Did they announce that just a moment ago?",
+   "chars": 53,
+   "durationSec": 3.117,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_female.wav": {
+   "index": 7,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Yes, it is about a ten-minute walk from security.",
+   "chars": 49,
+   "durationSec": 3.347,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_male.wav": {
+   "index": 8,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Got it. What time will boarding start for this flight?",
+   "chars": 54,
+   "durationSec": 2.875,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_female.wav": {
+   "index": 9,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Boarding begins at two thirty, so please be there early.",
+   "chars": 56,
+   "durationSec": 3.375,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_male.wav": {
+   "index": 10,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Thank you for letting me know. Have a wonderful day!",
+   "chars": 52,
+   "durationSec": 2.958,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 554,
+  "lessonRequests": 10,
+  "monthChars": 4828,
+  "monthRequests": 91,
+  "monthlyStopChars": 900000
+ }
+}

@@ -1,0 +1,125 @@
+{
+ "lesson": "my-favorite-movie",
+ "configHash": "1b1725b9a69efe25",
+ "thresholds": {
+  "f0DeviationMax": 0.15,
+  "rateDeviationMax": 0.25,
+  "rateUnit": "words/sec"
+ },
+ "digests": {
+  "L01_narrator.wav": "1dd54d300c942fe9",
+  "L02_narrator.wav": "4085a9b2486467ec",
+  "L03_narrator.wav": "1fac0634dab29de3",
+  "L04_narrator.wav": "b7e1caf63195cb44",
+  "L05_narrator.wav": "2347f32ad76891d1",
+  "L06_narrator.wav": "0385fe1b84aa5b9f",
+  "L07_narrator.wav": "b7ed321d658fa61c",
+  "L08_narrator.wav": "1969d657c0e4e2b5",
+  "L09_narrator.wav": "ecd2ca79acb4a984",
+  "L10_narrator.wav": "d17ba4eedc5c1c80",
+  "L11_narrator.wav": "186fe63924e645fa"
+ },
+ "rows": [
+  {
+   "file": "L01_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 158.9,
+   "rateWps": 3.22,
+   "durationSec": 2.79,
+   "flag": ""
+  },
+  {
+   "file": "L02_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 160.0,
+   "rateWps": 3.18,
+   "durationSec": 2.83,
+   "flag": ""
+  },
+  {
+   "file": "L03_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 164.4,
+   "rateWps": 3.58,
+   "durationSec": 2.51,
+   "flag": ""
+  },
+  {
+   "file": "L04_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 155.8,
+   "rateWps": 2.73,
+   "durationSec": 3.29,
+   "flag": ""
+  },
+  {
+   "file": "L05_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 160.0,
+   "rateWps": 3.0,
+   "durationSec": 3.0,
+   "flag": ""
+  },
+  {
+   "file": "L06_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 161.1,
+   "rateWps": 3.11,
+   "durationSec": 2.89,
+   "flag": ""
+  },
+  {
+   "file": "L07_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 165.5,
+   "rateWps": 3.28,
+   "durationSec": 4.27,
+   "flag": ""
+  },
+  {
+   "file": "L08_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 155.8,
+   "rateWps": 3.04,
+   "durationSec": 2.63,
+   "flag": ""
+  },
+  {
+   "file": "L09_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 163.8,
+   "rateWps": 2.81,
+   "durationSec": 2.85,
+   "flag": ""
+  },
+  {
+   "file": "L10_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 153.8,
+   "rateWps": 3.78,
+   "durationSec": 2.12,
+   "flag": ""
+  },
+  {
+   "file": "L11_narrator.wav",
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "f0Hz": 167.3,
+   "rateWps": 3.56,
+   "durationSec": 1.97,
+   "flag": ""
+  }
+ ],
+ "flagged": [],
+ "missing": []
+}

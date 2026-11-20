@@ -148,6 +148,33 @@ faster-whisper は初回に base.en モデル (~75MB) をダウンロードす�
 whisper が "nine fifty" を "950." のように書くため、difflib でアラインして
 台本の単語に Timing を分配する)。
 
+## バッチ生成の実績 (v1.0 の 12 本・2026-11-20 実行)
+
+手順は上記 3 ステップをレッスンごとに実行するだけ (既存の行 WAV はスキップされ、
+再実行は 0 文字)。バッチ実行は 1 レッスンあたり 20〜30 秒 (TTS + ゲート + whisper)。
+
+| レッスン | type | 文数 | TTS 文字数 | ゲート | 所要時間 |
+|---|---|---|---|---|---|
+| cafe-ordering | 会話 | 10 | 476 | PASS | (前回済) |
+| hotel-checkin | 会話 | 10 | 642 | PASS (2 文修正後) | 19+7 秒 |
+| asking-directions | 会話 | 10 | 459 | PASS (1 回) | 30 秒 |
+| shopping-clothes | 会話 | 9 | 357 | PASS (1 回) | 26 秒 |
+| restaurant-order | 会話 | 9 | 695 | PASS (2 文修正後) | 19+8 秒 |
+| phone-appointment | 会話 | 10 | 572 | PASS (1 文修正後) | 18+7 秒 |
+| at-the-airport | 会話 | 10 | 554 | PASS (1 回) | 29 秒 |
+| small-talk-coworker | 会話 | 8 | 528 | PASS (1 回) | 21 秒 |
+| my-morning-routine | モノローグ | 12 | 682 | PASS (1 文修正後) | 21+15 秒 |
+| weekend-in-kyoto | モノローグ | 10 | 796 | PASS (1 回) | 24 秒 |
+| introducing-my-hometown | モノローグ | 11 | 602 | PASS (1 回) | 25 秒 |
+| my-favorite-movie | モノローグ | 11 | 526 | PASS (1 文修正後) | 20+15 秒 |
+
+- ゲート FAIL からの修正は台本の文単位の軽微な修正のみ (音の変化の注釈と意味を
+  変えない)。Cloud TTS は決定論的 (同じ text + voice + config なら同じ音声) なため、
+  速度外れ値の行は再生成では収束せず、文の長さを調整して中央値に寄せた。
+- 会話レッスンの F0 中央値: female 212〜224 Hz / male 130〜148 Hz。
+  モノローグ (narrator / Neural2-A): 160〜168 Hz。
+- 当月累計: 7,962 / 900,000 文字 (無料枠月 100 万の 0.8%)。
+
 ## 入力台本 (lessons/<id>.json) の形式
 
 ```jsonc

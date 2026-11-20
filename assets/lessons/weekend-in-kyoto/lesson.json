@@ -1,0 +1,1128 @@
+{
+ "id": "weekend-in-kyoto",
+ "title": "A Weekend Trip to Kyoto",
+ "titleJa": "週末の京都旅行",
+ "type": "monologue",
+ "level": "intermediate",
+ "category": "travel",
+ "audio": "audio.m4a",
+ "durationSec": 54.952,
+ "speakerNames": {
+  "narrator": "Ken"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T10:07:49Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "narrator",
+   "startSec": 0.0,
+   "endSec": 5.217,
+   "text": "Last weekend, I took a quick bullet train trip to Kyoto to see the autumn leaves.",
+   "translationJa": "先週末、紅葉を見に新幹線でサッと京都へ行ってきました。",
+   "chunks": [
+    {
+     "text": "Last weekend,",
+     "startSec": 0.0,
+     "endSec": 0.62
+    },
+    {
+     "text": "I took a quick bullet train trip",
+     "startSec": 0.96,
+     "endSec": 2.56
+    },
+    {
+     "text": "to Kyoto",
+     "startSec": 2.56,
+     "endSec": 3.06
+    },
+    {
+     "text": "to see the autumn leaves.",
+     "startSec": 3.06,
+     "endSec": 4.22
+    }
+   ],
+   "words": [
+    {
+     "text": "Last",
+     "startSec": 0.0,
+     "endSec": 0.2
+    },
+    {
+     "text": "weekend,",
+     "startSec": 0.2,
+     "endSec": 0.62
+    },
+    {
+     "text": "I",
+     "startSec": 0.96,
+     "endSec": 1.04
+    },
+    {
+     "text": "took",
+     "startSec": 1.04,
+     "endSec": 1.24
+    },
+    {
+     "text": "a",
+     "startSec": 1.24,
+     "endSec": 1.38
+    },
+    {
+     "text": "quick",
+     "startSec": 1.38,
+     "endSec": 1.62
+    },
+    {
+     "text": "bullet",
+     "startSec": 1.62,
+     "endSec": 1.88
+    },
+    {
+     "text": "train",
+     "startSec": 1.88,
+     "endSec": 2.26
+    },
+    {
+     "text": "trip",
+     "startSec": 2.26,
+     "endSec": 2.56
+    },
+    {
+     "text": "to",
+     "startSec": 2.56,
+     "endSec": 2.76
+    },
+    {
+     "text": "Kyoto",
+     "startSec": 2.76,
+     "endSec": 3.06
+    },
+    {
+     "text": "to",
+     "startSec": 3.06,
+     "endSec": 3.38
+    },
+    {
+     "text": "see",
+     "startSec": 3.38,
+     "endSec": 3.54
+    },
+    {
+     "text": "the",
+     "startSec": 3.54,
+     "endSec": 3.68
+    },
+    {
+     "text": "autumn",
+     "startSec": 3.68,
+     "endSec": 3.92
+    },
+    {
+     "text": "leaves.",
+     "startSec": 3.92,
+     "endSec": 4.22
+    }
+   ],
+   "linking": [
+    {
+     "span": "took a",
+     "type": "linking",
+     "ipa": "/tʊk‿ə/",
+     "noteJa": "took の末尾子音 /k/ と a がつながり、「トゥッカ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "startSec": 5.717,
+   "endSec": 10.74,
+   "text": "As soon as I arrived at Kyoto Station, the city was packed with tourists.",
+   "translationJa": "京都駅に到着するやいなや、街は観光客でいっぱいでした。",
+   "chunks": [
+    {
+     "text": "As soon as I arrived",
+     "startSec": 5.717,
+     "endSec": 6.697
+    },
+    {
+     "text": "at Kyoto Station,",
+     "startSec": 6.697,
+     "endSec": 7.737
+    },
+    {
+     "text": "the city was packed",
+     "startSec": 8.177,
+     "endSec": 9.017
+    },
+    {
+     "text": "with tourists.",
+     "startSec": 9.017,
+     "endSec": 9.577
+    }
+   ],
+   "words": [
+    {
+     "text": "As",
+     "startSec": 5.717,
+     "endSec": 5.877
+    },
+    {
+     "text": "soon",
+     "startSec": 5.877,
+     "endSec": 6.097
+    },
+    {
+     "text": "as",
+     "startSec": 6.097,
+     "endSec": 6.257
+    },
+    {
+     "text": "I",
+     "startSec": 6.257,
+     "endSec": 6.417
+    },
+    {
+     "text": "arrived",
+     "startSec": 6.417,
+     "endSec": 6.697
+    },
+    {
+     "text": "at",
+     "startSec": 6.697,
+     "endSec": 6.977
+    },
+    {
+     "text": "Kyoto",
+     "startSec": 6.977,
+     "endSec": 7.197
+    },
+    {
+     "text": "Station,",
+     "startSec": 7.197,
+     "endSec": 7.737
+    },
+    {
+     "text": "the",
+     "startSec": 8.177,
+     "endSec": 8.277
+    },
+    {
+     "text": "city",
+     "startSec": 8.277,
+     "endSec": 8.497
+    },
+    {
+     "text": "was",
+     "startSec": 8.497,
+     "endSec": 8.737
+    },
+    {
+     "text": "packed",
+     "startSec": 8.737,
+     "endSec": 9.017
+    },
+    {
+     "text": "with",
+     "startSec": 9.017,
+     "endSec": 9.297
+    },
+    {
+     "text": "tourists.",
+     "startSec": 9.297,
+     "endSec": 9.577
+    }
+   ],
+   "linking": [
+    {
+     "span": "arrived at",
+     "type": "linking",
+     "ipa": "/əˈraɪvd‿ət/",
+     "noteJa": "arrived の末尾の /d/ と at の母音がつながり、「アライヴダッ(ト)」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "startSec": 11.24,
+   "endSec": 17.043,
+   "text": "First, I decided to head over to Kiyomizu Temple before the afternoon crowds got worse.",
+   "translationJa": "まずは午後の混雑がひどくなる前に清水寺へ向かうことにしました。",
+   "chunks": [
+    {
+     "text": "First, I decided to head over",
+     "startSec": 11.24,
+     "endSec": 12.96
+    },
+    {
+     "text": "to Kiyomizu Temple",
+     "startSec": 12.96,
+     "endSec": 13.96
+    },
+    {
+     "text": "before the afternoon crowds",
+     "startSec": 13.96,
+     "endSec": 15.44
+    },
+    {
+     "text": "got worse.",
+     "startSec": 15.44,
+     "endSec": 16.06
+    }
+   ],
+   "words": [
+    {
+     "text": "First,",
+     "startSec": 11.24,
+     "endSec": 11.56
+    },
+    {
+     "text": "I",
+     "startSec": 11.84,
+     "endSec": 11.94
+    },
+    {
+     "text": "decided",
+     "startSec": 11.94,
+     "endSec": 12.14
+    },
+    {
+     "text": "to",
+     "startSec": 12.14,
+     "endSec": 12.5
+    },
+    {
+     "text": "head",
+     "startSec": 12.5,
+     "endSec": 12.66
+    },
+    {
+     "text": "over",
+     "startSec": 12.66,
+     "endSec": 12.96
+    },
+    {
+     "text": "to",
+     "startSec": 12.96,
+     "endSec": 13.08
+    },
+    {
+     "text": "Kiyomizu",
+     "startSec": 13.08,
+     "endSec": 13.6
+    },
+    {
+     "text": "Temple",
+     "startSec": 13.6,
+     "endSec": 13.96
+    },
+    {
+     "text": "before",
+     "startSec": 13.96,
+     "endSec": 14.46
+    },
+    {
+     "text": "the",
+     "startSec": 14.46,
+     "endSec": 14.68
+    },
+    {
+     "text": "afternoon",
+     "startSec": 14.68,
+     "endSec": 15.06
+    },
+    {
+     "text": "crowds",
+     "startSec": 15.06,
+     "endSec": 15.44
+    },
+    {
+     "text": "got",
+     "startSec": 15.44,
+     "endSec": 15.74
+    },
+    {
+     "text": "worse.",
+     "startSec": 15.74,
+     "endSec": 16.06
+    }
+   ],
+   "linking": [
+    {
+     "span": "head over",
+     "type": "linking",
+     "ipa": "/hɛd‿ˈoʊvər/",
+     "noteJa": "head の /d/ と over の母音が連結し、「ヘッダウヴァー」のように滑らかにつながります。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "startSec": 17.543,
+   "endSec": 23.032,
+   "text": "The view from the wooden stage was breathtaking, especially with the vibrant red trees.",
+   "translationJa": "木造の舞台からの景色は息をのむほど美しく、鮮やかな赤い木々が特に見事でした。",
+   "chunks": [
+    {
+     "text": "The view from the wooden stage",
+     "startSec": 17.543,
+     "endSec": 18.843
+    },
+    {
+     "text": "was breathtaking,",
+     "startSec": 18.843,
+     "endSec": 19.683
+    },
+    {
+     "text": "especially with",
+     "startSec": 20.183,
+     "endSec": 20.943
+    },
+    {
+     "text": "the vibrant red trees.",
+     "startSec": 20.943,
+     "endSec": 22.023
+    }
+   ],
+   "words": [
+    {
+     "text": "The",
+     "startSec": 17.543,
+     "endSec": 17.643
+    },
+    {
+     "text": "view",
+     "startSec": 17.643,
+     "endSec": 17.843
+    },
+    {
+     "text": "from",
+     "startSec": 17.843,
+     "endSec": 18.103
+    },
+    {
+     "text": "the",
+     "startSec": 18.103,
+     "endSec": 18.223
+    },
+    {
+     "text": "wooden",
+     "startSec": 18.223,
+     "endSec": 18.403
+    },
+    {
+     "text": "stage",
+     "startSec": 18.403,
+     "endSec": 18.843
+    },
+    {
+     "text": "was",
+     "startSec": 18.843,
+     "endSec": 19.163
+    },
+    {
+     "text": "breathtaking,",
+     "startSec": 19.163,
+     "endSec": 19.683
+    },
+    {
+     "text": "especially",
+     "startSec": 20.183,
+     "endSec": 20.463
+    },
+    {
+     "text": "with",
+     "startSec": 20.463,
+     "endSec": 20.943
+    },
+    {
+     "text": "the",
+     "startSec": 20.943,
+     "endSec": 21.063
+    },
+    {
+     "text": "vibrant",
+     "startSec": 21.063,
+     "endSec": 21.343
+    },
+    {
+     "text": "red",
+     "startSec": 21.343,
+     "endSec": 21.663
+    },
+    {
+     "text": "trees.",
+     "startSec": 21.663,
+     "endSec": 22.023
+    }
+   ],
+   "linking": []
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "startSec": 23.532,
+   "endSec": 28.208,
+   "text": "While walking down the narrow hill, I ran into an old couple from Canada.",
+   "translationJa": "細い坂道を下りていく途中、カナダから来た年配のご夫婦に偶然出会いました。",
+   "chunks": [
+    {
+     "text": "While walking down the narrow hill,",
+     "startSec": 23.532,
+     "endSec": 25.132
+    },
+    {
+     "text": "I ran into",
+     "startSec": 25.492,
+     "endSec": 26.032
+    },
+    {
+     "text": "an old couple",
+     "startSec": 26.032,
+     "endSec": 26.612
+    },
+    {
+     "text": "from Canada.",
+     "startSec": 26.612,
+     "endSec": 27.232
+    }
+   ],
+   "words": [
+    {
+     "text": "While",
+     "startSec": 23.532,
+     "endSec": 23.712
+    },
+    {
+     "text": "walking",
+     "startSec": 23.712,
+     "endSec": 24.072
+    },
+    {
+     "text": "down",
+     "startSec": 24.072,
+     "endSec": 24.332
+    },
+    {
+     "text": "the",
+     "startSec": 24.332,
+     "endSec": 24.532
+    },
+    {
+     "text": "narrow",
+     "startSec": 24.532,
+     "endSec": 24.772
+    },
+    {
+     "text": "hill,",
+     "startSec": 24.772,
+     "endSec": 25.132
+    },
+    {
+     "text": "I",
+     "startSec": 25.492,
+     "endSec": 25.552
+    },
+    {
+     "text": "ran",
+     "startSec": 25.552,
+     "endSec": 25.752
+    },
+    {
+     "text": "into",
+     "startSec": 25.752,
+     "endSec": 26.032
+    },
+    {
+     "text": "an",
+     "startSec": 26.032,
+     "endSec": 26.172
+    },
+    {
+     "text": "old",
+     "startSec": 26.172,
+     "endSec": 26.312
+    },
+    {
+     "text": "couple",
+     "startSec": 26.312,
+     "endSec": 26.612
+    },
+    {
+     "text": "from",
+     "startSec": 26.612,
+     "endSec": 26.972
+    },
+    {
+     "text": "Canada.",
+     "startSec": 26.972,
+     "endSec": 27.232
+    }
+   ],
+   "linking": [
+    {
+     "span": "ran into",
+     "type": "linking",
+     "ipa": "/ræn‿ˈɪntuː/",
+     "noteJa": "ran の /n/ と into の /ɪ/ が連結し、「ラニントゥー」のように一息に発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "startSec": 28.708,
+   "endSec": 33.099,
+   "text": "They told me that they were looking for a cozy local noodle shop for lunch.",
+   "translationJa": "昼食にこぢんまりとした地元のうどん屋さんを探していると彼らは言っていました。",
+   "chunks": [
+    {
+     "text": "They told me",
+     "startSec": 28.708,
+     "endSec": 29.308
+    },
+    {
+     "text": "that they were looking for",
+     "startSec": 29.308,
+     "endSec": 30.288
+    },
+    {
+     "text": "a cozy local noodle shop",
+     "startSec": 30.288,
+     "endSec": 31.648
+    },
+    {
+     "text": "for lunch.",
+     "startSec": 31.648,
+     "endSec": 32.168
+    }
+   ],
+   "words": [
+    {
+     "text": "They",
+     "startSec": 28.708,
+     "endSec": 28.828
+    },
+    {
+     "text": "told",
+     "startSec": 28.828,
+     "endSec": 29.028
+    },
+    {
+     "text": "me",
+     "startSec": 29.028,
+     "endSec": 29.308
+    },
+    {
+     "text": "that",
+     "startSec": 29.308,
+     "endSec": 29.488
+    },
+    {
+     "text": "they",
+     "startSec": 29.488,
+     "endSec": 29.628
+    },
+    {
+     "text": "were",
+     "startSec": 29.628,
+     "endSec": 29.768
+    },
+    {
+     "text": "looking",
+     "startSec": 29.768,
+     "endSec": 30.028
+    },
+    {
+     "text": "for",
+     "startSec": 30.028,
+     "endSec": 30.288
+    },
+    {
+     "text": "a",
+     "startSec": 30.288,
+     "endSec": 30.408
+    },
+    {
+     "text": "cozy",
+     "startSec": 30.408,
+     "endSec": 30.608
+    },
+    {
+     "text": "local",
+     "startSec": 30.608,
+     "endSec": 30.988
+    },
+    {
+     "text": "noodle",
+     "startSec": 30.988,
+     "endSec": 31.468
+    },
+    {
+     "text": "shop",
+     "startSec": 31.468,
+     "endSec": 31.648
+    },
+    {
+     "text": "for",
+     "startSec": 31.648,
+     "endSec": 31.908
+    },
+    {
+     "text": "lunch.",
+     "startSec": 31.908,
+     "endSec": 32.168
+    }
+   ],
+   "linking": [
+    {
+     "span": "looking for a",
+     "type": "reduction",
+     "ipa": "/ˈlʊkɪŋ fər‿ə/",
+     "noteJa": "for が弱形 /fər/ になり、続く a と連結して「フォラ」のように短く弱く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "startSec": 33.599,
+   "endSec": 39.03,
+   "text": "Luckily, I knew a hidden spot just around the corner that serves amazing matcha soba.",
+   "translationJa": "運良くすぐ角を曲がったところに絶品の茶そばを出す隠れ家的な店を知っていたのです。",
+   "chunks": [
+    {
+     "text": "Luckily, I knew a hidden spot",
+     "startSec": 33.599,
+     "endSec": 35.219
+    },
+    {
+     "text": "just around the corner",
+     "startSec": 35.219,
+     "endSec": 36.359
+    },
+    {
+     "text": "that serves amazing matcha soba.",
+     "startSec": 36.359,
+     "endSec": 38.179
+    }
+   ],
+   "words": [
+    {
+     "text": "Luckily,",
+     "startSec": 33.599,
+     "endSec": 33.899
+    },
+    {
+     "text": "I",
+     "startSec": 34.259,
+     "endSec": 34.339
+    },
+    {
+     "text": "knew",
+     "startSec": 34.339,
+     "endSec": 34.499
+    },
+    {
+     "text": "a",
+     "startSec": 34.499,
+     "endSec": 34.659
+    },
+    {
+     "text": "hidden",
+     "startSec": 34.659,
+     "endSec": 34.859
+    },
+    {
+     "text": "spot",
+     "startSec": 34.859,
+     "endSec": 35.219
+    },
+    {
+     "text": "just",
+     "startSec": 35.219,
+     "endSec": 35.619
+    },
+    {
+     "text": "around",
+     "startSec": 35.619,
+     "endSec": 35.899
+    },
+    {
+     "text": "the",
+     "startSec": 35.899,
+     "endSec": 36.119
+    },
+    {
+     "text": "corner",
+     "startSec": 36.119,
+     "endSec": 36.359
+    },
+    {
+     "text": "that",
+     "startSec": 36.359,
+     "endSec": 36.679
+    },
+    {
+     "text": "serves",
+     "startSec": 36.679,
+     "endSec": 36.899
+    },
+    {
+     "text": "amazing",
+     "startSec": 36.899,
+     "endSec": 37.139
+    },
+    {
+     "text": "matcha",
+     "startSec": 37.139,
+     "endSec": 37.899
+    },
+    {
+     "text": "soba.",
+     "startSec": 37.899,
+     "endSec": 38.179
+    }
+   ],
+   "linking": [
+    {
+     "span": "just around",
+     "type": "elision",
+     "ipa": "/dʒʌs‿əˈraʊnd/",
+     "noteJa": "just の末尾 /t/ が脱落し、around とつながって「ジャサラウンド」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "startSec": 39.53,
+   "endSec": 44.47,
+   "text": "We ended up having lunch together and chatted about our favorite travel destinations.",
+   "translationJa": "結局一緒に昼食を食べることになり、お気に入りの旅先について語り合いました。",
+   "chunks": [
+    {
+     "text": "We ended up having lunch together",
+     "startSec": 39.53,
+     "endSec": 40.99
+    },
+    {
+     "text": "and chatted about",
+     "startSec": 40.99,
+     "endSec": 41.91
+    },
+    {
+     "text": "our favorite travel destinations.",
+     "startSec": 41.91,
+     "endSec": 43.25
+    }
+   ],
+   "words": [
+    {
+     "text": "We",
+     "startSec": 39.53,
+     "endSec": 39.63
+    },
+    {
+     "text": "ended",
+     "startSec": 39.63,
+     "endSec": 39.85
+    },
+    {
+     "text": "up",
+     "startSec": 39.85,
+     "endSec": 40.07
+    },
+    {
+     "text": "having",
+     "startSec": 40.07,
+     "endSec": 40.31
+    },
+    {
+     "text": "lunch",
+     "startSec": 40.31,
+     "endSec": 40.57
+    },
+    {
+     "text": "together",
+     "startSec": 40.57,
+     "endSec": 40.99
+    },
+    {
+     "text": "and",
+     "startSec": 40.99,
+     "endSec": 41.31
+    },
+    {
+     "text": "chatted",
+     "startSec": 41.31,
+     "endSec": 41.71
+    },
+    {
+     "text": "about",
+     "startSec": 41.71,
+     "endSec": 41.91
+    },
+    {
+     "text": "our",
+     "startSec": 41.91,
+     "endSec": 42.13
+    },
+    {
+     "text": "favorite",
+     "startSec": 42.13,
+     "endSec": 42.37
+    },
+    {
+     "text": "travel",
+     "startSec": 42.37,
+     "endSec": 42.79
+    },
+    {
+     "text": "destinations.",
+     "startSec": 42.79,
+     "endSec": 43.25
+    }
+   ],
+   "linking": [
+    {
+     "span": "ended up",
+     "type": "flapping",
+     "ipa": "/ˈɛndɪɾ‿ʌp/",
+     "noteJa": "ended の /d/ が母音に挟まれて日本語のラ行のような軽い音（フラッピング）になり、up と連結します。"
+    },
+    {
+     "span": "chatted about",
+     "type": "flapping",
+     "ipa": "/ˈtʃætɪɾ‿əˈbaʊt/",
+     "noteJa": "chatted の語尾の /d/ がフラッピング化し、about とつながって「チャティダバウト」のように流れます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "startSec": 44.97,
+   "endSec": 50.058,
+   "text": "Later that night, I strolled along the peaceful Gion district under the lanterns.",
+   "translationJa": "その日の夜遅くには、提灯の明かりが灯る静かな祇園界隈をのんびり散策しました。",
+   "chunks": [
+    {
+     "text": "Later that night,",
+     "startSec": 44.97,
+     "endSec": 45.71
+    },
+    {
+     "text": "I strolled along",
+     "startSec": 45.95,
+     "endSec": 46.73
+    },
+    {
+     "text": "the peaceful Gion district",
+     "startSec": 46.73,
+     "endSec": 48.09
+    },
+    {
+     "text": "under the lanterns.",
+     "startSec": 48.09,
+     "endSec": 49.33
+    }
+   ],
+   "words": [
+    {
+     "text": "Later",
+     "startSec": 44.97,
+     "endSec": 45.19
+    },
+    {
+     "text": "that",
+     "startSec": 45.19,
+     "endSec": 45.43
+    },
+    {
+     "text": "night,",
+     "startSec": 45.43,
+     "endSec": 45.71
+    },
+    {
+     "text": "I",
+     "startSec": 45.95,
+     "endSec": 46.07
+    },
+    {
+     "text": "strolled",
+     "startSec": 46.07,
+     "endSec": 46.45
+    },
+    {
+     "text": "along",
+     "startSec": 46.45,
+     "endSec": 46.73
+    },
+    {
+     "text": "the",
+     "startSec": 46.73,
+     "endSec": 46.97
+    },
+    {
+     "text": "peaceful",
+     "startSec": 46.97,
+     "endSec": 47.27
+    },
+    {
+     "text": "Gion",
+     "startSec": 47.27,
+     "endSec": 47.85
+    },
+    {
+     "text": "district",
+     "startSec": 47.85,
+     "endSec": 48.09
+    },
+    {
+     "text": "under",
+     "startSec": 48.09,
+     "endSec": 48.51
+    },
+    {
+     "text": "the",
+     "startSec": 48.51,
+     "endSec": 48.69
+    },
+    {
+     "text": "lanterns.",
+     "startSec": 48.69,
+     "endSec": 49.33
+    }
+   ],
+   "linking": [
+    {
+     "span": "strolled along",
+     "type": "linking",
+     "ipa": "/stroʊld‿əˈlɔːŋ/",
+     "noteJa": "strolled の /d/ と along の母音が滑らかにつながり、「ストロウルダロング」と聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "startSec": 50.558,
+   "endSec": 54.952,
+   "text": "It was such a memorable short trip that I cannot wait to visit again.",
+   "translationJa": "本当に思い出深い小旅行になったので、また訪れるのが待ちきれません。",
+   "chunks": [
+    {
+     "text": "It was such a memorable short trip",
+     "startSec": 50.558,
+     "endSec": 52.358
+    },
+    {
+     "text": "that I cannot wait",
+     "startSec": 52.358,
+     "endSec": 53.298
+    },
+    {
+     "text": "to visit again.",
+     "startSec": 53.298,
+     "endSec": 54.078
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 50.558,
+     "endSec": 50.658
+    },
+    {
+     "text": "was",
+     "startSec": 50.658,
+     "endSec": 50.798
+    },
+    {
+     "text": "such",
+     "startSec": 50.798,
+     "endSec": 51.058
+    },
+    {
+     "text": "a",
+     "startSec": 51.058,
+     "endSec": 51.198
+    },
+    {
+     "text": "memorable",
+     "startSec": 51.198,
+     "endSec": 51.558
+    },
+    {
+     "text": "short",
+     "startSec": 51.558,
+     "endSec": 51.998
+    },
+    {
+     "text": "trip",
+     "startSec": 51.998,
+     "endSec": 52.358
+    },
+    {
+     "text": "that",
+     "startSec": 52.358,
+     "endSec": 52.618
+    },
+    {
+     "text": "I",
+     "startSec": 52.618,
+     "endSec": 52.718
+    },
+    {
+     "text": "cannot",
+     "startSec": 52.718,
+     "endSec": 52.958
+    },
+    {
+     "text": "wait",
+     "startSec": 52.958,
+     "endSec": 53.298
+    },
+    {
+     "text": "to",
+     "startSec": 53.298,
+     "endSec": 53.518
+    },
+    {
+     "text": "visit",
+     "startSec": 53.518,
+     "endSec": 53.638
+    },
+    {
+     "text": "again.",
+     "startSec": 53.638,
+     "endSec": 54.078
+    }
+   ],
+   "linking": [
+    {
+     "span": "such a",
+     "type": "linking",
+     "ipa": "/ˈsʌtʃ‿ə/",
+     "noteJa": "such の /tʃ/ と a が一息につながり、「サッチャ」のように発音されます。"
+    },
+    {
+     "span": "visit again",
+     "type": "flapping",
+     "ipa": "/ˈvɪzɪɾ‿əˈɡɛn/",
+     "noteJa": "visit の末尾 /t/ が母音に挟まれてラ行化（フラッピング）し、「ヴィズィラゲン」のように聞こえます。"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,127 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "my-morning-routine",
+ "lines": {
+  "L01_narrator.wav": {
+   "index": 1,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I usually wake up at six thirty in the morning.",
+   "chars": 47,
+   "durationSec": 2.982,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_narrator.wav": {
+   "index": 2,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I try not to look at my phone right away when I wake up.",
+   "chars": 56,
+   "durationSec": 3.613,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_narrator.wav": {
+   "index": 3,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Instead, I get out of bed and drink a glass of water.",
+   "chars": 53,
+   "durationSec": 3.689,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_narrator.wav": {
+   "index": 4,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Then I go to the kitchen to make some fresh coffee.",
+   "chars": 51,
+   "durationSec": 2.87,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_narrator.wav": {
+   "index": 5,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "The smell of coffee always helps me wake up properly.",
+   "chars": 53,
+   "durationSec": 3.253,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_narrator.wav": {
+   "index": 6,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "While the coffee is brewing, I make a quick breakfast.",
+   "chars": 54,
+   "durationSec": 3.287,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_narrator.wav": {
+   "index": 7,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I often eat some toast with a little butter on it.",
+   "chars": 50,
+   "durationSec": 2.869,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_narrator.wav": {
+   "index": 8,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "After eating, I wash the dishes and clean up the table.",
+   "chars": 55,
+   "durationSec": 3.621,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_narrator.wav": {
+   "index": 9,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Next, I take a quick shower and brush my teeth.",
+   "chars": 47,
+   "durationSec": 3.173,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_narrator.wav": {
+   "index": 10,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I choose my clothes and put them on before seven thirty.",
+   "chars": 56,
+   "durationSec": 3.381,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L11_narrator.wav": {
+   "index": 11,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Before leaving the house, I make sure that I have my keys.",
+   "chars": 58,
+   "durationSec": 4.059,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L12_narrator.wav": {
+   "index": 12,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I walk to the train station to catch the eight o'clock train.",
+   "chars": 61,
+   "durationSec": 3.714,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 56,
+  "lessonRequests": 1,
+  "monthChars": 6038,
+  "monthRequests": 112,
+  "monthlyStopChars": 900000
+ }
+}

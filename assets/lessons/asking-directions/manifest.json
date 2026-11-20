@@ -1,0 +1,109 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "asking-directions",
+ "lines": {
+  "L01_female.wav": {
+   "index": 1,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Excuse me, could you tell me how to get to the central station?",
+   "chars": 63,
+   "durationSec": 3.877,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_male.wav": {
+   "index": 2,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Sure, it is not far from here at all.",
+   "chars": 37,
+   "durationSec": 2.397,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_male.wav": {
+   "index": 3,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Just walk straight down this street for two blocks.",
+   "chars": 51,
+   "durationSec": 3.029,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_female.wav": {
+   "index": 4,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Okay, and what should I do after that?",
+   "chars": 38,
+   "durationSec": 2.55,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_male.wav": {
+   "index": 5,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Turn right at the big convenience store on the corner.",
+   "chars": 54,
+   "durationSec": 2.875,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_female.wav": {
+   "index": 6,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Turn right at the store, got it.",
+   "chars": 32,
+   "durationSec": 2.294,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_male.wav": {
+   "index": 7,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "You will see a large glass building in front of you.",
+   "chars": 52,
+   "durationSec": 2.846,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_female.wav": {
+   "index": 8,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "How long will it take on foot?",
+   "chars": 30,
+   "durationSec": 1.875,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_male.wav": {
+   "index": 9,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "It will take about ten minutes to walk there.",
+   "chars": 45,
+   "durationSec": 2.355,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_female.wav": {
+   "index": 10,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "That sounds easy enough, thank you so much for your help!",
+   "chars": 57,
+   "durationSec": 3.826,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 459,
+  "lessonRequests": 10,
+  "monthChars": 2650,
+  "monthRequests": 51,
+  "monthlyStopChars": 900000
+ }
+}
