@@ -5,16 +5,22 @@
  * PRODUCT_IDS はプレースホルダのため、RevenueCat の Offerings からは取得できず、
  * ペイウォールの購入ボタンは無効化される (理由を画面上に表示)。
  *
- * 実商品を設定する際の差し替え手順 (PR 説明にも記載):
+ * 実商品を設定する際の手順 (詳細は docs/store/eas-production-checklist.md):
  * 1. App Store Connect でアプリレコードとサブスクリプション商品を作成する
  *    (月額: 価格レベル ¥680 相当 / 年額: ¥4,800 相当、年額は 7 日間無料トライアル)
  * 2. RevenueCat ダッシュボードでプロジェクトと Entitlement (premium) を作成し、
- *    商品を紐づける
- * 3. 下記 PRODUCT_IDS を実際の商品 ID に差し替える
- * 4. REVENUECAT_API_KEY を環境変数 (EXPO_PUBLIC_REVENUECAT_API_KEY) に設定する
- * 5. 新しいネイティブモジュールを含む開発ビルドを作り直す
+ *    **両商品を Entitlement に紐づけたうえで** Offering に追加する
+ *    (Offering への追加だけでは entitlements.active.premium が有効にならない)
+ * 3. REVENUECAT_API_KEY を環境変数 (EXPO_PUBLIC_REVENUECAT_API_KEY) に設定する
+ *    (ローカルの .env に加え、EAS の production 環境にも登録する)
+ * 4. 新しいネイティブモジュールを含む開発ビルドを作り直す
  *    (react-native-purchases はネイティブ SDK を含むため、現行の開発クライアントには
  *     含まれていない。npx expo prebuild / EAS Build での再ビルドが必要)
+ *
+ * ※ 下記 PRODUCT_IDS は**コード内では未使用**。購入用の商品 ID は
+ *   RevenueCat の getOfferings() が返す current.monthly/annual.product.identifier
+ *   (ストア商品 ID) を動的に使用するため、ASC / RevenueCat 側の設定が正しければ
+ *   コードの変更は不要。
  */
 
 /** RevenueCat の公開 API キー (環境変数から読み取る。実キーをコードに埋め込まない) */
