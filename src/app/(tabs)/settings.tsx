@@ -10,8 +10,13 @@ function Row({ label, value }: { label: string; value: string }) {
   const { colors } = useTheme();
   return (
     <View style={[styles.row, { borderBottomColor: colors.border }]}>
-      <ThemedText>{label}</ThemedText>
-      <ThemedText color="muted">{value}</ThemedText>
+      {/* 値が長い識別子でも折り返して行から溢れないようにする */}
+      <ThemedText style={{ flexShrink: 1 }} numberOfLines={2}>
+        {label}
+      </ThemedText>
+      <ThemedText color="muted" style={{ flexShrink: 1, textAlign: 'right' }} numberOfLines={2}>
+        {value}
+      </ThemedText>
     </View>
   );
 }

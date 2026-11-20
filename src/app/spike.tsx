@@ -59,7 +59,8 @@ export default function AudioSpikeScreen() {
   }, []);
 
   const player = useAudioPlayer(SPIKE_SAMPLE.asset, {
-    updateInterval: STATUS_UPDATE_INTERVAL_MILLIS / 1000,
+    // expo-audio の updateInterval はミリ秒単位 (秒ではない)
+    updateInterval: STATUS_UPDATE_INTERVAL_MILLIS,
   });
 
   // 画面を離れたらロック画面のコントロールを解除 (player 解放の前に実行される)
@@ -141,6 +142,15 @@ export default function AudioSpikeScreen() {
     if (status.playing) {
       player.pause();
       append('pause()');
+    } else if (status.didJustFinish) {
+      // 終端で停止している場合: iOS は再生位置を先頭へ戻さないため seekTo(0) してから再生
+      player
+        .seekTo(0, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
+        .then(() => {
+          player.play();
+          append('seekTo(0) + play() // 終端からの再再生');
+        })
+        .catch((e: unknown) => append(`再再生失敗: ${String(e)}`));
     } else {
       player.play();
       append('play()');

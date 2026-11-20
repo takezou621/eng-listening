@@ -8,7 +8,8 @@ Expo (React Native + TypeScript) アプリの開発手順。**CI は GitHub ホ�
 - ルーティング: expo-router (ファイルベース)
 - オーディオ: expo-audio (再生・シーク・速度変更・ロック画面コントロール)
 - 識別子: iOS Bundle ID `com.takezou.englistening` / Android package `com.takezou.englistening` (**仮**)
-  - 変更は `src/config/appConfig.ts` 1 箇所だけ編集すれば `app.config.ts` に自動反映される
+  - 変更は **`src/config/appConfig.json` 1 箇所だけ編集**すれば `app.config.ts` と画面表示に自動反映される
+  - `src/config/appConfig.ts` は型と派生定数 (速度リストなど) の再公開のみ。識別子の値を直接編集しないこと
 - ビルド: EAS (development / preview / production の 3 プロファイル)
 
 ## 2. 必要ツール
@@ -18,7 +19,7 @@ Expo (React Native + TypeScript) アプリの開発手順。**CI は GitHub ホ�
 | Node.js 24.x | npm scripts / Expo CLI | |
 | Xcode (最新安定版) | iOS シミュレータ・ビルド | `pod install` 用に CocoaPods (`brew install cocoapods`) も必要 |
 | Android Studio | Android エミュレータ (任意) | |
-| EAS CLI (`npm i -g eas-cli`) | ビルド申請 | `eas init` で project ID を `app.config.ts` の `extra.eas.projectId` に反映 |
+| EAS CLI (`npm i -g eas-cli`) | ビルド申請 | `eas init` の project ID は **手動で** `app.config.ts` の `extra.eas.projectId` に設定する (手順は下記 §5) |
 | ffmpeg / say (macOS 標準) | サンプル音声の再生成 (任意) | `assets/audio/spike-sample.m4a` の作り方は下記 |
 
 ## 3. セットアップ
@@ -68,12 +69,22 @@ EXPO_PUBLIC_SPIKE_AUTO_DEMO=1 npx expo start --dev-client
 ## 5. EAS ビルド
 
 ```bash
-eas init                                   # 初回のみ。project ID が app.config.ts に書き込まれる
+eas init                                   # 初回のみ
 eas build -p ios --profile development     # dev client (内部配布)
-eas build -p ios --profile preview --simulator   # シミュレータ用ビルド
+eas build -p ios --profile preview         # シミュレータ用ビルド (eas.json の preview が ios.simulator: true)
 eas build -p android --profile preview     # APK
 eas build -p ios --profile production      # ストア提出用 (要 Apple Developer 結合)
 ```
+
+### EAS project ID の設定 (手動)
+
+`app.config.ts` はオブジェクトを返す形式のため、`eas init` による `extra.eas.projectId` の自動書き換えが**行われない**。初回に次の手順で手動設定する:
+
+1. `eas init` を実行 → 出力 (または https://expo.dev のダッシュボード) で project ID (UUID) を確認
+2. `app.config.ts` の `extra.eas.projectId` にその UUID を書き込む
+3. `npx expo config --type public` で `extra.eas.projectId` に反映されていることを確認
+
+project ID が未設定のままでもローカル開発 (Metro / `expo run:ios`) は可能。EAS ビルド時のみ必須。
 
 認証情報 (credentials) は `.gitignore` 済み。**CI ワークフローは作らない**こと (EAS CLI のローカル実行でビルドする)。
 

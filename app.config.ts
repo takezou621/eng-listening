@@ -5,7 +5,9 @@ import type { ExpoConfig } from 'expo/config';
  * 識別子・バージョンは src/config/appConfig.json が単一ソース。
  * (app.config は CJS にトランスパイルされてから読み込まれるため TS モジュールを
  *  import できず、同じ JSON を require して共有する)
- * EAS project ID は `eas init` 実行時に extra.eas.projectId へ自動反映される。
+ * EAS project ID は手動設定: `eas init` はこの形式 (オブジェクト返し) の config を
+ * 自動書き換えできないため、出力された ID を extra.eas.projectId に手動で記入する
+ * (手順は docs/dev-setup.md §5)。未設定でもローカル開発は可能。
  */
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const APP_CONFIG: {
@@ -79,7 +81,7 @@ const config: ExpoConfig = {
   },
   extra: {
     eas: {
-      // `eas init` で自動設定される。未設定のままでもローカル開発は可能。
+      // 手動設定 (手順は docs/dev-setup.md §5)。未設定のままでもローカル開発は可能。
       projectId: '',
     },
   },
