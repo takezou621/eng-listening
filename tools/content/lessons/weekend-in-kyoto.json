@@ -1,0 +1,215 @@
+{
+ "title": "A Weekend Trip to Kyoto",
+ "titleJa": "週末の京都旅行",
+ "type": "monologue",
+ "level": "intermediate",
+ "speakerNames": {
+  "narrator": "Ken"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "text": "Last weekend, I took a quick bullet train trip to Kyoto to see the autumn leaves.",
+   "chunks": [
+    "Last weekend,",
+    "I took a quick bullet train trip",
+    "to Kyoto",
+    "to see the autumn leaves."
+   ],
+   "translationJa": "先週末、紅葉を見に新幹線でサッと京都へ行ってきました。",
+   "linking": [
+    {
+     "span": "took a",
+     "type": "linking",
+     "ipa": "/tʊk‿ə/",
+     "noteJa": "took の末尾子音 /k/ と a がつながり、「トゥッカ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "text": "As soon as I arrived at Kyoto Station, the city was packed with tourists.",
+   "chunks": [
+    "As soon as I arrived",
+    "at Kyoto Station,",
+    "the city was packed",
+    "with tourists."
+   ],
+   "translationJa": "京都駅に到着するやいなや、街は観光客でいっぱいでした。",
+   "linking": [
+    {
+     "span": "arrived at",
+     "type": "linking",
+     "ipa": "/əˈraɪvd‿ət/",
+     "noteJa": "arrived の末尾の /d/ と at の母音がつながり、「アライヴダッ(ト)」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "text": "First, I decided to head over to Kiyomizu Temple before the afternoon crowds got worse.",
+   "chunks": [
+    "First, I decided to head over",
+    "to Kiyomizu Temple",
+    "before the afternoon crowds",
+    "got worse."
+   ],
+   "translationJa": "まずは午後の混雑がひどくなる前に清水寺へ向かうことにしました。",
+   "linking": [
+    {
+     "span": "head over",
+     "type": "linking",
+     "ipa": "/hɛd‿ˈoʊvər/",
+     "noteJa": "head の /d/ と over の母音が連結し、「ヘッダウヴァー」のように滑らかにつながります。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "text": "The view from the wooden stage was breathtaking, especially with the vibrant red trees.",
+   "chunks": [
+    "The view from the wooden stage",
+    "was breathtaking,",
+    "especially with",
+    "the vibrant red trees."
+   ],
+   "translationJa": "木造の舞台からの景色は息をのむほど美しく、鮮やかな赤い木々が特に見事でした。",
+   "linking": []
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "text": "While walking down the narrow hill, I ran into an old couple from Canada.",
+   "chunks": [
+    "While walking down the narrow hill,",
+    "I ran into",
+    "an old couple",
+    "from Canada."
+   ],
+   "translationJa": "細い坂道を下りていく途中、カナダから来た年配のご夫婦に偶然出会いました。",
+   "linking": [
+    {
+     "span": "ran into",
+     "type": "linking",
+     "ipa": "/ræn‿ˈɪntuː/",
+     "noteJa": "ran の /n/ と into の /ɪ/ が連結し、「ラニントゥー」のように一息に発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "text": "They told me that they were looking for a cozy local noodle shop for lunch.",
+   "chunks": [
+    "They told me",
+    "that they were looking for",
+    "a cozy local noodle shop",
+    "for lunch."
+   ],
+   "translationJa": "昼食にこぢんまりとした地元のうどん屋さんを探していると彼らは言っていました。",
+   "linking": [
+    {
+     "span": "looking for a",
+     "type": "reduction",
+     "ipa": "/ˈlʊkɪŋ fər‿ə/",
+     "noteJa": "for が弱形 /fər/ になり、続く a と連結して「フォラ」のように短く弱く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "text": "Luckily, I knew a hidden spot just around the corner that serves amazing matcha soba.",
+   "chunks": [
+    "Luckily, I knew a hidden spot",
+    "just around the corner",
+    "that serves amazing matcha soba."
+   ],
+   "translationJa": "運良くすぐ角を曲がったところに絶品の茶そばを出す隠れ家的な店を知っていたのです。",
+   "linking": [
+    {
+     "span": "just around",
+     "type": "elision",
+     "ipa": "/dʒʌs‿əˈraʊnd/",
+     "noteJa": "just の末尾 /t/ が脱落し、around とつながって「ジャサラウンド」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "text": "We ended up having lunch together and chatted about our favorite travel destinations.",
+   "chunks": [
+    "We ended up having lunch together",
+    "and chatted about",
+    "our favorite travel destinations."
+   ],
+   "translationJa": "結局一緒に昼食を食べることになり、お気に入りの旅先について語り合いました。",
+   "linking": [
+    {
+     "span": "ended up",
+     "type": "flapping",
+     "ipa": "/ˈɛndɪɾ‿ʌp/",
+     "noteJa": "ended の /d/ が母音に挟まれて日本語のラ行のような軽い音（フラッピング）になり、up と連結します。"
+    },
+    {
+     "span": "chatted about",
+     "type": "flapping",
+     "ipa": "/ˈtʃætɪɾ‿əˈbaʊt/",
+     "noteJa": "chatted の語尾の /d/ がフラッピング化し、about とつながって「チャティダバウト」のように流れます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "text": "Later that night, I strolled along the peaceful Gion district under the lanterns.",
+   "chunks": [
+    "Later that night,",
+    "I strolled along",
+    "the peaceful Gion district",
+    "under the lanterns."
+   ],
+   "translationJa": "その日の夜遅くには、提灯の明かりが灯る静かな祇園界隈をのんびり散策しました。",
+   "linking": [
+    {
+     "span": "strolled along",
+     "type": "linking",
+     "ipa": "/stroʊld‿əˈlɔːŋ/",
+     "noteJa": "strolled の /d/ と along の母音が滑らかにつながり、「ストロウルダロング」と聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "narrator",
+   "text": "It was such a memorable short trip that I cannot wait to visit again.",
+   "chunks": [
+    "It was such a memorable short trip",
+    "that I cannot wait",
+    "to visit again."
+   ],
+   "translationJa": "本当に思い出深い小旅行になったので、また訪れるのが待ちきれません。",
+   "linking": [
+    {
+     "span": "such a",
+     "type": "linking",
+     "ipa": "/ˈsʌtʃ‿ə/",
+     "noteJa": "such の /tʃ/ と a が一息につながり、「サッチャ」のように発音されます。"
+    },
+    {
+     "span": "visit again",
+     "type": "flapping",
+     "ipa": "/ˈvɪzɪɾ‿əˈɡɛn/",
+     "noteJa": "visit の末尾 /t/ が母音に挟まれてラ行化（フラッピング）し、「ヴィズィラゲン」のように聞こえます。"
+    }
+   ]
+  }
+ ],
+ "id": "weekend-in-kyoto",
+ "category": "travel"
+}

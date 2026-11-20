@@ -9,6 +9,7 @@ dependencies = [
   "numpy>=2,<3",
   "faster-whisper>=1.1,<2",
   "av>=15,<16",
+  "google-genai>=1,<2",
 ]
 
 [tool.uv]

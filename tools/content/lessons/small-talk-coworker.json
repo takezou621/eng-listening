@@ -1,0 +1,180 @@
+{
+ "title": "Small Talk with a Coworker",
+ "titleJa": "同僚との雑談",
+ "type": "conversation",
+ "level": "intermediate",
+ "speakerNames": {
+  "female": "Lisa",
+  "male": "Mark"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "female",
+   "text": "Did you get a chance to enjoy the sunshine yesterday afternoon?",
+   "chunks": [
+    "Did you",
+    "get a chance",
+    "to enjoy",
+    "the sunshine",
+    "yesterday afternoon?"
+   ],
+   "translationJa": "昨日の午後は日差しを楽しむ時間はありましたか？",
+   "linking": [
+    {
+     "span": "Did you",
+     "type": "palatalization",
+     "ipa": "/dɪdʒuː/",
+     "noteJa": "Did の d と you の y が同化して「ディジュー」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "text": "Not really, because I had to finish up our quarterly budget report.",
+   "chunks": [
+    "Not really,",
+    "because I had to",
+    "finish up",
+    "our quarterly budget report."
+   ],
+   "translationJa": "あまりなかったですね。四半期の予算報告書を仕上げなければならなかったので。",
+   "linking": [
+    {
+     "span": "finish up",
+     "type": "linking",
+     "ipa": "/ˈfɪnɪʃʌp/",
+     "noteJa": "finish の語末 /ʃ/ と up の母音が連結して「フィニシャップ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "text": "That sounds tough, but at least the weather is going to stay nice.",
+   "chunks": [
+    "That sounds tough,",
+    "but at least",
+    "the weather",
+    "is going to",
+    "stay nice."
+   ],
+   "translationJa": "それは大変でしたね。でも、少なくとも天気はこのまま良さそうですよ。",
+   "linking": [
+    {
+     "span": "going to",
+     "type": "reduction",
+     "ipa": "/ˈɡənə/",
+     "noteJa": "going to が口語で脱落・弱化して「ガナ」のように短く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "male",
+   "text": "I hope so, since I want to go camping with my brother this weekend.",
+   "chunks": [
+    "I hope so,",
+    "since I want to",
+    "go camping",
+    "with my brother",
+    "this weekend."
+   ],
+   "translationJa": "そうだといいです。今週末は兄とキャンプに行く予定なんです。",
+   "linking": [
+    {
+     "span": "want to",
+     "type": "reduction",
+     "ipa": "/ˈwɑːnə/",
+     "noteJa": "want to がカジュアルな会話で縮約され、「ワナ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "female",
+   "text": "That would be great, but do you have time for a quick question?",
+   "chunks": [
+    "That would be great,",
+    "but do you",
+    "have time",
+    "for a",
+    "quick question?"
+   ],
+   "translationJa": "それは素敵ですね。ところで、手短な質問をしてもよろしいですか？",
+   "linking": [
+    {
+     "span": "for a",
+     "type": "weak-form",
+     "ipa": "/fər‿ə/",
+     "noteJa": "for が弱形 /fər/ となり、後ろの冠詞 a とつながって「ファラ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "male",
+   "text": "Sure, what do you need to talk about before our afternoon meeting?",
+   "chunks": [
+    "Sure,",
+    "what do you need",
+    "to talk about",
+    "before our",
+    "afternoon meeting?"
+   ],
+   "translationJa": "もちろんです。午後の会議の前に何について話す必要がありますか？",
+   "linking": [
+    {
+     "span": "talk about",
+     "type": "linking",
+     "ipa": "/ˈtɔːkəbaʊt/",
+     "noteJa": "talk の /k/ と about の語頭母音が連結して「トーカバウト」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "female",
+   "text": "I was wondering if we could go over the slides together before lunch.",
+   "chunks": [
+    "I was wondering",
+    "if we could",
+    "go over",
+    "the slides together",
+    "before lunch."
+   ],
+   "translationJa": "昼食の前にスライドを一緒に確認できればと思っていたのですが。",
+   "linking": [
+    {
+     "span": "go over",
+     "type": "intrusion",
+     "ipa": "/ɡoʊˈwoʊvər/",
+     "noteJa": "母音同士をつなぐため /w/ 音が自然に挟まり、「ゴーウォーヴァー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "male",
+   "text": "Sounds good, so let's meet in the conference room at eleven thirty.",
+   "chunks": [
+    "Sounds good,",
+    "so let's meet",
+    "in the conference room",
+    "at eleven thirty."
+   ],
+   "translationJa": "いいですね。では11時半に会議室で集まりましょう。",
+   "linking": [
+    {
+     "span": "at eleven",
+     "type": "linking",
+     "ipa": "/ət‿ɪˈlevn/",
+     "noteJa": "at の末尾子音と eleven の語頭母音が連結して「アレヴン」のように聞こえます。"
+    }
+   ]
+  }
+ ],
+ "id": "small-talk-coworker",
+ "category": "office"
+}

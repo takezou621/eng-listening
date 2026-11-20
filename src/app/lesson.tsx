@@ -17,7 +17,7 @@ import {
   STATUS_UPDATE_INTERVAL_MILLIS,
   type PlaybackRate,
 } from '@/config/appConfig';
-import { CAFE_LESSON, CAFE_LESSON_AUDIO } from '@/features/lesson/cafeLesson';
+import { getLessonBundle, type LessonBundle } from '@/features/lesson/registry';
 import type { LessonSentence } from '@/features/lesson/types';
 import { ControlButton, formatTime } from '@/features/player/shared';
 import { useTheme } from '@/theme/AppThemeProvider';
@@ -39,7 +39,8 @@ function chunkWordRanges(sentence: LessonSentence): { from: number; to: number }
   return ranges;
 }
 
-export default function LessonPlayerScreen() {
+function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoParam: boolean }) {
+  const lesson = bundle.data;
   const { colors } = useTheme();
   const [rate, setRate] = useState<PlaybackRate>(1.0);
   const [repeatSentence, setRepeatSentence] = useState<number | null>(null);
@@ -50,12 +51,12 @@ export default function LessonPlayerScreen() {
     });
   }, []);
 
-  const player = useAudioPlayer(CAFE_LESSON_AUDIO, {
+  const player = useAudioPlayer(bundle.audio, {
     updateInterval: STATUS_UPDATE_INTERVAL_MILLIS,
   });
   const status = useAudioPlayerStatus(player);
 
-  const sentences = CAFE_LESSON.sentences;
+  const sentences = lesson.sentences;
 
   // 画面内ログ = 実証エビデンス (Metro コンソールにも出力)。id はレンダーの鍵として安定させる
   const [log, setLog] = useState<{ id: number; text: string }[]>([]);
@@ -74,7 +75,7 @@ export default function LessonPlayerScreen() {
     onDone?: () => void,
     onFail?: () => void
   ) => {
-    const clamped = Math.min(Math.max(seconds, 0), status.duration || CAFE_LESSON.durationSec);
+    const clamped = Math.min(Math.max(seconds, 0), status.duration || lesson.durationSec);
     player
       .seekTo(clamped, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
       .then(() => {
@@ -128,9 +129,8 @@ export default function LessonPlayerScreen() {
   // ?demo=1: 再生→速度変更→文シーク→カラオケ確認→停止を自動実行
   // (手動操作と同じ操作関数を呼ぶ。ログは操作関数側で一度だけ記録される)
   const demoRanRef = useRef(false);
-  const params = useLocalSearchParams<{ demo?: string }>();
   useEffect(() => {
-    if (params.demo !== '1' || demoRanRef.current) return;
+    if (!demoParam || demoRanRef.current) return;
     demoRanRef.current = true;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const at = (delayMs: number, fn: () => void) => {
@@ -148,7 +148,7 @@ export default function LessonPlayerScreen() {
     at(12000, () => pause('pause() // デモ終了'));
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.demo, player]);
+  }, [demoParam, player]);
 
   // 文リピート (スパイク画面と同じ終端判定)。シーク先込み中の重複発行をガードし、
   // 完了時には「リピートがまだ有効か」を ref で確認してから再開する
@@ -208,10 +208,10 @@ export default function LessonPlayerScreen() {
       </ThemedText>
 
       <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <ThemedText variant="heading">{CAFE_LESSON.title}</ThemedText>
+        <ThemedText variant="heading">{lesson.title}</ThemedText>
         <ThemedText variant="caption" color="muted">
-          {CAFE_LESSON.titleJa} ・ {CAFE_LESSON.durationSec.toFixed(1)} 秒 / {sentences.length} 文 ・
-          config {CAFE_LESSON.configHash.slice(0, 8)}
+          {lesson.titleJa} ・ {lesson.durationSec.toFixed(1)} 秒 / {sentences.length} 文 ・
+          config {lesson.configHash.slice(0, 8)}
         </ThemedText>
 
         <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
@@ -241,7 +241,7 @@ export default function LessonPlayerScreen() {
       {activeSentence ? (
         <View style={[styles.karaoke, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <ThemedText variant="caption" color="muted">
-            {CAFE_LESSON.speakerNames[activeSentence.speaker] ?? activeSentence.speaker}
+            {lesson.speakerNames[activeSentence.speaker] ?? activeSentence.speaker}
           </ThemedText>
           <KaraokeLine sentence={activeSentence} activeWordIndex={activeWordIndex} />
           <ThemedText variant="caption" color="muted">
@@ -281,7 +281,7 @@ export default function LessonPlayerScreen() {
           ]}
         >
           <ThemedText variant="caption" color="muted">
-            文{sentence.index + 1} ・ {CAFE_LESSON.speakerNames[sentence.speaker] ?? sentence.speaker} ・
+            文{sentence.index + 1} ・ {lesson.speakerNames[sentence.speaker] ?? sentence.speaker} ・
             [{sentence.startSec.toFixed(2)}s]
             {repeatSentence === sentence.index ? ' ・リピート中' : ''}
           </ThemedText>
@@ -395,3 +395,16 @@ const styles = StyleSheet.create({
     gap: 4,
   },
 });
+
+/** ルート: ?lesson=<id>&demo=1 でレッスンを選択 (既定は cafe-ordering) */
+export default function LessonRoute() {
+  const params = useLocalSearchParams<{ demo?: string; lesson?: string }>();
+  const bundle = getLessonBundle(params.lesson);
+  return (
+    <LessonPlayerScreen
+      key={bundle.data.id}
+      bundle={bundle}
+      demoParam={params.demo === '1'}
+    />
+  );
+}

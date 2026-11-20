@@ -1,0 +1,218 @@
+{
+ "title": "My Morning Routine",
+ "titleJa": "朝の習慣",
+ "type": "monologue",
+ "level": "beginner",
+ "speakerNames": {
+  "narrator": "Speaker"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "text": "I usually wake up at six thirty in the morning.",
+   "chunks": [
+    "I usually wake up",
+    "at six thirty",
+    "in the morning."
+   ],
+   "translationJa": "私は普段、朝の6時半に目を覚まします。",
+   "linking": [
+    {
+     "span": "wake up",
+     "type": "linking",
+     "ipa": "/weɪ.kʌp/",
+     "noteJa": "wakeの語尾/k/とupの語頭/ʌ/がつながり、「ウェイカップ」のようにひとまとまりで発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "text": "I try not to look at my phone right away.",
+   "chunks": [
+    "I try not to",
+    "look at my phone",
+    "right away."
+   ],
+   "translationJa": "起きてすぐにはスマートフォンを見ないようにしています。",
+   "linking": [
+    {
+     "span": "right away",
+     "type": "flapping",
+     "ipa": "/raɪ.ɾə.weɪ/",
+     "noteJa": "rightの/t/が母音に挟まれて日本語のラ行のような音に変化し、「ライラウェイ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "text": "Instead, I get out of bed and drink a glass of water.",
+   "chunks": [
+    "Instead,",
+    "I get out of bed",
+    "and drink a glass of water."
+   ],
+   "translationJa": "その代わりにベッドから起き上がり、コップ1杯の水を飲みます。",
+   "linking": [
+    {
+     "span": "get out of",
+     "type": "flapping",
+     "ipa": "/ɡɛ.ɾaʊ.ɾəv/",
+     "noteJa": "getの/t/とoutの/t/がフラップ化して後続の母音とつながり、「ゲラウラヴ」のように滑らかに聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "text": "Then I go to the kitchen to make some fresh coffee.",
+   "chunks": [
+    "Then I go to the kitchen",
+    "to make some fresh coffee."
+   ],
+   "translationJa": "それから台所へ行き、淹れたてのコーヒーを淹れます。",
+   "linking": []
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "text": "The smell of coffee always helps me wake up properly.",
+   "chunks": [
+    "The smell of coffee",
+    "always helps me",
+    "wake up properly."
+   ],
+   "translationJa": "コーヒーの香りをかぐと、いつもすっきりと目が覚めます。",
+   "linking": [
+    {
+     "span": "smell of",
+     "type": "linking",
+     "ipa": "/smɛ.ləv/",
+     "noteJa": "smellの/l/とofの/əv/が連結し、「スメラヴ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "text": "While the coffee is brewing, I make a quick breakfast.",
+   "chunks": [
+    "While the coffee is brewing,",
+    "I make a quick breakfast."
+   ],
+   "translationJa": "コーヒーを抽出している間に、手早く朝食を作ります。",
+   "linking": [
+    {
+     "span": "make a",
+     "type": "linking",
+     "ipa": "/meɪ.kə/",
+     "noteJa": "makeの/k/とaの/ə/がつながり、「メイカ」のように短く聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "text": "I often eat some toast with a little butter on it.",
+   "chunks": [
+    "I often eat some toast",
+    "with a little butter",
+    "on it."
+   ],
+   "translationJa": "よくバターを少し塗ったトーストを食べます。",
+   "linking": [
+    {
+     "span": "on it",
+     "type": "linking",
+     "ipa": "/ɑː.nɪt/",
+     "noteJa": "onの/n/とitの/ɪ/がつながり、「オニット」のようにひと息で発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "text": "After eating, I wash the dishes and clean up the table.",
+   "chunks": [
+    "After eating,",
+    "I wash the dishes",
+    "and clean up the table."
+   ],
+   "translationJa": "食べた後は食器を洗い、テーブルを片付けます。",
+   "linking": [
+    {
+     "span": "clean up",
+     "type": "linking",
+     "ipa": "/kliː.nʌp/",
+     "noteJa": "cleanの/n/とupの/ʌ/が結合して「クリーナップ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "text": "Next, I take a quick shower and brush my teeth.",
+   "chunks": [
+    "Next,",
+    "I take a quick shower",
+    "and brush my teeth."
+   ],
+   "translationJa": "次に、さっとシャワーを浴びて歯を磨きます。",
+   "linking": []
+  },
+  {
+   "index": 10,
+   "speaker": "narrator",
+   "text": "I choose my clothes and put them on before seven thirty.",
+   "chunks": [
+    "I choose my clothes",
+    "and put them on",
+    "before seven thirty."
+   ],
+   "translationJa": "服を選び、7時半前には着替えます。",
+   "linking": [
+    {
+     "span": "put them on",
+     "type": "reduction",
+     "ipa": "/pʊ.ðəm‿ɑːn/",
+     "noteJa": "themが弱形となって直前のputおよび直後のonとつながり、「プットゥマーン」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 11,
+   "speaker": "narrator",
+   "text": "Before leaving the house, I make sure that I have my keys.",
+   "chunks": [
+    "Before leaving the house,",
+    "I make sure",
+    "that I have my keys."
+   ],
+   "translationJa": "家を出る前に、鍵を持ったか必ず確認します。",
+   "linking": []
+  },
+  {
+   "index": 12,
+   "speaker": "narrator",
+   "text": "I walk to the train station to catch the eight o'clock train.",
+   "chunks": [
+    "I walk to the train station",
+    "to catch",
+    "the eight o'clock train."
+   ],
+   "translationJa": "8時ちょうどの電車に乗るために駅まで歩きます。",
+   "linking": [
+    {
+     "span": "eight o'clock",
+     "type": "linking",
+     "ipa": "/eɪ.tə.klɑːk/",
+     "noteJa": "eightの語尾/t/とo'clockの/ə/がつながり、「エイタクロック」のように聞こえます。"
+    }
+   ]
+  }
+ ],
+ "id": "my-morning-routine",
+ "category": "daily-life"
+}

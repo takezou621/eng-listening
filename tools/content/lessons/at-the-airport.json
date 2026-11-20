@@ -1,0 +1,203 @@
+{
+ "title": "At the Airport",
+ "titleJa": "空港で",
+ "type": "conversation",
+ "level": "intermediate",
+ "speakerNames": {
+  "female": "Agent",
+  "male": "Traveler"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "female",
+   "text": "Good morning! Could I see your passport and ticket, please?",
+   "chunks": [
+    "Good morning!",
+    "Could I see your passport",
+    "and ticket, please?"
+   ],
+   "translationJa": "おはようございます。パスポートと航空券を拝見できますか？",
+   "linking": [
+    {
+     "span": "Could I",
+     "type": "linking",
+     "ipa": "/kʊd‿aɪ/",
+     "noteJa": "Couldの語尾の/d/とIの母音がつながり、「クダイ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "text": "Sure, here you go. Can I check these two bags to Chicago?",
+   "chunks": [
+    "Sure, here you go.",
+    "Can I check these two bags",
+    "to Chicago?"
+   ],
+   "translationJa": "はい、どうぞ。この2つの荷物をシカゴまで預けられますか？",
+   "linking": [
+    {
+     "span": "Can I",
+     "type": "linking",
+     "ipa": "/kæn‿aɪ/",
+     "noteJa": "Canの語尾の/n/とIが連結して「キャナイ」のように滑らかに聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "text": "Certainly. Please place them on the scale one at a time.",
+   "chunks": [
+    "Certainly.",
+    "Please place them on the scale",
+    "one at a time."
+   ],
+   "translationJa": "かしこまりました。荷物を1つずつ計量台に載せてください。",
+   "linking": [
+    {
+     "span": "one at a time",
+     "type": "linking",
+     "ipa": "/wʌn‿ət‿ə taɪm/",
+     "noteJa": "oneとat、atとaがつながり、「ワナタタイム」のように一続きで発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "male",
+   "text": "All right. I hope they are not over the weight limit.",
+   "chunks": [
+    "All right.",
+    "I hope they are not",
+    "over the weight limit."
+   ],
+   "translationJa": "分かりました。重量制限を超えていなければいいのですが。",
+   "linking": [
+    {
+     "span": "All right.",
+     "type": "flapping",
+     "ipa": "/ɔːl raɪt/",
+     "noteJa": "語尾の/t/が脱落気味になり、「オーライ」のように軽く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "female",
+   "text": "Both are within the limit, but your gate has been changed to B12.",
+   "chunks": [
+    "Both are within the limit,",
+    "but your gate",
+    "has been changed to B12."
+   ],
+   "translationJa": "両方とも制限内ですが、搭乗ゲートがB12に変更されました。",
+   "linking": [
+    {
+     "span": "Both are",
+     "type": "linking",
+     "ipa": "/boʊθ‿ɑːr/",
+     "noteJa": "Bothの/θ/とareが滑らかにつながり、「ボウサール」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "male",
+   "text": "Oh, really? Did they announce that just a moment ago?",
+   "chunks": [
+    "Oh, really?",
+    "Did they announce that",
+    "just a moment ago?"
+   ],
+   "translationJa": "えっ、本当ですか？さっきアナウンスされたのですか？",
+   "linking": [
+    {
+     "span": "just a",
+     "type": "linking",
+     "ipa": "/dʒʌst‿ə/",
+     "noteJa": "justの/t/とaが連結して「ジャスタ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "female",
+   "text": "Yes, it is about a ten-minute walk from security.",
+   "chunks": [
+    "Yes,",
+    "it is about",
+    "a ten-minute walk",
+    "from security."
+   ],
+   "translationJa": "はい、保安検査場から歩いて10分ほどのところです。",
+   "linking": [
+    {
+     "span": "it is",
+     "type": "flapping",
+     "ipa": "/ɪɾɪz/",
+     "noteJa": "itの/t/が母音に挟まれてラ行のように軽く弾く音（フラッピング）になり、「イリズ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "male",
+   "text": "Got it. What time will boarding start for this flight?",
+   "chunks": [
+    "Got it.",
+    "What time will boarding start",
+    "for this flight?"
+   ],
+   "translationJa": "了解しました。この便の搭乗は何時から始まりますか？",
+   "linking": [
+    {
+     "span": "Got it.",
+     "type": "flapping",
+     "ipa": "/ɡɑːɾɪt/",
+     "noteJa": "Gotの/t/が母音とつながりラ行のように変化して「ガリッ」と聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "female",
+   "text": "Boarding begins at two thirty, so please be there early.",
+   "chunks": [
+    "Boarding begins at two thirty,",
+    "so please be there early."
+   ],
+   "translationJa": "搭乗は2時30分から始まりますので、お早めにお越しください。",
+   "linking": [
+    {
+     "span": "begins at",
+     "type": "linking",
+     "ipa": "/bɪˈɡɪnz‿ət/",
+     "noteJa": "beginsの語尾の/z/とatが連結し、「ビギンザット」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "male",
+   "text": "Thank you for letting me know. Have a wonderful day!",
+   "chunks": [
+    "Thank you for letting me know.",
+    "Have a wonderful day!"
+   ],
+   "translationJa": "教えていただきありがとうございます。良い一日をお過ごしください！",
+   "linking": [
+    {
+     "span": "Have a",
+     "type": "linking",
+     "ipa": "/hæv‿ə/",
+     "noteJa": "Haveの/v/とaがつながって「ハヴァ」のように発音されます。"
+    }
+   ]
+  }
+ ],
+ "id": "at-the-airport",
+ "category": "airport"
+}

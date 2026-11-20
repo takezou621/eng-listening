@@ -1,0 +1,126 @@
+{
+  "version": "1.0",
+  "noteJa": "v1.0 の 12 本計画 (GM 決定: 会話 8 本 + モノローグ 4 本、初級 6 + 中級 6)。シチュエーションは重複しない。行数の目安: 会話 8〜12 行、モノローグ 10〜14 行。speakerNames と lines は LLM 生成 (generate_scripts.py) が決めるため、ここには書かない。",
+  "lessons": [
+    {
+      "id": "cafe-ordering",
+      "title": "Ordering at a Café",
+      "titleJa": "カフェで注文する",
+      "type": "conversation",
+      "level": "beginner",
+      "category": "cafe",
+      "situation": "チェーン系カフェでドリンクとマフィンを注文する。既存 (済) — generate_scripts.py は再生成しない。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "hotel-checkin",
+      "title": "Checking In at a Hotel",
+      "titleJa": "ホテルでチェックインする",
+      "type": "conversation",
+      "level": "beginner",
+      "category": "hotel",
+      "situation": "海外のホテルのフロントで、予約名を伝えてチェックインし、朝食の時間や Wi-Fi を尋ねる。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "asking-directions",
+      "title": "Asking for Directions",
+      "titleJa": "道を聞く",
+      "type": "conversation",
+      "level": "beginner",
+      "category": "street",
+      "situation": "観光で街中にいる旅行者が、駅への行き方を通行人に尋ね、道順と所要時間を確認する。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "shopping-clothes",
+      "title": "Buying Clothes",
+      "titleJa": "服を買う",
+      "type": "conversation",
+      "level": "beginner",
+      "category": "shop",
+      "situation": "アパレルショップでサイズを尋ね、試着して、レジで支払い方法を確認する。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "restaurant-order",
+      "title": "Ordering at a Restaurant",
+      "titleJa": "レストランで注文する",
+      "type": "conversation",
+      "level": "intermediate",
+      "category": "restaurant",
+      "situation": "レストランでメニューのおすすめを聞き、アレルギーを伝えて注文し、デザートと会計を頼む。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "phone-appointment",
+      "title": "Making an Appointment by Phone",
+      "titleJa": "電話で予約を入れる",
+      "type": "conversation",
+      "level": "intermediate",
+      "category": "phone",
+      "situation": "歯医者に電話して診療の予約を入れ、都合の悪い日時を変更してもらう。電話特有の聞きづらさを扱う。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "at-the-airport",
+      "title": "At the Airport",
+      "titleJa": "空港で",
+      "type": "conversation",
+      "level": "intermediate",
+      "category": "airport",
+      "situation": "空港のカウンターでチェックインと預け荷物の重量確認をし、搭乗ゲートの変更をアナウンスで確認する。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "small-talk-coworker",
+      "title": "Small Talk with a Coworker",
+      "titleJa": "同僚との雑談",
+      "type": "conversation",
+      "level": "intermediate",
+      "category": "office",
+      "situation": "オフィスのキッチンで同僚と週末の予定や天気について雑談し、会議の件を軽く確認する。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "my-morning-routine",
+      "title": "My Morning Routine",
+      "titleJa": "朝の習慣",
+      "type": "monologue",
+      "level": "beginner",
+      "category": "daily-life",
+      "situation": "自分の典型的な朝の流れ (起床から出勤まで) を、 平易な単語で 1 分ほど話す。",
+      "speakers": ["narrator"]
+    },
+    {
+      "id": "weekend-in-kyoto",
+      "title": "A Weekend Trip to Kyoto",
+      "titleJa": "週末の京都旅行",
+      "type": "monologue",
+      "level": "intermediate",
+      "category": "travel",
+      "situation": "先週末の京都旅行の感想を、行き場所・食事・人との会話をまじえて 1〜2 分で話す。",
+      "speakers": ["narrator"]
+    },
+    {
+      "id": "introducing-my-hometown",
+      "title": "Introducing My Hometown",
+      "titleJa": "故郷の紹介",
+      "type": "monologue",
+      "level": "intermediate",
+      "category": "culture",
+      "situation": "自分の故郷の暮らしやすさ・名物・おすすめスポットを、聞き手の反応を想定しながら紹介する。",
+      "speakers": ["narrator"]
+    },
+    {
+      "id": "my-favorite-movie",
+      "title": "My Favorite Movie",
+      "titleJa": "好きな映画",
+      "type": "monologue",
+      "level": "beginner",
+      "category": "entertainment",
+      "situation": "好きな映画のあらすじと好きな理由を、ネタバレを避けながら平易な語彙で話す。",
+      "speakers": ["narrator"]
+    }
+  ]
+}

@@ -1,0 +1,210 @@
+{
+ "title": "Ordering at a Restaurant",
+ "titleJa": "レストランで注文する",
+ "type": "conversation",
+ "level": "intermediate",
+ "speakerNames": {
+  "female": "Server",
+  "male": "Customer"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "female",
+   "text": "Good evening! Are you ready to order, or do you need a few more minutes?",
+   "chunks": [
+    "Good evening!",
+    "Are you ready to order,",
+    "or do you need",
+    "a few more minutes?"
+   ],
+   "translationJa": "こんばんは！ご注文はお決まりですか、それとももう少しお時間が必要ですか？",
+   "linking": [
+    {
+     "span": "ready to order,",
+     "type": "linking",
+     "ipa": "/ˈrɛdi tuː ˈɔːrdər/",
+     "noteJa": "ready の語尾と to order が滑らかにつながり、特に to と order の母音同士が連結して「レディトゥオウダー」のように流れるように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "text": "Could you tell me what you would recommend for dinner tonight?",
+   "chunks": [
+    "Could you tell me",
+    "what you would recommend",
+    "for dinner tonight?"
+   ],
+   "translationJa": "今夜のおすすめのディナーを教えていただけますか？",
+   "linking": [
+    {
+     "span": "Could you",
+     "type": "palatalization",
+     "ipa": "/kʊdʒuː/",
+     "noteJa": "Could の末尾の /d/ と you の /j/ が合体し、「クッジュ」のように発音されます。"
+    },
+    {
+     "span": "what you",
+     "type": "palatalization",
+     "ipa": "/wʌtʃuː/",
+     "noteJa": "what の /t/ と you の /j/ が同化して「ワッチュ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "text": "Our grilled salmon is very popular, and it comes with fresh seasonal vegetables.",
+   "chunks": [
+    "Our grilled salmon",
+    "is very popular,",
+    "and it comes with",
+    "fresh seasonal vegetables."
+   ],
+   "translationJa": "サーモンのグリルがとても人気で、新鮮な旬の野菜がついてきますよ。",
+   "linking": [
+    {
+     "span": "and it",
+     "type": "reduction",
+     "ipa": "/ən ɪt/",
+     "noteJa": "and の d が脱落して弱い an になり、直後の it とつながって「アニット」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "male",
+   "text": "That sounds delicious, but I should let you know that I have a nut allergy.",
+   "chunks": [
+    "That sounds delicious,",
+    "but I should let you know",
+    "that I have a nut allergy."
+   ],
+   "translationJa": "美味しそうですね。ただ、ナッツアレルギーがあることをお伝えしておかなければなりません。",
+   "linking": [
+    {
+     "span": "but I",
+     "type": "flapping",
+     "ipa": "/bʌɾaɪ/",
+     "noteJa": "but の /t/ が母音に挟まれて日本語のラ行のような軽い音（フラップ音）になり、「バライ」と聞こえます。"
+    },
+    {
+     "span": "have a",
+     "type": "linking",
+     "ipa": "/hævə/",
+     "noteJa": "have の末尾子音 /v/ と不定冠詞 a がつながって「ハヴァ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "female",
+   "text": "Thank you for letting us know; we can make sure your dish is completely nut-free.",
+   "chunks": [
+    "Thank you for letting us know;",
+    "we can make sure",
+    "your dish is",
+    "completely nut-free."
+   ],
+   "translationJa": "教えてくださりありがとうございます。お料理にナッツが一切入らないように確認いたしますね。",
+   "linking": [
+    {
+     "span": "letting us",
+     "type": "flapping",
+     "ipa": "/ˈlɛɾɪŋ ʌs/",
+     "noteJa": "letting の tt がフラップ化し、さらに us につながって「レリンガス」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "male",
+   "text": "Great, then I will have the salmon dish with a glass of white wine.",
+   "chunks": [
+    "Great,",
+    "then I will have",
+    "the salmon dish",
+    "with a glass of white wine."
+   ],
+   "translationJa": "素晴らしい、ではそのサーモンの料理と白ワインをグラスで一杯お願いします。",
+   "linking": [
+    {
+     "span": "glass of",
+     "type": "linking",
+     "ipa": "/ˈɡlæsəv/",
+     "noteJa": "glass の /s/ と of の /əv/ がつながり、「グラサヴ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "female",
+   "text": "Excellent choice. Would you like to see our dessert menu after your meal?",
+   "chunks": [
+    "Excellent choice.",
+    "Would you like",
+    "to see our dessert menu",
+    "after your meal?"
+   ],
+   "translationJa": "素晴らしい選択です。食後にデザートメニューをご覧になりますか？",
+   "linking": [
+    {
+     "span": "Would you",
+     "type": "palatalization",
+     "ipa": "/wʊdʒuː/",
+     "noteJa": "Would の /d/ と you の /j/ が融合して「ウッジュ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "male",
+   "text": "Actually, I might be full, so could we just get the check later?",
+   "chunks": [
+    "Actually,",
+    "I might be full,",
+    "so could we just get",
+    "the check later?"
+   ],
+   "translationJa": "実はお腹いっぱいになりそうなので、後でお会計だけいただくことはできますか？",
+   "linking": [
+    {
+     "span": "get the",
+     "type": "elision",
+     "ipa": "/ɡɛt ðə/",
+     "noteJa": "get の末尾 /t/ が破裂せずに飲み込まれ、息が詰まるような「ゲッザ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "female",
+   "text": "Of course! I will put your order in and bring your wine right away.",
+   "chunks": [
+    "Of course!",
+    "I will put your order in",
+    "and bring your wine",
+    "right away."
+   ],
+   "translationJa": "かしこまりました！すぐにご注文を通し、ワインをお持ちいたしますね。",
+   "linking": [
+    {
+     "span": "put your",
+     "type": "palatalization",
+     "ipa": "/pʊtʃər/",
+     "noteJa": "put の /t/ と your の /j/ が融合し、「プッチャー」のように発音されます。"
+    },
+    {
+     "span": "right away.",
+     "type": "flapping",
+     "ipa": "/ˌraɪɾəˈweɪ/",
+     "noteJa": "right の /t/ が母音に挟まれてフラップ化し、「ライラウェイ」のように聞こえます。"
+    }
+   ]
+  }
+ ],
+ "id": "restaurant-order",
+ "category": "restaurant"
+}
