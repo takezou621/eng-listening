@@ -343,7 +343,7 @@ function LessonPlayerScreen({
   // (手動操作と同じ操作関数を呼ぶ。ログは操作関数側で一度だけ記録される)
   const demoRanRef = useRef(false);
   useEffect(() => {
-    if (!demoParam || demoRanRef.current) return;
+    if (!__DEV__ || !demoParam || demoRanRef.current) return;
     demoRanRef.current = true;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const at = (delayMs: number, fn: () => void) => {
@@ -369,7 +369,7 @@ function LessonPlayerScreen({
   // (シミュレータでの録音フロー自動検証用。手動操作と同じ startRecording / stopRecording を呼ぶ)
   const autoRecordRanRef = useRef(false);
   useEffect(() => {
-    if (!autorecordParam || autoRecordRanRef.current) return;
+    if (!__DEV__ || !autorecordParam || autoRecordRanRef.current) return;
     autoRecordRanRef.current = true;
     const target = initialSentenceIndex ?? 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -386,7 +386,7 @@ function LessonPlayerScreen({
   // (進捗記録の収集フローを自動検証する用。?demo=1 と同じく既存操作関数を呼ぶだけ)
   const autoStudyRanRef = useRef(false);
   useEffect(() => {
-    if (!autostudyParam || autoStudyRanRef.current) return;
+    if (!__DEV__ || !autostudyParam || autoStudyRanRef.current) return;
     autoStudyRanRef.current = true;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const at = (delayMs: number, fn: () => void) => {
