@@ -30,6 +30,7 @@ export const LINKING_LABELS: Record<LessonLinkingNote['type'], string> = {
 /**
  * 文内の各単語 (空白区切り) が、どの linking 注釈の span と重なるかを返す。
  * 値は注釈のインデックス (重複時は最初に一致したもの)、重ならない単語は null。
+ * 返り値の長さは text を空白分割したトークン数と一致する。
  * span が text に見つからない注釈は無視する (生成時に検証済みだが二重防護)。
  */
 export function wordLinkMap(sentence: LessonSentence): (number | null)[] {

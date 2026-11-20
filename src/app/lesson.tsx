@@ -158,12 +158,21 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
   };
 
   // --- AB リピート (任意の開始点 A・終了点 B を現在位置に設定) ---
+  // デモの setTimeout から呼ばれても最新の再生位置を使えるよう status を ref にミラーする
+  const statusRef = useRef(status);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
   const setAbPoint = (which: 'a' | 'b') => {
-    const now = status.currentTime;
+    const now = statusRef.current.currentTime;
+    const duration = statusRef.current.duration || lesson.durationSec;
     setAb((prev) => {
       const a = which === 'a' ? now : (prev?.a ?? Math.max(0, now - 3));
-      const b = which === 'b' ? now : (prev?.b ?? Math.min(status.duration || now + 3, now + 3));
-      return b > a ? { a, b } : { a: b, b: a };
+      const b = which === 'b' ? now : (prev?.b ?? Math.min(duration, now + 3));
+      const lo = Math.min(a, b);
+      const hi = Math.max(a, b);
+      // 同一位置タップによるゼロ長区間は B 到達判定との無限シークループになるため拒否
+      return hi - lo > 0.2 ? { a: lo, b: hi } : (prev ?? null);
     });
     append(`AB: ${which.toUpperCase()} = ${now.toFixed(2)}s 設定`);
   };
@@ -191,11 +200,8 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
       if (!s3) return;
       seekTo(s3.startSec, `seekTo(${s3.startSec}) // 文3の冒頭へ (文シーク)`);
     });
-    at(7000, () => {
-      // AB リピート: 現在位置から 3 秒区間を設定
-      setAbPoint('a');
-      setTimeout(() => setAbPoint('b'), 1500);
-    });
+    at(7000, () => setAbPoint('a'));
+    at(8500, () => setAbPoint('b'));
     at(10000, () => pause('pause() // デモ終了'));
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -289,9 +295,10 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
   // 単語タップ → その単語に重なる音の変化の詳細を表示
   const handleWordPress = (sentence: LessonSentence, wordIndex: number) => {
     const noteIndex = wordLinkMap(sentence)[wordIndex];
-    if (noteIndex === null) return;
-    setNoteDetail({ sentenceIndex: sentence.index, noteIndex });
+    if (noteIndex === null || noteIndex === undefined) return;
     const note = sentence.linking[noteIndex];
+    if (!note) return;
+    setNoteDetail({ sentenceIndex: sentence.index, noteIndex });
     append(`音の変化: ${note.span} (${LINKING_LABELS[note.type]})`);
   };
 
@@ -400,12 +407,7 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
               }
             />
           )}
-          {displayMode === 'chunks' && showChunkJa ? (
-            <ThemedText variant="caption" color="muted">
-              {activeSentence.translationJa}
-            </ThemedText>
-          ) : null}
-          {displayMode === 'karaoke' ? (
+          {(displayMode === 'karaoke' || showChunkJa) ? (
             <ThemedText variant="caption" color="muted">
               {activeSentence.translationJa}
             </ThemedText>
@@ -436,7 +438,7 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
             <View style={styles.linkingBox}>
               {activeSentence.linking.map((note, noteIndex) => (
                 <Pressable
-                  key={note.span}
+                  key={`${noteIndex}-${note.span}`}
                   onPress={() =>
                     setNoteDetail({ sentenceIndex: activeSentence.index, noteIndex })
                   }
@@ -540,8 +542,12 @@ function KaraokeLine({
             const isActive = wordIndex === activeWordIndex;
             const isPast = wordIndex < activeWordIndex;
             const noteIndex = linkMap[wordIndex];
-            const linkColor =
-              noteIndex !== null ? LINKING_COLORS[sentence.linking[noteIndex].type] : null;
+            // linkMap は text トークン基準のため words と長さがずれると undefined になり得る
+            const note =
+              noteIndex === null || noteIndex === undefined
+                ? undefined
+                : sentence.linking[noteIndex];
+            const linkColor = note ? LINKING_COLORS[note.type] : null;
             const wordNode = (
               <ThemedText
                 style={[
@@ -554,7 +560,7 @@ function KaraokeLine({
                 {word.text}
               </ThemedText>
             );
-            return noteIndex !== null && onWordPress ? (
+            return note && onWordPress ? (
               <Pressable
                 key={`${word.text}-${wordIndex}`}
                 hitSlop={4}
@@ -614,7 +620,7 @@ const styles = StyleSheet.create({
   },
   progressFill: { height: 6, borderRadius: 3 },
   controlsRow: { flexDirection: 'row', gap: 8 },
-  rateRow: { flexDirection: 'row', gap: 8 },
+  rateRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   sectionTitle: { marginTop: 18 },
   karaoke: {
     borderRadius: 10,

@@ -8,23 +8,30 @@ import type { PlaybackRate } from '@/config/appConfig';
 
 export type ChunkDisplayMode = 'karaoke' | 'chunks';
 
-interface PlayerPrefs {
+/** 外部に見せる読み取り専用の設定値 */
+export interface PlayerPrefs {
   /** カラオケ (単語ハイライト) かチャンク (意味の塊) 表示か */
-  displayMode: ChunkDisplayMode;
+  readonly displayMode: ChunkDisplayMode;
   /** チャンク表示時の直訳 (文単位の自然な日本語訳) 表示。既定 OFF */
-  showChunkJa: boolean;
+  readonly showChunkJa: boolean;
   /** 再生速度。アプリ再起動まで保持 */
-  rate: PlaybackRate;
+  readonly rate: PlaybackRate;
 }
 
-const prefs: PlayerPrefs = {
+/** 内部保持用 (可変。外部からは setter 経由でのみ変更できる) */
+const prefs: {
+  displayMode: ChunkDisplayMode;
+  showChunkJa: boolean;
+  rate: PlaybackRate;
+} = {
   displayMode: 'karaoke',
   showChunkJa: false,
   rate: 1.0,
 };
 
-export function getPlayerPrefs(): PlayerPrefs {
-  return prefs;
+/** 現在値の凍結コピーを返す (直接書き換えは不可。変更は必ず setter 経由で行う) */
+export function getPlayerPrefs(): Readonly<PlayerPrefs> {
+  return Object.freeze({ ...prefs });
 }
 
 export function setPlayerPrefsRate(rate: PlaybackRate): void {
