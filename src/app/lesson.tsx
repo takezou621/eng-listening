@@ -484,11 +484,15 @@ function LessonPlayerScreen({
       playedSecondsRef.current += t - lastPlaybackTRef.current;
     }
     lastPlaybackTRef.current = t;
-    // 日またぎ検出: ローカル日が変わったら蓄積分を前日でフラッシュする
+    // 日またぎ検出: ローカル日が変わったら蓄積分を前日でフラッシュし、
+    // 累計量にかかわらず playedDateRef を今日へ更新する
+    // (23:59 に開いて 00:01 から再生すると前日に記録される問題の解消)
     const today = localDateStr();
-    if (today !== playedDateRef.current && playedSecondsRef.current >= 1) {
-      addStudySeconds(lesson.id, playedSecondsRef.current, playedDateRef.current);
-      playedSecondsRef.current = 0;
+    if (today !== playedDateRef.current) {
+      if (playedSecondsRef.current >= 1) {
+        addStudySeconds(lesson.id, playedSecondsRef.current, playedDateRef.current);
+        playedSecondsRef.current = 0;
+      }
       playedDateRef.current = today;
     }
   }, [t, status.playing, lesson.id]);

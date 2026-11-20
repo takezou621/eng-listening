@@ -41,7 +41,14 @@ export default function ProgressScreen() {
         setToday(todayStr());
       }
     });
-    return () => sub.remove();
+    // 前景のまま日付を跨ぐケースにも対応する (60 秒間隔で再評価)
+    const interval = setInterval(() => {
+      setToday(todayStr());
+    }, 60_000);
+    return () => {
+      sub.remove();
+      clearInterval(interval);
+    };
   }, []);
 
   const streak = computeStreak(days, new Date(today + 'T12:00:00'));

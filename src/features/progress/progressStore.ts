@@ -125,18 +125,22 @@ export function loadProgressDataAsync(): Promise<void> {
       }
     } catch (e) {
       console.error('Failed to load progress data:', e);
-      // 再試行可能にする: 次回 loadProgressDataAsync 呼び出しで再読み込みできる
+      // 再試行可能にする: loadPromise を null に戻し、isLoaded を立てない。
+      // これにより useProgressData の次回マウントで再読み込みが走る。
+      // canPersist は false のまま (既存ファイルの保護)。
       loadPromise = null;
-      isLoaded = true;
       notify();
       return;
     }
     canPersist = true;
-    isLoaded = true;
-    // 読み込み結果とメモリ内の記録 (読み込み待ち中に蓄積された分) を日別にマージする。
-    // これにより、読み込み完了前に蓄積された記録も永続化される。
-    for (const [date, memory] of Object.entries(cachedData)) {
-      const saved = parsed?.[date];
+    // 読み込み成功時は isLoaded を立てない
+    // (失敗時も含めて再試行可能な状態を維持する)
+    // 保存済みの全履歴 (parsed) を土台にし、メモリ内の記録 (読み込み待ち中に蓄積された分) を
+    // 日別に加算マージする。parsed にしかない日付・メモリにしかない日付の両方を保持する。
+    const memoryData = cachedData;
+    cachedData = parsed ? { ...parsed } : { ...defaultData };
+    for (const [date, memory] of Object.entries(memoryData)) {
+      const saved = cachedData[date];
       if (saved) {
         cachedData[date] = {
           ...saved,
@@ -147,8 +151,11 @@ export function loadProgressDataAsync(): Promise<void> {
             ...new Set([...saved.completedLessons, ...memory.completedLessons]),
           ],
         };
+      } else {
+        cachedData[date] = memory;
       }
     }
+    // 新しいオブジェクト参照を代入済みのため React の再描画が確実に走る
     notify();
     flushToDisk();
   })();
@@ -263,15 +270,17 @@ export function computeTotalSeconds(days: ProgressData): number {
   return Object.values(days).reduce((sum, day) => sum + day.seconds, 0);
 }
 
-/** 今週 (月曜開始の暦週) の学習秒数 */
+/** 今週 (月曜開始の暦週) の学習秒数。未来日付 (翌月曜以降) は含めない */
 export function computeWeekSeconds(days: ProgressData, today: Date = new Date()): number {
   const start = new Date(today);
   start.setDate(start.getDate() - ((start.getDay() + 6) % 7)); // 月曜に戻る
   start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7); // 翌月曜 (排他上限)
   let sum = 0;
   for (const day of Object.values(days)) {
     const d = new Date(`${day.date}T00:00:00`);
-    if (!Number.isNaN(d.getTime()) && d >= start) {
+    if (!Number.isNaN(d.getTime()) && d >= start && d < end) {
       sum += day.seconds;
     }
   }
