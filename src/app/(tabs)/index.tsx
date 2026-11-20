@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -7,7 +7,7 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { CONTENT_TYPE_LABELS, type ContentType } from '@/data/types';
 import { getLessonList } from '@/features/lesson/registry';
-import { useUserData } from '@/features/library/userStore';
+import { loadUserDataAsync, useUserData } from '@/features/library/userStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 type FilterType = 'all' | ContentType;
@@ -16,13 +16,25 @@ type FilterLevel = 'all' | 'beginner' | 'intermediate';
 export default function LibraryScreen() {
   const { colors } = useTheme();
   const router = useRouter();
-  const { favoriteLessons, toggleFavoriteLesson } = useUserData();
+  const { favoriteLessons, toggleFavoriteLesson, onboardingDone } = useUserData();
 
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [filterLevel, setFilterLevel] = useState<FilterLevel>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   const lessonList = getLessonList();
+
+  // 初回起動時のみオンボーディング診断へ誘導する (完了状態は端末内に永続化)
+  const redirectedRef = useRef(false);
+  useEffect(() => {
+    if (redirectedRef.current) return;
+    void loadUserDataAsync().then(() => {
+      if (!onboardingDone && !redirectedRef.current) {
+        redirectedRef.current = true;
+        router.replace('/onboarding');
+      }
+    });
+  }, [onboardingDone, router]);
 
   const filteredLessons = useMemo(() => {
     return lessonList.filter(({ entry }) => {

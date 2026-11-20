@@ -12,6 +12,8 @@ const STORAGE_FILE = new File(Paths.document, 'user-data.json');
 interface UserData {
   favoriteLessons: string[]; // お気に入り登録した lessonId の配列
   weakSentences: WeakSentence[];
+  /** 初回オンボーディング診断 (またはスキップ) を完了したか */
+  onboardingDone: boolean;
 }
 
 export interface WeakSentence {
@@ -23,6 +25,7 @@ export interface WeakSentence {
 const defaultData: UserData = {
   favoriteLessons: [],
   weakSentences: [],
+  onboardingDone: false,
 };
 
 // インメモリのキャッシュ。変更時は必ず新しい参照を作る (React の再描画検知のため)
@@ -39,6 +42,7 @@ function parseUserData(json: string): UserData {
   }
   const obj = parsed as Partial<UserData>;
   return {
+    onboardingDone: obj.onboardingDone === true,
     favoriteLessons: Array.isArray(obj.favoriteLessons)
       ? obj.favoriteLessons.filter((id) => typeof id === 'string')
       : [],
@@ -53,6 +57,22 @@ function parseUserData(json: string): UserData {
         )
       : [],
   };
+}
+
+/** 苦手フレーズをマージする (同一文は追加日時が古い方 = 登録当初の記録を優先) */
+function mergeWeakSentences(
+  base: WeakSentence[],
+  override: WeakSentence[]
+): WeakSentence[] {
+  const byKey = new Map<string, WeakSentence>();
+  for (const s of [...base, ...override]) {
+    const key = `${s.lessonId}:${s.sentenceIndex}`;
+    const existing = byKey.get(key);
+    if (!existing || s.addedAtMs < existing.addedAtMs) {
+      byKey.set(key, s);
+    }
+  }
+  return [...byKey.values()];
 }
 
 function notify() {
@@ -89,10 +109,11 @@ export function loadUserDataAsync(): Promise<void> {
           const parsed = parseUserData(await STORAGE_FILE.text());
           // 読み込み待ち中のトグル操作を上書きで消さないようマージする
           updateUserData((current) => ({
-            favoriteLessons:
-              current.favoriteLessons.length > 0 ? current.favoriteLessons : parsed.favoriteLessons,
-            weakSentences:
-              current.weakSentences.length > 0 ? current.weakSentences : parsed.weakSentences,
+            ...current,
+            favoriteLessons: Array.from(
+              new Set([...current.favoriteLessons, ...parsed.favoriteLessons])
+            ),
+            weakSentences: mergeWeakSentences(parsed.weakSentences, current.weakSentences),
           }));
         }
       } catch (e) {
@@ -123,6 +144,10 @@ export function useUserData() {
 
   return {
     ...data,
+    /** オンボーディング完了 (またはスキップ) を記録し、次回以降は通常起動にする */
+    completeOnboarding: () => {
+      updateUserData((current) => ({ ...current, onboardingDone: true }));
+    },
     toggleFavoriteLesson: (lessonId: string) => {
       updateUserData((current) => {
         const isFav = current.favoriteLessons.includes(lessonId);
