@@ -18,6 +18,7 @@ import {
   type PlaybackRate,
 } from '@/config/appConfig';
 import { SPIKE_SAMPLE } from '@/features/spike/sample';
+import { ControlButton, formatTime } from '@/features/player/shared';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 type LogEntry = { at: string; action: string };
@@ -32,11 +33,6 @@ function useSpikeLog() {
     if (__DEV__) console.log(`[spike] ${at} ${action}`);
   };
   return { log, append };
-}
-
-function formatTime(seconds: number): string {
-  const s = Math.max(0, seconds);
-  return `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
 }
 
 export default function AudioSpikeScreen() {
@@ -304,33 +300,6 @@ export default function AudioSpikeScreen() {
   );
 }
 
-function ControlButton({
-  label,
-  onPress,
-  primary = false,
-}: {
-  label: string;
-  onPress: () => void;
-  primary?: boolean;
-}) {
-  const { colors } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.controlButton,
-        primary
-          ? { backgroundColor: colors.primary }
-          : { backgroundColor: colors.secondarySurface },
-      ]}
-    >
-      <ThemedText style={{ color: primary ? colors.primaryText : colors.text, fontWeight: '600' }}>
-        {label}
-      </ThemedText>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   panel: {
     marginTop: 8,
@@ -346,12 +315,6 @@ const styles = StyleSheet.create({
   },
   progressFill: { height: 6, borderRadius: 3 },
   controlsRow: { flexDirection: 'row', gap: 8 },
-  controlButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
   sectionTitle: { marginTop: 18 },
   rateRow: { flexDirection: 'row', gap: 8, marginTop: 8 },
   sentence: {

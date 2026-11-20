@@ -50,17 +50,18 @@ def assets_dir(lesson_id: str) -> Path:
     return REPO / "assets" / "lessons" / lesson_id
 
 
-def check_no_config_mixing(cfg: dict, chash: str, out_assets: Path) -> None:
+def check_no_config_mixing(chash: str, out_assets: Path) -> None:
     """異なる設定ハッシュの既存音声が同じ出力先にある場合は生成を中止する。"""
     manifest_path = out_assets / "manifest.json"
     if not manifest_path.exists():
         return
     old = json.loads(manifest_path.read_text(encoding="utf-8"))
+    old_hash = old.get("configHash") or old.get("config_hash")
     has_audio = old.get("lines") or any(out_assets.glob("audio.*"))
-    if old.get("config_hash") != chash and has_audio:
+    if old_hash != chash and has_audio:
         raise SystemExit(
             "ABORT: 出力先には異なる voice config (ハッシュ "
-            f"{old.get('config_hash')}) で生成された音声があります。混在を防ぐため中止します。"
+            f"{old_hash}) で生成された音声があります。混在を防ぐため中止します。"
             "作り直す場合は assets/lessons/<id>/ と tools/content/build/<id>/ を消してから再実行してください。"
         )
 
@@ -96,25 +97,31 @@ def main() -> int:
     ldir.mkdir(parents=True, exist_ok=True)
     out_assets.mkdir(parents=True, exist_ok=True)
 
-    check_no_config_mixing(cfg, chash, out_assets)
+    check_no_config_mixing(chash, out_assets)
 
-    # --- 事前見積り: レッスン全体をこの実行で生成して停止上限を超えるなら開始前に中止 ---
-    total_chars = sum(len(ln["text"].strip()) for ln in lesson["lines"])
+    force_lines = set(args.line or [])
+
+    # --- 事前見積り: この実行で実際に合成する行だけを見積もる。
+    # スキップする行は既に月次カウンタへ計上済みなので数え直すと二重計上になる ---
+    total_chars = sum(
+        len(ln["text"].strip()) for ln in lesson["lines"]
+        if not (ldir / f"L{int(ln['index']):02d}_{ln['speaker']}.wav").exists()
+        or int(ln["index"]) in force_lines
+    )
     cloud_tts.check_monthly_budget(cfg, total_chars)
 
     manifest: dict = {
-        "config_hash": chash,
+        "configHash": chash,
         "engine": cfg["engine"],
         "voices": {k: v["voiceName"] for k, v in speakers.items()},
-        "lesson_id": args.lesson,
+        "lessonId": args.lesson,
         "lines": {},
     }
     old_manifest = out_assets / "manifest.json"
     if old_manifest.exists():
         manifest = json.loads(old_manifest.read_text(encoding="utf-8"))
-        manifest["config_hash"] = chash
+        manifest["configHash"] = chash
 
-    force_lines = set(args.line or [])
     sample_rate = int(cfg["audio"]["sampleRateHertz"])
     generated = skipped = 0
     lesson_chars = 0
@@ -150,7 +157,7 @@ def main() -> int:
             "text": text,
             "chars": len(text),
             "durationSec": round(dur, 3),
-            "config_hash": chash,
+            "configHash": chash,
         }
 
     usage = cloud_tts.read_usage()
@@ -162,7 +169,7 @@ def main() -> int:
         "monthlyStopChars": cfg["limits"]["monthlyStopChars"],
     }
     (out_assets / "manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8"
+        json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
     )
     print(
         f"DONE lines={len(lesson['lines'])} generated={generated} skipped={skipped} "
@@ -170,8 +177,8 @@ def main() -> int:
         f"config={chash}",
         flush=True,
     )
-    print("next: python tools/content/check_voice_consistency.py --lesson " + args.lesson,
-          flush=True)
+    print("next: uv run --project tools/content python tools/content/"
+          "check_voice_consistency.py --lesson " + args.lesson, flush=True)
     return 0
 
 

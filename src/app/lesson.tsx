@@ -19,6 +19,7 @@ import {
 } from '@/config/appConfig';
 import { CAFE_LESSON, CAFE_LESSON_AUDIO } from '@/features/lesson/cafeLesson';
 import type { LessonSentence } from '@/features/lesson/types';
+import { ControlButton, formatTime } from '@/features/player/shared';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -26,26 +27,16 @@ import { useTheme } from '@/theme/AppThemeProvider';
  * 再生ロジックの基本型はオーディオスパイク画面 (src/app/spike.tsx) で検証済みのものを使う。
  */
 
-/** パイプラインの norm (tools/content/build_lesson.py) と同じ正規化で語数を数える */
-function normToken(token: string): string {
-  return token.toLowerCase().replace(/[^a-z0-9']/g, '');
-}
-
-/** チャンクごとの単語インデックス範囲 (パイプラインが単語を順に消費して作ったため整合する) */
+/** チャンクごとの単語インデックス範囲 (パイプラインが台本トークンを順に消費して作るため 1:1) */
 function chunkWordRanges(sentence: LessonSentence): { from: number; to: number }[] {
   const ranges: { from: number; to: number }[] = [];
   let ptr = 0;
   for (const chunk of sentence.chunks) {
-    const n = chunk.text.split(/\s+/).filter((t) => normToken(t).length > 0).length;
+    const n = chunk.text.split(/\s+/).filter((t) => t.length > 0).length;
     ranges.push({ from: ptr, to: Math.min(ptr + n, sentence.words.length) });
     ptr += n;
   }
   return ranges;
-}
-
-function formatTime(seconds: number): string {
-  const s = Math.max(0, seconds);
-  return `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
 }
 
 export default function LessonPlayerScreen() {
@@ -66,11 +57,14 @@ export default function LessonPlayerScreen() {
 
   const sentences = CAFE_LESSON.sentences;
 
-  // 画面内ログ = 実証エビデンス (Metro コンソールにも出力)
-  const [log, setLog] = useState<string[]>([]);
+  // 画面内ログ = 実証エビデンス (Metro コンソールにも出力)。id はレンダーの鍵として安定させる
+  const [log, setLog] = useState<{ id: number; text: string }[]>([]);
+  const logIdRef = useRef(0);
   const append = (action: string) => {
     const at = new Date().toLocaleTimeString('ja-JP', { hour12: false });
-    setLog((prev) => [`${at}  ${action}`, ...prev].slice(0, 8));
+    logIdRef.current += 1;
+    const id = logIdRef.current;
+    setLog((prev) => [{ id, text: `${at}  ${action}` }, ...prev].slice(0, 8));
     if (__DEV__) console.log(`[lesson] ${at} ${action}`);
   };
 
@@ -138,15 +132,19 @@ export default function LessonPlayerScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.demo, player]);
 
-  // 文リピート (スパイク画面と同じ終端判定)
+  // 文リピート (スパイク画面と同じ終端判定)。シーク先込み中の重複発行をガードする
+  const seekingRef = useRef(false);
   useEffect(() => {
     if (repeatSentence === null) return;
     const sentence = sentences.find((s) => s.index === repeatSentence);
     if (!sentence) return;
     const endThreshold =
       status.duration > 0 ? Math.min(sentence.endSec, status.duration - 0.05) : sentence.endSec;
+    if (seekingRef.current) return;
     if (status.didJustFinish || status.currentTime >= endThreshold) {
+      seekingRef.current = true;
       seekTo(sentence.startSec, () => {
+        seekingRef.current = false;
         if (!status.playing) player.play();
       });
     }
@@ -266,9 +264,9 @@ export default function LessonPlayerScreen() {
             操作するとここにログが記録されます
           </ThemedText>
         ) : (
-          log.map((entry, i) => (
-            <ThemedText key={`${entry}-${i}`} variant="caption">
-              {entry}
+          log.map((entry) => (
+            <ThemedText key={entry.id} variant="caption">
+              {entry.text}
             </ThemedText>
           ))
         )}
@@ -317,31 +315,6 @@ function KaraokeLine({
   );
 }
 
-function ControlButton({
-  label,
-  onPress,
-  primary = false,
-}: {
-  label: string;
-  onPress: () => void;
-  primary?: boolean;
-}) {
-  const { colors } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.controlButton,
-        primary ? { backgroundColor: colors.primary } : { backgroundColor: colors.secondarySurface },
-      ]}
-    >
-      <ThemedText style={{ color: primary ? colors.primaryText : colors.text, fontWeight: '600' }}>
-        {label}
-      </ThemedText>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   panel: {
     marginTop: 8,
@@ -357,12 +330,6 @@ const styles = StyleSheet.create({
   },
   progressFill: { height: 6, borderRadius: 3 },
   controlsRow: { flexDirection: 'row', gap: 8 },
-  controlButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
   rateRow: { flexDirection: 'row', gap: 8 },
   sectionTitle: { marginTop: 18 },
   karaoke: {

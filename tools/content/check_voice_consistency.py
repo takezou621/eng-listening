@@ -23,7 +23,6 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 
 import cloud_tts  # noqa: E402
@@ -101,16 +100,23 @@ def main() -> int:
 
     flagged = []
     for spk in sorted({r["speaker"] for r in rows}):
-        sub = [r for r in rows if r["speaker"] == spk and r["f0Hz"] > 0]
-        if not sub:
+        sub = [r for r in rows if r["speaker"] == spk]
+        voiced = [r for r in sub if r["f0Hz"] > 0]
+        if not voiced:
+            # F0 が 1 行も測れない = 無音または壊れた音声。ゲートを素通しさせない
+            for r in sub:
+                r["flag"] = "F0 undetectable (silent or failed audio)"
+                flagged.append(r)
             continue
-        med_f0 = float(np.median([r["f0Hz"] for r in sub]))
-        med_rate = float(np.median([r["rateWps"] for r in sub]))
+        med_f0 = float(np.median([r["f0Hz"] for r in voiced]))
+        med_rate = float(np.median([r["rateWps"] for r in voiced]))
         for r in sub:
             reasons = []
-            if abs(r["f0Hz"] - med_f0) / med_f0 > f0_max:
+            if r["f0Hz"] <= 0:
+                reasons.append("F0 undetectable (silent or failed audio)")
+            elif abs(r["f0Hz"] - med_f0) / med_f0 > f0_max:
                 reasons.append(f"F0 {r['f0Hz']}Hz vs median {med_f0:.1f}Hz")
-            if med_rate > 0 and abs(r["rateWps"] - med_rate) / med_rate > rate_max:
+            if med_rate > 0 and r["f0Hz"] > 0 and abs(r["rateWps"] - med_rate) / med_rate > rate_max:
                 reasons.append(f"rate {r['rateWps']} wps vs median {med_rate:.2f} wps")
             r["flag"] = "; ".join(reasons)
             if reasons:
@@ -120,7 +126,7 @@ def main() -> int:
 
     report = {
         "lesson": args.lesson,
-        "config_hash": cloud_tts.config_hash(cfg),
+        "configHash": cloud_tts.config_hash(cfg),
         "thresholds": {"f0DeviationMax": f0_max, "rateDeviationMax": rate_max,
                        "rateUnit": rate_unit},
         "rows": rows,
@@ -128,7 +134,7 @@ def main() -> int:
     }
     out = assets_dir(args.lesson) / "voice_consistency_report.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+    out.write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
     if flagged:
         print(f"GATE FAIL: {len(flagged)} line(s) flagged:", flush=True)

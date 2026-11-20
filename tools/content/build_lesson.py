@@ -25,7 +25,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 
 import cloud_tts  # noqa: E402
@@ -34,7 +33,8 @@ from generate_lesson import assets_dir, lines_dir, load_lesson  # noqa: E402
 
 def read_wav_frames(path: Path) -> tuple[bytes, int]:
     with wave.open(str(path), "rb") as w:
-        assert w.getnchannels() == 1 and w.getsampwidth() == 2, f"unexpected wav: {path}"
+        if w.getnchannels() != 1 or w.getsampwidth() != 2:
+            raise SystemExit(f"unexpected wav (mono/16bit 以外): {path}")
         return w.readframes(w.getnframes()), w.getframerate()
 
 
@@ -54,9 +54,10 @@ def concat_lines(ldir: Path, master_path: Path, gap_sec: float) -> list[dict]:
         spans.append({"file": wav_path.name, "startSec": round(pos, 3),
                       "endSec": round(pos + dur, 3)})
         frames.append(data)
-        gap = b"\x00\x00" * int(gap_sec * sr)
-        frames.append(gap)
-        pos += dur + gap_sec
+        # 位置の進みは実際に挿入したサンプル数から計算する (切り捨て誤差の累積を防ぐ)
+        gap_samples = int(gap_sec * sr)
+        frames.append(b"\x00\x00" * gap_samples)
+        pos += dur + gap_samples / sr
     if sr is None:
         raise SystemExit("行 WAV がありません。先に generate_lesson.py を実行してください。")
     with wave.open(str(master_path), "wb") as w:
@@ -68,13 +69,17 @@ def concat_lines(ldir: Path, master_path: Path, gap_sec: float) -> list[dict]:
     return spans
 
 
-def whisper_words(cfg: dict, wav_path: Path) -> list[dict]:
-    """1 行 WAV を faster-whisper で転写し、単語タイムスタンプ (行内相対秒) を返す。"""
+def load_whisper_model(cfg: dict):
+    """faster-whisper モデルを 1 回だけロードする (行ごとの再読み込みを避ける)。"""
     from faster_whisper import WhisperModel  # uv 環境でのみ利用可能
 
     wcfg = cfg["whisper"]
-    model = WhisperModel(wcfg["model"], device=wcfg["device"], compute_type=wcfg["computeType"])
-    segments, _info = model.transcribe(str(wav_path), language=wcfg["language"],
+    return WhisperModel(wcfg["model"], device=wcfg["device"], compute_type=wcfg["computeType"])
+
+
+def whisper_words(model, wav_path: Path, language: str) -> list[dict]:
+    """1 行 WAV を faster-whisper で転写し、単語タイムスタンプ (行内相対秒) を返す。"""
+    segments, _info = model.transcribe(str(wav_path), language=language,
                                        word_timestamps=True)
     words = []
     for seg in segments:
@@ -133,7 +138,8 @@ def align_words(line_text: str, wwords: list[dict]) -> list[dict]:
         elif i1 > 0 and out[i1 - 1] is not None:
             t0 = t1 = out[i1 - 1]["endSec"]
         else:
-            t0 = t1 = span[0]["startSec"] if span else 0.0
+            # 行頭から whisper が取りこぼした語: 前時刻が無いので 0.0 に張り付ける
+            t0 = t1 = 0.0
         weights = [max(len(t), 1) for t in script_slice]
         total = sum(weights) or 1
         pos = t0
@@ -150,7 +156,8 @@ def chunks_from_words(chunk_texts: list[str], words: list[dict]) -> list[dict]:
     out: list[dict] = []
     ptr = 0
     for chunk_text in chunk_texts:
-        n = len([t for t in chunk_text.split() if norm(t)])
+        # words は台本トークンと 1:1 対応 (正規化が空になる語も含む) のため素数で数える
+        n = len(chunk_text.split())
         part = words[ptr:ptr + n]
         ptr += n
         if part:
@@ -175,14 +182,16 @@ def main() -> int:
     if not manifest_path.exists():
         raise SystemExit("manifest.json がありません。先に generate_lesson.py を実行してください。")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("config_hash") != chash:
+    manifest_hash = manifest.get("configHash") or manifest.get("config_hash")
+    if manifest_hash != chash:
         raise SystemExit("manifest の設定ハッシュが現在の voice config と一致しません。混在防止のため中止します。")
 
     report_path = out_assets / "voice_consistency_report.json"
     if not report_path.exists():
         raise SystemExit("一貫性ゲートのレポートがありません。先に check_voice_consistency.py を実行してください。")
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    if report.get("config_hash") != chash:
+    report_hash = report.get("configHash") or report.get("config_hash")
+    if report_hash != chash:
         raise SystemExit("一貫性レポートの設定ハッシュが古いため中止します。ゲートを再実行してください。")
     if report.get("flagged"):
         raise SystemExit(
@@ -203,12 +212,21 @@ def main() -> int:
         check=True,
     )
 
-    # --- faster-whisper で単語タイムスタンプ (Issue #3) ---
+    # --- faster-whisper で単語タイムスタンプ (Issue #3)。モデルは 1 回だけロードする ---
+    model = load_whisper_model(cfg)
+    wcfg = cfg["whisper"]
     sentences: list[dict] = []
     for line in lesson["lines"]:
         name = f"L{int(line['index']):02d}_{line['speaker']}.wav"
-        span = span_by_file[name]
-        raw = whisper_words(cfg, ldir / name)
+        span = span_by_file.get(name)
+        if span is None:
+            raise SystemExit(
+                f"行 WAV が見つかりません: {name} (tools/content/build/{args.lesson}/lines/ が"
+                "台本と一致しません。generate_lesson.py を再実行してください)"
+            )
+        if not line.get("chunks"):
+            raise SystemExit(f"行 {line.get('index')}: chunks (スラッシュ区切り) が台本にありません")
+        raw = whisper_words(model, ldir / name, wcfg["language"])
         for w in raw:
             # 行内相対秒 → トラック全体の絶対秒へオフセットし、行区間にクリップ
             w["startSec"] = round(span["startSec"] + w["startSec"], 3)
@@ -244,7 +262,7 @@ def main() -> int:
         "sentences": sentences,
     }
     out_path = out_assets / "lesson.json"
-    out_path.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    out_path.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"DONE lesson.json + audio.m4a lines={len(sentences)} duration={total_dur:.2f}s "
           f"config={chash}", flush=True)
     return 0

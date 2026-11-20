@@ -88,7 +88,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "av", specifier = ">=14,<16" },
+    { name = "av", specifier = ">=15,<16" },
     { name = "faster-whisper", specifier = ">=1.1,<2" },
     { name = "numpy", specifier = ">=2,<3" },
 ]

@@ -174,6 +174,7 @@ def synthesize(cfg: dict, text: str, voice_name: str, *, lesson_id: str, label: 
     }
 
     last_error: Exception | None = None
+    audio: bytes | None = None
     for attempt in range(int(wd["maxRetries"]) + 1):
         if attempt > 0:
             delay = float(wd["backoffSec"][min(attempt - 1, len(wd["backoffSec"]) - 1)])
@@ -184,22 +185,15 @@ def synthesize(cfg: dict, text: str, voice_name: str, *, lesson_id: str, label: 
             req = urllib.request.Request(
                 url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST"
             )
+            # リトライ領域は HTTP 呼び出しに限定する。usage 記録などのローカル処理を
+            # 含めると、TTS 成功後に記録だけ失敗したケースで同じ課金リクエストを
+            # 再送してしまう (ゼロコスト制約に反する)。
             with urllib.request.build_opener().open(req, timeout=float(wd["timeoutSec"])) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
             audio = base64.b64decode(data["audioContent"])
-            usage = record_usage(len(text), lesson_id)
-            print(
-                f"  tts ok: {label} chars={len(text)} "
-                f"(month total {usage['chars']}/{cfg['limits']['monthlyStopChars']})",
-                flush=True,
-            )
-            return audio
-        except UsageLimitExceeded:
-            raise
+            break
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError,
                 KeyError, ValueError) as exc:
-            # HTTPError のレスポンスボディにはプロジェクト ID 以外の秘密情報は含まれないため、
-            # ステータスコードのみを表示する (詳細は不要、トークン等は出さない)。
             code = getattr(exc, "code", None)
             last_error = exc
             if code is not None:
@@ -207,4 +201,14 @@ def synthesize(cfg: dict, text: str, voice_name: str, *, lesson_id: str, label: 
             else:
                 print(f"  tts error: {type(exc).__name__}", flush=True)
 
-    raise TTSError(f"TTS failed after {wd['maxRetries']} retries: {label} ({last_error})")
+    if audio is None:
+        raise TTSError(f"TTS failed after {wd['maxRetries']} retries: {label} ({last_error})")
+
+    # 成功したリクエストのみ加算。ここでのローカル I/O 失敗はリトライせず伝播させる
+    usage = record_usage(len(text), lesson_id)
+    print(
+        f"  tts ok: {label} chars={len(text)} "
+        f"(month total {usage['chars']}/{cfg['limits']['monthlyStopChars']})",
+        flush=True,
+    )
+    return audio

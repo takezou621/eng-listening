@@ -66,9 +66,10 @@ export function assertValidLesson(lesson: LessonData): void {
   }
   let prevEnd = -1;
   for (const sentence of lesson.sentences) {
+    // Number.isFinite で NaN / Infinity を弾く (typeof NaN === 'number' のため)
     if (
-      typeof sentence.startSec !== 'number' ||
-      typeof sentence.endSec !== 'number' ||
+      !Number.isFinite(sentence.startSec) ||
+      !Number.isFinite(sentence.endSec) ||
       sentence.startSec >= sentence.endSec ||
       sentence.startSec < prevEnd
     ) {
@@ -77,6 +78,13 @@ export function assertValidLesson(lesson: LessonData): void {
     prevEnd = sentence.endSec;
     if (!Array.isArray(sentence.words) || sentence.words.length === 0) {
       throw new Error(`単語タイムスタンプがありません: lesson=${lesson.id}, index=${String(sentence.index)}`);
+    }
+    for (const word of sentence.words) {
+      if (!Number.isFinite(word.startSec) || !Number.isFinite(word.endSec) || word.startSec > word.endSec) {
+        throw new Error(
+          `不正な単語タイムスタンプ: lesson=${lesson.id}, index=${String(sentence.index)}, word=${word.text}`
+        );
+      }
     }
   }
 }

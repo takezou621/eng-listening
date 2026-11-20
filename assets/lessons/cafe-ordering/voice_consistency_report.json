@@ -1,6 +1,6 @@
 {
  "lesson": "cafe-ordering",
- "config_hash": "1b1725b9a69efe25",
+ "configHash": "1b1725b9a69efe25",
  "thresholds": {
   "f0DeviationMax": 0.15,
   "rateDeviationMax": 0.25,
