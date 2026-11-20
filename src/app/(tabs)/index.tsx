@@ -68,6 +68,11 @@ export default function LibraryScreen() {
           active={filterLevel === 'intermediate'}
           onPress={() => setFilterLevel('intermediate')}
         />
+        <Chip
+          label="レベルすべて"
+          active={filterLevel === 'all'}
+          onPress={() => setFilterLevel('all')}
+        />
       </ScrollView>
     </View>
   );
@@ -114,6 +119,9 @@ export default function LibraryScreen() {
                 </View>
                 <Pressable
                   hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${entry.title}をお気に入りに登録`}
+                  accessibilityState={{ selected: isFav }}
                   onPress={() => toggleFavoriteLesson(entry.id)}
                   style={styles.favIcon}
                 >

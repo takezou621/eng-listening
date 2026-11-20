@@ -733,7 +733,7 @@ function LessonPlayerScreen({
               onPress={() => toggleWeakSentence(lesson.id, sentence.index)}
               style={styles.weakIcon}
             >
-              <ThemedText variant="caption" style={{ color: isSentenceWeak(lesson.id, sentence.index) ? '#F59E0B' : colors.textMuted }}>
+              <ThemedText variant="caption" style={{ color: isSentenceWeak(lesson.id, sentence.index) ? '#B45309' : colors.textMuted }}>
                 {isSentenceWeak(lesson.id, sentence.index) ? '★ 苦手' : '☆ 苦手'}
               </ThemedText>
             </Pressable>

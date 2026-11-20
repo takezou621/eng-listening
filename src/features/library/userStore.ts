@@ -61,11 +61,23 @@ function notify() {
   }
 }
 
+// 読み込み完了前の保存は保存済みデータを消す恐れがあるため禁止し、
+// 書き込みは前の書き込み完了後に直列実行する (競合で古い状態が残るのを防ぐ)
+let canPersist = false;
+let saveQueue: Promise<void> = Promise.resolve();
+
 /** 変更は必ずこの関数経由で行い、新しい参照を通知する */
 function updateUserData(mutate: (current: UserData) => UserData) {
   cachedData = mutate(cachedData);
   notify();
-  STORAGE_FILE.write(JSON.stringify(cachedData));
+  saveQueue = saveQueue.then(async () => {
+    if (!canPersist) return;
+    try {
+      await STORAGE_FILE.write(JSON.stringify(cachedData));
+    } catch (e) {
+      console.error('Failed to save user data:', e);
+    }
+  });
 }
 
 /** 読み込みは 1 回だけ実行し、並走呼び出しを dedupe する (Promise をキャッシュ) */
@@ -86,6 +98,7 @@ export function loadUserDataAsync(): Promise<void> {
       } catch (e) {
         console.error('Failed to load user data:', e);
       } finally {
+        canPersist = true; // 読み込み成功後のみ保存を許可する (空データでの上書き防止)
         isLoaded = true;
         notify();
       }
