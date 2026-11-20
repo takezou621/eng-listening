@@ -26,28 +26,28 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'ホーム',
-          tabBarIcon: ({ color, size }) => <TabIcon symbol="📚" size={size} />,
+          tabBarIcon: ({ size }) => <TabIcon symbol="📚" size={size} />,
         }}
       />
       <Tabs.Screen
         name="player"
         options={{
           title: 'プレイヤー',
-          tabBarIcon: ({ color, size }) => <TabIcon symbol="🎧" size={size} />,
+          tabBarIcon: ({ size }) => <TabIcon symbol="🎧" size={size} />,
         }}
       />
       <Tabs.Screen
         name="phrases"
         options={{
           title: '苦手フレーズ',
-          tabBarIcon: ({ color, size }) => <TabIcon symbol="⭐️" size={size} />,
+          tabBarIcon: ({ size }) => <TabIcon symbol="⭐️" size={size} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: '設定',
-          tabBarIcon: ({ color, size }) => <TabIcon symbol="⚙️" size={size} />,
+          tabBarIcon: ({ size }) => <TabIcon symbol="⚙️" size={size} />,
         }}
       />
     </Tabs>

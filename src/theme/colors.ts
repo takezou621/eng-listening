@@ -1,4 +1,4 @@
-export type ColorSchemeName = 'light' | 'dark';
+export type AppColorScheme = 'light' | 'dark';
 
 export interface ThemeColors {
   background: string;
@@ -9,8 +9,8 @@ export interface ThemeColors {
   primary: string;
   primaryText: string;
   secondarySurface: string;
-  accent: string;
-  danger: string;
+  badgeTypeBg: string;
+  badgeTypeText: string;
   tabIconActive: string;
   tabIconInactive: string;
 }
@@ -24,8 +24,8 @@ export const lightColors: ThemeColors = {
   primary: '#2563EB',
   primaryText: '#FFFFFF',
   secondarySurface: '#EEF2FF',
-  accent: '#0EA5E9',
-  danger: '#DC2626',
+  badgeTypeBg: '#DBEAFE',
+  badgeTypeText: '#1D4ED8',
   tabIconActive: '#2563EB',
   tabIconInactive: '#9CA3AF',
 };
@@ -39,12 +39,12 @@ export const darkColors: ThemeColors = {
   primary: '#3B82F6',
   primaryText: '#0B1220',
   secondarySurface: '#1E293B',
-  accent: '#38BDF8',
-  danger: '#F87171',
+  badgeTypeBg: '#1E3A8A',
+  badgeTypeText: '#93C5FD',
   tabIconActive: '#60A5FA',
   tabIconInactive: '#64748B',
 };
 
-export function getThemeColors(scheme: ColorSchemeName): ThemeColors {
+export function getThemeColors(scheme: AppColorScheme): ThemeColors {
   return scheme === 'dark' ? darkColors : lightColors;
 }

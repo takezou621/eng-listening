@@ -71,6 +71,14 @@ export default function AudioSpikeScreen() {
 
   const status = useAudioPlayerStatus(player);
 
+  const seekTo = (seconds: number, label: string) => {
+    const clamped = Math.min(Math.max(seconds, 0), status.duration || SPIKE_SAMPLE.durationSec);
+    player
+      .seekTo(clamped, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
+      .then(() => append(label))
+      .catch((e: unknown) => append(`seekTo(${clamped}) 失敗: ${String(e)}`));
+  };
+
   // ?demo=1: 再生→速度変更→文シーク→ロック画面有効化を自動実行する
   // (シミュレータの自動検証・エビデンス取得用。手動操作と同じ API を順に呼ぶだけ)
   const demoRanRef = useRef(false);
@@ -98,8 +106,9 @@ export default function AudioSpikeScreen() {
       append('setPlaybackRate(1.2, high) // ピッチ補正あり');
     });
     at(6500, () => {
-      void player.seekTo(11.23, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS);
-      append('seekTo(11.23) // 文3の冒頭へ (文単位ジャンプ)');
+      const sentence3 = SPIKE_SAMPLE.sentences.find((s) => s.index === 2);
+      if (!sentence3) return;
+      seekTo(sentence3.startSec, `seekTo(${sentence3.startSec}) // 文3の冒頭へ (文単位ジャンプ)`);
     });
     at(7500, () => {
       player.setPlaybackRate(1.0, PITCH_CORRECTION_QUALITY);
@@ -138,12 +147,6 @@ export default function AudioSpikeScreen() {
     }
   };
 
-  const seekTo = (seconds: number, label: string) => {
-    const clamped = Math.min(Math.max(seconds, 0), status.duration || SPIKE_SAMPLE.durationSec);
-    void player.seekTo(clamped, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS);
-    append(label);
-  };
-
   const applyRate = (nextRate: PlaybackRate) => {
     setRate(nextRate);
     player.setPlaybackRate(nextRate, PITCH_CORRECTION_QUALITY);
@@ -171,16 +174,26 @@ export default function AudioSpikeScreen() {
     }
   };
 
-  // 文リピート (ABリピートの土台): 選択文の終端に来たら開始位置へ戻す
+  // 文リピート (ABリピートの土台): 選択文の終端に来たら開始位置へ戻す。
+  // 最終文は endSec == duration で再生が先に終わるため didJustFinish も見る
   useEffect(() => {
-    if (repeatSentence === null || !status.playing) return;
-    const sentence = SPIKE_SAMPLE.sentences[repeatSentence];
-    if (status.currentTime >= sentence.endSec) {
-      void player.seekTo(sentence.startSec, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS);
-      append(`文リピート: ${sentence.startSec.toFixed(2)}s へ戻す`);
+    if (repeatSentence === null) return;
+    const sentence = SPIKE_SAMPLE.sentences.find((s) => s.index === repeatSentence);
+    if (!sentence) return;
+    const endThreshold =
+      status.duration > 0 ? Math.min(sentence.endSec, status.duration - 0.05) : sentence.endSec;
+    const shouldRepeat = status.didJustFinish || status.currentTime >= endThreshold;
+    if (shouldRepeat) {
+      player
+        .seekTo(sentence.startSec, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
+        .then(() => {
+          if (!status.playing) player.play();
+          append(`文リピート: ${sentence.startSec.toFixed(2)}s へ戻す`);
+        })
+        .catch((e: unknown) => append(`文リピート失敗: ${String(e)}`));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status.currentTime, status.playing, repeatSentence]);
+  }, [status.currentTime, status.playing, status.didJustFinish, status.duration, repeatSentence]);
 
   const progress =
     status.duration > 0 ? Math.min(1, status.currentTime / status.duration) : 0;
@@ -194,10 +207,11 @@ export default function AudioSpikeScreen() {
       <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ThemedText variant="heading">{SPIKE_SAMPLE.title}</ThemedText>
         <ThemedText variant="caption" color="muted">
-          14.24 秒 / 3 文 (say + ffmpeg で生成したサンプル音声をバンドル)
+          {SPIKE_SAMPLE.durationSec.toFixed(2)} 秒 / {SPIKE_SAMPLE.sentences.length} 文
+          (say + ffmpeg で生成したサンプル音声をバンドル)
         </ThemedText>
 
-        <View style={styles.progressTrack}>
+        <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
           <View style={[styles.progressFill, { backgroundColor: colors.primary, width: `${progress * 100}%` }]} />
         </View>
         <ThemedText variant="caption" color="muted">
@@ -265,7 +279,7 @@ export default function AudioSpikeScreen() {
           </ThemedText>
         ) : (
           log.map((entry, i) => (
-            <ThemedText key={`${entry.at}-${i}`} variant="caption" style={styles.logLine}>
+            <ThemedText key={`${entry.at}-${i}`} variant="caption">
               {entry.at}  {entry.action}
             </ThemedText>
           ))
@@ -318,7 +332,6 @@ const styles = StyleSheet.create({
   progressTrack: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#D1D5DB',
     overflow: 'hidden',
   },
   progressFill: { height: 6, borderRadius: 3 },
@@ -345,6 +358,5 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 4,
   },
-  logLine: { fontFamily: undefined },
   note: { marginTop: 16 },
 });

@@ -10,18 +10,14 @@ interface ThemedTextProps extends TextProps {
 export function ThemedText({ style, variant = 'body', color = 'default', ...rest }: ThemedTextProps) {
   const { colors } = useTheme();
 
-  const colorStyle =
-    color === 'muted'
-      ? { color: colors.textMuted }
-      : color === 'primary'
-        ? { color: colors.primary }
-        : { color: colors.text };
+  const colorStyle = {
+    default: { color: colors.text },
+    muted: { color: colors.textMuted },
+    primary: { color: colors.primary },
+  }[color];
 
   return (
-    <Text
-      style={StyleSheet.flatten([textStyles[variant], colorStyle, style])}
-      {...rest}
-    />
+    <Text style={[textStyles[variant], colorStyle, style]} {...rest} />
   );
 }
 

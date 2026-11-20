@@ -5,7 +5,7 @@ import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { CONTENTS } from '@/data';
-import type { ContentType } from '@/data/types';
+import { CONTENT_TYPE_LABELS, type ContentType } from '@/data/types';
 import { useSelection } from '@/state/SelectionContext';
 import { useTheme } from '@/theme/AppThemeProvider';
 
@@ -24,13 +24,17 @@ export default function LibraryScreen() {
   const [filter, setFilter] = useState<Filter>('all');
 
   const contents = filter === 'all' ? CONTENTS : CONTENTS.filter((c) => c.type === filter);
+  const counts = {
+    conversation: CONTENTS.filter((c) => c.type === 'conversation').length,
+    monologue: CONTENTS.filter((c) => c.type === 'monologue').length,
+  };
 
   return (
     // FlatList 自体がスクロールするため Screen はスクロールさせない (VirtualizedList のネスト防止)
     <Screen scroll={false}>
       <ThemedText variant="title">ライブラリ</ThemedText>
       <ThemedText variant="caption" color="muted" style={styles.subtitle}>
-        全 {CONTENTS.length} 本 (会話 8 / モノローグ 4) ・ モックデータ
+        全 {CONTENTS.length} 本 (会話 {counts.conversation} / モノローグ {counts.monologue}) ・ モックデータ
       </ThemedText>
       <View style={styles.filterRow}>
         {FILTERS.map((f) => (
@@ -57,9 +61,9 @@ export default function LibraryScreen() {
             ]}
           >
             <View style={styles.cardHeader}>
-              <View style={styles.badgeType}>
-                <ThemedText variant="caption" style={styles.badgeTypeText}>
-                  {item.type === 'conversation' ? '会話' : 'モノローグ'}
+              <View style={[styles.badgeType, { backgroundColor: colors.badgeTypeBg }]}>
+                <ThemedText variant="caption" style={{ color: colors.badgeTypeText }}>
+                  {CONTENT_TYPE_LABELS[item.type]}
                 </ThemedText>
               </View>
               <View style={[styles.badgeLevel, { backgroundColor: colors.secondarySurface }]}>
@@ -107,7 +111,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: '#DBEAFE',
   },
-  badgeTypeText: { color: '#1D4ED8' },
   badgeLevel: {
     paddingHorizontal: 8,
     paddingVertical: 3,

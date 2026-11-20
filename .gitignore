@@ -9,8 +9,8 @@ node_modules
 .expo/types
 
 # Native build outputs (CNG: ios / android は生成物。必要時のみコミットする方針)
-ios
-android
+/ios
+/android
 
 # TypeScript
 *.tsbuildinfo
@@ -25,6 +25,7 @@ yarn-error.*
 .DS_Store
 
 # local env files
+.env
 .env*.local
 
 # eas

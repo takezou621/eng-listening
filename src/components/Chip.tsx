@@ -18,17 +18,18 @@ export function Chip({ label, active = false, onPress, disabled }: ChipProps) {
       onPress={onPress}
       disabled={disabled}
       hitSlop={6}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active, disabled: disabled ?? false }}
       style={[
         styles.chip,
         { borderColor: colors.border },
         active
           ? { backgroundColor: colors.primary, borderColor: colors.primary }
           : { backgroundColor: colors.surface },
+        disabled && styles.disabled,
       ]}
     >
-      <ThemedText style={[styles.label, active && { color: colors.primaryText }]}>
-        {label}
-      </ThemedText>
+      <ThemedText style={[styles.label, active && { color: colors.primaryText }]}>{label}</ThemedText>
     </Pressable>
   );
 }
@@ -41,4 +42,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   label: { fontSize: 13, fontWeight: '600' },
+  disabled: { opacity: 0.4 },
 });

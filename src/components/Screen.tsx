@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme/AppThemeProvider';
@@ -13,24 +13,21 @@ interface ScreenProps {
 
 export function Screen({ children, scroll = true, padded = true }: ScreenProps) {
   const { colors } = useTheme();
-  const style = [
-    styles.base,
-    { backgroundColor: colors.background },
-    padded ? styles.padded : null,
-  ];
+  // 背景色はコンテナとスクロール領域の両方に敷く (バウンス時の露出防止)
+  const paddedStyle = [styles.content, { backgroundColor: colors.background }, padded && styles.padded];
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
       {scroll ? (
         <ScrollView
           style={styles.flex}
-          contentContainerStyle={style}
+          contentContainerStyle={paddedStyle}
           showsVerticalScrollIndicator={false}
         >
           {children}
         </ScrollView>
       ) : (
-        <View style={[styles.flex, style]}>{children}</View>
+        <View style={[styles.flex, paddedStyle]}>{children}</View>
       )}
     </SafeAreaView>
   );
@@ -39,6 +36,6 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   flex: { flex: 1 },
-  base: {},
+  content: { flexGrow: 1 },
   padded: { paddingHorizontal: 16, paddingTop: 12 },
 });

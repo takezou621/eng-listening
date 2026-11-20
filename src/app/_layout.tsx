@@ -10,35 +10,52 @@ import { useEffect, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { AppThemeProvider } from '@/theme/AppThemeProvider';
+import { darkColors, lightColors } from '@/theme/colors';
 import { SelectionProvider } from '@/state/SelectionContext';
 
 export default function RootLayout() {
   const scheme = useColorScheme();
   const router = useRouter();
-
-  // 開発用: EXPO_PUBLIC_SPIKE_AUTO_DEMO=1 で Metro を起動すると、
-  // 起動直後にオーディオスパイク画面の自動デモを開く (シミュレータ自動検証用)。
-  // 本番ビルドでは一切動作しない (__DEV__ ガード)。docs/dev-setup.md 参照。
-  useEffect(() => {
-    if (__DEV__ && process.env.EXPO_PUBLIC_SPIKE_AUTO_DEMO === '1') {
-      router.replace({ pathname: '/spike', params: { demo: '1' } });
-    }
-  }, [router]);
+  const isDark = scheme === 'dark';
 
   // expo-router のナビゲーションテーマ (ステータスバー等) をシステム設定に追従させる
   const navTheme = useMemo(
     () =>
-      scheme === 'dark'
-        ? { ...DarkTheme, colors: { ...DarkTheme.colors, background: '#0B1220', card: '#151E2E' } }
-        : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: '#F6F7F9', card: '#FFFFFF' } },
-    [scheme]
+      isDark
+        ? {
+            ...DarkTheme,
+            colors: {
+              ...DarkTheme.colors,
+              background: darkColors.background,
+              card: darkColors.surface,
+            },
+          }
+        : {
+            ...DefaultTheme,
+            colors: {
+              ...DefaultTheme.colors,
+              background: lightColors.background,
+              card: lightColors.surface,
+            },
+          },
+    [isDark]
   );
+
+  // 開発用: EXPO_PUBLIC_SPIKE_AUTO_DEMO=1 で Metro を起動すると、
+  // 起動直後にオーディオスパイク画面の自動デモを開く (シミュレータ自動検証用)。
+  // 本番ビルドでは一切動作しない (__DEV__ ガード)。docs/dev-setup.md 参照。
+  const autoDemo = process.env.EXPO_PUBLIC_SPIKE_AUTO_DEMO === '1';
+  useEffect(() => {
+    if (__DEV__ && autoDemo) {
+      router.replace({ pathname: '/spike', params: { demo: '1' } });
+    }
+  }, [router, autoDemo]);
 
   return (
     <AppThemeProvider>
       <ThemeProvider value={navTheme}>
         <SelectionProvider>
-          <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+          <StatusBar style={isDark ? 'light' : 'dark'} />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen

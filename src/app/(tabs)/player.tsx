@@ -6,6 +6,7 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_CONFIG, PLAYBACK_RATES } from '@/config/appConfig';
 import { sentencesOf } from '@/data';
+import { CONTENT_TYPE_LABELS } from '@/data/types';
 import { useSelection } from '@/state/SelectionContext';
 import { useTheme } from '@/theme/AppThemeProvider';
 
@@ -25,21 +26,20 @@ export default function PlayerScreen() {
         {selected.title}
       </ThemedText>
       <ThemedText variant="caption" color="muted">
-        {selected.titleJa} ・ {selected.type === 'conversation' ? '会話' : 'モノローグ'}
+        {selected.titleJa} ・ {CONTENT_TYPE_LABELS[selected.type]}
       </ThemedText>
 
       {/* プレイヤー操作の仮配置。ボタンは次フェーズで活性化 */}
       <View style={[styles.controls, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ThemedText variant="heading">再生コントロール (土台)</ThemedText>
         <View style={styles.rateRow}>
+          {/* 土台のため仮無効化。再生ロジック実装時に活性化する */}
           {PLAYBACK_RATES.map((rate) => (
-            <Chip key={rate} label={`${rate}x`} disabled={!selected.audioSource} />
+            <Chip key={rate} label={`${rate}x`} disabled />
           ))}
         </View>
         <ThemedText variant="caption" color="muted">
-          {selected.audioSource
-            ? '速度はピッチ補正ありで切り替わります (スパイク画面で動作検証済み)'
-            : 'このモック項目には音声がありません。スパイク用サンプルで再生を検証できます'}
+          速度変更の動作はスパイク画面で検証済み (ピッチ補正あり)。この画面への統合は次フェーズ
         </ThemedText>
         <Pressable
           style={[styles.spikeButton, { backgroundColor: colors.primary }]}

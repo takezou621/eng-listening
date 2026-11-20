@@ -1,9 +1,10 @@
 import contentsJson from './mock/contents.json';
 import phrasesJson from './mock/phrases.json';
-import type { LearningContent, Sentence, WeakPhrase } from './types';
+import { assertValidContents, type LearningContent, type Sentence, type WeakPhrase } from './types';
 
-/** 初期コンテンツは GM 決定どおり 12 本 (会話8 + モノローグ4) のモック */
+/** 初期コンテンツは GM 決定どおり 12 本 (会話8 + モノローグ4) のモック。読み込み時に検証する */
 export const CONTENTS = contentsJson.contents as LearningContent[];
+assertValidContents(CONTENTS);
 
 export const WEAK_PHRASES = phrasesJson.phrases as WeakPhrase[];
 

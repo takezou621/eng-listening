@@ -4,12 +4,12 @@ import { useColorScheme } from 'react-native';
 import {
   getThemeColors,
   lightColors,
-  type ColorSchemeName,
+  type AppColorScheme,
   type ThemeColors,
 } from './colors';
 
 interface ThemeContextValue {
-  scheme: ColorSchemeName;
+  scheme: AppColorScheme;
   colors: ThemeColors;
 }
 

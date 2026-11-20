@@ -17,6 +17,20 @@ const APP_CONFIG: {
   androidPackageName: string;
 } = require('./src/config/appConfig.json');
 
+// require の戻り値は any なので、識別子が欠けたままビルドされないよう起動時に検証する
+for (const key of [
+  'appName',
+  'slug',
+  'scheme',
+  'version',
+  'iosBundleIdentifier',
+  'androidPackageName',
+] as const) {
+  if (typeof APP_CONFIG[key] !== 'string' || APP_CONFIG[key] === '') {
+    throw new Error(`src/config/appConfig.json の ${key} が不正です`);
+  }
+}
+
 const config: ExpoConfig = {
   name: APP_CONFIG.appName,
   slug: APP_CONFIG.slug,
