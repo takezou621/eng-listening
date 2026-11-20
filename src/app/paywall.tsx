@@ -11,6 +11,7 @@ import {
   purchaseAsync,
   restorePurchasesAsync,
   useEntitlement,
+  type PurchaseResult,
 } from '@/features/billing/billingStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
@@ -45,6 +46,9 @@ export default function PaywallScreen() {
   const { isAvailable, isPremium, isLoading } = useEntitlement();
   const [hasProducts, setHasProducts] = useState(false);
   const [monthlyProductId, setMonthlyProductId] = useState<string | null>(null);
+  const [annualProductId, setAnnualProductId] = useState<string | null>(null);
+  // 選択中のプラン ('monthly' | 'annual')。既定は年額 (GM 決定の主力プラン)
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
 
@@ -60,19 +64,27 @@ export default function PaywallScreen() {
     void fetchOfferingsAsync().then((result) => {
       setHasProducts(result.hasProducts);
       setMonthlyProductId(result.monthlyProductId);
+      setAnnualProductId(result.annualProductId);
     });
   }, [isAvailable]);
 
-  const canPurchase = isAvailable && hasProducts && !purchasing && !isPremium;
+  // 選択中プランのストア商品 ID (Offerings から取得できていない場合は null)
+  const selectedProductId =
+    selectedPlan === 'monthly' ? monthlyProductId : annualProductId;
+  const canPurchase =
+    isAvailable && hasProducts && !purchasing && !isPremium && selectedProductId !== null;
 
   const handlePurchase = async () => {
-    // 実購入: RevenueCat の purchaseProduct → 成功時のみ purchase_completed を発火する
-    if (!canPurchase || !monthlyProductId) return;
+    // 実購入: RevenueCat の purchaseProduct → 購入成功時のみ purchase_completed を発火する
+    if (!canPurchase || !selectedProductId) return;
     setPurchasing(true);
-    const ok = await purchaseAsync(monthlyProductId);
+    const result: PurchaseResult = await purchaseAsync(selectedProductId);
     setPurchasing(false);
-    if (ok) {
-      logEvent('purchase_completed', { productId: monthlyProductId });
+    if (result.purchased) {
+      logEvent('purchase_completed', {
+        productId: selectedProductId,
+        premium_active: result.premium,
+      });
     }
   };
 
@@ -123,14 +135,40 @@ export default function PaywallScreen() {
 
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ThemedText variant="heading">料金プラン</ThemedText>
-        <ThemedText style={styles.priceRow}>{DISPLAY_PRICES.monthlyJa}</ThemedText>
-        <ThemedText variant="caption" color="muted">
-          自動更新。いつでも解約できます。
-        </ThemedText>
-        <ThemedText style={[styles.priceRow, { marginTop: 8 }]}>{DISPLAY_PRICES.annualJa}</ThemedText>
-        <ThemedText variant="caption" color="muted">
-          トライアル期間中に解約すれば請求されません。
-        </ThemedText>
+        <Pressable
+          onPress={() => setSelectedPlan('monthly')}
+          disabled={!monthlyProductId}
+          accessibilityRole="button"
+          accessibilityState={{ selected: selectedPlan === 'monthly' }}
+          style={[
+            styles.planButton,
+            { borderColor: colors.border },
+            selectedPlan === 'monthly' && { borderColor: colors.primary, borderWidth: 2 },
+            !monthlyProductId && { opacity: 0.5 },
+          ]}
+        >
+          <ThemedText style={styles.priceRow}>{DISPLAY_PRICES.monthlyJa}</ThemedText>
+          <ThemedText variant="caption" color="muted">
+            自動更新。いつでも解約できます。
+          </ThemedText>
+        </Pressable>
+        <Pressable
+          onPress={() => setSelectedPlan('annual')}
+          disabled={!annualProductId}
+          accessibilityRole="button"
+          accessibilityState={{ selected: selectedPlan === 'annual' }}
+          style={[
+            styles.planButton,
+            { borderColor: colors.border },
+            selectedPlan === 'annual' && { borderColor: colors.primary, borderWidth: 2 },
+            !annualProductId && { opacity: 0.5 },
+          ]}
+        >
+          <ThemedText style={styles.priceRow}>{DISPLAY_PRICES.annualJa}</ThemedText>
+          <ThemedText variant="caption" color="muted">
+            トライアル期間中に解約すれば請求されません。
+          </ThemedText>
+        </Pressable>
       </View>
 
       {/* ストア商品が取得できない環境では購入ボタンを無効化 (理由を画面上に表示) */}
@@ -161,7 +199,11 @@ export default function PaywallScreen() {
         </ThemedText>
       ) : null}
 
-      <Pressable onPress={handleRestore} disabled={!isAvailable || restoring} style={styles.restoreButton}>
+      <Pressable
+        onPress={handleRestore}
+        disabled={!isAvailable || isLoading || purchasing || restoring}
+        style={styles.restoreButton}
+      >
         <ThemedText variant="caption" color="primary">
           {restoring ? '復元中…' : '購入を復元'}
         </ThemedText>
@@ -212,6 +254,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 16,
+  },
+  planButton: {
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 12,
+    marginTop: 8,
   },
   purchaseNote: { marginTop: 8, lineHeight: 18 },
   restoreButton: { alignItems: 'center', marginTop: 10, padding: 8 },

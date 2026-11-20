@@ -44,7 +44,8 @@ export default function ProgressScreen() {
     const counts: Record<string, number> = {};
     for (const w of weakSentences) {
       const bundle = lessonList.find((l) => l.entry.id === w.lessonId)?.bundle;
-      const sentence = bundle?.data.sentences[w.sentenceIndex];
+      // sentenceIndex は文の index 値 (配列位置ではない) のため find で解決する
+      const sentence = bundle?.data.sentences.find((st) => st.index === w.sentenceIndex);
       for (const note of sentence?.linking ?? []) {
         const t = note.type;
         counts[t] = (counts[t] ?? 0) + 1;

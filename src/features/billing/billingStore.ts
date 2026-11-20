@@ -28,33 +28,48 @@ export interface BillingState {
 export interface OfferingsResult {
   /** 購入可能な商品が存在する */
   hasProducts: boolean;
+  /** ストア商品 ID (PurchasesPackage.product.identifier。パッケージ ID ではない) */
   monthlyProductId: string | null;
   annualProductId: string | null;
+}
+
+/** purchaseAsync の結果。purchased は購入 API の成否、premium はエンタイトルメントの有効状態 */
+export interface PurchaseResult {
+  purchased: boolean;
+  premium: boolean;
 }
 
 let configured = false;
 let available = false;
 let premium = false;
 let loading = false;
+let listenerAdded = false;
 const listeners = new Set<() => void>();
+
+/** CustomerInfo の形状 (entitlements.active に有効なエンタイトルメントが入る) */
+type CustomerInfo = { entitlements: { active: Record<string, unknown> } };
 
 /** Purchases モジュール (利用可能な場合のみ non-null) */
 type PurchasesModule = {
   configure: (config: { apiKey: string }) => Promise<void> | void;
-  addCustomerInfoUpdateListener: (listener: (info: unknown) => void) => void;
-  getCustomerInfo: () => Promise<{ entitlements: { active: Record<string, unknown> } }>;
+  addCustomerInfoUpdateListener: (listener: (info: CustomerInfo) => void) => void;
+  getCustomerInfo: () => Promise<CustomerInfo>;
   getOfferings: () => Promise<{
     current: {
-      monthly: { identifier: string } | null;
-      annual: { identifier: string } | null;
+      monthly: {
+        identifier: string;
+        product: { identifier: string };
+      } | null;
+      annual: {
+        identifier: string;
+        product: { identifier: string };
+      } | null;
     } | null;
   }>;
-  purchaseProduct: (productId: string) => Promise<{
-    customerInfo: { entitlements: { active: Record<string, unknown> } };
-  }>;
-  restorePurchases: () => Promise<{
-    customerInfo: { entitlements: { active: Record<string, unknown> } };
-  }>;
+  /** purchaseProduct の戻り値は PurchaseResult ({ customerInfo, productIdentifier, ... }) */
+  purchaseProduct: (productId: string) => Promise<{ customerInfo: CustomerInfo }>;
+  /** restorePurchases の戻り値は CustomerInfo そのもの (PurchaseResult ではない) */
+  restorePurchases: () => Promise<CustomerInfo>;
 };
 
 let purchases: PurchasesModule | null = null;
@@ -83,7 +98,7 @@ function getState(): BillingState {
 /**
  * RevenueCat を初期化する (キーとネイティブモジュールが揃っている場合のみ)。
  * 失敗してもアプリは継続し、無料扱いとなる (クラッシュしないフォールバック)。
- * 失敗時は configured を false に戻すため、次回呼び出しで再試行できる。
+ * 失敗時は configured を false に戻し、次回呼び出しで再試行できる。
  */
 export async function initBillingAsync(): Promise<void> {
   if (configured || loading) return;
@@ -106,11 +121,15 @@ export async function initBillingAsync(): Promise<void> {
     await purchases.configure({ apiKey: REVENUECAT_API_KEY });
     available = true;
 
-    // 顧客情報の更新をリッスン (購入・復元・更新時に発火)
-    purchases.addCustomerInfoUpdateListener((info) => {
-      premium = checkEntitlement(info);
-      notify();
-    });
+    // 顧客情報の更新リスナーは一度だけ登録する
+    // (getCustomerInfo が失敗して再試行したときに重複登録されるのを防ぐ)
+    if (!listenerAdded) {
+      purchases.addCustomerInfoUpdateListener((info) => {
+        premium = checkEntitlement(info);
+        notify();
+      });
+      listenerAdded = true;
+    }
 
     const info = await purchases.getCustomerInfo();
     premium = checkEntitlement(info);
@@ -119,16 +138,16 @@ export async function initBillingAsync(): Promise<void> {
     console.error('Failed to initialize RevenueCat:', e);
     available = false;
     premium = false;
+    // 失敗時は configured を false のままにし、次回呼び出しで再試行できるようにする
   }
   loading = false;
   notify();
 }
 
 /** 顧客情報からプレミアムエンタイトルメントを判定する */
-function checkEntitlement(info: unknown): boolean {
+function checkEntitlement(info: CustomerInfo | null | undefined): boolean {
   try {
-    const entitlements = (info as { entitlements?: { active?: Record<string, unknown> } })
-      ?.entitlements?.active;
+    const entitlements = info?.entitlements?.active;
     return Boolean(entitlements && entitlements[ENTITLEMENT_ID]);
   } catch {
     return false;
@@ -137,6 +156,8 @@ function checkEntitlement(info: unknown): boolean {
 
 /**
  * Offerings から購入可能な商品を取得する。
+ * 返すのは PurchasesPackage.product.identifier (ストア商品 ID)。
+ * PurchasesPackage.identifier ($rc_monthly などのパッケージ ID) ではない点に注意。
  * ストア側で実商品が未作成の場合は hasProducts = false を返す
  * (ペイウォールは購入ボタンを無効化し、その理由を表示する)。
  */
@@ -150,8 +171,8 @@ export async function fetchOfferingsAsync(): Promise<OfferingsResult> {
   try {
     const offerings = await purchases.getOfferings();
     const current = offerings?.current ?? null;
-    const monthly = current?.monthly?.identifier ?? null;
-    const annual = current?.annual?.identifier ?? null;
+    const monthly = current?.monthly?.product?.identifier ?? null;
+    const annual = current?.annual?.product?.identifier ?? null;
     return { hasProducts: Boolean(monthly || annual), monthlyProductId: monthly, annualProductId: annual };
   } catch (e) {
     console.error('Failed to fetch offerings:', e);
@@ -160,31 +181,34 @@ export async function fetchOfferingsAsync(): Promise<OfferingsResult> {
 }
 
 /**
- * 商品を購入する。成功時は true を返す (呼び出し側が purchase_completed を発火する)。
- * ユーザーによるキャンセルは false (エラー扱いにしない)。
+ * 商品を購入する。購入 API が成功したかどうかを purchased で返し、
+ * エンタイトルメントの有効状態を premium で返す (両者は独立)。
+ * purchase_completed の発火は purchased を基準に呼び出し側で行う。
+ * ユーザーによるキャンセルは purchased = false (エラー扱いにしない)。
  */
-export async function purchaseAsync(productId: string): Promise<boolean> {
-  if (!available || !purchases) return false;
+export async function purchaseAsync(productId: string): Promise<PurchaseResult> {
+  if (!available || !purchases) return { purchased: false, premium };
   try {
     const result = await purchases.purchaseProduct(productId);
     premium = checkEntitlement(result.customerInfo);
     notify();
-    return premium;
+    return { purchased: true, premium };
   } catch (e) {
-    // ユーザーキャンセルを含む失敗は false
+    // ユーザーキャンセルを含む失敗は purchased = false
     console.error('Purchase failed:', e);
-    return false;
+    return { purchased: false, premium };
   }
 }
 
-/** 過去の購入を復元する (再インストール・機種変更時)。成功時は true */
+/** 過去の購入を復元する (再インストール・機種変更時)。
+ *  restorePurchases の戻り値は CustomerInfo そのもの。成功時は premium を更新して true を返す */
 export async function restorePurchasesAsync(): Promise<boolean> {
   if (!available || !purchases) return false;
   try {
-    const result = await purchases.restorePurchases();
-    premium = checkEntitlement(result.customerInfo);
+    const customerInfo = await purchases.restorePurchases();
+    premium = checkEntitlement(customerInfo);
     notify();
-    return premium;
+    return true;
   } catch (e) {
     console.error('Restore failed:', e);
     return false;
