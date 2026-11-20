@@ -19,10 +19,19 @@ export interface LessonChunk {
   endSec: number;
 }
 
-/** 音の変化 (リンキング・リダクション等) の注釈。表示は Issue #7 */
+/** 音の変化 (リンキング・リダクション等) の注釈。表示は Issue #7。
+ *  type の取りうる値は generate_scripts.py の ALLOWED_LINKING_TYPES と一致させる */
 export interface LessonLinkingNote {
   span: string;
-  type: 'linking' | 'reduction' | 'flapping' | 'palatalization' | 'assimilation';
+  type:
+    | 'linking'
+    | 'reduction'
+    | 'flapping'
+    | 'assimilation'
+    | 'palatalization'
+    | 'elision'
+    | 'intrusion'
+    | 'weak-form';
   ipa: string;
   noteJa: string;
 }
@@ -86,5 +95,17 @@ export function assertValidLesson(lesson: LessonData): void {
         );
       }
     }
+  }
+  // 画面が直接参照するフィールドも起動時に検証する (JSON キャストはコンパイル時に検査されない)
+  if (
+    !Number.isFinite(lesson.durationSec) ||
+    typeof lesson.configHash !== 'string' ||
+    lesson.configHash.length === 0 ||
+    typeof lesson.audio !== 'string' ||
+    lesson.audio.length === 0 ||
+    typeof lesson.speakerNames !== 'object' ||
+    lesson.speakerNames === null
+  ) {
+    throw new Error(`レッスン JSON の必須フィールドが不正です: id=${String(lesson.id)}`);
   }
 }
