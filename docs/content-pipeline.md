@@ -35,8 +35,11 @@ require し、`/lesson` 画面 (`src/app/lesson.tsx`) で再生・カラオケ�
   高い声は `cloud_tts.py` のガードで拒否する。
 - パイプラインは月間文字数カウンタ (`tools/content/usage/monthly-YYYY-MM.json`) を持ち、
   **当月累計が 90 万文字 (monthlyStopChars) に達したら生成を停止**して報告する。
-  無料枠超過による課金を未然に防ぐためのマージンである。リクエストは成功したものだけ
-  加算し、レッスン別の内訳も記録する。
+  無料枠超過による課金を未然に防ぐためのマージンである。レッスン別の内訳も記録する。
+  カウンタは「予約 → 確定」方式: TTS 送信前に文字数を pendingChars として永続予約し、
+  成功時に実績へ確定、失敗時に解放する。プロセスが途中で死んでも予約は上限判定に
+  残り続けるため、成功分が未計上のまま無料枠を超過することはない
+  (長期間残った孤立予約は手動で確認・解放してよい)。
 - 課金が発生する設定変更 (API の追加有効化、予算設定の変更など) は行わない。
   必要になったら作業を止めて GM に報告する。
 
@@ -73,7 +76,9 @@ require し、`/lesson` 画面 (`src/app/lesson.tsx`) で再生・カラオケ�
 - F0 (基本周波数) 偏差 > 15%
 - 発話速度偏差 > 25% (words/sec)
 
-合否は `voice_consistency_report.json` に記録される。FAIL の場合は:
+合否は `voice_consistency_report.json` に記録される。レポートには検査対象 WAV の
+ダイジェスト (SHA-256) も保存され、build_lesson.py はビルド時に現在の WAV と照合する
+(ゲート実行後に音声が入れ替わっていればビルドを拒否する)。FAIL の場合は:
 
 ```bash
 rm tools/content/build/cafe-ordering/lines/L03_female.wav   # 該当行を削除
@@ -84,9 +89,12 @@ uv run --project tools/content python tools/content/check_voice_consistency.py -
 ## 実行手順 (リポジトリ ルートで)
 
 ```bash
-# 0) 依導入は不要 (uv が tools/content/pyproject.toml から環境を作る。av は 15.x 系に固定)
-
-# 1) 行ごとの TTS 生成 (文字数カウンタ・manifest 付き)
+# 0) 前提条件
+#    - Python 依存 (numpy / faster-whisper / av) は uv が tools/content/pyproject.toml
+#      から環境を作るため手動導入は不要 (av は 15.x 系に固定)
+#    - 外部コマンド ffmpeg が必要 (build_lesson.py が m4a エンコードに使用)。
+#      未導入なら先にインストールして PATH から実行できることを確認する:
+#        brew install ffmpeg && ffmpeg -version
 python3 tools/content/generate_lesson.py --lesson cafe-ordering
 
 # 2) 一貫性ゲート (FAIL なら上記の再生成フロー)

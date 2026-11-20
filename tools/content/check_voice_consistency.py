@@ -6,6 +6,10 @@
 - 基本周波数 (F0) 中央値 (自己相関法) からの偏差 > 15%
 - 発話速度 (単語数 / 秒, words/sec) からの偏差 > 25%
 
+レポートには検査対象 WAV のダイジェストを保存する。build_lesson.py はこれを
+現在の WAV と照合し、ゲート実行後に音声が変わっていればビルドを拒否する
+(同一 config hash のまま --line 再生成された古いレポートを素通しさせない)。
+
 検出された行は削除して generate_lesson.py で再生成する (ゲートは exit 1)。
 
 Usage (リポジトリ ルートで):
@@ -16,8 +20,10 @@ Usage (リポジトリ ルートで):
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
+import wave
 from pathlib import Path
 
 import numpy as np
@@ -26,17 +32,20 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import cloud_tts  # noqa: E402
-from generate_lesson import assets_dir, lines_dir, load_lesson  # noqa: E402
+from generate_lesson import assets_dir, lines_dir, line_wav_name, load_lesson  # noqa: E402
 
 
 def read_wav(path: Path) -> tuple[np.ndarray, int]:
-    import wave
-
     with wave.open(str(path), "rb") as w:
         sr = w.getframerate()
         raw = w.readframes(w.getnframes())
     x = np.frombuffer(raw, dtype=np.int16).astype(np.float64) / 32768.0
     return x, sr
+
+
+def wav_digest(path: Path) -> str:
+    """検査対象 WAV のダイジェスト (先頭16文字)。レポートと音声の結び付けに使う。"""
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
 
 
 def median_f0(x: np.ndarray, sr: int) -> float:
@@ -76,29 +85,36 @@ def main() -> int:
 
     lesson = load_lesson(args.lesson)
     ldir = lines_dir(args.lesson)
-    beats = {f"L{int(ln['index']):02d}_{ln['speaker']}.wav": ln for ln in lesson["lines"]}
 
-    rows = []
-    for wav_path in sorted(ldir.glob("*.wav")):
-        line = beats.get(wav_path.name)
-        if line is None:
+    # --- 台本の全行を基準に検査する (存在しない行はゲート FAIL) ---
+    rows: list[dict] = []
+    digests: dict[str, str] = {}
+    missing: list[str] = []
+    for ln in lesson["lines"]:
+        name = line_wav_name(ln)
+        wav_path = ldir / name
+        if not wav_path.exists():
+            missing.append(name)
             continue
+        digests[name] = wav_digest(wav_path)
         x, sr = read_wav(wav_path)
         dur = len(x) / sr
         f0 = median_f0(x, sr)
         # 英語なので発話速度は words/sec (本家は chars/sec)
-        words = len(line["text"].split())
+        words = len(ln["text"].split())
         rate = words / dur if dur > 0 else 0.0
         rows.append({
-            "file": wav_path.name,
-            "speaker": line["speaker"],
-            "voice": cfg["voices"][line["speaker"]]["voiceName"],
+            "file": name,
+            "speaker": ln["speaker"],
+            "voice": cfg["voices"][ln["speaker"]]["voiceName"],
             "f0Hz": round(f0, 1),
             "rateWps": round(rate, 2),
             "durationSec": round(dur, 2),
+            "sha256": digests[name],
+            "flag": "",
         })
 
-    flagged = []
+    flagged: list[dict] = []
     for spk in sorted({r["speaker"] for r in rows}):
         sub = [r for r in rows if r["speaker"] == spk]
         voiced = [r for r in sub if r["f0Hz"] > 0]
@@ -129,13 +145,19 @@ def main() -> int:
         "configHash": cloud_tts.config_hash(cfg),
         "thresholds": {"f0DeviationMax": f0_max, "rateDeviationMax": rate_max,
                        "rateUnit": rate_unit},
+        "digests": digests,
         "rows": rows,
         "flagged": flagged,
+        "missing": missing,
     }
     out = assets_dir(args.lesson) / "voice_consistency_report.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
+    if missing:
+        print(f"GATE FAIL: {len(missing)} line(s) missing: {', '.join(missing)}", flush=True)
+        print("先に generate_lesson.py を実行して全行の WAV を揃えてください。", flush=True)
+        return 1
     if flagged:
         print(f"GATE FAIL: {len(flagged)} line(s) flagged:", flush=True)
         for r in flagged:

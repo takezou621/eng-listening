@@ -6,7 +6,7 @@
  "level": "beginner",
  "category": "cafe",
  "audio": "audio.m4a",
- "durationSec": 36.997,
+ "durationSec": 36.987,
  "speakerNames": {
   "female": "Barista",
   "male": "Customer"
@@ -18,25 +18,25 @@
   "male": "en-US-Neural2-D",
   "narrator": "en-US-Neural2-A"
  },
- "generatedAtUtc": "2026-11-20T04:04:14Z",
+ "generatedAtUtc": "2026-11-20T04:35:00Z",
  "sentences": [
   {
    "index": 0,
    "speaker": "female",
    "startSec": 0.0,
-   "endSec": 4.573,
+   "endSec": 4.572,
    "text": "Good morning! Welcome to Sunbeam Coffee. What can I get started for you?",
    "translationJa": "おはようございます！サンビームコーヒーへようこそ。ご注文お決まりでしょうか。",
    "chunks": [
     {
      "text": "Good morning!",
      "startSec": 0.0,
-     "endSec": 0.56
+     "endSec": 0.54
     },
     {
      "text": "Welcome to Sunbeam Coffee.",
-     "startSec": 0.92,
-     "endSec": 2.16
+     "startSec": 0.9,
+     "endSec": 2.18
     },
     {
      "text": "What can I get started for you?",
@@ -48,21 +48,21 @@
     {
      "text": "Good",
      "startSec": 0.0,
-     "endSec": 0.14
+     "endSec": 0.16
     },
     {
      "text": "morning!",
-     "startSec": 0.14,
-     "endSec": 0.56
+     "startSec": 0.16,
+     "endSec": 0.54
     },
     {
      "text": "Welcome",
-     "startSec": 0.92,
-     "endSec": 1.18
+     "startSec": 0.9,
+     "endSec": 1.2
     },
     {
      "text": "to",
-     "startSec": 1.18,
+     "startSec": 1.2,
      "endSec": 1.46
     },
     {
@@ -73,7 +73,7 @@
     {
      "text": "Coffee.",
      "startSec": 1.86,
-     "endSec": 2.16
+     "endSec": 2.18
     },
     {
      "text": "What",
@@ -116,82 +116,82 @@
   {
    "index": 1,
    "speaker": "male",
-   "startSec": 5.073,
-   "endSec": 8.499,
+   "startSec": 5.072,
+   "endSec": 8.497,
    "text": "Hi. I'd like a medium latte with oat milk, please.",
    "translationJa": "こんにちは。ミディアムサイズのラテをオートミルクでお願いします。",
    "chunks": [
     {
      "text": "Hi.",
-     "startSec": 5.073,
-     "endSec": 5.393
+     "startSec": 5.072,
+     "endSec": 5.372
     },
     {
      "text": "I'd like a medium latte",
-     "startSec": 5.653,
-     "endSec": 6.793
+     "startSec": 5.652,
+     "endSec": 6.812
     },
     {
      "text": "with oat milk,",
-     "startSec": 6.793,
-     "endSec": 7.393
+     "startSec": 6.812,
+     "endSec": 7.392
     },
     {
      "text": "please.",
-     "startSec": 7.653,
-     "endSec": 7.813
+     "startSec": 7.652,
+     "endSec": 7.812
     }
    ],
    "words": [
     {
      "text": "Hi.",
-     "startSec": 5.073,
-     "endSec": 5.393
+     "startSec": 5.072,
+     "endSec": 5.372
     },
     {
      "text": "I'd",
-     "startSec": 5.653,
-     "endSec": 5.733
+     "startSec": 5.652,
+     "endSec": 5.752
     },
     {
      "text": "like",
-     "startSec": 5.733,
-     "endSec": 5.873
+     "startSec": 5.752,
+     "endSec": 5.872
     },
     {
      "text": "a",
-     "startSec": 5.873,
-     "endSec": 6.013
+     "startSec": 5.872,
+     "endSec": 6.012
     },
     {
      "text": "medium",
-     "startSec": 6.013,
-     "endSec": 6.273
+     "startSec": 6.012,
+     "endSec": 6.272
     },
     {
      "text": "latte",
-     "startSec": 6.273,
-     "endSec": 6.793
+     "startSec": 6.272,
+     "endSec": 6.812
     },
     {
      "text": "with",
-     "startSec": 6.793,
-     "endSec": 6.973
+     "startSec": 6.812,
+     "endSec": 6.952
     },
     {
      "text": "oat",
-     "startSec": 6.973,
-     "endSec": 7.213
+     "startSec": 6.952,
+     "endSec": 7.212
     },
     {
      "text": "milk,",
-     "startSec": 7.213,
-     "endSec": 7.393
+     "startSec": 7.212,
+     "endSec": 7.392
     },
     {
      "text": "please.",
-     "startSec": 7.653,
-     "endSec": 7.813
+     "startSec": 7.652,
+     "endSec": 7.812
     }
    ],
    "linking": [
@@ -206,72 +206,72 @@
   {
    "index": 2,
    "speaker": "female",
-   "startSec": 8.999,
-   "endSec": 11.557,
+   "startSec": 8.997,
+   "endSec": 11.555,
    "text": "Sure. Would you like whipped cream on that?",
    "translationJa": "かしこまりました。ホイップクリームを付けますか。",
    "chunks": [
     {
      "text": "Sure.",
-     "startSec": 8.999,
-     "endSec": 9.299
+     "startSec": 8.997,
+     "endSec": 9.277
     },
     {
      "text": "Would you like",
-     "startSec": 9.599,
-     "endSec": 10.059
+     "startSec": 9.617,
+     "endSec": 10.057
     },
     {
      "text": "whipped cream",
-     "startSec": 10.059,
-     "endSec": 10.579
+     "startSec": 10.057,
+     "endSec": 10.577
     },
     {
      "text": "on that?",
-     "startSec": 10.579,
-     "endSec": 11.039
+     "startSec": 10.577,
+     "endSec": 11.037
     }
    ],
    "words": [
     {
      "text": "Sure.",
-     "startSec": 8.999,
-     "endSec": 9.299
+     "startSec": 8.997,
+     "endSec": 9.277
     },
     {
      "text": "Would",
-     "startSec": 9.599,
-     "endSec": 9.799
+     "startSec": 9.617,
+     "endSec": 9.797
     },
     {
      "text": "you",
-     "startSec": 9.799,
-     "endSec": 9.919
+     "startSec": 9.797,
+     "endSec": 9.917
     },
     {
      "text": "like",
-     "startSec": 9.919,
-     "endSec": 10.059
+     "startSec": 9.917,
+     "endSec": 10.057
     },
     {
      "text": "whipped",
-     "startSec": 10.059,
-     "endSec": 10.299
+     "startSec": 10.057,
+     "endSec": 10.297
     },
     {
      "text": "cream",
-     "startSec": 10.299,
-     "endSec": 10.579
+     "startSec": 10.297,
+     "endSec": 10.577
     },
     {
      "text": "on",
-     "startSec": 10.579,
-     "endSec": 10.819
+     "startSec": 10.577,
+     "endSec": 10.817
     },
     {
      "text": "that?",
-     "startSec": 10.819,
-     "endSec": 11.039
+     "startSec": 10.817,
+     "endSec": 11.037
     }
    ],
    "linking": [
@@ -286,62 +286,62 @@
   {
    "index": 3,
    "speaker": "male",
-   "startSec": 12.057,
-   "endSec": 15.015,
+   "startSec": 12.055,
+   "endSec": 15.012,
    "text": "No, thanks. Just the latte is fine.",
    "translationJa": "いえ、結構です。ラテだけで大丈夫です。",
    "chunks": [
     {
      "text": "No, thanks.",
-     "startSec": 12.057,
-     "endSec": 12.797
+     "startSec": 12.055,
+     "endSec": 12.795
     },
     {
      "text": "Just the latte",
-     "startSec": 13.197,
-     "endSec": 14.037
+     "startSec": 13.215,
+     "endSec": 14.035
     },
     {
      "text": "is fine.",
-     "startSec": 14.037,
-     "endSec": 14.417
+     "startSec": 14.035,
+     "endSec": 14.435
     }
    ],
    "words": [
     {
      "text": "No,",
-     "startSec": 12.057,
-     "endSec": 12.257
+     "startSec": 12.055,
+     "endSec": 12.255
     },
     {
      "text": "thanks.",
-     "startSec": 12.517,
-     "endSec": 12.797
+     "startSec": 12.515,
+     "endSec": 12.795
     },
     {
      "text": "Just",
-     "startSec": 13.197,
-     "endSec": 13.457
+     "startSec": 13.215,
+     "endSec": 13.435
     },
     {
      "text": "the",
-     "startSec": 13.457,
-     "endSec": 13.637
+     "startSec": 13.435,
+     "endSec": 13.635
     },
     {
      "text": "latte",
-     "startSec": 13.637,
-     "endSec": 14.037
+     "startSec": 13.635,
+     "endSec": 14.035
     },
     {
      "text": "is",
-     "startSec": 14.037,
-     "endSec": 14.177
+     "startSec": 14.035,
+     "endSec": 14.175
     },
     {
      "text": "fine.",
-     "startSec": 14.177,
-     "endSec": 14.417
+     "startSec": 14.175,
+     "endSec": 14.435
     }
    ],
    "linking": [
@@ -356,87 +356,87 @@
   {
    "index": 4,
    "speaker": "female",
-   "startSec": 15.515,
-   "endSec": 19.374,
+   "startSec": 15.512,
+   "endSec": 19.37,
    "text": "Anything to eat? Our blueberry muffin is fresh out of the oven.",
    "translationJa": "食べ物はいかがですか？うちのブルーベリーマフィンは焼きたてです。",
    "chunks": [
     {
      "text": "Anything to eat?",
-     "startSec": 15.515,
-     "endSec": 16.315
+     "startSec": 15.512,
+     "endSec": 16.312
     },
     {
      "text": "Our blueberry muffin",
-     "startSec": 16.675,
-     "endSec": 17.775
+     "startSec": 16.652,
+     "endSec": 17.752
     },
     {
      "text": "is fresh out of the oven.",
-     "startSec": 17.775,
-     "endSec": 18.835
+     "startSec": 17.752,
+     "endSec": 18.832
     }
    ],
    "words": [
     {
      "text": "Anything",
-     "startSec": 15.515,
-     "endSec": 15.755
+     "startSec": 15.512,
+     "endSec": 15.752
     },
     {
      "text": "to",
-     "startSec": 15.755,
-     "endSec": 16.095
+     "startSec": 15.752,
+     "endSec": 16.092
     },
     {
      "text": "eat?",
-     "startSec": 16.095,
-     "endSec": 16.315
+     "startSec": 16.092,
+     "endSec": 16.312
     },
     {
      "text": "Our",
-     "startSec": 16.675,
-     "endSec": 16.815
+     "startSec": 16.652,
+     "endSec": 16.812
     },
     {
      "text": "blueberry",
-     "startSec": 16.815,
-     "endSec": 17.275
+     "startSec": 16.812,
+     "endSec": 17.272
     },
     {
      "text": "muffin",
-     "startSec": 17.275,
-     "endSec": 17.775
+     "startSec": 17.272,
+     "endSec": 17.752
     },
     {
      "text": "is",
-     "startSec": 17.775,
-     "endSec": 17.855
+     "startSec": 17.752,
+     "endSec": 17.872
     },
     {
      "text": "fresh",
-     "startSec": 17.855,
-     "endSec": 18.135
+     "startSec": 17.872,
+     "endSec": 18.112
     },
     {
      "text": "out",
-     "startSec": 18.135,
-     "endSec": 18.395
+     "startSec": 18.112,
+     "endSec": 18.392
     },
     {
      "text": "of",
-     "startSec": 18.395,
-     "endSec": 18.495
+     "startSec": 18.392,
+     "endSec": 18.492
     },
     {
      "text": "the",
-     "startSec": 18.495,
-     "endSec": 18.595
+     "startSec": 18.492,
+     "endSec": 18.592
     },
     {
      "text": "oven.",
-     "startSec": 18.595,
-     "endSec": 18.835
+     "startSec": 18.592,
+     "endSec": 18.832
     }
    ],
    "linking": [
@@ -451,72 +451,72 @@
   {
    "index": 5,
    "speaker": "male",
-   "startSec": 19.874,
-   "endSec": 22.897,
+   "startSec": 19.87,
+   "endSec": 22.892,
    "text": "That sounds great. I'll take one muffin too.",
    "translationJa": "それは良さそうですね。マフィンも一つ頼みます。",
    "chunks": [
     {
      "text": "That sounds great.",
-     "startSec": 19.874,
-     "endSec": 20.694
+     "startSec": 19.87,
+     "endSec": 20.69
     },
     {
      "text": "I'll take",
-     "startSec": 21.134,
-     "endSec": 21.394
+     "startSec": 21.09,
+     "endSec": 21.39
     },
     {
      "text": "one muffin",
-     "startSec": 21.394,
-     "endSec": 22.054
+     "startSec": 21.39,
+     "endSec": 22.05
     },
     {
      "text": "too.",
-     "startSec": 22.054,
-     "endSec": 22.294
+     "startSec": 22.05,
+     "endSec": 22.29
     }
    ],
    "words": [
     {
      "text": "That",
-     "startSec": 19.874,
-     "endSec": 20.034
+     "startSec": 19.87,
+     "endSec": 20.01
     },
     {
      "text": "sounds",
-     "startSec": 20.034,
-     "endSec": 20.294
+     "startSec": 20.01,
+     "endSec": 20.25
     },
     {
      "text": "great.",
-     "startSec": 20.294,
-     "endSec": 20.694
+     "startSec": 20.25,
+     "endSec": 20.69
     },
     {
      "text": "I'll",
-     "startSec": 21.134,
-     "endSec": 21.214
+     "startSec": 21.09,
+     "endSec": 21.21
     },
     {
      "text": "take",
-     "startSec": 21.214,
-     "endSec": 21.394
+     "startSec": 21.21,
+     "endSec": 21.39
     },
     {
      "text": "one",
-     "startSec": 21.394,
-     "endSec": 21.634
+     "startSec": 21.39,
+     "endSec": 21.63
     },
     {
      "text": "muffin",
-     "startSec": 21.634,
-     "endSec": 22.054
+     "startSec": 21.63,
+     "endSec": 22.05
     },
     {
      "text": "too.",
-     "startSec": 22.054,
-     "endSec": 22.294
+     "startSec": 22.05,
+     "endSec": 22.29
     }
    ],
    "linking": [
@@ -531,82 +531,82 @@
   {
    "index": 6,
    "speaker": "female",
-   "startSec": 23.397,
-   "endSec": 27.439,
+   "startSec": 23.392,
+   "endSec": 27.432,
    "text": "Perfect. That comes to nine fifty. Can I get your name?",
    "translationJa": "かしこまりました。合計9ドル50セントです。お名前を頂けますか？",
    "chunks": [
     {
      "text": "Perfect.",
-     "startSec": 23.397,
-     "endSec": 23.737
+     "startSec": 23.392,
+     "endSec": 23.752
     },
     {
      "text": "That comes to nine fifty.",
-     "startSec": 24.177,
-     "endSec": 25.277
+     "startSec": 24.172,
+     "endSec": 25.332
     },
     {
      "text": "Can I get your name?",
-     "startSec": 26.037,
-     "endSec": 26.837
+     "startSec": 26.012,
+     "endSec": 26.852
     }
    ],
    "words": [
     {
      "text": "Perfect.",
-     "startSec": 23.397,
-     "endSec": 23.737
+     "startSec": 23.392,
+     "endSec": 23.752
     },
     {
      "text": "That",
-     "startSec": 24.177,
-     "endSec": 24.397
+     "startSec": 24.172,
+     "endSec": 24.372
     },
     {
      "text": "comes",
-     "startSec": 24.397,
-     "endSec": 24.697
+     "startSec": 24.372,
+     "endSec": 24.672
     },
     {
      "text": "to",
-     "startSec": 24.697,
-     "endSec": 24.917
+     "startSec": 24.672,
+     "endSec": 24.912
     },
     {
      "text": "nine",
-     "startSec": 24.917,
-     "endSec": 25.061
+     "startSec": 24.912,
+     "endSec": 25.08
     },
     {
      "text": "fifty.",
-     "startSec": 25.061,
-     "endSec": 25.277
+     "startSec": 25.08,
+     "endSec": 25.332
     },
     {
      "text": "Can",
-     "startSec": 26.037,
-     "endSec": 26.217
+     "startSec": 26.012,
+     "endSec": 26.212
     },
     {
      "text": "I",
-     "startSec": 26.217,
-     "endSec": 26.337
+     "startSec": 26.212,
+     "endSec": 26.332
     },
     {
      "text": "get",
-     "startSec": 26.337,
-     "endSec": 26.497
+     "startSec": 26.332,
+     "endSec": 26.492
     },
     {
      "text": "your",
-     "startSec": 26.497,
-     "endSec": 26.657
+     "startSec": 26.492,
+     "endSec": 26.652
     },
     {
      "text": "name?",
-     "startSec": 26.657,
-     "endSec": 26.837
+     "startSec": 26.652,
+     "endSec": 26.852
     }
    ],
    "linking": [
@@ -627,42 +627,42 @@
   {
    "index": 7,
    "speaker": "male",
-   "startSec": 27.939,
-   "endSec": 29.817,
+   "startSec": 27.932,
+   "endSec": 29.81,
    "text": "It's Ken. Ken Tanaka.",
    "translationJa": "ケンです。ケン・タナカです。",
    "chunks": [
     {
      "text": "It's Ken.",
-     "startSec": 27.939,
-     "endSec": 28.379
+     "startSec": 27.932,
+     "endSec": 28.352
     },
     {
      "text": "Ken Tanaka.",
-     "startSec": 28.659,
-     "endSec": 29.119
+     "startSec": 28.652,
+     "endSec": 29.112
     }
    ],
    "words": [
     {
      "text": "It's",
-     "startSec": 27.939,
-     "endSec": 28.119
+     "startSec": 27.932,
+     "endSec": 28.112
     },
     {
      "text": "Ken.",
-     "startSec": 28.119,
-     "endSec": 28.379
+     "startSec": 28.112,
+     "endSec": 28.352
     },
     {
      "text": "Ken",
-     "startSec": 28.659,
-     "endSec": 28.879
+     "startSec": 28.652,
+     "endSec": 28.872
     },
     {
      "text": "Tanaka.",
-     "startSec": 28.879,
-     "endSec": 29.119
+     "startSec": 28.872,
+     "endSec": 29.112
     }
    ],
    "linking": []
@@ -670,97 +670,97 @@
   {
    "index": 8,
    "speaker": "female",
-   "startSec": 30.317,
-   "endSec": 34.63,
+   "startSec": 30.31,
+   "endSec": 34.622,
    "text": "Thanks, Ken. We'll call your name at the counter in a few minutes.",
    "translationJa": "ありがとう、ケンさん。数分でカウンターでお名前をお呼びします。",
    "chunks": [
     {
      "text": "Thanks, Ken.",
-     "startSec": 30.317,
-     "endSec": 31.357
+     "startSec": 30.31,
+     "endSec": 31.35
     },
     {
      "text": "We'll call your name",
-     "startSec": 31.697,
-     "endSec": 32.557
+     "startSec": 31.71,
+     "endSec": 32.55
     },
     {
      "text": "at the counter",
-     "startSec": 32.557,
-     "endSec": 33.077
+     "startSec": 32.55,
+     "endSec": 33.07
     },
     {
      "text": "in a few minutes.",
-     "startSec": 33.077,
-     "endSec": 33.917
+     "startSec": 33.07,
+     "endSec": 33.91
     }
    ],
    "words": [
     {
      "text": "Thanks,",
-     "startSec": 30.317,
-     "endSec": 30.577
+     "startSec": 30.31,
+     "endSec": 30.55
     },
     {
      "text": "Ken.",
-     "startSec": 31.077,
-     "endSec": 31.357
+     "startSec": 31.09,
+     "endSec": 31.35
     },
     {
      "text": "We'll",
-     "startSec": 31.697,
-     "endSec": 31.997
+     "startSec": 31.71,
+     "endSec": 31.99
     },
     {
      "text": "call",
-     "startSec": 31.997,
-     "endSec": 32.177
+     "startSec": 31.99,
+     "endSec": 32.17
     },
     {
      "text": "your",
-     "startSec": 32.177,
-     "endSec": 32.337
+     "startSec": 32.17,
+     "endSec": 32.33
     },
     {
      "text": "name",
-     "startSec": 32.337,
-     "endSec": 32.557
+     "startSec": 32.33,
+     "endSec": 32.55
     },
     {
      "text": "at",
-     "startSec": 32.557,
-     "endSec": 32.717
+     "startSec": 32.55,
+     "endSec": 32.71
     },
     {
      "text": "the",
-     "startSec": 32.717,
-     "endSec": 32.817
+     "startSec": 32.71,
+     "endSec": 32.81
     },
     {
      "text": "counter",
-     "startSec": 32.817,
-     "endSec": 33.077
+     "startSec": 32.81,
+     "endSec": 33.07
     },
     {
      "text": "in",
-     "startSec": 33.077,
-     "endSec": 33.397
+     "startSec": 33.07,
+     "endSec": 33.39
     },
     {
      "text": "a",
-     "startSec": 33.397,
-     "endSec": 33.477
+     "startSec": 33.39,
+     "endSec": 33.45
     },
     {
      "text": "few",
-     "startSec": 33.477,
-     "endSec": 33.657
+     "startSec": 33.45,
+     "endSec": 33.65
     },
     {
      "text": "minutes.",
-     "startSec": 33.657,
-     "endSec": 33.917
+     "startSec": 33.65,
+     "endSec": 33.91
     }
    ],
    "linking": [
@@ -781,52 +781,52 @@
   {
    "index": 9,
    "speaker": "male",
-   "startSec": 35.13,
-   "endSec": 36.997,
+   "startSec": 35.122,
+   "endSec": 36.987,
    "text": "Awesome. Thank you so much!",
    "translationJa": "ばっちり。本当にありがとう！",
    "chunks": [
     {
      "text": "Awesome.",
-     "startSec": 35.13,
-     "endSec": 35.43
+     "startSec": 35.122,
+     "endSec": 35.422
     },
     {
      "text": "Thank you",
-     "startSec": 35.79,
-     "endSec": 36.11
+     "startSec": 35.782,
+     "endSec": 36.102
     },
     {
      "text": "so much!",
-     "startSec": 36.11,
-     "endSec": 36.61
+     "startSec": 36.102,
+     "endSec": 36.622
     }
    ],
    "words": [
     {
      "text": "Awesome.",
-     "startSec": 35.13,
-     "endSec": 35.43
+     "startSec": 35.122,
+     "endSec": 35.422
     },
     {
      "text": "Thank",
-     "startSec": 35.79,
-     "endSec": 35.91
+     "startSec": 35.782,
+     "endSec": 35.902
     },
     {
      "text": "you",
-     "startSec": 35.91,
-     "endSec": 36.11
+     "startSec": 35.902,
+     "endSec": 36.102
     },
     {
      "text": "so",
-     "startSec": 36.11,
-     "endSec": 36.31
+     "startSec": 36.102,
+     "endSec": 36.282
     },
     {
      "text": "much!",
-     "startSec": 36.31,
-     "endSec": 36.61
+     "startSec": 36.282,
+     "endSec": 36.622
     }
    ],
    "linking": []

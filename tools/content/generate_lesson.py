@@ -4,8 +4,11 @@
 
 - 全行で voice_config.json の単一構成のみを使う (別声・別エンジンへ切り替えない)。
 - 出力先 manifest に設定ハッシュを記録し、異なるハッシュの既存音声がある場合は
-  生成を中止する (混在防止)。
-- 既存の行 WAV はスキップし、欠けている行だけ再生成する (削除 → 再実行で再生成)。
+  生成を中止する (混在防止)。最初の TTS 呼び出しの前に設定を
+  build/<id>/generation.json へ永続化するため、manifest 書き込み前に中断した
+  場合も既存 WAV の設定を確認できる (確認できない場合は停止)。
+- 既存の行 WAV は「同一設定・同一テキスト」のときだけスキップし、それ以外は
+  再生成する (削除 → 再実行、または --line N で再生成)。
 
 Usage (リポジトリ ルートで):
   uv run --project tools/content python tools/content/generate_lesson.py \
@@ -15,10 +18,12 @@ Usage (リポジトリ ルートで):
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import sys
 import time
 import wave
+from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -50,6 +55,10 @@ def assets_dir(lesson_id: str) -> Path:
     return REPO / "assets" / "lessons" / lesson_id
 
 
+def line_wav_name(line: dict) -> str:
+    return f"L{int(line['index']):02d}_{line['speaker']}.wav"
+
+
 def check_no_config_mixing(chash: str, out_assets: Path) -> None:
     """異なる設定ハッシュの既存音声が同じ出力先にある場合は生成を中止する。"""
     manifest_path = out_assets / "manifest.json"
@@ -66,19 +75,82 @@ def check_no_config_mixing(chash: str, out_assets: Path) -> None:
         )
 
 
+def check_generation_sidecar(chash: str, lesson_id: str, ldir: Path) -> None:
+    """行 WAV の生成時設定を build/<id>/generation.json で検証する (混在防止)。
+
+    manifest は全行生成後の末尾で書くため、途中停止すると「WAV だけがあり
+    manifest がない」状態になり得る。そのため最初の TTS 呼び出しの前に設定を
+    sidecar に永続化し、既存 WAV の設定を確認できない場合は停止する
+    (同一設定での途中再開は許可する)。
+    """
+    sidecar = HERE / "build" / lesson_id / "generation.json"
+    if sidecar.exists():
+        gen_info = json.loads(sidecar.read_text(encoding="utf-8"))
+        if gen_info.get("configHash") != chash:
+            raise SystemExit(
+                f"ABORT: {sidecar} の記録 (ハッシュ {gen_info.get('configHash')}) と現在の "
+                f"voice config (ハッシュ {chash}) が一致しません。既存の行 WAV と設定が混在するため中止します。"
+                "作り直す場合は tools/content/build/<id>/ と assets/lessons/<id>/ を消してから再実行してください。"
+            )
+        return
+    if any(ldir.glob("*.wav")):
+        raise SystemExit(
+            f"ABORT: {ldir} に生成時設定を確認できない WAV があります (manifest/sidecar なし)。"
+            "混在を防ぐため中止します。作り直す場合は tools/content/build/<id>/ を消してから再実行してください。"
+        )
+    sidecar.parent.mkdir(parents=True, exist_ok=True)
+    sidecar.write_text(
+        json.dumps({
+            "configHash": chash,
+            "lessonId": lesson_id,
+            "startedAtUtc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }, ensure_ascii=False, indent=1) + "\n",
+        encoding="utf-8",
+    )
+
+
 def wav_write(path: Path, audio: bytes, sample_rate: int) -> float:
+    """Cloud TTS の LINEAR16 応答 (WAV ヘッダー付き) を検証して PCM だけ保存する。
+
+    応答をフレームとして直接書くと元の WAV ヘッダーが音声サンプルに混入するため、
+    ヘッダーを読み捨て、形式 (mono / 16bit / sample_rate) を検証してから書き込む。
+    """
+    with wave.open(io.BytesIO(audio), "rb") as r:
+        if r.getnchannels() != 1 or r.getsampwidth() != 2:
+            raise SystemExit(f"unexpected TTS wav (mono/16bit 以外): {path}")
+        if r.getframerate() != sample_rate:
+            raise SystemExit(
+                f"unexpected TTS wav sample rate: {r.getframerate()} != {sample_rate} ({path})"
+            )
+        frames = r.readframes(r.getnframes())
     with wave.open(str(path), "wb") as w:
         w.setnchannels(1)
         w.setsampwidth(2)
         w.setframerate(sample_rate)
-        w.writeframes(audio)
-    with wave.open(str(path), "rb") as w:
-        return w.getnframes() / w.getframerate()
+        w.writeframes(frames)
+    return wav_duration(path)
 
 
 def wav_duration(path: Path) -> float:
     with wave.open(str(path), "rb") as w:
         return w.getnframes() / w.getframerate()
+
+
+def needs_regeneration(wav_path: Path, idx: int, force_lines: set[int],
+                       text: str, old_manifest: dict) -> bool:
+    """この行を再生成するかどうか。予算見積りと生成ループで共有する判定。
+
+    - --line で指定された行は常に再生成
+    - WAV がない / 壊れている (1,000 バイト以下) ときは再生成
+    - manifest の生成時テキストが現在の台本と不一致なら再生成
+      (音声と表示テキストの不一致を未然に防ぐ。初回実行など照合できない場合も再生成)
+    """
+    if idx in force_lines:
+        return True
+    if not (wav_path.exists() and wav_path.stat().st_size > 1000):
+        return True
+    old_line = old_manifest.get("lines", {}).get(wav_path.name)
+    return old_line is None or old_line.get("text") != text
 
 
 def main() -> int:
@@ -98,15 +170,20 @@ def main() -> int:
     out_assets.mkdir(parents=True, exist_ok=True)
 
     check_no_config_mixing(chash, out_assets)
+    check_generation_sidecar(chash, args.lesson, ldir)
+
+    old_manifest: dict = {}
+    old_manifest_path = out_assets / "manifest.json"
+    if old_manifest_path.exists():
+        old_manifest = json.loads(old_manifest_path.read_text(encoding="utf-8"))
 
     force_lines = set(args.line or [])
 
-    # --- 事前見積り: この実行で実際に合成する行だけを見積もる。
-    # スキップする行は既に月次カウンタへ計上済みなので数え直すと二重計上になる ---
+    # --- 事前見積り: この実行で実際に合成する行だけを見積もる (生成ループと同じ判定) ---
     total_chars = sum(
         len(ln["text"].strip()) for ln in lesson["lines"]
-        if not (ldir / f"L{int(ln['index']):02d}_{ln['speaker']}.wav").exists()
-        or int(ln["index"]) in force_lines
+        if needs_regeneration(ldir / line_wav_name(ln), int(ln["index"]),
+                              force_lines, ln["text"].strip(), old_manifest)
     )
     cloud_tts.check_monthly_budget(cfg, total_chars)
 
@@ -117,9 +194,8 @@ def main() -> int:
         "lessonId": args.lesson,
         "lines": {},
     }
-    old_manifest = out_assets / "manifest.json"
-    if old_manifest.exists():
-        manifest = json.loads(old_manifest.read_text(encoding="utf-8"))
+    if old_manifest_path.exists():
+        manifest = json.loads(old_manifest_path.read_text(encoding="utf-8"))
         manifest["configHash"] = chash
 
     sample_rate = int(cfg["audio"]["sampleRateHertz"])
@@ -134,9 +210,9 @@ def main() -> int:
                 f"(定義済み: {', '.join(sorted(speakers))})"
             )
         text = line["text"].strip()
-        name = f"L{idx:02d}_{spk}.wav"
+        name = line_wav_name(line)
         wav_path = ldir / name
-        if wav_path.exists() and wav_path.stat().st_size > 1000 and idx not in force_lines:
+        if not needs_regeneration(wav_path, idx, force_lines, text, old_manifest):
             dur = wav_duration(wav_path)
             print(f"skip {name} {dur:.2f}s [{spk}] {text[:40]}", flush=True)
             skipped += 1
@@ -173,8 +249,8 @@ def main() -> int:
     )
     print(
         f"DONE lines={len(lesson['lines'])} generated={generated} skipped={skipped} "
-        f"chars_this_run={lesson_chars} month={usage['chars']}/{cfg['limits']['monthlyStopChars']} "
-        f"config={chash}",
+        f"chars_this_run={lesson_chars} month={usage['chars']}+{usage.get('pendingChars', 0)}pending"
+        f"/{cfg['limits']['monthlyStopChars']} config={chash}",
         flush=True,
     )
     print("next: uv run --project tools/content python tools/content/"

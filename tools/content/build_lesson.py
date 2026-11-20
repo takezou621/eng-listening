@@ -16,7 +16,9 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -28,7 +30,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 import cloud_tts  # noqa: E402
-from generate_lesson import assets_dir, lines_dir, load_lesson  # noqa: E402
+from generate_lesson import assets_dir, lines_dir, line_wav_name, load_lesson  # noqa: E402
 
 
 def read_wav_frames(path: Path) -> tuple[bytes, int]:
@@ -38,13 +40,17 @@ def read_wav_frames(path: Path) -> tuple[bytes, int]:
         return w.readframes(w.getnframes()), w.getframerate()
 
 
-def concat_lines(ldir: Path, master_path: Path, gap_sec: float) -> list[dict]:
-    """行 WAV を固定ギャップで連結し、各行のトラック上の区間を返す。"""
+def concat_lines(line_wavs: list[Path], master_path: Path, gap_sec: float) -> list[dict]:
+    """台本順の行 WAV だけを固定ギャップで連結し、各行のトラック上の区間を返す。
+
+    ディレクトリを glob しない (speaker 変更などの古い WAV を連結しないため)。
+    呼び出し前に全ファイルの存在を確認しておくこと。
+    """
     sr = None
     frames: list[bytes] = []
     spans: list[dict] = []
     pos = 0.0
-    for wav_path in sorted(ldir.glob("*.wav")):
+    for wav_path in line_wavs:
         data, rate = read_wav_frames(wav_path)
         if sr is None:
             sr = rate
@@ -98,13 +104,15 @@ def norm(token: str) -> str:
     return _TOKEN_NORM_RE.sub("", token.lower())
 
 
-def align_words(line_text: str, wwords: list[dict]) -> list[dict]:
+def align_words(line_text: str, wwords: list[dict], default_start: float = 0.0) -> list[dict]:
     """台本の単語列を whisper の単語スパンに対応させる。
 
     whisper は表記ゆれ (nine fifty → "950.") や幻トークン ("//") を出すため、
     単語の「文字面」は台本を正とし、whisper はタイムスタンプのみ使う。
     正規化トークン列を difflib でアラインし、置換区間は文字数比例で分配、
     台本側にしか無い語は前後のタイミングで幅 0 に補間する。
+    default_start は文の開始時刻 (文頭語の取りこぼし補間に使い、
+    文の開始より前に置かないようにする)。
     """
     script_tokens = line_text.split()
     matched = [w for w in wwords if norm(w["text"])]
@@ -114,7 +122,7 @@ def align_words(line_text: str, wwords: list[dict]) -> list[dict]:
     if sm.ratio() < 0.5:
         # アライン失敗: 全体を文字数比例で分配 (データは壊さない、ゲートではない)
         total = sum(max(len(t), 1) for t in script_tokens) or 1
-        t0 = matched[0]["startSec"] if matched else 0.0
+        t0 = matched[0]["startSec"] if matched else default_start
         t1 = matched[-1]["endSec"] if matched else t0
         pos, out = t0, []
         for tok in script_tokens:
@@ -138,8 +146,8 @@ def align_words(line_text: str, wwords: list[dict]) -> list[dict]:
         elif i1 > 0 and out[i1 - 1] is not None:
             t0 = t1 = out[i1 - 1]["endSec"]
         else:
-            # 行頭から whisper が取りこぼした語: 前時刻が無いので 0.0 に張り付ける
-            t0 = t1 = 0.0
+            # 行頭から whisper が取りこぼした語: 文の開始時刻に張り付ける (0 秒には置かない)
+            t0 = t1 = default_start
         weights = [max(len(t), 1) for t in script_slice]
         total = sum(weights) or 1
         pos = t0
@@ -193,22 +201,58 @@ def main() -> int:
     report_hash = report.get("configHash") or report.get("config_hash")
     if report_hash != chash:
         raise SystemExit("一貫性レポートの設定ハッシュが古いため中止します。ゲートを再実行してください。")
+    if report.get("missing"):
+        raise SystemExit(
+            f"一貫性レポートに未生成の行があります: {', '.join(report['missing'])}。"
+            "generate_lesson.py を実行してからゲートを再実行してください。"
+        )
     if report.get("flagged"):
         raise SystemExit(
             f"一貫性ゲートが FAIL です ({len(report['flagged'])} 行)。"
             "該当行の WAV を削除して再生成してから再実行してください。"
         )
 
+    # --- 台本から順序付き WAV 一覧を作り、ゲートが検査した音声と照合する ---
+    target_wavs: list[Path] = []
+    for ln in lesson["lines"]:
+        name = line_wav_name(ln)
+        wav_path = ldir / name
+        if not wav_path.exists():
+            raise SystemExit(
+                f"行 WAV が見つかりません: {name}。generate_lesson.py を実行してください。"
+            )
+        target_wavs.append(wav_path)
+
+    report_digests = report.get("digests") or {}
+    # 古いレポート (ダイジェスト記録前) は受け入れない
+    if not report_digests:
+        raise SystemExit(
+            "一貫性レポートに WAV ダイジェストがありません。"
+            "ゲートを再実行してレポートを更新してください。"
+        )
+    for wav_path in target_wavs:
+        current = hashlib.sha256(wav_path.read_bytes()).hexdigest()[:16]
+        recorded = report_digests.get(wav_path.name)
+        if recorded != current:
+            raise SystemExit(
+                f"{wav_path.name} は一貫性ゲートの検査後に入れ替わっています "
+                f"(レポート {recorded} != 現在 {current})。"
+                "ゲートを再実行してからビルドしてください。"
+            )
+
     gap = float(cfg.get("gapSecBetweenLines", 0.5))
     master_path = HERE / "build" / args.lesson / "master.wav"
-    spans = concat_lines(ldir, master_path, gap)
+    spans = concat_lines(target_wavs, master_path, gap)
     span_by_file = {s["file"]: s for s in spans}
 
-    # --- ffmpeg: 24kHz WAV → AAC m4a (アプリ同梱用) ---
-    m4a_path = out_assets / "audio.m4a"
+    # --- ffmpeg と whisper・JSON はすべて一時領域で完成させ、最後に一組として公開する
+    #     (途中失敗しても既存の audio.m4a + lesson.json の整合性を壊さない) ---
+    build_dir = HERE / "build" / args.lesson
+    next_m4a = build_dir / "audio.next.m4a"
+    next_json = build_dir / "lesson.next.json"
     subprocess.run(
         ["ffmpeg", "-v", "error", "-y", "-i", str(master_path),
-         "-c:a", "aac", "-b:a", "64k", "-ar", "24000", "-ac", "1", str(m4a_path)],
+         "-c:a", "aac", "-b:a", "64k", "-ar", "24000", "-ac", "1", str(next_m4a)],
         check=True,
     )
 
@@ -217,7 +261,7 @@ def main() -> int:
     wcfg = cfg["whisper"]
     sentences: list[dict] = []
     for line in lesson["lines"]:
-        name = f"L{int(line['index']):02d}_{line['speaker']}.wav"
+        name = line_wav_name(line)
         span = span_by_file.get(name)
         if span is None:
             raise SystemExit(
@@ -231,7 +275,7 @@ def main() -> int:
             # 行内相対秒 → トラック全体の絶対秒へオフセットし、行区間にクリップ
             w["startSec"] = round(span["startSec"] + w["startSec"], 3)
             w["endSec"] = round(min(span["startSec"] + w["endSec"], span["endSec"]), 3)
-        words = align_words(line["text"], raw)
+        words = align_words(line["text"], raw, span["startSec"])
         sentences.append({
             "index": int(line["index"]) - 1,
             "speaker": line["speaker"],
@@ -243,6 +287,15 @@ def main() -> int:
             "words": words,
             "linking": line.get("linking", []),
         })
+
+    # --- 公開前の検証: 文数が台本と一致し、単語列が台本と 1:1 であること ---
+    if len(sentences) != len(lesson["lines"]):
+        raise SystemExit("生成した文数が台本と一致しません。ビルドを中断します。")
+    for sentence, line in zip(sentences, lesson["lines"]):
+        if [w["text"] for w in sentence["words"]] != line["text"].split():
+            raise SystemExit(
+                f"行 {line.get('index')}: 単語列が台本と一致しません。ビルドを中断します。"
+            )
 
     total_dur = spans[-1]["endSec"] if spans else 0.0
     out = {
@@ -261,8 +314,12 @@ def main() -> int:
         "generatedAtUtc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "sentences": sentences,
     }
-    out_path = out_assets / "lesson.json"
-    out_path.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    next_json.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+
+    # --- 公開: 一組として置き換える (途中失敗時は既存の一組を維持) ---
+    m4a_path = out_assets / "audio.m4a"
+    os.replace(next_m4a, m4a_path)
+    os.replace(next_json, out_assets / "lesson.json")
     print(f"DONE lesson.json + audio.m4a lines={len(sentences)} duration={total_dur:.2f}s "
           f"config={chash}", flush=True)
     return 0

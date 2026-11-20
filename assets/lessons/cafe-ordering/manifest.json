@@ -14,7 +14,7 @@
    "voice": "en-US-Neural2-F",
    "text": "Good morning! Welcome to Sunbeam Coffee. What can I get started for you?",
    "chars": 72,
-   "durationSec": 4.573,
+   "durationSec": 4.572,
    "configHash": "1b1725b9a69efe25"
   },
   "L02_male.wav": {
@@ -23,7 +23,7 @@
    "voice": "en-US-Neural2-D",
    "text": "Hi. I'd like a medium latte with oat milk, please.",
    "chars": 50,
-   "durationSec": 3.426,
+   "durationSec": 3.425,
    "configHash": "1b1725b9a69efe25"
   },
   "L03_female.wav": {
@@ -32,7 +32,7 @@
    "voice": "en-US-Neural2-F",
    "text": "Sure. Would you like whipped cream on that?",
    "chars": 43,
-   "durationSec": 2.558,
+   "durationSec": 2.557,
    "configHash": "1b1725b9a69efe25"
   },
   "L04_male.wav": {
@@ -41,7 +41,7 @@
    "voice": "en-US-Neural2-D",
    "text": "No, thanks. Just the latte is fine.",
    "chars": 35,
-   "durationSec": 2.958,
+   "durationSec": 2.957,
    "configHash": "1b1725b9a69efe25"
   },
   "L05_female.wav": {
@@ -50,7 +50,7 @@
    "voice": "en-US-Neural2-F",
    "text": "Anything to eat? Our blueberry muffin is fresh out of the oven.",
    "chars": 63,
-   "durationSec": 3.859,
+   "durationSec": 3.858,
    "configHash": "1b1725b9a69efe25"
   },
   "L06_male.wav": {
@@ -59,7 +59,7 @@
    "voice": "en-US-Neural2-D",
    "text": "That sounds great. I'll take one muffin too.",
    "chars": 44,
-   "durationSec": 3.023,
+   "durationSec": 3.022,
    "configHash": "1b1725b9a69efe25"
   },
   "L07_female.wav": {
@@ -68,7 +68,7 @@
    "voice": "en-US-Neural2-F",
    "text": "Perfect. That comes to nine fifty. Can I get your name?",
    "chars": 55,
-   "durationSec": 4.041,
+   "durationSec": 4.04,
    "configHash": "1b1725b9a69efe25"
   },
   "L08_male.wav": {
@@ -77,7 +77,7 @@
    "voice": "en-US-Neural2-D",
    "text": "It's Ken. Ken Tanaka.",
    "chars": 21,
-   "durationSec": 1.879,
+   "durationSec": 1.878,
    "configHash": "1b1725b9a69efe25"
   },
   "L09_female.wav": {
@@ -86,7 +86,7 @@
    "voice": "en-US-Neural2-F",
    "text": "Thanks, Ken. We'll call your name at the counter in a few minutes.",
    "chars": 66,
-   "durationSec": 4.313,
+   "durationSec": 4.312,
    "configHash": "1b1725b9a69efe25"
   },
   "L10_male.wav": {
@@ -95,15 +95,15 @@
    "voice": "en-US-Neural2-D",
    "text": "Awesome. Thank you so much!",
    "chars": 27,
-   "durationSec": 1.866,
+   "durationSec": 1.865,
    "configHash": "1b1725b9a69efe25"
   }
  },
  "totals": {
   "lessonChars": 0,
   "lessonRequests": 0,
-  "monthChars": 1073,
-  "monthRequests": 17,
+  "monthChars": 1549,
+  "monthRequests": 27,
   "monthlyStopChars": 900000
  }
 }

@@ -69,44 +69,101 @@ def usage_path(month: str | None = None) -> Path:
 def read_usage(month: str | None = None) -> dict:
     path = usage_path(month)
     if not path.exists():
-        return {"month": month or current_month(), "chars": 0, "requests": 0, "lessons": {}}
-    return json.loads(path.read_text(encoding="utf-8"))
+        return {
+            "month": month or current_month(),
+            "chars": 0, "requests": 0, "pendingChars": 0, "lessons": {},
+        }
+    usage = json.loads(path.read_text(encoding="utf-8"))
+    usage.setdefault("pendingChars", 0)
+    for per in usage.setdefault("lessons", {}).values():
+        per.setdefault("pendingChars", 0)
+    return usage
 
 
 def _write_usage_atomic(usage: dict) -> None:
     USAGE_DIR.mkdir(parents=True, exist_ok=True)
     path = usage_path(usage["month"])
     tmp = path.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(usage, ensure_ascii=False, indent=1), encoding="utf-8")
+    tmp.write_text(json.dumps(usage, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     os.replace(tmp, path)
 
 
 def check_monthly_budget(cfg: dict, additional_chars: int) -> dict:
     """追加分を足しても停止上限以内か確認する。超過なら UsageLimitExceeded。
 
-    停止上限 monthlyStopChars (90万) < 無料枠 (月100万文字) なので、
-    上限到達 = 生成停止 = 無料枠超過による課金の未然防止。
+    確定済み (chars) に加え、送信済みで結果が未確定の予約 (pendingChars) も
+    上限判定に含める。プロセスが途中で死んで予約だけが残っても上限内に
+    数え続けるため、成功分が未計上のまま無料枠を超過することがない
+    (ゼロコスト制約)。停止上限 monthlyStopChars (90万) < 無料枠 (月100万文字)。
     """
     usage = read_usage()
     stop = int(cfg["limits"]["monthlyStopChars"])
-    projected = usage["chars"] + additional_chars
+    projected = usage["chars"] + usage["pendingChars"] + additional_chars
     if projected > stop:
         raise UsageLimitExceeded(
             f"月間文字数カウンタが停止上限に達します: 使用 {usage['chars']} + "
-            f"追加分 {additional_chars} > 上限 {stop} 文字。生成を停止します。"
-            "無料枠 (月1,000,000文字) 超過による課金を防ぐため、当月はこれ以上生成しないこと。"
+            f"予約中 {usage['pendingChars']} + 追加分 {additional_chars} > 上限 {stop} 文字。"
+            "生成を停止します。無料枠 (月1,000,000文字) 超過による課金を防ぐため、"
+            "当月はこれ以上生成しないこと。"
         )
     return usage
 
 
-def record_usage(chars: int, lesson_id: str) -> dict:
-    """成功したリクエスト分の文字数を当月カウンタに加算する (原子的更新)。"""
+def reserve_usage(cfg: dict, chars: int, lesson_id: str) -> dict:
+    """TTS 送信前に文字数を永続的に予約する (原子的更新)。
+
+    予約前に上限判定を行い、確定済み + 予約中 + 予約分が monthlyStopChars を
+    超えるなら UsageLimitExceeded。プロセスが finalize 前に死んでも
+    pendingChars はカウンタに残り、以降の上限判定に含まれる
+    (成功分が未計上にならない)。
+    """
+    if chars <= 0:
+        return read_usage()
     usage = read_usage()
+    stop = int(cfg["limits"]["monthlyStopChars"])
+    if usage["chars"] + usage["pendingChars"] + chars > stop:
+        raise UsageLimitExceeded(
+            f"月間文字数カウンタが停止上限に達します: 使用 {usage['chars']} + "
+            f"予約中 {usage['pendingChars']} + 予約分 {chars} > 上限 {stop} 文字。"
+            "生成を停止します。"
+        )
+    usage["pendingChars"] += chars
+    per = usage.setdefault("lessons", {}).setdefault(
+        lesson_id, {"chars": 0, "requests": 0, "pendingChars": 0}
+    )
+    per["pendingChars"] += chars
+    _write_usage_atomic(usage)
+    return usage
+
+
+def finalize_usage(chars: int, lesson_id: str) -> dict:
+    """成功したリクエストの予約を実績へ確定する (原子的更新)。"""
+    if chars <= 0:
+        return read_usage()
+    usage = read_usage()
+    usage["pendingChars"] -= chars
     usage["chars"] += chars
     usage["requests"] += 1
-    per = usage.setdefault("lessons", {}).setdefault(lesson_id, {"chars": 0, "requests": 0})
+    per = usage.setdefault("lessons", {}).setdefault(
+        lesson_id, {"chars": 0, "requests": 0, "pendingChars": 0}
+    )
+    per["pendingChars"] -= chars
     per["chars"] += chars
     per["requests"] += 1
+    _write_usage_atomic(usage)
+    return usage
+
+
+def release_usage(chars: int, lesson_id: str) -> dict:
+    """失敗したリクエストの予約を解放する (実績には計上しない)。"""
+    if chars <= 0:
+        return read_usage()
+    usage = read_usage()
+    usage["pendingChars"] = max(0, usage["pendingChars"] - chars)
+    per = usage.setdefault("lessons", {}).setdefault(
+        lesson_id, {"chars": 0, "requests": 0, "pendingChars": 0}
+    )
+    per["pendingChars"] = max(0, per["pendingChars"] - chars)
     _write_usage_atomic(usage)
     return usage
 
@@ -173,41 +230,53 @@ def synthesize(cfg: dict, text: str, voice_name: str, *, lesson_id: str, label: 
         "Content-Type": "application/json",
     }
 
+    # 送信前に予約を永続化 (reserve)。プロセスが途中で死んでも成功分が
+    # 未計上にならず、予約中の分も上限判定に含まれる (ゼロコスト制約)。
+    chars = len(text)
+    reserve_usage(cfg, chars, lesson_id)
+
     last_error: Exception | None = None
     audio: bytes | None = None
-    for attempt in range(int(wd["maxRetries"]) + 1):
-        if attempt > 0:
-            delay = float(wd["backoffSec"][min(attempt - 1, len(wd["backoffSec"]) - 1)])
-            print(f"  retry {attempt}/{wd['maxRetries']} after {delay:.0f}s ({last_error})",
-                  flush=True)
-            time.sleep(delay)
-        try:
-            req = urllib.request.Request(
-                url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST"
-            )
-            # リトライ領域は HTTP 呼び出しに限定する。usage 記録などのローカル処理を
-            # 含めると、TTS 成功後に記録だけ失敗したケースで同じ課金リクエストを
-            # 再送してしまう (ゼロコスト制約に反する)。
-            with urllib.request.build_opener().open(req, timeout=float(wd["timeoutSec"])) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-            audio = base64.b64decode(data["audioContent"])
-            break
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError,
-                KeyError, ValueError) as exc:
-            code = getattr(exc, "code", None)
-            last_error = exc
-            if code is not None:
-                print(f"  tts error: HTTP {code}", flush=True)
-            else:
-                print(f"  tts error: {type(exc).__name__}", flush=True)
+    try:
+        for attempt in range(int(wd["maxRetries"]) + 1):
+            if attempt > 0:
+                delay = float(wd["backoffSec"][min(attempt - 1, len(wd["backoffSec"]) - 1)])
+                print(f"  retry {attempt}/{wd['maxRetries']} after {delay:.0f}s ({last_error})",
+                      flush=True)
+                time.sleep(delay)
+            try:
+                req = urllib.request.Request(
+                    url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST"
+                )
+                # リトライ領域は HTTP 呼び出しに限定する。
+                with urllib.request.build_opener().open(req,
+                                                        timeout=float(wd["timeoutSec"])) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                audio = base64.b64decode(data["audioContent"])
+                break
+            except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError,
+                    KeyError, ValueError) as exc:
+                code = getattr(exc, "code", None)
+                last_error = exc
+                if code is not None:
+                    print(f"  tts error: HTTP {code}", flush=True)
+                else:
+                    print(f"  tts error: {type(exc).__name__}", flush=True)
+    except BaseException:
+        # 予期しない中断でも予約は解放する (UsageLimitExceeded 等のローカル例外)
+        release_usage(chars, lesson_id)
+        raise
 
     if audio is None:
+        # 永続失敗: 予約を実績にせず解放する
+        release_usage(chars, lesson_id)
         raise TTSError(f"TTS failed after {wd['maxRetries']} retries: {label} ({last_error})")
 
-    # 成功したリクエストのみ加算。ここでのローカル I/O 失敗はリトライせず伝播させる
-    usage = record_usage(len(text), lesson_id)
+    # 成功: 予約を実績へ確定。ここでのローカル I/O 失敗はリトライせず伝播させる
+    # (予約済みなので、仮にここで落ちても当月の上限判定から漏れない)
+    usage = finalize_usage(chars, lesson_id)
     print(
-        f"  tts ok: {label} chars={len(text)} "
+        f"  tts ok: {label} chars={chars} "
         f"(month total {usage['chars']}/{cfg['limits']['monthlyStopChars']})",
         flush=True,
     )

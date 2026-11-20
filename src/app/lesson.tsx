@@ -68,35 +68,58 @@ export default function LessonPlayerScreen() {
     if (__DEV__) console.log(`[lesson] ${at} ${action}`);
   };
 
-  const seekTo = (seconds: number, onDone?: () => void) => {
+  const seekTo = (seconds: number, label: string, onDone?: () => void) => {
     const clamped = Math.min(Math.max(seconds, 0), status.duration || CAFE_LESSON.durationSec);
     player
       .seekTo(clamped, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
-      .then(() => onDone?.())
+      .then(() => {
+        onDone?.();
+        append(label);
+      })
       .catch(() => {
         // シーク失敗は再生中の位置を変えないだけで、致命的ではない
+        append(`seekTo(${clamped}) 失敗`);
       });
   };
 
+  // --- 手動操作とデモが共用する操作関数 (ログはここで一度だけ記録する) ---
+  const play = (label = 'play()') => {
+    player.play();
+    append(label);
+  };
+  const pause = (label = 'pause()') => {
+    player.pause();
+    append(label);
+  };
+  const applyRate = (nextRate: PlaybackRate, label?: string) => {
+    setRate(nextRate);
+    player.setPlaybackRate(nextRate, PITCH_CORRECTION_QUALITY);
+    append(label ?? `setPlaybackRate(${nextRate}, ${PITCH_CORRECTION_QUALITY})`);
+  };
   const togglePlay = () => {
     if (status.playing) {
-      player.pause();
+      pause();
     } else if (
       repeatSentence === null &&
       (status.didJustFinish || (status.duration > 0 && status.currentTime >= status.duration - 0.05))
     ) {
-      seekTo(0, () => player.play());
+      seekTo(0, 'seekTo(0) // 終端から先頭へ', () => play());
     } else {
-      player.play();
+      play();
     }
   };
-
-  const applyRate = (nextRate: PlaybackRate) => {
-    setRate(nextRate);
-    player.setPlaybackRate(nextRate, PITCH_CORRECTION_QUALITY);
+  const toggleRepeat = (sentenceIndex: number) => {
+    const next = repeatSentence === sentenceIndex ? null : sentenceIndex;
+    setRepeatSentence(next);
+    append(
+      next === null
+        ? `文${sentenceIndex + 1} リピート解除`
+        : `文${sentenceIndex + 1} リピート開始`
+    );
   };
 
-  // ?demo=1: 再生→速度変更→文シーク→カラオケ確認→停止を自動実行 (手動操作と同じ API を呼ぶだけ)
+  // ?demo=1: 再生→速度変更→文シーク→カラオケ確認→停止を自動実行
+  // (手動操作と同じ操作関数を呼ぶ。ログは操作関数側で一度だけ記録される)
   const demoRanRef = useRef(false);
   const params = useLocalSearchParams<{ demo?: string }>();
   useEffect(() => {
@@ -107,33 +130,27 @@ export default function LessonPlayerScreen() {
       timers.push(setTimeout(fn, delayMs));
     };
     append('--- 自動デモ開始 (?demo=1) ---');
-    at(500, () => {
-      player.play();
-      append('play()');
-    });
-    at(3000, () => {
-      applyRate(0.7);
-      append('setPlaybackRate(0.7, high) // ピッチ補正あり');
-    });
-    at(5500, () => {
-      applyRate(1.0);
-      append('setPlaybackRate(1.0, high)');
-    });
+    at(500, () => play('play()'));
+    at(3000, () => applyRate(0.7, 'setPlaybackRate(0.7, high) // ピッチ補正あり'));
+    at(5500, () => applyRate(1.0, 'setPlaybackRate(1.0, high)'));
     at(6500, () => {
       const s3 = sentences.find((s) => s.index === 2);
       if (!s3) return;
-      seekTo(s3.startSec, () => append(`seekTo(${s3.startSec}) // 文3の冒頭へ (文シーク)`));
+      seekTo(s3.startSec, `seekTo(${s3.startSec}) // 文3の冒頭へ (文シーク)`);
     });
-    at(12000, () => {
-      player.pause();
-      append('pause() // デモ終了');
-    });
+    at(12000, () => pause('pause() // デモ終了'));
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.demo, player]);
 
-  // 文リピート (スパイク画面と同じ終端判定)。シーク先込み中の重複発行をガードする
+  // 文リピート (スパイク画面と同じ終端判定)。シーク先込み中の重複発行をガードし、
+  // 完了時には「リピートがまだ有効か」を ref で確認してから再開する
+  // (シーク完了前に解除された古い操作からは再生を始めない)
   const seekingRef = useRef(false);
+  const repeatSentenceRef = useRef<number | null>(null);
+  useEffect(() => {
+    repeatSentenceRef.current = repeatSentence;
+  }, [repeatSentence]);
   useEffect(() => {
     if (repeatSentence === null) return;
     const sentence = sentences.find((s) => s.index === repeatSentence);
@@ -143,9 +160,11 @@ export default function LessonPlayerScreen() {
     if (seekingRef.current) return;
     if (status.didJustFinish || status.currentTime >= endThreshold) {
       seekingRef.current = true;
-      seekTo(sentence.startSec, () => {
+      seekTo(sentence.startSec, `文リピート: ${sentence.startSec.toFixed(2)}s へ戻す`, () => {
         seekingRef.current = false;
-        if (!status.playing) player.play();
+        if (repeatSentenceRef.current === sentence.index) {
+          play();
+        }
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -232,10 +251,10 @@ export default function LessonPlayerScreen() {
       {sentences.map((sentence) => (
         <Pressable
           key={sentence.index}
-          onPress={() => seekTo(sentence.startSec)}
-          onLongPress={() => {
-            setRepeatSentence(repeatSentence === sentence.index ? null : sentence.index);
-          }}
+          onPress={() =>
+            seekTo(sentence.startSec, `seekTo(${sentence.startSec}) // 文${sentence.index + 1} 冒頭`)
+          }
+          onLongPress={() => toggleRepeat(sentence.index)}
           style={[
             styles.sentence,
             { backgroundColor: colors.surface, borderColor: colors.border },
