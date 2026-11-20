@@ -60,6 +60,8 @@ type CustomerInfo = { entitlements: { active: Record<string, unknown> } };
 /** Purchases モジュール (利用可能な場合のみ non-null) */
 type PurchasesModule = {
   configure: (config: { apiKey: string }) => Promise<void> | void;
+  /** SDK が公開するエラーコード列挙 (PURCHASE_CANCELLED_ERROR = "1") */
+  PURCHASES_ERROR_CODE?: { PURCHASE_CANCELLED_ERROR: string };
   addCustomerInfoUpdateListener: (listener: (info: CustomerInfo) => void) => void;
   getCustomerInfo: () => Promise<CustomerInfo>;
   getOfferings: () => Promise<{
@@ -202,8 +204,14 @@ export async function purchaseAsync(productId: string): Promise<PurchaseResult> 
     notify();
     return { purchased: true, premium };
   } catch (e) {
-    // ユーザーによるキャンセルとその他のエラーを区別する (UI のメッセージ分岐用)
-    const cancelled = (e as { code?: string })?.code === 'PURCHASES_ERROR_CODE_USER_CANCELLED';
+    // ユーザーによるキャンセルとその他のエラーを区別する (UI のメッセージ分岐用)。
+    // SDK の列挙値 PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR ("1") と
+    // userCancelled フラグのいずれでも判定できるようにする。
+    const err = e as { code?: string | number; userCancelled?: boolean | null };
+    const cancelledCode = purchases?.PURCHASES_ERROR_CODE?.PURCHASE_CANCELLED_ERROR;
+    const cancelled =
+      err?.userCancelled === true ||
+      (cancelledCode !== undefined && String(err?.code) === String(cancelledCode));
     console.error('Purchase failed:', e);
     return { purchased: false, premium, reason: cancelled ? 'cancelled' : 'error' };
   }

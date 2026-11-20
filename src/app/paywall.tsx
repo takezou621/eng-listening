@@ -76,8 +76,14 @@ export default function PaywallScreen() {
   // 選択中プランのストア商品 ID (Offerings から取得できていない場合は null)
   const selectedProductId =
     selectedPlan === 'monthly' ? monthlyProductId : annualProductId;
+  // 復元中 (restoring) は購入を開始できないようにする (購入と復元の競合防止)
   const canPurchase =
-    isAvailable && hasProducts && !purchasing && !isPremium && selectedProductId !== null;
+    isAvailable &&
+    hasProducts &&
+    !purchasing &&
+    !restoring &&
+    !isPremium &&
+    selectedProductId !== null;
 
   const purchaseNote = getPurchaseNote({
     isLoading,
@@ -87,6 +93,8 @@ export default function PaywallScreen() {
     hasProducts,
   });
 
+  const [purchaseMessage, setPurchaseMessage] = useState('');
+
   const handlePurchase = async () => {
     // 実購入: RevenueCat の purchaseProduct → 購入成功時のみ purchase_completed を発火する
     if (!canPurchase || !selectedProductId) return;
@@ -94,10 +102,14 @@ export default function PaywallScreen() {
     const result: PurchaseResult = await purchaseAsync(selectedProductId);
     setPurchasing(false);
     if (result.purchased) {
+      setPurchaseMessage('プレミアムへの切り替えが完了しました。');
       logEvent('purchase_completed', {
         productId: selectedProductId,
         premium_active: result.premium,
       });
+    } else if (result.reason === 'error') {
+      // ユーザーによるキャンセルはメッセージを出さない (エラーのみ案内)
+      setPurchaseMessage('購入に失敗しました。時間をおいて再度お試しください。');
     }
   };
 
@@ -228,6 +240,11 @@ export default function PaywallScreen() {
       {restoreMessage ? (
         <ThemedText variant="caption" color="muted" style={styles.purchaseNote}>
           {restoreMessage}
+        </ThemedText>
+      ) : null}
+      {purchaseMessage ? (
+        <ThemedText variant="caption" color="muted" style={styles.purchaseNote}>
+          {purchaseMessage}
         </ThemedText>
       ) : null}
 
