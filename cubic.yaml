@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://cubic.dev/schema/cubic-repository-config.schema.json
+
+version: 1
+
+reviews:
+  # PR 作成時に自動レビューを発火させる(マスタースイッチ)
+  enabled: true
+  # PR に新しいコミットが push されたときも自動で再レビューする
+  incremental_commits: true
+  # ドラフト PR も作成直後にレビューする場合は true に変更
+  check_drafts: false
+  # 外部コントリビューターの PR も自動レビュー対象にする
+  external_contributors_require_manual_review: false
+  # レビューにマージ信頼度 (1〜5) を付記し、マージ判断の材料にする
+  merge_confidence_summary: true
+
+  # プロジェクト固有のレビュー観点(README.md / docs/content-pipeline.md が仕様の正)
+  custom_instructions: |
+    個人開発の英語リスニングアプリ「eng-listening」。
+    Expo (SDK 58) / React Native 0.88 / TypeScript 製の iOS・Android アプリ (src/) と、
+    Python 製コンテンツ生成パイプライン (tools/content/: Gemini で台本生成 →
+    Google Cloud TTS で行ごと音声合成 → voice consistency ゲート →
+    faster-whisper で単語タイムスタンプ) の 2 層構成。
+
+    - レビューコメントは日本語で書く。
+    - assets/lessons/** はパイプラインの生成物(コミット済み)。問題があれば生成元
+      tools/content/ 側の修正として指摘する。
+    - src/ の UI 変更は docs/evidence/ への証跡スクリーンショット追加が習慣。
+      無い場合は過度に要求せず一言促す程度に留める。
+    - TypeScript は strict 運用。`expo lint` と `tsc --noEmit` を通る変更かを意識して指摘する。
+
+  # パイプラインの生成物・ロックファイルはレビュー対象外
+  ignore:
+    files:
+      - "assets/**"
+      - "docs/evidence/**"
+      - "package-lock.json"
+      - "tools/content/uv.lock"
+
+  custom_rules:
+    - name: プレイヤー再生制御の正確性
+      description: |
+        AB リピートのループ境界、文シーク、再生速度変更 (0.7x〜1.2x・ピッチ保持)、
+        カラオケ表示と再生位置の同期ズレ、バックグラウンド/通話中断からの復帰、
+        useEffect の後始末やリスナー解除漏れ、再生位置まわりのレース条件を
+        重点的に確認する。
+      include:
+        - "src/features/player/**"
+        - "src/app/**"
+        - "src/components/**"
+
+    - name: レッスンデータのスキーマ整合性
+      description: |
+        レッスン JSON のスキーマはアプリ側 src/features/lesson/types.ts と生成側
+        tools/content/build_lesson.py・generate_scripts.py で共有される
+        (linking.type は ALLOWED_LINKING_TYPES と一致させる等)。
+        片側だけの変更で乖離が起きる場合は要修正。assertValidLesson の検証漏れや、
+        configHash による voice_config.json 混在防止が壊れる変更も指摘する。
+      include:
+        - "src/features/lesson/**"
+        - "src/data/**"
+        - "tools/content/**"
+
+    - name: 権利・プライバシー・秘匿情報の方針遵守
+      description: |
+        このアプリは著作権クリーンな AI 生成コンテンツのみを扱うのが根幹方針
+        (README の調達戦略 A + C)。スクレイピングや動画サイトからの音声抽出・
+        ダウンロードを行う・提案する変更は仕様違反として指摘する。
+        シャドーイング録音などユーザーの音声を端末外へ送信・保存する変更、
+        マイク用途の説明 (NSMicrophoneUsageDescription 等) との不整合、
+        GEMINI_API_KEY などのシークレットがコミット・ログ・PR に出る変更も要修正。
+      # include を省略 = スキーマ上デフォルトで全ファイルが対象
+      # (docs や台本スクリプトも含め全体に効かせたい)
+
+    - name: パイプラインのコスト安全性と冪等性
+      description: |
+        tools/content/ は従量課金 API (Gemini / Cloud TTS / faster-whisper) を呼ぶ。
+        再実行時の冪等性 (既存レッスンのスキップ、cafe-ordering は --force でも常にスキップ)、
+        部分失敗からの再開、文字数カウンタや usage/ 配下のコスト記録の更新漏れ、
+        意図しない大量 API 呼び出しのリスクを確認する。
+      include:
+        - "tools/**"
+
+    - name: MVP スコープの遵守
+      description: |
+        v1.0 は RevenueCat サブスクリプションのペイウォールを含む
+        (月額 ¥680 / 年額 ¥4,800、年額は 7 日間無料トライアル。Issues #17〜#19, #22)。
+        広告 SDK の導入は v1.0 スコープ外。CarPlay / Apple Watch は v1.1 の必須要件だが
+        entitlement 申請は v1.0 リリース後に開始という計画。スコープ外の実装や、
+        app.config.ts / eas.json / package.json への entitlement・ネイティブモジュール追加が
+        計画と合致するかを確認し、意図が不明なら指摘する。
+      include:
+        - "app.config.ts"
+        - "eas.json"
+        - "package.json"
+        - "src/**"
+
+pr_descriptions:
+  generate: true
+  instructions: |
+    日本語で生成する。変更の意図、主な変更点、関連 Issue 番号 (#N) を明記する。
+    UI 変更の場合は確認手順 (実機 / シミュレータ) を添える。
