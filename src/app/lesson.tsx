@@ -75,6 +75,7 @@ function LessonPlayerScreen({
   demoParam,
   initialSentenceIndex,
   autorecordParam,
+  autostudyParam,
 }: {
   bundle: LessonBundle;
   demoParam: boolean;
@@ -82,6 +83,8 @@ function LessonPlayerScreen({
   initialSentenceIndex: number | null;
   /** 自動録音デモ (スクロール後に録音開始 → 4 秒で停止) */
   autorecordParam: boolean;
+  /** 自動学習デモ (再生して 6 秒後に一時停止。進捗記録の収集を検証) */
+  autostudyParam: boolean;
 }) {
   const lesson = bundle.data;
   const { colors } = useTheme();
@@ -378,6 +381,22 @@ function LessonPlayerScreen({
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autorecordParam]);
+
+  // ?autostudy=1: 再生を開始して 6 秒後に一時停止する
+  // (進捗記録の収集フローを自動検証する用。?demo=1 と同じく既存操作関数を呼ぶだけ)
+  const autoStudyRanRef = useRef(false);
+  useEffect(() => {
+    if (!autostudyParam || autoStudyRanRef.current) return;
+    autoStudyRanRef.current = true;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const at = (delayMs: number, fn: () => void) => {
+      timers.push(setTimeout(fn, delayMs));
+    };
+    at(800, () => play('自動学習デモ: play()'));
+    at(6800, () => pause('自動学習デモ: pause() // 6 秒再生して記録'));
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autostudyParam, player]);
 
   // 文リピート (スパイク画面と同じ終端判定)。シーク先込み中の重複発行をガードし、
   // 完了時には「リピートがまだ有効か」を ref で確認してから再開する
@@ -1028,6 +1047,7 @@ export default function LessonRoute() {
     lesson?: string | string[];
     sentence?: string | string[];
     autorecord?: string | string[];
+    autostudy?: string | string[];
   }>();
   const lessonParam = Array.isArray(params.lesson) ? params.lesson[0] : params.lesson;
   const sentenceParam = Array.isArray(params.sentence) ? params.sentence[0] : params.sentence;
@@ -1040,6 +1060,7 @@ export default function LessonRoute() {
       demoParam={params.demo === '1'}
       initialSentenceIndex={Number.isFinite(sentenceNumber) ? sentenceNumber - 1 : null}
       autorecordParam={params.autorecord === '1'}
+      autostudyParam={params.autostudy === '1'}
     />
   );
 }
