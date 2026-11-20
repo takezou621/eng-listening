@@ -7,6 +7,8 @@
  * プレースホルダ〈…〉は GM が差し替える項目です。
  */
 
+import { DISPLAY_PRICES } from '@/features/billing/config';
+
 export type LegalDocId = 'privacy' | 'terms' | 'tokushoho';
 
 export interface LegalSection {
@@ -115,7 +117,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
       {
         heading: '2. サブスクリプション',
         paragraphs: [
-          '月額プラン: ¥680 / 年額プラン: ¥4,800（年額プランには 7 日間の無料トライアルが付きます）。',
+          `${DISPLAY_PRICES.monthlyJa} / ${DISPLAY_PRICES.annualJa}。`,
           'サブスクリプションは自動更新されます。次回更新日の 24 時間前までに解約しない限り、契約は自動的に更新されます。',
           '解約は、端末の App Store アカウント設定からいつでも行えます。解約後も現在の契約期間の終了までは機能を利用できます。',
           '課金は Apple ID 決済（RevenueCat 経由）で処理されます。',
@@ -151,7 +153,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
       {
         heading: '2. Subscription',
         paragraphs: [
-          'Monthly plan: ¥680 / Annual plan: ¥4,800 (annual plan includes a 7-day free trial).',
+          `${DISPLAY_PRICES.monthlyEn}; ${DISPLAY_PRICES.annualEn}.`,
           'Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period.',
           'You can cancel anytime from your App Store account settings. Access continues until the end of the current period.',
           'Payments are processed through your Apple ID (via RevenueCat).',
@@ -189,7 +191,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
       { heading: '所在地', paragraphs: ['〈所在地〉'] },
       { heading: 'お問い合わせ', paragraphs: ['〈メールアドレス〉（受付時間: 〈平日 10:00〜18:00〉）'] },
       { heading: '電話番号', paragraphs: ['〈電話番号〉（請求があった場合は遅滞なく開示します）'] },
-      { heading: '販売価格', paragraphs: ['月額プラン: ¥680 / 年額プラン: ¥4,800（年額プランには 7 日間の無料トライアルが付きます）。Apple App Store を通じて課金されます。'] },
+      { heading: '販売価格', paragraphs: [`${DISPLAY_PRICES.monthlyJa} / ${DISPLAY_PRICES.annualJa}。Apple App Store を通じて課金されます。`] },
       { heading: '支払方法', paragraphs: ['Apple ID 決済（RevenueCat 経由）'] },
       { heading: 'サービスの提供時期', paragraphs: ['購入後、アプリ内で即時に利用可能'] },
       { heading: 'キャンセル・解約について', paragraphs: ['サブスクリプションは自動更新です。解約は App Store のアカウント設定から次回更新日の 24 時間前までに行えます。'] },
@@ -201,7 +203,7 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
       { heading: 'Location', paragraphs: ['<address>'] },
       { heading: 'Contact', paragraphs: ['<email address> (hours: <weekdays 10:00-18:00>)'] },
       { heading: 'Phone Number', paragraphs: ['<phone number> (disclosed upon request without delay)'] },
-      { heading: 'Price', paragraphs: ['Monthly: ¥680 / Annual: ¥4,800 (the annual plan includes a 7-day free trial). Billed through the Apple App Store.'] },
+      { heading: 'Price', paragraphs: [`${DISPLAY_PRICES.monthlyEn}; ${DISPLAY_PRICES.annualEn}. Billed through the Apple App Store.`] },
       { heading: 'Payment Method', paragraphs: ['Apple ID payment (via RevenueCat)'] },
       { heading: 'Timing of Service', paragraphs: ['Available in-app immediately after purchase'] },
       { heading: 'Cancellation', paragraphs: ['Subscriptions auto-renew. Cancel from your App Store account settings at least 24 hours before the next renewal date.'] },
