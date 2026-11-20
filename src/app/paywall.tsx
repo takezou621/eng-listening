@@ -101,14 +101,26 @@ export default function PaywallScreen() {
     }
   };
 
+  const [restoreMessage, setRestoreMessage] = useState('');
+
   const handleRestore = async () => {
     if (!isAvailable) return;
     setRestoring(true);
     const result: RestoreResult = await restorePurchasesAsync();
     setRestoring(false);
-    if (result.restored) {
-      // 復元成功は purchase_completed と同義 (restored フラグで区別する)
-      logEvent('purchase_completed', { productId: 'restored', restored: true, premium_active: result.premium });
+    if (result.restored && result.premium) {
+      // 復元成功かつプレミアムが有効な場合のみ購入完了として記録する
+      logEvent('purchase_completed', {
+        productId: 'restored',
+        restored: true,
+        premium_active: true,
+      });
+      setRestoreMessage('プレミアムが復元されました。');
+    } else if (result.restored) {
+      // 復元処理は成功したが、プレミアム購入が見つからない場合
+      setRestoreMessage('復元できるプレミアム購入が見つかりませんでした。');
+    } else {
+      setRestoreMessage('復元に失敗しました。時間をおいて再度お試しください。');
     }
   };
 
@@ -213,6 +225,11 @@ export default function PaywallScreen() {
           {restoring ? '復元中…' : '購入を復元'}
         </ThemedText>
       </Pressable>
+      {restoreMessage ? (
+        <ThemedText variant="caption" color="muted" style={styles.purchaseNote}>
+          {restoreMessage}
+        </ThemedText>
+      ) : null}
 
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ThemedText variant="heading">解約方法</ThemedText>
