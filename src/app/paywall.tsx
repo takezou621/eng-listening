@@ -52,6 +52,8 @@ export default function PaywallScreen() {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  // 購入/復元の結果メッセージ (1 つの state に統一し、矛盾するメッセージの併存を防ぐ)
+  const [resultMessage, setResultMessage] = useState('');
 
   useEffect(() => {
     void initBillingAsync();
@@ -93,30 +95,33 @@ export default function PaywallScreen() {
     hasProducts,
   });
 
-  const [purchaseMessage, setPurchaseMessage] = useState('');
-
   const handlePurchase = async () => {
     // 実購入: RevenueCat の purchaseProduct → 購入成功時のみ purchase_completed を発火する
     if (!canPurchase || !selectedProductId) return;
+    // 結果メッセージは 1 つの state で管理するため、開始時に前回の結果を消す
+    setResultMessage('');
     setPurchasing(true);
     const result: PurchaseResult = await purchaseAsync(selectedProductId);
     setPurchasing(false);
     if (result.purchased) {
-      setPurchaseMessage('プレミアムへの切り替えが完了しました。');
+      setResultMessage('プレミアムへの切り替えが完了しました。');
       logEvent('purchase_completed', {
         productId: selectedProductId,
         premium_active: result.premium,
       });
     } else if (result.reason === 'error') {
       // ユーザーによるキャンセルはメッセージを出さない (エラーのみ案内)
-      setPurchaseMessage('購入に失敗しました。時間をおいて再度お試しください。');
+      setResultMessage('購入に失敗しました。時間をおいて再度お試しください。');
+    } else {
+      // キャンセル: 前回のメッセージが残らないようクリアする
+      setResultMessage('');
     }
   };
 
-  const [restoreMessage, setRestoreMessage] = useState('');
-
   const handleRestore = async () => {
     if (!isAvailable) return;
+    // 結果メッセージは 1 つの state で管理するため、開始時に前回の結果を消す
+    setResultMessage('');
     setRestoring(true);
     const result: RestoreResult = await restorePurchasesAsync();
     setRestoring(false);
@@ -127,12 +132,12 @@ export default function PaywallScreen() {
         restored: true,
         premium_active: true,
       });
-      setRestoreMessage('プレミアムが復元されました。');
+      setResultMessage('プレミアムが復元されました。');
     } else if (result.restored) {
       // 復元処理は成功したが、プレミアム購入が見つからない場合
-      setRestoreMessage('復元できるプレミアム購入が見つかりませんでした。');
+      setResultMessage('復元できるプレミアム購入が見つかりませんでした。');
     } else {
-      setRestoreMessage('復元に失敗しました。時間をおいて再度お試しください。');
+      setResultMessage('復元に失敗しました。時間をおいて再度お試しください。');
     }
   };
 
@@ -237,14 +242,9 @@ export default function PaywallScreen() {
           {restoring ? '復元中…' : '購入を復元'}
         </ThemedText>
       </Pressable>
-      {restoreMessage ? (
+      {resultMessage ? (
         <ThemedText variant="caption" color="muted" style={styles.purchaseNote}>
-          {restoreMessage}
-        </ThemedText>
-      ) : null}
-      {purchaseMessage ? (
-        <ThemedText variant="caption" color="muted" style={styles.purchaseNote}>
-          {purchaseMessage}
+          {resultMessage}
         </ThemedText>
       ) : null}
 
