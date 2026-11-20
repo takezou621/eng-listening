@@ -72,7 +72,7 @@ function mergeWeakSentences(
       byKey.set(key, s);
     }
   }
-  return [...byKey.values()];
+  return [...byKey.values()].sort((a, b) => b.addedAtMs - a.addedAtMs);
 }
 
 function notify() {

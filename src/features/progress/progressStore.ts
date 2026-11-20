@@ -8,6 +8,10 @@ import { useEffect, useState } from 'react';
  *
  * 記録の単位は「日 (ローカル日)」。再生秒数は実際に再生が進行した時間のみを
  * 累計する (一時停止・シークジャンプ・逆再生はカウントしない = 水増ししない)。
+ *
+ * 読み込みは useProgressData のマウント時に行うが、それ以前の記録も
+ * updateData がメモリに蓄積し、読み込み完了後にマージして永続化するため、
+ * 進捗画面のマウントに依存せずに記録が保存される。
  */
 
 const STORAGE_FILE = new File(Paths.document, 'progress-data.json');
@@ -76,13 +80,14 @@ function notify() {
   }
 }
 
-// 読み込み完了前の保存は禁止し、書き込みは直列化する (PR #33 の userStore と同じ方針)
-
-function updateData(mutate: (current: ProgressData) => ProgressData) {
-  cachedData = mutate(cachedData);
-  notify();
+/**
+ * すべての書き込みはこの直列化キューを通る。
+ * 読み込み完了 (canPersist = true) 前の更新はキューに保留され、
+ * 読み込み成功後にまとめてフラッシュされる。
+ * 読み込みが失敗した場合はゲートが開かないため、既存ファイルを保護する。
+ */
+function flushToDisk() {
   saveQueue = saveQueue.then(async () => {
-    if (!canPersist) return;
     try {
       await STORAGE_FILE.write(JSON.stringify(cachedData));
     } catch (e) {
@@ -91,28 +96,62 @@ function updateData(mutate: (current: ProgressData) => ProgressData) {
   });
 }
 
-/** 読み込みは 1 回だけ実行し、並走呼び出しを dedupe する */
-export function loadProgressDataAsync(): Promise<void> {
-  if (!loadPromise) {
-    loadPromise = (async () => {
-      try {
-        if (STORAGE_FILE.exists) {
-          const parsed = parseProgress(await STORAGE_FILE.text());
-          updateData((current) => ({ ...current, ...parsed }));
-        }
-      } catch (e) {
-        // 読み込み失敗時は canPersist を true にしない (既存ファイルの保護)。
-        console.error('Failed to load progress data:', e);
-        isLoaded = true;
-        notify();
-        return;
-      }
-      canPersist = true;
-      isLoaded = true;
-      // 読み込み待ち中に積まれた更新 (保留中の最新状態) をここで書き出す
-      await saveQueue;
-    })();
+function updateData(mutate: (current: ProgressData) => ProgressData) {
+  cachedData = mutate(cachedData);
+  notify();
+  if (canPersist) {
+    flushToDisk();
   }
+  // canPersist = false のときはメモリにのみ蓄積し、
+  // 読み込み完了後にマージして永続化される
+}
+
+/**
+ * 読み込みは 1 回だけ実行し、並走呼び出しを dedupe する。
+ * 成功時: canPersist を true にして、読み込み中にメモリへ蓄積された記録を
+ * 日別にマージしたうえでフラッシュする。
+ * 失敗時: loadPromise を null に戻して再試行可能にする。
+ * isLoaded は失敗時も true にする (毎回の自動読み込みを防ぐため)。
+ */
+export function loadProgressDataAsync(): Promise<void> {
+  if (loadPromise) {
+    return loadPromise;
+  }
+  loadPromise = (async () => {
+    let parsed: ProgressData | null = null;
+    try {
+      if (STORAGE_FILE.exists) {
+        parsed = parseProgress(await STORAGE_FILE.text());
+      }
+    } catch (e) {
+      console.error('Failed to load progress data:', e);
+      // 再試行可能にする: 次回 loadProgressDataAsync 呼び出しで再読み込みできる
+      loadPromise = null;
+      isLoaded = true;
+      notify();
+      return;
+    }
+    canPersist = true;
+    isLoaded = true;
+    // 読み込み結果とメモリ内の記録 (読み込み待ち中に蓄積された分) を日別にマージする。
+    // これにより、読み込み完了前に蓄積された記録も永続化される。
+    for (const [date, memory] of Object.entries(cachedData)) {
+      const saved = parsed?.[date];
+      if (saved) {
+        cachedData[date] = {
+          ...saved,
+          seconds: saved.seconds + memory.seconds,
+          shadowingCount: saved.shadowingCount + memory.shadowingCount,
+          playedLessons: [...new Set([...saved.playedLessons, ...memory.playedLessons])],
+          completedLessons: [
+            ...new Set([...saved.completedLessons, ...memory.completedLessons]),
+          ],
+        };
+      }
+    }
+    notify();
+    flushToDisk();
+  })();
   return loadPromise;
 }
 

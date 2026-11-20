@@ -1,4 +1,5 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
@@ -22,6 +23,7 @@ function formatMinutes(seconds: number): string {
 
 /** 学習進捗画面 (Issue #13) */
 export default function ProgressScreen() {
+  const router = useRouter();
   const { colors } = useTheme();
   const days = useProgressData();
 
@@ -55,6 +57,14 @@ export default function ProgressScreen() {
           <ThemedText variant="caption" color="muted" style={styles.gap}>
             ライブラリからレッスンを再生すると、学習時間やシャドーイングの記録がここに表示されます。
           </ThemedText>
+          <Pressable
+            onPress={() => router.push('/(tabs)')}
+            style={[styles.emptyLink, { backgroundColor: colors.secondarySurface }]}
+          >
+            <ThemedText variant="caption" color="primary" style={{ fontWeight: '600' }}>
+              ライブラリを開く
+            </ThemedText>
+          </Pressable>
         </View>
       ) : null}
 
@@ -142,6 +152,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   sectionTitle: { marginTop: 20, marginBottom: 8 },
+  emptyLink: { borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 8 },
   heatmap: { flexDirection: 'row', flexWrap: 'wrap', gap: 3 },
   heatCell: { width: 16, height: 16, borderRadius: 3 },
   heatLegend: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10 },
