@@ -1,0 +1,118 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "my-favorite-movie",
+ "lines": {
+  "L01_narrator.wav": {
+   "index": 1,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Today, I want to talk about my favorite movie.",
+   "chars": 46,
+   "durationSec": 2.793,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_narrator.wav": {
+   "index": 2,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "It is a heartwarming story about a young boy.",
+   "chars": 45,
+   "durationSec": 2.834,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_narrator.wav": {
+   "index": 3,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "He moves to a new city with his family.",
+   "chars": 39,
+   "durationSec": 2.514,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_narrator.wav": {
+   "index": 4,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "At first, he feels lonely and has no friends.",
+   "chars": 45,
+   "durationSec": 3.291,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_narrator.wav": {
+   "index": 5,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Then, he meets an unusual dog in the park.",
+   "chars": 42,
+   "durationSec": 2.996,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_narrator.wav": {
+   "index": 6,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "They become best friends and go on an adventure.",
+   "chars": 48,
+   "durationSec": 2.89,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_narrator.wav": {
+   "index": 7,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I will not tell you how the film ends, so please watch it yourself.",
+   "chars": 67,
+   "durationSec": 4.267,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_narrator.wav": {
+   "index": 8,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "What I love most is the beautiful music.",
+   "chars": 40,
+   "durationSec": 2.628,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_narrator.wav": {
+   "index": 9,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "It always makes me feel happy and energetic.",
+   "chars": 44,
+   "durationSec": 2.848,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_narrator.wav": {
+   "index": 10,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I have watched it a lot of times.",
+   "chars": 33,
+   "durationSec": 2.118,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L11_narrator.wav": {
+   "index": 11,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "You should check it out this weekend.",
+   "chars": 37,
+   "durationSec": 1.968,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 67,
+  "lessonRequests": 1,
+  "monthChars": 7962,
+  "monthRequests": 145,
+  "monthlyStopChars": 900000
+ }
+}

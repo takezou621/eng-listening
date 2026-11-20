@@ -1,0 +1,874 @@
+{
+ "id": "small-talk-coworker",
+ "title": "Small Talk with a Coworker",
+ "titleJa": "同僚との雑談",
+ "type": "conversation",
+ "level": "intermediate",
+ "category": "office",
+ "audio": "audio.m4a",
+ "durationSec": 34.006,
+ "speakerNames": {
+  "female": "Lisa",
+  "male": "Mark"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T10:06:35Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "female",
+   "startSec": 0.0,
+   "endSec": 3.29,
+   "text": "Did you get a chance to enjoy the sunshine yesterday afternoon?",
+   "translationJa": "昨日の午後は日差しを楽しむ時間はありましたか？",
+   "chunks": [
+    {
+     "text": "Did you",
+     "startSec": 0.0,
+     "endSec": 0.22
+    },
+    {
+     "text": "get a chance",
+     "startSec": 0.22,
+     "endSec": 0.7
+    },
+    {
+     "text": "to enjoy",
+     "startSec": 0.7,
+     "endSec": 1.12
+    },
+    {
+     "text": "the sunshine",
+     "startSec": 1.12,
+     "endSec": 1.58
+    },
+    {
+     "text": "yesterday afternoon?",
+     "startSec": 1.58,
+     "endSec": 2.7
+    }
+   ],
+   "words": [
+    {
+     "text": "Did",
+     "startSec": 0.0,
+     "endSec": 0.1
+    },
+    {
+     "text": "you",
+     "startSec": 0.1,
+     "endSec": 0.22
+    },
+    {
+     "text": "get",
+     "startSec": 0.22,
+     "endSec": 0.38
+    },
+    {
+     "text": "a",
+     "startSec": 0.38,
+     "endSec": 0.48
+    },
+    {
+     "text": "chance",
+     "startSec": 0.48,
+     "endSec": 0.7
+    },
+    {
+     "text": "to",
+     "startSec": 0.7,
+     "endSec": 0.92
+    },
+    {
+     "text": "enjoy",
+     "startSec": 0.92,
+     "endSec": 1.12
+    },
+    {
+     "text": "the",
+     "startSec": 1.12,
+     "endSec": 1.34
+    },
+    {
+     "text": "sunshine",
+     "startSec": 1.34,
+     "endSec": 1.58
+    },
+    {
+     "text": "yesterday",
+     "startSec": 1.58,
+     "endSec": 2.12
+    },
+    {
+     "text": "afternoon?",
+     "startSec": 2.12,
+     "endSec": 2.7
+    }
+   ],
+   "linking": [
+    {
+     "span": "Did you",
+     "type": "palatalization",
+     "ipa": "/dɪdʒuː/",
+     "noteJa": "Did の d と you の y が同化して「ディジュー」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "male",
+   "startSec": 3.79,
+   "endSec": 7.654,
+   "text": "Not really, because I had to finish up our quarterly budget report.",
+   "translationJa": "あまりなかったですね。四半期の予算報告書を仕上げなければならなかったので。",
+   "chunks": [
+    {
+     "text": "Not really,",
+     "startSec": 3.79,
+     "endSec": 4.23
+    },
+    {
+     "text": "because I had to",
+     "startSec": 4.43,
+     "endSec": 5.05
+    },
+    {
+     "text": "finish up",
+     "startSec": 5.05,
+     "endSec": 5.49
+    },
+    {
+     "text": "our quarterly budget report.",
+     "startSec": 5.49,
+     "endSec": 6.79
+    }
+   ],
+   "words": [
+    {
+     "text": "Not",
+     "startSec": 3.79,
+     "endSec": 3.91
+    },
+    {
+     "text": "really,",
+     "startSec": 3.91,
+     "endSec": 4.23
+    },
+    {
+     "text": "because",
+     "startSec": 4.43,
+     "endSec": 4.59
+    },
+    {
+     "text": "I",
+     "startSec": 4.59,
+     "endSec": 4.75
+    },
+    {
+     "text": "had",
+     "startSec": 4.75,
+     "endSec": 4.93
+    },
+    {
+     "text": "to",
+     "startSec": 4.93,
+     "endSec": 5.05
+    },
+    {
+     "text": "finish",
+     "startSec": 5.05,
+     "endSec": 5.27
+    },
+    {
+     "text": "up",
+     "startSec": 5.27,
+     "endSec": 5.49
+    },
+    {
+     "text": "our",
+     "startSec": 5.49,
+     "endSec": 5.59
+    },
+    {
+     "text": "quarterly",
+     "startSec": 5.59,
+     "endSec": 5.91
+    },
+    {
+     "text": "budget",
+     "startSec": 5.91,
+     "endSec": 6.31
+    },
+    {
+     "text": "report.",
+     "startSec": 6.31,
+     "endSec": 6.79
+    }
+   ],
+   "linking": [
+    {
+     "span": "finish up",
+     "type": "linking",
+     "ipa": "/ˈfɪnɪʃʌp/",
+     "noteJa": "finish の語末 /ʃ/ と up の母音が連結して「フィニシャップ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "female",
+   "startSec": 8.154,
+   "endSec": 12.351,
+   "text": "That sounds tough, but at least the weather is going to stay nice.",
+   "translationJa": "それは大変でしたね。でも、少なくとも天気はこのまま良さそうですよ。",
+   "chunks": [
+    {
+     "text": "That sounds tough,",
+     "startSec": 8.154,
+     "endSec": 9.074
+    },
+    {
+     "text": "but at least",
+     "startSec": 9.394,
+     "endSec": 9.814
+    },
+    {
+     "text": "the weather",
+     "startSec": 9.814,
+     "endSec": 10.254
+    },
+    {
+     "text": "is going to",
+     "startSec": 10.254,
+     "endSec": 10.834
+    },
+    {
+     "text": "stay nice.",
+     "startSec": 10.834,
+     "endSec": 11.374
+    }
+   ],
+   "words": [
+    {
+     "text": "That",
+     "startSec": 8.154,
+     "endSec": 8.314
+    },
+    {
+     "text": "sounds",
+     "startSec": 8.314,
+     "endSec": 8.614
+    },
+    {
+     "text": "tough,",
+     "startSec": 8.614,
+     "endSec": 9.074
+    },
+    {
+     "text": "but",
+     "startSec": 9.394,
+     "endSec": 9.494
+    },
+    {
+     "text": "at",
+     "startSec": 9.494,
+     "endSec": 9.614
+    },
+    {
+     "text": "least",
+     "startSec": 9.614,
+     "endSec": 9.814
+    },
+    {
+     "text": "the",
+     "startSec": 9.814,
+     "endSec": 10.054
+    },
+    {
+     "text": "weather",
+     "startSec": 10.054,
+     "endSec": 10.254
+    },
+    {
+     "text": "is",
+     "startSec": 10.254,
+     "endSec": 10.494
+    },
+    {
+     "text": "going",
+     "startSec": 10.494,
+     "endSec": 10.654
+    },
+    {
+     "text": "to",
+     "startSec": 10.654,
+     "endSec": 10.834
+    },
+    {
+     "text": "stay",
+     "startSec": 10.834,
+     "endSec": 11.074
+    },
+    {
+     "text": "nice.",
+     "startSec": 11.074,
+     "endSec": 11.374
+    }
+   ],
+   "linking": [
+    {
+     "span": "going to",
+     "type": "reduction",
+     "ipa": "/ˈɡənə/",
+     "noteJa": "going to が口語で脱落・弱化して「ガナ」のように短く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "male",
+   "startSec": 12.851,
+   "endSec": 16.678,
+   "text": "I hope so, since I want to go camping with my brother this weekend.",
+   "translationJa": "そうだといいです。今週末は兄とキャンプに行く予定なんです。",
+   "chunks": [
+    {
+     "text": "I hope so,",
+     "startSec": 12.851,
+     "endSec": 13.371
+    },
+    {
+     "text": "since I want to",
+     "startSec": 13.631,
+     "endSec": 14.131
+    },
+    {
+     "text": "go camping",
+     "startSec": 14.131,
+     "endSec": 14.571
+    },
+    {
+     "text": "with my brother",
+     "startSec": 14.571,
+     "endSec": 15.191
+    },
+    {
+     "text": "this weekend.",
+     "startSec": 15.191,
+     "endSec": 15.751
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 12.851,
+     "endSec": 12.911
+    },
+    {
+     "text": "hope",
+     "startSec": 12.911,
+     "endSec": 13.071
+    },
+    {
+     "text": "so,",
+     "startSec": 13.071,
+     "endSec": 13.371
+    },
+    {
+     "text": "since",
+     "startSec": 13.631,
+     "endSec": 13.751
+    },
+    {
+     "text": "I",
+     "startSec": 13.751,
+     "endSec": 13.891
+    },
+    {
+     "text": "want",
+     "startSec": 13.891,
+     "endSec": 14.011
+    },
+    {
+     "text": "to",
+     "startSec": 14.011,
+     "endSec": 14.131
+    },
+    {
+     "text": "go",
+     "startSec": 14.131,
+     "endSec": 14.231
+    },
+    {
+     "text": "camping",
+     "startSec": 14.231,
+     "endSec": 14.571
+    },
+    {
+     "text": "with",
+     "startSec": 14.571,
+     "endSec": 14.811
+    },
+    {
+     "text": "my",
+     "startSec": 14.811,
+     "endSec": 14.951
+    },
+    {
+     "text": "brother",
+     "startSec": 14.951,
+     "endSec": 15.191
+    },
+    {
+     "text": "this",
+     "startSec": 15.191,
+     "endSec": 15.411
+    },
+    {
+     "text": "weekend.",
+     "startSec": 15.411,
+     "endSec": 15.751
+    }
+   ],
+   "linking": [
+    {
+     "span": "want to",
+     "type": "reduction",
+     "ipa": "/ˈwɑːnə/",
+     "noteJa": "want to がカジュアルな会話で縮約され、「ワナ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "female",
+   "startSec": 17.178,
+   "endSec": 20.918,
+   "text": "That would be great, but do you have time for a quick question?",
+   "translationJa": "それは素敵ですね。ところで、手短な質問をしてもよろしいですか？",
+   "chunks": [
+    {
+     "text": "That would be great,",
+     "startSec": 17.178,
+     "endSec": 17.938
+    },
+    {
+     "text": "but do you",
+     "startSec": 18.298,
+     "endSec": 18.658
+    },
+    {
+     "text": "have time",
+     "startSec": 18.658,
+     "endSec": 19.038
+    },
+    {
+     "text": "for a",
+     "startSec": 19.038,
+     "endSec": 19.318
+    },
+    {
+     "text": "quick question?",
+     "startSec": 19.318,
+     "endSec": 19.918
+    }
+   ],
+   "words": [
+    {
+     "text": "That",
+     "startSec": 17.178,
+     "endSec": 17.358
+    },
+    {
+     "text": "would",
+     "startSec": 17.358,
+     "endSec": 17.498
+    },
+    {
+     "text": "be",
+     "startSec": 17.498,
+     "endSec": 17.658
+    },
+    {
+     "text": "great,",
+     "startSec": 17.658,
+     "endSec": 17.938
+    },
+    {
+     "text": "but",
+     "startSec": 18.298,
+     "endSec": 18.418
+    },
+    {
+     "text": "do",
+     "startSec": 18.418,
+     "endSec": 18.558
+    },
+    {
+     "text": "you",
+     "startSec": 18.558,
+     "endSec": 18.658
+    },
+    {
+     "text": "have",
+     "startSec": 18.658,
+     "endSec": 18.818
+    },
+    {
+     "text": "time",
+     "startSec": 18.818,
+     "endSec": 19.038
+    },
+    {
+     "text": "for",
+     "startSec": 19.038,
+     "endSec": 19.258
+    },
+    {
+     "text": "a",
+     "startSec": 19.258,
+     "endSec": 19.318
+    },
+    {
+     "text": "quick",
+     "startSec": 19.318,
+     "endSec": 19.518
+    },
+    {
+     "text": "question?",
+     "startSec": 19.518,
+     "endSec": 19.918
+    }
+   ],
+   "linking": [
+    {
+     "span": "for a",
+     "type": "weak-form",
+     "ipa": "/fər‿ə/",
+     "noteJa": "for が弱形 /fər/ となり、後ろの冠詞 a とつながって「ファラ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "male",
+   "startSec": 21.418,
+   "endSec": 25.005,
+   "text": "Sure, what do you need to talk about before our afternoon meeting?",
+   "translationJa": "もちろんです。午後の会議の前に何について話す必要がありますか？",
+   "chunks": [
+    {
+     "text": "Sure,",
+     "startSec": 21.418,
+     "endSec": 21.638
+    },
+    {
+     "text": "what do you need",
+     "startSec": 21.938,
+     "endSec": 22.438
+    },
+    {
+     "text": "to talk about",
+     "startSec": 22.438,
+     "endSec": 23.018
+    },
+    {
+     "text": "before our",
+     "startSec": 23.018,
+     "endSec": 23.478
+    },
+    {
+     "text": "afternoon meeting?",
+     "startSec": 23.478,
+     "endSec": 24.138
+    }
+   ],
+   "words": [
+    {
+     "text": "Sure,",
+     "startSec": 21.418,
+     "endSec": 21.638
+    },
+    {
+     "text": "what",
+     "startSec": 21.938,
+     "endSec": 22.118
+    },
+    {
+     "text": "do",
+     "startSec": 22.118,
+     "endSec": 22.238
+    },
+    {
+     "text": "you",
+     "startSec": 22.238,
+     "endSec": 22.338
+    },
+    {
+     "text": "need",
+     "startSec": 22.338,
+     "endSec": 22.438
+    },
+    {
+     "text": "to",
+     "startSec": 22.438,
+     "endSec": 22.578
+    },
+    {
+     "text": "talk",
+     "startSec": 22.578,
+     "endSec": 22.758
+    },
+    {
+     "text": "about",
+     "startSec": 22.758,
+     "endSec": 23.018
+    },
+    {
+     "text": "before",
+     "startSec": 23.018,
+     "endSec": 23.318
+    },
+    {
+     "text": "our",
+     "startSec": 23.318,
+     "endSec": 23.478
+    },
+    {
+     "text": "afternoon",
+     "startSec": 23.478,
+     "endSec": 23.798
+    },
+    {
+     "text": "meeting?",
+     "startSec": 23.798,
+     "endSec": 24.138
+    }
+   ],
+   "linking": [
+    {
+     "span": "talk about",
+     "type": "linking",
+     "ipa": "/ˈtɔːkəbaʊt/",
+     "noteJa": "talk の /k/ と about の語頭母音が連結して「トーカバウト」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "female",
+   "startSec": 25.505,
+   "endSec": 29.536,
+   "text": "I was wondering if we could go over the slides together before lunch.",
+   "translationJa": "昼食の前にスライドを一緒に確認できればと思っていたのですが。",
+   "chunks": [
+    {
+     "text": "I was wondering",
+     "startSec": 25.505,
+     "endSec": 26.085
+    },
+    {
+     "text": "if we could",
+     "startSec": 26.085,
+     "endSec": 26.605
+    },
+    {
+     "text": "go over",
+     "startSec": 26.605,
+     "endSec": 26.985
+    },
+    {
+     "text": "the slides together",
+     "startSec": 26.985,
+     "endSec": 27.805
+    },
+    {
+     "text": "before lunch.",
+     "startSec": 27.805,
+     "endSec": 28.585
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 25.505,
+     "endSec": 25.585
+    },
+    {
+     "text": "was",
+     "startSec": 25.585,
+     "endSec": 25.725
+    },
+    {
+     "text": "wondering",
+     "startSec": 25.725,
+     "endSec": 26.085
+    },
+    {
+     "text": "if",
+     "startSec": 26.085,
+     "endSec": 26.345
+    },
+    {
+     "text": "we",
+     "startSec": 26.345,
+     "endSec": 26.465
+    },
+    {
+     "text": "could",
+     "startSec": 26.465,
+     "endSec": 26.605
+    },
+    {
+     "text": "go",
+     "startSec": 26.605,
+     "endSec": 26.785
+    },
+    {
+     "text": "over",
+     "startSec": 26.785,
+     "endSec": 26.985
+    },
+    {
+     "text": "the",
+     "startSec": 26.985,
+     "endSec": 27.125
+    },
+    {
+     "text": "slides",
+     "startSec": 27.125,
+     "endSec": 27.325
+    },
+    {
+     "text": "together",
+     "startSec": 27.325,
+     "endSec": 27.805
+    },
+    {
+     "text": "before",
+     "startSec": 27.805,
+     "endSec": 28.185
+    },
+    {
+     "text": "lunch.",
+     "startSec": 28.185,
+     "endSec": 28.585
+    }
+   ],
+   "linking": [
+    {
+     "span": "go over",
+     "type": "intrusion",
+     "ipa": "/ɡoʊˈwoʊvər/",
+     "noteJa": "母音同士をつなぐため /w/ 音が自然に挟まり、「ゴーウォーヴァー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "male",
+   "startSec": 30.036,
+   "endSec": 34.006,
+   "text": "Sounds good, so let's meet in the conference room at eleven thirty.",
+   "translationJa": "いいですね。では11時半に会議室で集まりましょう。",
+   "chunks": [
+    {
+     "text": "Sounds good,",
+     "startSec": 30.036,
+     "endSec": 30.656
+    },
+    {
+     "text": "so let's meet",
+     "startSec": 30.956,
+     "endSec": 31.476
+    },
+    {
+     "text": "in the conference room",
+     "startSec": 31.476,
+     "endSec": 32.336
+    },
+    {
+     "text": "at eleven thirty.",
+     "startSec": 32.336,
+     "endSec": 33.116
+    }
+   ],
+   "words": [
+    {
+     "text": "Sounds",
+     "startSec": 30.036,
+     "endSec": 30.276
+    },
+    {
+     "text": "good,",
+     "startSec": 30.276,
+     "endSec": 30.656
+    },
+    {
+     "text": "so",
+     "startSec": 30.956,
+     "endSec": 31.096
+    },
+    {
+     "text": "let's",
+     "startSec": 31.096,
+     "endSec": 31.356
+    },
+    {
+     "text": "meet",
+     "startSec": 31.356,
+     "endSec": 31.476
+    },
+    {
+     "text": "in",
+     "startSec": 31.476,
+     "endSec": 31.616
+    },
+    {
+     "text": "the",
+     "startSec": 31.616,
+     "endSec": 31.696
+    },
+    {
+     "text": "conference",
+     "startSec": 31.696,
+     "endSec": 31.976
+    },
+    {
+     "text": "room",
+     "startSec": 31.976,
+     "endSec": 32.336
+    },
+    {
+     "text": "at",
+     "startSec": 32.336,
+     "endSec": 32.496
+    },
+    {
+     "text": "eleven",
+     "startSec": 32.496,
+     "endSec": 32.782
+    },
+    {
+     "text": "thirty.",
+     "startSec": 32.782,
+     "endSec": 33.116
+    }
+   ],
+   "linking": [
+    {
+     "span": "at eleven",
+     "type": "linking",
+     "ipa": "/ət‿ɪˈlevn/",
+     "noteJa": "at の末尾子音と eleven の語頭母音が連結して「アレヴン」のように聞こえます。"
+    }
+   ]
+  }
+ ]
+}

@@ -31,10 +31,10 @@
   {
    "index": 2,
    "speaker": "male",
-   "text": "Could you tell me what you would recommend for dinner tonight?",
+   "text": "Could you recommend something good for dinner tonight?",
    "chunks": [
-    "Could you tell me",
-    "what you would recommend",
+    "Could you",
+    "recommend something good",
     "for dinner tonight?"
    ],
    "translationJa": "今夜のおすすめのディナーを教えていただけますか？",
@@ -46,10 +46,10 @@
      "noteJa": "Could の末尾の /d/ と you の /j/ が合体し、「クッジュ」のように発音されます。"
     },
     {
-     "span": "what you",
+     "span": "Could you",
      "type": "palatalization",
-     "ipa": "/wʌtʃuː/",
-     "noteJa": "what の /t/ と you の /j/ が同化して「ワッチュ」のように聞こえます。"
+     "ipa": "/kənaɪ/",
+     "noteJa": "Could の語尾 /d/ と you の /j/ が融けて「クッジュ」のようにひと続きになります。"
     }
    ]
   },

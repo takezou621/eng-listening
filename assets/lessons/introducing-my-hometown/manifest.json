@@ -1,0 +1,118 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "introducing-my-hometown",
+ "lines": {
+  "L01_narrator.wav": {
+   "index": 1,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Today, I'd like to tell you a bit about my hometown.",
+   "chars": 52,
+   "durationSec": 3.317,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_narrator.wav": {
+   "index": 2,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "It is located in the northern part of the country.",
+   "chars": 50,
+   "durationSec": 2.825,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_narrator.wav": {
+   "index": 3,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Most people think it gets too cold in the winter.",
+   "chars": 49,
+   "durationSec": 2.985,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_narrator.wav": {
+   "index": 4,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Actually, the snow makes the whole city look magical.",
+   "chars": 53,
+   "durationSec": 3.348,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_narrator.wav": {
+   "index": 5,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Our town is famous for fresh seafood and warm noodle soup.",
+   "chars": 58,
+   "durationSec": 3.635,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_narrator.wav": {
+   "index": 6,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "You can find a great bowl of ramen on almost every corner.",
+   "chars": 58,
+   "durationSec": 4.014,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_narrator.wav": {
+   "index": 7,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "If you visit, you must stop at the historic central park.",
+   "chars": 57,
+   "durationSec": 3.932,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_narrator.wav": {
+   "index": 8,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "You can rent a bicycle and ride around the peaceful lake.",
+   "chars": 57,
+   "durationSec": 3.279,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_narrator.wav": {
+   "index": 9,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "The local people are kind and always willing to help visitors.",
+   "chars": 62,
+   "durationSec": 3.549,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_narrator.wav": {
+   "index": 10,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Life moves at a relaxed pace compared to big cities.",
+   "chars": 52,
+   "durationSec": 3.654,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L11_narrator.wav": {
+   "index": 11,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I hope you will take the chance to visit someday soon.",
+   "chars": 54,
+   "durationSec": 3.097,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 602,
+  "lessonRequests": 11,
+  "monthChars": 7436,
+  "monthRequests": 133,
+  "monthlyStopChars": 900000
+ }
+}

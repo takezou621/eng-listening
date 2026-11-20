@@ -1,0 +1,109 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "phone-appointment",
+ "lines": {
+  "L01_female.wav": {
+   "index": 1,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Bright Dental Clinic, how can I help you today?",
+   "chars": 47,
+   "durationSec": 3.017,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_male.wav": {
+   "index": 2,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Hi, I'd like to make an appointment for a checkup.",
+   "chars": 50,
+   "durationSec": 2.805,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_female.wav": {
+   "index": 3,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Sure, would next Tuesday at three work for you?",
+   "chars": 47,
+   "durationSec": 3.058,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_male.wav": {
+   "index": 4,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "I'm afraid I'm tied up at work at that time.",
+   "chars": 44,
+   "durationSec": 2.331,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_female.wav": {
+   "index": 5,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "How about Wednesday afternoon instead, around four thirty?",
+   "chars": 58,
+   "durationSec": 3.589,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_male.wav": {
+   "index": 6,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "That sounds much better, could you fit me in then?",
+   "chars": 50,
+   "durationSec": 2.563,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_female.wav": {
+   "index": 7,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Yes, we have an opening with Doctor Miller right then.",
+   "chars": 54,
+   "durationSec": 3.428,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_male.wav": {
+   "index": 8,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Perfect, please put me down for that slot.",
+   "chars": 42,
+   "durationSec": 2.486,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_female.wav": {
+   "index": 9,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "All set, could I get your name and phone number?",
+   "chars": 48,
+   "durationSec": 2.909,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_male.wav": {
+   "index": 10,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Sure, it is Kenji Sato, and my number is five five five, one two three.",
+   "chars": 71,
+   "durationSec": 5.529,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 71,
+  "lessonRequests": 1,
+  "monthChars": 4274,
+  "monthRequests": 81,
+  "monthlyStopChars": 900000
+ }
+}

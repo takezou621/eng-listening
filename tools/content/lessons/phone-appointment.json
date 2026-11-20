@@ -199,12 +199,12 @@
   {
    "index": 10,
    "speaker": "male",
-   "text": "Sure, it is Kenji Sato at five five five, one two three four.",
+   "text": "Sure, it is Kenji Sato, and my number is five five five, one two three.",
    "chunks": [
-    "Sure,",
-    "it is Kenji Sato",
-    "at five five five,",
-    "one two three four."
+    "Sure, it is Kenji Sato,",
+    "and my number is",
+    "five five five,",
+    "one two three."
    ],
    "translationJa": "はい、佐藤ケンジで、番号は555-1234です。",
    "linking": [

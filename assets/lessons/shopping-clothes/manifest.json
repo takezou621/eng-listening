@@ -1,0 +1,100 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "shopping-clothes",
+ "lines": {
+  "L01_female.wav": {
+   "index": 1,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Excuse me, do you need any help with that jacket?",
+   "chars": 49,
+   "durationSec": 3.039,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_male.wav": {
+   "index": 2,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Yes, do you have this in a medium size?",
+   "chars": 39,
+   "durationSec": 2.427,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_female.wav": {
+   "index": 3,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Let me check our stock in the back room.",
+   "chars": 40,
+   "durationSec": 2.343,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_female.wav": {
+   "index": 4,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Here it is. Would you like to try it on?",
+   "chars": 40,
+   "durationSec": 2.637,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_male.wav": {
+   "index": 5,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Thank you. Where is the fitting room?",
+   "chars": 37,
+   "durationSec": 2.083,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_female.wav": {
+   "index": 6,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "It is right over there next to the mirror.",
+   "chars": 42,
+   "durationSec": 2.323,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_male.wav": {
+   "index": 7,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "It fits well, so I will take it.",
+   "chars": 32,
+   "durationSec": 2.07,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_female.wav": {
+   "index": 8,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Great! Will you pay with cash or credit card?",
+   "chars": 45,
+   "durationSec": 2.919,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_male.wav": {
+   "index": 9,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Can I pay by credit card, please?",
+   "chars": 33,
+   "durationSec": 2.042,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 357,
+  "lessonRequests": 9,
+  "monthChars": 3007,
+  "monthRequests": 60,
+  "monthlyStopChars": 900000
+ }
+}

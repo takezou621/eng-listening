@@ -1,0 +1,100 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "restaurant-order",
+ "lines": {
+  "L01_female.wav": {
+   "index": 1,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Good evening! Are you ready to order, or do you need a few more minutes?",
+   "chars": 72,
+   "durationSec": 4.526,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_male.wav": {
+   "index": 2,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Could you recommend something good for dinner tonight?",
+   "chars": 54,
+   "durationSec": 2.384,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_female.wav": {
+   "index": 3,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Our grilled salmon is very popular, and it comes with fresh seasonal vegetables.",
+   "chars": 80,
+   "durationSec": 5.287,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_male.wav": {
+   "index": 4,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "That sounds delicious, but I should let you know that I have a nut allergy.",
+   "chars": 75,
+   "durationSec": 4.27,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_female.wav": {
+   "index": 5,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Thank you for letting us know; we can make sure your dish is completely nut-free.",
+   "chars": 81,
+   "durationSec": 4.769,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_male.wav": {
+   "index": 6,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Great, then I will have the salmon dish with a glass of white wine.",
+   "chars": 67,
+   "durationSec": 3.885,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_female.wav": {
+   "index": 7,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Excellent choice. Would you like to see our dessert menu after your meal?",
+   "chars": 73,
+   "durationSec": 4.056,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_male.wav": {
+   "index": 8,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Actually, I might be full, so could we just get the check later?",
+   "chars": 64,
+   "durationSec": 3.907,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_female.wav": {
+   "index": 9,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Of course! I will put your order in and bring your wine right away.",
+   "chars": 67,
+   "durationSec": 4.264,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 54,
+  "lessonRequests": 1,
+  "monthChars": 4203,
+  "monthRequests": 80,
+  "monthlyStopChars": 900000
+ }
+}

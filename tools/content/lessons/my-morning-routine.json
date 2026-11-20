@@ -29,11 +29,12 @@
   {
    "index": 2,
    "speaker": "narrator",
-   "text": "I try not to look at my phone right away.",
+   "text": "I try not to look at my phone right away when I wake up.",
    "chunks": [
     "I try not to",
     "look at my phone",
-    "right away."
+    "right away",
+    "when I wake up."
    ],
    "translationJa": "起きてすぐにはスマートフォンを見ないようにしています。",
    "linking": [

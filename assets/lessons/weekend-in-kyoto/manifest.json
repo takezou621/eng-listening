@@ -1,0 +1,109 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "weekend-in-kyoto",
+ "lines": {
+  "L01_narrator.wav": {
+   "index": 1,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Last weekend, I took a quick bullet train trip to Kyoto to see the autumn leaves.",
+   "chars": 81,
+   "durationSec": 5.217,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_narrator.wav": {
+   "index": 2,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "As soon as I arrived at Kyoto Station, the city was packed with tourists.",
+   "chars": 73,
+   "durationSec": 5.023,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_narrator.wav": {
+   "index": 3,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "First, I decided to head over to Kiyomizu Temple before the afternoon crowds got worse.",
+   "chars": 87,
+   "durationSec": 5.803,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_narrator.wav": {
+   "index": 4,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "The view from the wooden stage was breathtaking, especially with the vibrant red trees.",
+   "chars": 87,
+   "durationSec": 5.489,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_narrator.wav": {
+   "index": 5,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "While walking down the narrow hill, I ran into an old couple from Canada.",
+   "chars": 73,
+   "durationSec": 4.676,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_narrator.wav": {
+   "index": 6,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "They told me that they were looking for a cozy local noodle shop for lunch.",
+   "chars": 75,
+   "durationSec": 4.391,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_narrator.wav": {
+   "index": 7,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Luckily, I knew a hidden spot just around the corner that serves amazing matcha soba.",
+   "chars": 85,
+   "durationSec": 5.431,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_narrator.wav": {
+   "index": 8,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "We ended up having lunch together and chatted about our favorite travel destinations.",
+   "chars": 85,
+   "durationSec": 4.94,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_narrator.wav": {
+   "index": 9,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Later that night, I strolled along the peaceful Gion district under the lanterns.",
+   "chars": 81,
+   "durationSec": 5.088,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_narrator.wav": {
+   "index": 10,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "It was such a memorable short trip that I cannot wait to visit again.",
+   "chars": 69,
+   "durationSec": 4.394,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 796,
+  "lessonRequests": 10,
+  "monthChars": 6834,
+  "monthRequests": 122,
+  "monthlyStopChars": 900000
+ }
+}

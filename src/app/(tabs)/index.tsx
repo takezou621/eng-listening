@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { CONTENTS } from '@/data';
 import { CONTENT_TYPE_LABELS, type ContentType } from '@/data/types';
+import { getLessonList } from '@/features/lesson/registry';
 import { useSelection } from '@/state/SelectionContext';
 import { useTheme } from '@/theme/AppThemeProvider';
 
@@ -17,11 +19,13 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: 'monologue', label: 'モノローグ' },
 ];
 
-/** ホーム = コンテンツライブラリ (モック 12 本: 会話8 + モノローグ4) */
+/** ホーム = コンテンツライブラリ (モック 12 本 + パイプライン生成レッスン 12 本) */
 export default function LibraryScreen() {
   const { colors } = useTheme();
+  const router = useRouter();
   const { selected, select } = useSelection();
   const [filter, setFilter] = useState<Filter>('all');
+  const lessonList = getLessonList();
 
   const contents = filter === 'all' ? CONTENTS : CONTENTS.filter((c) => c.type === filter);
   const counts = {
@@ -88,6 +92,54 @@ export default function LibraryScreen() {
         )}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<ThemedText>コンテンツがありません</ThemedText>}
+        ListHeaderComponent={
+          <View style={styles.pipelineSection}>
+            <ThemedText variant="heading">生成レッスン (12 本計画)</ThemedText>
+            <ThemedText variant="caption" color="muted" style={styles.subtitle}>
+              パイプライン生成 (Cloud TTS + faster-whisper)。タップで再生画面へ
+            </ThemedText>
+            {lessonList.map(({ entry, bundle }) => (
+              <Pressable
+                key={entry.id}
+                disabled={bundle === null}
+                onPress={() => router.push(`/lesson?lesson=${entry.id}`)}
+                style={[
+                  styles.card,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                    opacity: bundle === null ? 0.6 : 1,
+                  },
+                ]}
+              >
+                <View style={styles.cardHeader}>
+                  <View style={[styles.badgeType, { backgroundColor: colors.badgeTypeBg }]}>
+                    <ThemedText variant="caption" style={{ color: colors.badgeTypeText }}>
+                      {CONTENT_TYPE_LABELS[entry.type]}
+                    </ThemedText>
+                  </View>
+                  <View style={[styles.badgeLevel, { backgroundColor: colors.secondarySurface }]}>
+                    <ThemedText variant="caption" color="primary">
+                      {entry.level}
+                    </ThemedText>
+                  </View>
+                  {bundle === null && (
+                    <View style={[styles.badgeLevel, { backgroundColor: colors.secondarySurface }]}>
+                      <ThemedText variant="caption" color="muted">
+                        準備中
+                      </ThemedText>
+                    </View>
+                  )}
+                </View>
+                <ThemedText variant="heading">{entry.title}</ThemedText>
+                <ThemedText variant="caption" color="muted">
+                  {entry.titleJa}
+                  {bundle ? ` ・ ${bundle.data.durationSec.toFixed(0)} 秒 ・ ${bundle.data.sentences.length} 文` : ''}
+                </ThemedText>
+              </Pressable>
+            ))}
+          </View>
+        }
       />
     </Screen>
   );
@@ -97,6 +149,7 @@ const styles = StyleSheet.create({
   subtitle: { marginTop: 4 },
   filterRow: { flexDirection: 'row', gap: 8, marginVertical: 12 },
   list: { paddingBottom: 24, gap: 10 },
+  pipelineSection: { marginTop: 20, gap: 10 },
   card: {
     borderRadius: 12,
     borderWidth: 1,
