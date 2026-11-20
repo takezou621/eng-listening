@@ -46,6 +46,12 @@ import {
   lessonShadowingTotal,
 } from '@/features/player/shadowingStore';
 import { useUserData } from '@/features/library/userStore';
+import {
+  addShadowingRecord,
+  addStudySeconds,
+  localDateStr,
+  markLessonCompleted,
+} from '@/features/progress/progressStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -70,6 +76,7 @@ function LessonPlayerScreen({
   demoParam,
   initialSentenceIndex,
   autorecordParam,
+  autostudyParam,
 }: {
   bundle: LessonBundle;
   demoParam: boolean;
@@ -77,6 +84,8 @@ function LessonPlayerScreen({
   initialSentenceIndex: number | null;
   /** 自動録音デモ (スクロール後に録音開始 → 4 秒で停止) */
   autorecordParam: boolean;
+  /** 自動学習デモ (再生して 6 秒後に一時停止。進捗記録の収集を検証) */
+  autostudyParam: boolean;
 }) {
   const lesson = bundle.data;
   const { colors } = useTheme();
@@ -286,6 +295,7 @@ function LessonPlayerScreen({
     }
     setLastRecordings((prev) => ({ ...prev, [sentenceIndex]: { uri, durationSec: duration } }));
     setShadowingCounts(addShadowingCount(lesson.id, sentenceIndex));
+    addShadowingRecord(lesson.id);
     append(`録音完了: 文${sentenceIndex + 1} ${duration.toFixed(1)} 秒`);
   };
 
@@ -334,7 +344,7 @@ function LessonPlayerScreen({
   // (手動操作と同じ操作関数を呼ぶ。ログは操作関数側で一度だけ記録される)
   const demoRanRef = useRef(false);
   useEffect(() => {
-    if (!demoParam || demoRanRef.current) return;
+    if (!__DEV__ || !demoParam || demoRanRef.current) return;
     demoRanRef.current = true;
     const timers: ReturnType<typeof setTimeout>[] = [];
     const at = (delayMs: number, fn: () => void) => {
@@ -360,7 +370,7 @@ function LessonPlayerScreen({
   // (シミュレータでの録音フロー自動検証用。手動操作と同じ startRecording / stopRecording を呼ぶ)
   const autoRecordRanRef = useRef(false);
   useEffect(() => {
-    if (!autorecordParam || autoRecordRanRef.current) return;
+    if (!__DEV__ || !autorecordParam || autoRecordRanRef.current) return;
     autoRecordRanRef.current = true;
     const target = initialSentenceIndex ?? 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -373,11 +383,33 @@ function LessonPlayerScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autorecordParam]);
 
+  // ?autostudy=1: 再生を開始して 6 秒後に一時停止する
+  // (進捗記録の収集フローを自動検証する用。?demo=1 と同じく既存操作関数を呼ぶだけ)
+  const autoStudyRanRef = useRef(false);
+  useEffect(() => {
+    if (!__DEV__ || !autostudyParam || autoStudyRanRef.current) return;
+    autoStudyRanRef.current = true;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const at = (delayMs: number, fn: () => void) => {
+      timers.push(setTimeout(fn, delayMs));
+    };
+    at(800, () => play('自動学習デモ: play()'));
+    at(6800, () => pause('自動学習デモ: pause() // 6 秒再生して記録'));
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autostudyParam, player]);
+
   // 文リピート (スパイク画面と同じ終端判定)。シーク先込み中の重複発行をガードし、
   // 完了時には「リピートがまだ有効か」を ref で確認してから再開する
   // (シーク完了前に解除された古い操作からは再生を始めない)
   const seekingRef = useRef(false);
   const repeatSentenceRef = useRef<number | null>(null);
+
+  // --- 学習進捗の記録 (Issue #13): 実際に再生が進行した秒数のみを累計する ---
+  const playedSecondsRef = useRef(0);
+  const lastPlaybackTRef = useRef(0);
+  // 日またぎ対応: 累計開始時のローカル日を保持し、日付変更時に分割フラッシュする
+  const playedDateRef = useRef<string>(localDateStr());
   const abRef = useRef<{ a: number; b: number } | null>(null);
   useEffect(() => {
     repeatSentenceRef.current = repeatSentence;
@@ -385,6 +417,13 @@ function LessonPlayerScreen({
   useEffect(() => {
     abRef.current = ab;
   }, [ab]);
+  // レッスン完了 (最後まで再生) を進捗に記録する
+  useEffect(() => {
+    if (status.didJustFinish) {
+      markLessonCompleted(lesson.id);
+    }
+  }, [status.didJustFinish, lesson.id]);
+
   // AB リピート (文リピートより優先。両方設定時は AB 区間を繰り返す)
   useEffect(() => {
     if (ab === null || seekingRef.current) return;
@@ -439,6 +478,39 @@ function LessonPlayerScreen({
 
   // カラオケ表示: 現在文と現在単語を再生位置から導出
   const t = status.currentTime;
+  // 実際に再生が進行した秒数のみを累計する (逆シーク・ジャンプは水増しになるためカウントしない)
+  useEffect(() => {
+    if (status.playing && t > lastPlaybackTRef.current && t - lastPlaybackTRef.current < 2) {
+      playedSecondsRef.current += t - lastPlaybackTRef.current;
+    }
+    lastPlaybackTRef.current = t;
+    // 日またぎ検出: ローカル日が変わったら蓄積分を前日でフラッシュし、
+    // 累計量にかかわらず playedDateRef を今日へ更新する
+    // (23:59 に開いて 00:01 から再生すると前日に記録される問題の解消)
+    const today = localDateStr();
+    if (today !== playedDateRef.current) {
+      if (playedSecondsRef.current >= 1) {
+        addStudySeconds(lesson.id, playedSecondsRef.current, playedDateRef.current);
+        playedSecondsRef.current = 0;
+      }
+      playedDateRef.current = today;
+    }
+  }, [t, status.playing, lesson.id]);
+  // 一時停止への遷移・レッスン完了・アンマウントのタイミングで記録をフラッシュする
+  useEffect(() => {
+    if (playedSecondsRef.current >= 1) {
+      addStudySeconds(lesson.id, playedSecondsRef.current, playedDateRef.current);
+      playedSecondsRef.current = 0;
+    }
+  }, [status.playing, status.didJustFinish, lesson.id]);
+  useEffect(() => {
+    return () => {
+      if (playedSecondsRef.current >= 1) {
+        addStudySeconds(lesson.id, playedSecondsRef.current, playedDateRef.current);
+        playedSecondsRef.current = 0;
+      }
+    };
+  }, [lesson.id]);
   const activeSentence = useMemo(
     () => sentences.find((s) => t >= s.startSec && t < s.endSec) ?? null,
     [sentences, t]
@@ -989,6 +1061,7 @@ export default function LessonRoute() {
     lesson?: string | string[];
     sentence?: string | string[];
     autorecord?: string | string[];
+    autostudy?: string | string[];
   }>();
   const lessonParam = Array.isArray(params.lesson) ? params.lesson[0] : params.lesson;
   const sentenceParam = Array.isArray(params.sentence) ? params.sentence[0] : params.sentence;
@@ -1001,6 +1074,7 @@ export default function LessonRoute() {
       demoParam={params.demo === '1'}
       initialSentenceIndex={Number.isFinite(sentenceNumber) ? sentenceNumber - 1 : null}
       autorecordParam={params.autorecord === '1'}
+      autostudyParam={params.autostudy === '1'}
     />
   );
 }

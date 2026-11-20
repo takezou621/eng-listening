@@ -72,7 +72,7 @@ function mergeWeakSentences(
       byKey.set(key, s);
     }
   }
-  return [...byKey.values()];
+  return [...byKey.values()].sort((a, b) => b.addedAtMs - a.addedAtMs);
 }
 
 function notify() {
@@ -107,7 +107,8 @@ export function loadUserDataAsync(): Promise<void> {
       try {
         if (STORAGE_FILE.exists) {
           const parsed = parseUserData(await STORAGE_FILE.text());
-          // 読み込み待ち中のトグル操作を上書きで消さないようマージする
+          // 読み込み待ち中のトグル操作を破棄しない。お気に入りはユニオン、
+          // 苦手フレーズは文キーで dedupe して両側の登録を保持する
           updateUserData((current) => ({
             // 完了済みフラグは読み込み結果で false に戻さない (毎回オンボーディングに戻るのを防ぐ)
             onboardingDone: current.onboardingDone || parsed.onboardingDone,

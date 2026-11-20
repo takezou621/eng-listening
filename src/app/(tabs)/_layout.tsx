@@ -5,7 +5,7 @@ import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
  * タブ構成 (GM 指示):
- * ホーム = ライブラリ / 学習プレイヤー / 苦手フレーズ / 設定
+ * ホーム = ライブラリ / 学習プレイヤー / 苦手フレーズ / 進捗 / 設定
  */
 export default function TabsLayout() {
   const { colors } = useTheme();
@@ -41,6 +41,13 @@ export default function TabsLayout() {
         options={{
           title: '苦手フレーズ',
           tabBarIcon: ({ size }) => <TabIcon symbol="⭐️" size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{
+          title: '進捗',
+          tabBarIcon: ({ size }) => <TabIcon symbol="📈" size={size} />,
         }}
       />
       <Tabs.Screen
