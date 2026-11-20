@@ -1,7 +1,7 @@
 {
  "month": "2026-11",
- "chars": 1549,
- "requests": 27,
+ "chars": 2191,
+ "requests": 41,
  "lessons": {
   "_manual_connectivity_check": {
    "chars": 3,
@@ -16,6 +16,11 @@
   "cafe-ordering": {
    "chars": 952,
    "requests": 20,
+   "pendingChars": 0
+  },
+  "hotel-checkin": {
+   "chars": 642,
+   "requests": 14,
    "pendingChars": 0
   }
  },

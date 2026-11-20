@@ -1,0 +1,874 @@
+{
+ "id": "hotel-checkin",
+ "title": "Checking In at a Hotel",
+ "titleJa": "ホテルでチェックインする",
+ "type": "conversation",
+ "level": "beginner",
+ "category": "hotel",
+ "audio": "audio.m4a",
+ "durationSec": 35.62,
+ "speakerNames": {
+  "female": "Receptionist",
+  "male": "Ken"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T09:20:42Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "female",
+   "startSec": 0.0,
+   "endSec": 2.691,
+   "text": "Good afternoon, how can I help you today?",
+   "translationJa": "こんにちは、本日はどのようなご用件でしょうか？",
+   "chunks": [
+    {
+     "text": "Good afternoon,",
+     "startSec": 0.0,
+     "endSec": 0.56
+    },
+    {
+     "text": "how can I help you",
+     "startSec": 1.06,
+     "endSec": 1.88
+    },
+    {
+     "text": "today?",
+     "startSec": 1.88,
+     "endSec": 2.16
+    }
+   ],
+   "words": [
+    {
+     "text": "Good",
+     "startSec": 0.0,
+     "endSec": 0.14
+    },
+    {
+     "text": "afternoon,",
+     "startSec": 0.14,
+     "endSec": 0.56
+    },
+    {
+     "text": "how",
+     "startSec": 1.06,
+     "endSec": 1.24
+    },
+    {
+     "text": "can",
+     "startSec": 1.24,
+     "endSec": 1.4
+    },
+    {
+     "text": "I",
+     "startSec": 1.4,
+     "endSec": 1.5
+    },
+    {
+     "text": "help",
+     "startSec": 1.5,
+     "endSec": 1.68
+    },
+    {
+     "text": "you",
+     "startSec": 1.68,
+     "endSec": 1.88
+    },
+    {
+     "text": "today?",
+     "startSec": 1.88,
+     "endSec": 2.16
+    }
+   ],
+   "linking": [
+    {
+     "span": "can I",
+     "type": "linking",
+     "ipa": "/kənaɪ/",
+     "noteJa": "can の語尾 /n/ と I の母音 /aɪ/ がつながり、「キャナイ」のように滑らかに読まれます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "male",
+   "startSec": 3.191,
+   "endSec": 5.568,
+   "text": "Hi, I'd like to check in, please.",
+   "translationJa": "こんにちは、チェックインをお願いしたいのですが。",
+   "chunks": [
+    {
+     "text": "Hi,",
+     "startSec": 3.191,
+     "endSec": 3.471
+    },
+    {
+     "text": "I'd like to",
+     "startSec": 3.731,
+     "endSec": 4.111
+    },
+    {
+     "text": "check in,",
+     "startSec": 4.111,
+     "endSec": 4.491
+    },
+    {
+     "text": "please.",
+     "startSec": 4.711,
+     "endSec": 4.891
+    }
+   ],
+   "words": [
+    {
+     "text": "Hi,",
+     "startSec": 3.191,
+     "endSec": 3.471
+    },
+    {
+     "text": "I'd",
+     "startSec": 3.731,
+     "endSec": 3.891
+    },
+    {
+     "text": "like",
+     "startSec": 3.891,
+     "endSec": 3.991
+    },
+    {
+     "text": "to",
+     "startSec": 3.991,
+     "endSec": 4.111
+    },
+    {
+     "text": "check",
+     "startSec": 4.111,
+     "endSec": 4.291
+    },
+    {
+     "text": "in,",
+     "startSec": 4.291,
+     "endSec": 4.491
+    },
+    {
+     "text": "please.",
+     "startSec": 4.711,
+     "endSec": 4.891
+    }
+   ],
+   "linking": [
+    {
+     "span": "check in",
+     "type": "linking",
+     "ipa": "/tʃɛkɪn/",
+     "noteJa": "check の末尾の子音 /k/ と in の母音 /ɪ/ がつながり、「チェッキン」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "female",
+   "startSec": 6.068,
+   "endSec": 8.839,
+   "text": "Sure! Could you tell me your name, please?",
+   "translationJa": "かしこまりました！お名前を教えていただけますか？",
+   "chunks": [
+    {
+     "text": "Sure!",
+     "startSec": 6.068,
+     "endSec": 6.368
+    },
+    {
+     "text": "Could you",
+     "startSec": 6.688,
+     "endSec": 7.008
+    },
+    {
+     "text": "tell me your name,",
+     "startSec": 7.008,
+     "endSec": 7.688
+    },
+    {
+     "text": "please?",
+     "startSec": 7.968,
+     "endSec": 8.128
+    }
+   ],
+   "words": [
+    {
+     "text": "Sure!",
+     "startSec": 6.068,
+     "endSec": 6.368
+    },
+    {
+     "text": "Could",
+     "startSec": 6.688,
+     "endSec": 6.888
+    },
+    {
+     "text": "you",
+     "startSec": 6.888,
+     "endSec": 7.008
+    },
+    {
+     "text": "tell",
+     "startSec": 7.008,
+     "endSec": 7.228
+    },
+    {
+     "text": "me",
+     "startSec": 7.228,
+     "endSec": 7.328
+    },
+    {
+     "text": "your",
+     "startSec": 7.328,
+     "endSec": 7.448
+    },
+    {
+     "text": "name,",
+     "startSec": 7.448,
+     "endSec": 7.688
+    },
+    {
+     "text": "please?",
+     "startSec": 7.968,
+     "endSec": 8.128
+    }
+   ],
+   "linking": [
+    {
+     "span": "Could you",
+     "type": "palatalization",
+     "ipa": "/kʊdʒuː/",
+     "noteJa": "Could の語尾 /d/ と you の /j/ が合わさって「クッジュ」のような破擦音になります。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "male",
+   "startSec": 9.339,
+   "endSec": 12.326,
+   "text": "My name is Ken Tanaka, and I have a reservation.",
+   "translationJa": "タナカ・ケンです。予約をしています。",
+   "chunks": [
+    {
+     "text": "My name is Ken Tanaka,",
+     "startSec": 9.339,
+     "endSec": 10.279
+    },
+    {
+     "text": "and I have",
+     "startSec": 10.859,
+     "endSec": 11.179
+    },
+    {
+     "text": "a reservation.",
+     "startSec": 11.179,
+     "endSec": 11.559
+    }
+   ],
+   "words": [
+    {
+     "text": "My",
+     "startSec": 9.339,
+     "endSec": 9.459
+    },
+    {
+     "text": "name",
+     "startSec": 9.459,
+     "endSec": 9.599
+    },
+    {
+     "text": "is",
+     "startSec": 9.599,
+     "endSec": 9.799
+    },
+    {
+     "text": "Ken",
+     "startSec": 9.799,
+     "endSec": 10.019
+    },
+    {
+     "text": "Tanaka,",
+     "startSec": 10.019,
+     "endSec": 10.279
+    },
+    {
+     "text": "and",
+     "startSec": 10.859,
+     "endSec": 10.919
+    },
+    {
+     "text": "I",
+     "startSec": 10.919,
+     "endSec": 11.039
+    },
+    {
+     "text": "have",
+     "startSec": 11.039,
+     "endSec": 11.179
+    },
+    {
+     "text": "a",
+     "startSec": 11.179,
+     "endSec": 11.259
+    },
+    {
+     "text": "reservation.",
+     "startSec": 11.259,
+     "endSec": 11.559
+    }
+   ],
+   "linking": [
+    {
+     "span": "name is",
+     "type": "linking",
+     "ipa": "/neɪmɪz/",
+     "noteJa": "name の末尾 /m/ と is の母音 /ɪ/ が連結して「ネイミズ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "female",
+   "startSec": 12.826,
+   "endSec": 16.595,
+   "text": "Yes, here it is. You are booked for two nights.",
+   "translationJa": "はい、確認できました。2泊のご予約ですね。",
+   "chunks": [
+    {
+     "text": "Yes,",
+     "startSec": 12.826,
+     "endSec": 13.106
+    },
+    {
+     "text": "here it is.",
+     "startSec": 13.486,
+     "endSec": 14.146
+    },
+    {
+     "text": "You are booked",
+     "startSec": 14.646,
+     "endSec": 15.106
+    },
+    {
+     "text": "for two nights.",
+     "startSec": 15.106,
+     "endSec": 15.886
+    }
+   ],
+   "words": [
+    {
+     "text": "Yes,",
+     "startSec": 12.826,
+     "endSec": 13.106
+    },
+    {
+     "text": "here",
+     "startSec": 13.486,
+     "endSec": 13.706
+    },
+    {
+     "text": "it",
+     "startSec": 13.706,
+     "endSec": 13.886
+    },
+    {
+     "text": "is.",
+     "startSec": 13.886,
+     "endSec": 14.146
+    },
+    {
+     "text": "You",
+     "startSec": 14.646,
+     "endSec": 14.786
+    },
+    {
+     "text": "are",
+     "startSec": 14.786,
+     "endSec": 14.926
+    },
+    {
+     "text": "booked",
+     "startSec": 14.926,
+     "endSec": 15.106
+    },
+    {
+     "text": "for",
+     "startSec": 15.106,
+     "endSec": 15.406
+    },
+    {
+     "text": "two",
+     "startSec": 15.406,
+     "endSec": 15.626
+    },
+    {
+     "text": "nights.",
+     "startSec": 15.626,
+     "endSec": 15.886
+    }
+   ],
+   "linking": [
+    {
+     "span": "it is",
+     "type": "flapping",
+     "ipa": "/ɪɾɪz/",
+     "noteJa": "it の /t/ が母音に挟まれることで、日本語のラ行に近い軽い音に変化します。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "male",
+   "startSec": 17.095,
+   "endSec": 20.105,
+   "text": "That's right. What time is breakfast served tomorrow?",
+   "translationJa": "その通りです。明日の朝食は何時に提供されますか？",
+   "chunks": [
+    {
+     "text": "That's right.",
+     "startSec": 17.095,
+     "endSec": 17.535
+    },
+    {
+     "text": "What time is",
+     "startSec": 17.855,
+     "endSec": 18.395
+    },
+    {
+     "text": "breakfast served",
+     "startSec": 18.395,
+     "endSec": 19.055
+    },
+    {
+     "text": "tomorrow?",
+     "startSec": 19.055,
+     "endSec": 19.395
+    }
+   ],
+   "words": [
+    {
+     "text": "That's",
+     "startSec": 17.095,
+     "endSec": 17.335
+    },
+    {
+     "text": "right.",
+     "startSec": 17.335,
+     "endSec": 17.535
+    },
+    {
+     "text": "What",
+     "startSec": 17.855,
+     "endSec": 17.995
+    },
+    {
+     "text": "time",
+     "startSec": 17.995,
+     "endSec": 18.235
+    },
+    {
+     "text": "is",
+     "startSec": 18.235,
+     "endSec": 18.395
+    },
+    {
+     "text": "breakfast",
+     "startSec": 18.395,
+     "endSec": 18.655
+    },
+    {
+     "text": "served",
+     "startSec": 18.655,
+     "endSec": 19.055
+    },
+    {
+     "text": "tomorrow?",
+     "startSec": 19.055,
+     "endSec": 19.395
+    }
+   ],
+   "linking": [
+    {
+     "span": "time is",
+     "type": "linking",
+     "ipa": "/taɪmɪz/",
+     "noteJa": "time の終わりの /m/ と is の /ɪ/ がつながり、「タイミズ」と発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "female",
+   "startSec": 20.605,
+   "endSec": 23.572,
+   "text": "It is served from seven to ten on the second floor.",
+   "translationJa": "2階で7時から10時までとなっております。",
+   "chunks": [
+    {
+     "text": "It is served",
+     "startSec": 20.605,
+     "endSec": 21.045
+    },
+    {
+     "text": "from seven to ten",
+     "startSec": 21.045,
+     "endSec": 22.105
+    },
+    {
+     "text": "on the second floor.",
+     "startSec": 22.105,
+     "endSec": 23.065
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 20.605,
+     "endSec": 20.725
+    },
+    {
+     "text": "is",
+     "startSec": 20.725,
+     "endSec": 20.825
+    },
+    {
+     "text": "served",
+     "startSec": 20.825,
+     "endSec": 21.045
+    },
+    {
+     "text": "from",
+     "startSec": 21.045,
+     "endSec": 21.305
+    },
+    {
+     "text": "seven",
+     "startSec": 21.305,
+     "endSec": 21.645
+    },
+    {
+     "text": "to",
+     "startSec": 21.645,
+     "endSec": 21.845
+    },
+    {
+     "text": "ten",
+     "startSec": 21.845,
+     "endSec": 22.105
+    },
+    {
+     "text": "on",
+     "startSec": 22.105,
+     "endSec": 22.305
+    },
+    {
+     "text": "the",
+     "startSec": 22.305,
+     "endSec": 22.385
+    },
+    {
+     "text": "second",
+     "startSec": 22.385,
+     "endSec": 22.705
+    },
+    {
+     "text": "floor.",
+     "startSec": 22.705,
+     "endSec": 23.065
+    }
+   ],
+   "linking": [
+    {
+     "span": "It is",
+     "type": "flapping",
+     "ipa": "/ɪɾɪz/",
+     "noteJa": "語頭の It の /t/ が弱まり、続く is とつながって「イリズ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "male",
+   "startSec": 24.072,
+   "endSec": 26.965,
+   "text": "Great. Could I also get the Wi-Fi password?",
+   "translationJa": "わかりました。Wi-Fiのパスワードも教えていただけますか？",
+   "chunks": [
+    {
+     "text": "Great.",
+     "startSec": 24.072,
+     "endSec": 24.352
+    },
+    {
+     "text": "Could I also",
+     "startSec": 24.712,
+     "endSec": 25.212
+    },
+    {
+     "text": "get the",
+     "startSec": 25.212,
+     "endSec": 25.552
+    },
+    {
+     "text": "Wi-Fi password?",
+     "startSec": 25.552,
+     "endSec": 26.392
+    }
+   ],
+   "words": [
+    {
+     "text": "Great.",
+     "startSec": 24.072,
+     "endSec": 24.352
+    },
+    {
+     "text": "Could",
+     "startSec": 24.712,
+     "endSec": 24.812
+    },
+    {
+     "text": "I",
+     "startSec": 24.812,
+     "endSec": 24.952
+    },
+    {
+     "text": "also",
+     "startSec": 24.952,
+     "endSec": 25.212
+    },
+    {
+     "text": "get",
+     "startSec": 25.212,
+     "endSec": 25.412
+    },
+    {
+     "text": "the",
+     "startSec": 25.412,
+     "endSec": 25.552
+    },
+    {
+     "text": "Wi-Fi",
+     "startSec": 25.552,
+     "endSec": 25.932
+    },
+    {
+     "text": "password?",
+     "startSec": 25.932,
+     "endSec": 26.392
+    }
+   ],
+   "linking": [
+    {
+     "span": "Could I",
+     "type": "linking",
+     "ipa": "/kʊdaɪ/",
+     "noteJa": "Could の /d/ と I の /aɪ/ が結びついて「クダイ」のようにひと息で読まれます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "female",
+   "startSec": 27.465,
+   "endSec": 31.317,
+   "text": "You will find it printed on this card, along with your room key.",
+   "translationJa": "ルームキーと一緒にお渡しするこちらのカードに記載されております。",
+   "chunks": [
+    {
+     "text": "You will find it",
+     "startSec": 27.465,
+     "endSec": 28.105
+    },
+    {
+     "text": "printed on this card,",
+     "startSec": 28.105,
+     "endSec": 29.105
+    },
+    {
+     "text": "along with your room key.",
+     "startSec": 29.385,
+     "endSec": 30.445
+    }
+   ],
+   "words": [
+    {
+     "text": "You",
+     "startSec": 27.465,
+     "endSec": 27.585
+    },
+    {
+     "text": "will",
+     "startSec": 27.585,
+     "endSec": 27.705
+    },
+    {
+     "text": "find",
+     "startSec": 27.705,
+     "endSec": 27.945
+    },
+    {
+     "text": "it",
+     "startSec": 27.945,
+     "endSec": 28.105
+    },
+    {
+     "text": "printed",
+     "startSec": 28.105,
+     "endSec": 28.345
+    },
+    {
+     "text": "on",
+     "startSec": 28.345,
+     "endSec": 28.645
+    },
+    {
+     "text": "this",
+     "startSec": 28.645,
+     "endSec": 28.785
+    },
+    {
+     "text": "card,",
+     "startSec": 28.785,
+     "endSec": 29.105
+    },
+    {
+     "text": "along",
+     "startSec": 29.385,
+     "endSec": 29.645
+    },
+    {
+     "text": "with",
+     "startSec": 29.645,
+     "endSec": 29.885
+    },
+    {
+     "text": "your",
+     "startSec": 29.885,
+     "endSec": 30.005
+    },
+    {
+     "text": "room",
+     "startSec": 30.005,
+     "endSec": 30.205
+    },
+    {
+     "text": "key.",
+     "startSec": 30.205,
+     "endSec": 30.445
+    }
+   ],
+   "linking": [
+    {
+     "span": "printed on",
+     "type": "linking",
+     "ipa": "/prɪntɪd‿ɑːn/",
+     "noteJa": "printed の /d/ と on の母音 /ɑː/ がつながり、「プリンティッドン」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "male",
+   "startSec": 31.817,
+   "endSec": 35.62,
+   "text": "Thank you so much for taking such good care of everything today.",
+   "translationJa": "助かりました、どうもありがとうございます！",
+   "chunks": [
+    {
+     "text": "Thank you so much",
+     "startSec": 31.817,
+     "endSec": 32.597
+    },
+    {
+     "text": "for taking such good care",
+     "startSec": 32.597,
+     "endSec": 33.877
+    },
+    {
+     "text": "of everything today.",
+     "startSec": 33.877,
+     "endSec": 34.757
+    }
+   ],
+   "words": [
+    {
+     "text": "Thank",
+     "startSec": 31.817,
+     "endSec": 31.957
+    },
+    {
+     "text": "you",
+     "startSec": 31.957,
+     "endSec": 32.157
+    },
+    {
+     "text": "so",
+     "startSec": 32.157,
+     "endSec": 32.357
+    },
+    {
+     "text": "much",
+     "startSec": 32.357,
+     "endSec": 32.597
+    },
+    {
+     "text": "for",
+     "startSec": 32.597,
+     "endSec": 32.817
+    },
+    {
+     "text": "taking",
+     "startSec": 32.817,
+     "endSec": 33.037
+    },
+    {
+     "text": "such",
+     "startSec": 33.037,
+     "endSec": 33.377
+    },
+    {
+     "text": "good",
+     "startSec": 33.377,
+     "endSec": 33.637
+    },
+    {
+     "text": "care",
+     "startSec": 33.637,
+     "endSec": 33.877
+    },
+    {
+     "text": "of",
+     "startSec": 33.877,
+     "endSec": 34.037
+    },
+    {
+     "text": "everything",
+     "startSec": 34.037,
+     "endSec": 34.277
+    },
+    {
+     "text": "today.",
+     "startSec": 34.277,
+     "endSec": 34.757
+    }
+   ],
+   "linking": [
+    {
+     "span": "Thank you",
+     "type": "palatalization",
+     "ipa": "/θæŋkjuː/",
+     "noteJa": "Thank の語尾 /k/ と you の /j/ が融けて「サンキュュー」のようにひと続きになります。"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,219 @@
+{
+ "title": "My Favorite Movie",
+ "titleJa": "好きな映画",
+ "type": "monologue",
+ "level": "beginner",
+ "speakerNames": {
+  "narrator": "Speaker"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "text": "Today, I want to talk about my favorite movie.",
+   "chunks": [
+    "Today,",
+    "I want to talk",
+    "about my favorite movie."
+   ],
+   "translationJa": "今日は、私のお気に入りの映画についてお話ししたいと思います。",
+   "linking": [
+    {
+     "span": "want to",
+     "type": "reduction",
+     "ipa": "/wɑnə/",
+     "noteJa": "want to が縮まって「ワナ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "text": "It is a heartwarming story about a young boy.",
+   "chunks": [
+    "It is",
+    "a heartwarming story",
+    "about a young boy."
+   ],
+   "translationJa": "それはある幼い少年を描いた、心温まる物語です。",
+   "linking": [
+    {
+     "span": "It is a",
+     "type": "flapping",
+     "ipa": "/ɪɾɪzə/",
+     "noteJa": "It の t が母音に挟まれてラ行のように軽く弾かれ、「イリザ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "text": "He moves to a new city with his family.",
+   "chunks": [
+    "He moves",
+    "to a new city",
+    "with his family."
+   ],
+   "translationJa": "彼は家族と一緒に新しい街へ引っ越します。",
+   "linking": [
+    {
+     "span": "with his",
+     "type": "weak-form",
+     "ipa": "/wɪðɪz/",
+     "noteJa": "his の h 音が脱落して直前の with とつながり、「ウィディズ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "text": "At first, he feels lonely and has no friends.",
+   "chunks": [
+    "At first,",
+    "he feels lonely",
+    "and has no friends."
+   ],
+   "translationJa": "最初は寂しさを感じ、友達も一人もいません。",
+   "linking": [
+    {
+     "span": "At first,",
+     "type": "elision",
+     "ipa": "/ət fɜːrst/",
+     "noteJa": "At の弱化と t の脱落（あるいは閉鎖音化）により、「アッフォースト」のように短く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "text": "Then, he meets an unusual dog in the park.",
+   "chunks": [
+    "Then,",
+    "he meets an unusual dog",
+    "in the park."
+   ],
+   "translationJa": "そんな時、彼は公園でちょっと変わった犬に出会います。",
+   "linking": [
+    {
+     "span": "meets an",
+     "type": "linking",
+     "ipa": "/miːtsən/",
+     "noteJa": "meets の末尾の s 音と an が連結して「ミーツァン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "text": "They become best friends and go on an adventure.",
+   "chunks": [
+    "They become best friends",
+    "and go on",
+    "an adventure."
+   ],
+   "translationJa": "二人は親友になり、冒険の旅に出ます。",
+   "linking": [
+    {
+     "span": "go on an",
+     "type": "linking",
+     "ipa": "/ɡoʊ ɑːnən/",
+     "noteJa": "go on の音のつながりと on an の連結が続き、「ゴーオナン」のように滑らかに聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "text": "I will not tell you the end of the film.",
+   "chunks": [
+    "I will not tell you",
+    "the end of",
+    "the film."
+   ],
+   "translationJa": "映画の結末は言わないでおきますね。",
+   "linking": [
+    {
+     "span": "end of",
+     "type": "linking",
+     "ipa": "/ɛndəv/",
+     "noteJa": "end の d 音と of の弱い母音がつながり、「エンダヴ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "text": "What I love most is the beautiful music.",
+   "chunks": [
+    "What I love most",
+    "is the beautiful music."
+   ],
+   "translationJa": "私が一番気に入っているのは、美しい音楽です。",
+   "linking": [
+    {
+     "span": "What I",
+     "type": "flapping",
+     "ipa": "/wʌɾaɪ/",
+     "noteJa": "What の t が母音に挟まれてラ行化し、「ワライ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "text": "It always makes me feel happy and energetic.",
+   "chunks": [
+    "It always makes me",
+    "feel happy",
+    "and energetic."
+   ],
+   "translationJa": "その音楽を聴くと、いつも明るく元気な気持ちになれます。",
+   "linking": [
+    {
+     "span": "and energetic.",
+     "type": "linking",
+     "ipa": "/ənd‿ɛnərdʒɛtɪk/",
+     "noteJa": "and の d が弱まるか脱落し、母音へと滑らかにつながります。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "narrator",
+   "text": "I have watched it a lot of times.",
+   "chunks": [
+    "I have watched it",
+    "a lot of times."
+   ],
+   "translationJa": "私はこの映画を何度も観返しました。",
+   "linking": [
+    {
+     "span": "lot of",
+     "type": "flapping",
+     "ipa": "/lɑːɾəv/",
+     "noteJa": "lot の t がラ行化し、of とつながって「ララヴ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 11,
+   "speaker": "narrator",
+   "text": "You should check it out this weekend.",
+   "chunks": [
+    "You should check it out",
+    "this weekend."
+   ],
+   "translationJa": "今週末にぜひチェックしてみてくださいね。",
+   "linking": [
+    {
+     "span": "check it out",
+     "type": "linking",
+     "ipa": "/tʃɛkɪɾaʊt/",
+     "noteJa": "check it がつながり、it の t が母音 out の前でラ行化して「チェキラウト」のように聞こえます。"
+    }
+   ]
+  }
+ ],
+ "id": "my-favorite-movie",
+ "category": "entertainment"
+}

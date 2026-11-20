@@ -1,0 +1,186 @@
+{
+ "title": "Buying Clothes",
+ "titleJa": "服を買う",
+ "type": "conversation",
+ "level": "beginner",
+ "speakerNames": {
+  "female": "Store Clerk",
+  "male": "Customer"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "female",
+   "text": "Excuse me, do you need any help with that jacket?",
+   "chunks": [
+    "Excuse me,",
+    "do you need any help",
+    "with that jacket?"
+   ],
+   "translationJa": "すみません、そちらのジャケットでお困りのことはございますか？",
+   "linking": [
+    {
+     "span": "need any",
+     "type": "linking",
+     "ipa": "/niːd‿ɛni/",
+     "noteJa": "need の d と any の a が連結して「ニーデニ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "text": "Yes, do you have this in a medium size?",
+   "chunks": [
+    "Yes,",
+    "do you have this",
+    "in a medium size?"
+   ],
+   "translationJa": "はい、これの M サイズはありますか？",
+   "linking": [
+    {
+     "span": "in a",
+     "type": "linking",
+     "ipa": "/ɪn‿ə/",
+     "noteJa": "in の n と a がつながって「イナ」のように弱く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "text": "Let me check our stock in the back room.",
+   "chunks": [
+    "Let me check",
+    "our stock",
+    "in the back room."
+   ],
+   "translationJa": "バックヤードの在庫を確認してまいります。",
+   "linking": [
+    {
+     "span": "Let me",
+     "type": "elision",
+     "ipa": "/lɛmi/",
+     "noteJa": "Let の t が脱落して、日本語の「レミ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "female",
+   "text": "Here it is. Would you like to try it on?",
+   "chunks": [
+    "Here it is.",
+    "Would you like",
+    "to try it on?"
+   ],
+   "translationJa": "こちらにございます。ご試着なさいますか？",
+   "linking": [
+    {
+     "span": "Would you",
+     "type": "palatalization",
+     "ipa": "/wʊdʒuː/",
+     "noteJa": "Would の d と you の y が同化して「ウドゥジュー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "male",
+   "text": "Thank you. Where is the fitting room?",
+   "chunks": [
+    "Thank you.",
+    "Where is",
+    "the fitting room?"
+   ],
+   "translationJa": "ありがとうございます。試着室はどこですか？",
+   "linking": [
+    {
+     "span": "fitting",
+     "type": "flapping",
+     "ipa": "/ˈfɪɾɪŋ/",
+     "noteJa": "tt の音が母音に挟まれてラ行化し、「フィリング」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "female",
+   "text": "It is right over there next to the mirror.",
+   "chunks": [
+    "It is",
+    "right over there",
+    "next to the mirror."
+   ],
+   "translationJa": "あちらの鏡のすぐ隣にございます。",
+   "linking": [
+    {
+     "span": "right over",
+     "type": "flapping",
+     "ipa": "/raɪɾ‿oʊvər/",
+     "noteJa": "right の t がラ行化して over と連結し、「ライロウヴァー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "male",
+   "text": "It fits well, so I will take it.",
+   "chunks": [
+    "It fits well,",
+    "so I will",
+    "take it."
+   ],
+   "translationJa": "サイズがぴったりなので、これにします。",
+   "linking": [
+    {
+     "span": "take it",
+     "type": "linking",
+     "ipa": "/teɪk‿ɪt/",
+     "noteJa": "take の k の音と it が連結して「テイキット」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "female",
+   "text": "Great! Will you pay with cash or credit card?",
+   "chunks": [
+    "Great!",
+    "Will you pay",
+    "with cash",
+    "or credit card?"
+   ],
+   "translationJa": "ありがとうございます！お支払いは現金ですか、それともクレジットカードですか？",
+   "linking": [
+    {
+     "span": "cash or",
+     "type": "linking",
+     "ipa": "/kæʃ‿ər/",
+     "noteJa": "cash の語尾の音と or が連結して「キャッシャー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "male",
+   "text": "Can I pay by credit card, please?",
+   "chunks": [
+    "Can I",
+    "pay by credit card,",
+    "please?"
+   ],
+   "translationJa": "クレジットカードでお願いします。",
+   "linking": [
+    {
+     "span": "Can I",
+     "type": "linking",
+     "ipa": "/kæn‿aɪ/",
+     "noteJa": "Can の n と I がつながって「キャナイ」のように発音されます。"
+    }
+   ]
+  }
+ ],
+ "id": "shopping-clothes",
+ "category": "shop"
+}

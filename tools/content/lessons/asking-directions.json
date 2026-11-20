@@ -1,0 +1,219 @@
+{
+ "title": "Asking for Directions",
+ "titleJa": "道を聞く",
+ "type": "conversation",
+ "level": "beginner",
+ "speakerNames": {
+  "female": "Tourist",
+  "male": "Local Resident"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "female",
+   "text": "Excuse me, could you tell me how to get to the central station?",
+   "chunks": [
+    "Excuse me,",
+    "could you tell me",
+    "how to get to",
+    "the central station?"
+   ],
+   "translationJa": "すみません、中央駅への行き方を教えていただけますか？",
+   "linking": [
+    {
+     "span": "could you",
+     "type": "palatalization",
+     "ipa": "/kʊdʒuː/",
+     "noteJa": "could の d と you の y が同化して「クッジュ」のように聞こえます。"
+    },
+    {
+     "span": "get to",
+     "type": "flapping",
+     "ipa": "/ˈɡɛɾə/",
+     "noteJa": "get の t が母音に挟まれて日本語のラ行に近い軽い「ゲラ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "text": "Sure, it is not far from here at all.",
+   "chunks": [
+    "Sure,",
+    "it is not far",
+    "from here",
+    "at all."
+   ],
+   "translationJa": "もちろんですよ、ここからは全く遠くありません。",
+   "linking": [
+    {
+     "span": "it is",
+     "type": "flapping",
+     "ipa": "/ɪɾɪz/",
+     "noteJa": "it の t が次の母音とつながり、フラップ化して「イリズ」のように聞こえます。"
+    },
+    {
+     "span": "at all",
+     "type": "linking",
+     "ipa": "/əˈtɔːl/",
+     "noteJa": "at の t と all の母音が連結して「アトール」または「アラール」とつながります。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "male",
+   "text": "Just walk straight down this street for two blocks.",
+   "chunks": [
+    "Just walk straight",
+    "down this street",
+    "for two blocks."
+   ],
+   "translationJa": "この通りをまっすぐ2ブロック歩いてください。",
+   "linking": [
+    {
+     "span": "for",
+     "type": "weak-form",
+     "ipa": "/fər/",
+     "noteJa": "前置詞の for は弱形になり、あいまい母音で「ファー」より「ファ」と短く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "female",
+   "text": "Okay, and what should I do after that?",
+   "chunks": [
+    "Okay,",
+    "and what should I do",
+    "after that?"
+   ],
+   "translationJa": "わかりました、その後はどうすればいいですか？",
+   "linking": [
+    {
+     "span": "should I",
+     "type": "linking",
+     "ipa": "/ˈʃʊdaɪ/",
+     "noteJa": "should の d と I の母音がつながって「シュダイ」のようにひと続きになります。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "male",
+   "text": "Turn right at the big convenience store on the corner.",
+   "chunks": [
+    "Turn right",
+    "at the big",
+    "convenience store",
+    "on the corner."
+   ],
+   "translationJa": "角にある大きなコンビニのところで右に曲がってください。",
+   "linking": [
+    {
+     "span": "right at",
+     "type": "flapping",
+     "ipa": "/ˈraɪɾət/",
+     "noteJa": "right の t が脱落またはフラップ化し、at とつながって「ライラッ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "female",
+   "text": "Turn right at the store, got it.",
+   "chunks": [
+    "Turn right",
+    "at the store,",
+    "got it."
+   ],
+   "translationJa": "お店のところで右に曲がるのですね、了解しました。",
+   "linking": [
+    {
+     "span": "got it",
+     "type": "linking",
+     "ipa": "/ˈɡɑːtɪt/",
+     "noteJa": "got の t と it がつながって「ガリッ」のように素早く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "male",
+   "text": "You will see a large glass building in front of you.",
+   "chunks": [
+    "You will see",
+    "a large glass building",
+    "in front of you."
+   ],
+   "translationJa": "目の前に大きなガラス張りの建物が見えますよ。",
+   "linking": [
+    {
+     "span": "front of",
+     "type": "reduction",
+     "ipa": "/ˈfrʌnəv/",
+     "noteJa": "front の t が脱落し、of と連結して「フラナヴ」のように弱く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "female",
+   "text": "How long will it take on foot?",
+   "chunks": [
+    "How long",
+    "will it take",
+    "on foot?"
+   ],
+   "translationJa": "歩いてどのくらい時間がかかりますか？",
+   "linking": [
+    {
+     "span": "will it",
+     "type": "linking",
+     "ipa": "/ˈwɪlɪt/",
+     "noteJa": "will の l と it が滑らかにつながり「ウィリット」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "male",
+   "text": "It will take about ten minutes to walk there.",
+   "chunks": [
+    "It will take",
+    "about ten minutes",
+    "to walk there."
+   ],
+   "translationJa": "そこまで歩いて10分ほどかかります。",
+   "linking": [
+    {
+     "span": "take about",
+     "type": "linking",
+     "ipa": "/teɪk‿əˈbaʊt/",
+     "noteJa": "take の語尾の k 音が about の先頭の母音とつながって「テイカバウト」と聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "female",
+   "text": "That sounds easy enough, thank you so much for your help!",
+   "chunks": [
+    "That sounds easy enough,",
+    "thank you so much",
+    "for your help!"
+   ],
+   "translationJa": "それなら簡単そうですね、助けてくれて本当にありがとうございました！",
+   "linking": [
+    {
+     "span": "easy enough",
+     "type": "intrusion",
+     "ipa": "/ˈiːzi‿jɪˈnʌf/",
+     "noteJa": "easy の終わりの母音 /iː/ から enough の母音へ移る際に軽い /j/ 音が挟まります。"
+    }
+   ]
+  }
+ ],
+ "id": "asking-directions",
+ "category": "street"
+}

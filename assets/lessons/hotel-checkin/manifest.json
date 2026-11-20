@@ -1,0 +1,109 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "hotel-checkin",
+ "lines": {
+  "L01_female.wav": {
+   "index": 1,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Good afternoon, how can I help you today?",
+   "chars": 41,
+   "durationSec": 2.691,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_male.wav": {
+   "index": 2,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Hi, I'd like to check in, please.",
+   "chars": 33,
+   "durationSec": 2.377,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_female.wav": {
+   "index": 3,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Sure! Could you tell me your name, please?",
+   "chars": 42,
+   "durationSec": 2.771,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_male.wav": {
+   "index": 4,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "My name is Ken Tanaka, and I have a reservation.",
+   "chars": 48,
+   "durationSec": 2.988,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_female.wav": {
+   "index": 5,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Yes, here it is. You are booked for two nights.",
+   "chars": 47,
+   "durationSec": 3.769,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_male.wav": {
+   "index": 6,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "That's right. What time is breakfast served tomorrow?",
+   "chars": 53,
+   "durationSec": 3.01,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_female.wav": {
+   "index": 7,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "It is served from seven to ten on the second floor.",
+   "chars": 51,
+   "durationSec": 2.966,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_male.wav": {
+   "index": 8,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Great. Could I also get the Wi-Fi password?",
+   "chars": 43,
+   "durationSec": 2.893,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_female.wav": {
+   "index": 9,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "You will find it printed on this card, along with your room key.",
+   "chars": 64,
+   "durationSec": 3.852,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_male.wav": {
+   "index": 10,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Thank you so much for taking such good care of everything today.",
+   "chars": 64,
+   "durationSec": 3.803,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 128,
+  "lessonRequests": 2,
+  "monthChars": 2191,
+  "monthRequests": 41,
+  "monthlyStopChars": 900000
+ }
+}

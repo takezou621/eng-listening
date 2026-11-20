@@ -1,0 +1,209 @@
+{
+ "title": "Checking In at a Hotel",
+ "titleJa": "ホテルでチェックインする",
+ "type": "conversation",
+ "level": "beginner",
+ "speakerNames": {
+  "female": "Receptionist",
+  "male": "Ken"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "female",
+   "text": "Good afternoon, how can I help you today?",
+   "chunks": [
+    "Good afternoon,",
+    "how can I help you",
+    "today?"
+   ],
+   "translationJa": "こんにちは、本日はどのようなご用件でしょうか？",
+   "linking": [
+    {
+     "span": "can I",
+     "type": "linking",
+     "ipa": "/kənaɪ/",
+     "noteJa": "can の語尾 /n/ と I の母音 /aɪ/ がつながり、「キャナイ」のように滑らかに読まれます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "text": "Hi, I'd like to check in, please.",
+   "chunks": [
+    "Hi,",
+    "I'd like to",
+    "check in,",
+    "please."
+   ],
+   "translationJa": "こんにちは、チェックインをお願いしたいのですが。",
+   "linking": [
+    {
+     "span": "check in",
+     "type": "linking",
+     "ipa": "/tʃɛkɪn/",
+     "noteJa": "check の末尾の子音 /k/ と in の母音 /ɪ/ がつながり、「チェッキン」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "text": "Sure! Could you tell me your name, please?",
+   "chunks": [
+    "Sure!",
+    "Could you",
+    "tell me your name,",
+    "please?"
+   ],
+   "translationJa": "かしこまりました！お名前を教えていただけますか？",
+   "linking": [
+    {
+     "span": "Could you",
+     "type": "palatalization",
+     "ipa": "/kʊdʒuː/",
+     "noteJa": "Could の語尾 /d/ と you の /j/ が合わさって「クッジュ」のような破擦音になります。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "male",
+   "text": "My name is Ken Tanaka, and I have a reservation.",
+   "chunks": [
+    "My name is Ken Tanaka,",
+    "and I have",
+    "a reservation."
+   ],
+   "translationJa": "タナカ・ケンです。予約をしています。",
+   "linking": [
+    {
+     "span": "name is",
+     "type": "linking",
+     "ipa": "/neɪmɪz/",
+     "noteJa": "name の末尾 /m/ と is の母音 /ɪ/ が連結して「ネイミズ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "female",
+   "text": "Yes, here it is. You are booked for two nights.",
+   "chunks": [
+    "Yes,",
+    "here it is.",
+    "You are booked",
+    "for two nights."
+   ],
+   "translationJa": "はい、確認できました。2泊のご予約ですね。",
+   "linking": [
+    {
+     "span": "it is",
+     "type": "flapping",
+     "ipa": "/ɪɾɪz/",
+     "noteJa": "it の /t/ が母音に挟まれることで、日本語のラ行に近い軽い音に変化します。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "male",
+   "text": "That's right. What time is breakfast served tomorrow?",
+   "chunks": [
+    "That's right.",
+    "What time is",
+    "breakfast served",
+    "tomorrow?"
+   ],
+   "translationJa": "その通りです。明日の朝食は何時に提供されますか？",
+   "linking": [
+    {
+     "span": "time is",
+     "type": "linking",
+     "ipa": "/taɪmɪz/",
+     "noteJa": "time の終わりの /m/ と is の /ɪ/ がつながり、「タイミズ」と発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "female",
+   "text": "It is served from seven to ten on the second floor.",
+   "chunks": [
+    "It is served",
+    "from seven to ten",
+    "on the second floor."
+   ],
+   "translationJa": "2階で7時から10時までとなっております。",
+   "linking": [
+    {
+     "span": "It is",
+     "type": "flapping",
+     "ipa": "/ɪɾɪz/",
+     "noteJa": "語頭の It の /t/ が弱まり、続く is とつながって「イリズ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "male",
+   "text": "Great. Could I also get the Wi-Fi password?",
+   "chunks": [
+    "Great.",
+    "Could I also",
+    "get the",
+    "Wi-Fi password?"
+   ],
+   "translationJa": "わかりました。Wi-Fiのパスワードも教えていただけますか？",
+   "linking": [
+    {
+     "span": "Could I",
+     "type": "linking",
+     "ipa": "/kʊdaɪ/",
+     "noteJa": "Could の /d/ と I の /aɪ/ が結びついて「クダイ」のようにひと息で読まれます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "female",
+   "text": "You will find it printed on this card, along with your room key.",
+   "chunks": [
+    "You will find it",
+    "printed on this card,",
+    "along with your room key."
+   ],
+   "translationJa": "ルームキーと一緒にお渡しするこちらのカードに記載されております。",
+   "linking": [
+    {
+     "span": "printed on",
+     "type": "linking",
+     "ipa": "/prɪntɪd‿ɑːn/",
+     "noteJa": "printed の /d/ と on の母音 /ɑː/ がつながり、「プリンティッドン」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "male",
+   "text": "Thank you so much for taking such good care of everything today.",
+   "chunks": [
+    "Thank you so much",
+    "for taking such good care",
+    "of everything today."
+   ],
+   "translationJa": "助かりました、どうもありがとうございます！",
+   "linking": [
+    {
+     "span": "Thank you",
+     "type": "palatalization",
+     "ipa": "/θæŋkjuː/",
+     "noteJa": "Thank の語尾 /k/ と you の /j/ が融けて「サンキュュー」のようにひと続きになります。"
+    }
+   ]
+  }
+ ],
+ "id": "hotel-checkin",
+ "category": "hotel"
+}

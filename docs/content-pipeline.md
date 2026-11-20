@@ -11,6 +11,9 @@ Text-to-Speech に置き換えている (GM 決定: Gemini TTS はアニメ側�
 ## 全体の流れ
 
 ```
+tools/content/lesson-plan.json       # 12 本計画 (id / type / level / category / situation / speakers)
+        │  ⓪ generate_scripts.py     LLM (Gemini) で台本 JSON を生成 + バリデーション
+        ▼
 tools/content/lessons/<id>.json      # 入力: 台本 (話者・英文・チャンク・直訳・リンキング注釈)
         │  ① generate_lesson.py      行ごと Cloud TTS 生成 (文字数カウンタ付き)
         ▼
@@ -26,8 +29,41 @@ assets/lessons/<id>/                 # 出力: アプリが読む成果物 (コ�
   └ voice_consistency_report.json    #   ゲートの測定値と合否
 ```
 
-アプリ側は `src/features/lesson/cafeLesson.ts` が `assets/lessons/cafe-ordering/` を
-require し、`/lesson` 画面 (`src/app/lesson.tsx`) で再生・カラオケ表示・文シークをする。
+アプリ側は `src/features/lesson/registry.ts` が `assets/lessons/<id>/` を require し、
+`/lesson` 画面 (`src/app/lesson.tsx`) で再生・カラオケ表示・文シークをする。
+`/lesson?lesson=<id>` でレッスンを切り替えられる (既定は cafe-ordering)。
+
+## 台本の LLM 生成 (Issue #1, generate_scripts.py)
+
+12 本計画は `tools/content/lesson-plan.json` (v1.0: 会話 8 本 + モノローグ 4 本、
+初級 6 + 中級 6、シチュエーション重複なし)。cafe-ordering は既存ファイルが正なので
+再生成しない (`--force` を付けても常にスキップする)。
+
+```bash
+# 全レッスン (既存ファイルはスキップ)
+GEMINI_API_KEY=... uv run --project tools/content python tools/content/generate_scripts.py --all
+# 1 本だけ (既存があっても再生成)
+GEMINI_API_KEY=... uv run --project tools/content python tools/content/generate_scripts.py --lesson <id>
+```
+
+- **LLM**: Gemini API (`gemini-3.8-flash`)、Structured Outputs (JSON モード +
+  response_schema で台本スキーマを強制)。
+- **認証**: mini 上のアニメ日本史ラボのツール群と同じ `GEMINI_API_KEY`
+  (~/.zshrc の export。google-genai SDK に渡す)。キーの値をログ・PR・コミットに
+  出してはならない。Muse 環境の credential surrogate (/opt/muse/...) は mini に
+  存在しないため、この環境でアニメ側が実際に使っている環境変数方式を再利用している。
+- **品質ルール (プロンプトで指示 + バリデーションで強制)**:
+  - 英文は TOEIC 400〜750 レベル。「知っている単語なのに聞き取れない」音の変化を体験できる
+  - linking 注釈は 1 レッスン 6 箇所以上、1 行 1〜2 箇所まで
+  - linking.span は text の部分文字列と完全一致
+  - chunks は半角スペース 1 個で連結すると text と一致 (空白正規化のうえ検証)
+  - translationJa は文単位の自然な日本語訳
+  - IPA は /.../ 形式で音声記号のみ (英単語や絵文字は拒否)
+  - 話者ロールは voice_config.json の female / male / narrator のみ
+  - 行数: 会話 8〜12、モノローグ 10〜14
+- **再生成**: バリデーション失敗のレッスンは自動で再生成 (上限 3 回)。
+  3 回失敗すると exit 2 で停止するので、結果を報告してから原因を直す。
+  id / category / 行番号は計画から機械的に付与される (LLM 出力に依存しない)。
 
 ## ゼロコスト制約 (絶対条件)
 

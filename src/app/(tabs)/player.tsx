@@ -46,7 +46,15 @@ export default function PlayerScreen() {
           onPress={() => router.push('/lesson')}
         >
           <ThemedText style={{ color: colors.primaryText, fontWeight: '600' }}>
-            生成レッスンを再生 (TTS パイプライン)
+            生成レッスンを再生 (カフェ)
+          </ThemedText>
+        </Pressable>
+        <Pressable
+          style={[styles.spikeButton, { backgroundColor: colors.primary }]}
+          onPress={() => router.push('/lesson?lesson=hotel-checkin')}
+        >
+          <ThemedText style={{ color: colors.primaryText, fontWeight: '600' }}>
+            生成レッスンを再生 (ホテル)
           </ThemedText>
         </Pressable>
         <Pressable

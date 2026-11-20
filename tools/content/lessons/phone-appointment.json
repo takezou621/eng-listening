@@ -1,0 +1,222 @@
+{
+ "title": "Making an Appointment by Phone",
+ "titleJa": "電話で予約を入れる",
+ "type": "conversation",
+ "level": "intermediate",
+ "speakerNames": {
+  "female": "Receptionist",
+  "male": "Patient"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "female",
+   "text": "Bright Dental Clinic, how can I help you today?",
+   "chunks": [
+    "Bright Dental Clinic,",
+    "how can I",
+    "help you today?"
+   ],
+   "translationJa": "ブライト歯科医院です。本日はどのようなご用件でしょうか？",
+   "linking": [
+    {
+     "span": "can I",
+     "type": "linking",
+     "ipa": "/kənaɪ/",
+     "noteJa": "can の語尾の /n/ と I の /aɪ/ がつながり「キャナイ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "text": "Hi, I'd like to make an appointment for a checkup.",
+   "chunks": [
+    "Hi,",
+    "I'd like to",
+    "make an appointment",
+    "for a checkup."
+   ],
+   "translationJa": "こんにちは、定期検診の予約を取りたいのですが。",
+   "linking": [
+    {
+     "span": "make an appointment",
+     "type": "linking",
+     "ipa": "/meɪkənəˈpɔɪntmənt/",
+     "noteJa": "make と an、さらに appointment が連結して「メイカナポイントマント」のように滑らかに続きます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "text": "Sure, would next Tuesday at three work for you?",
+   "chunks": [
+    "Sure,",
+    "would next Tuesday",
+    "at three",
+    "work for you?"
+   ],
+   "translationJa": "かしこまりました。来週火曜日の3時はいかがでしょうか？",
+   "linking": [
+    {
+     "span": "next Tuesday",
+     "type": "elision",
+     "ipa": "/nɛksˈtjuːzdeɪ/",
+     "noteJa": "next の語尾の /t/ が脱落し、「ネクス・チューズデイ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "male",
+   "text": "I'm afraid I'm tied up at work at that time.",
+   "chunks": [
+    "I'm afraid",
+    "I'm tied up",
+    "at work",
+    "at that time."
+   ],
+   "translationJa": "あいにくその時間は仕事で手が離せそうにありません。",
+   "linking": [
+    {
+     "span": "tied up",
+     "type": "linking",
+     "ipa": "/taɪdʌp/",
+     "noteJa": "tied の語尾の /d/ と up の /ʌ/ がつながり「タイダップ」と発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "female",
+   "text": "How about Wednesday afternoon instead, around four thirty?",
+   "chunks": [
+    "How about",
+    "Wednesday afternoon instead,",
+    "around four thirty?"
+   ],
+   "translationJa": "では代わりに水曜日の午後、4時半ごろはいかがですか？",
+   "linking": [
+    {
+     "span": "How about",
+     "type": "linking",
+     "ipa": "/haʊəˈbaʊt/",
+     "noteJa": "about の語頭が前の語と滑らかにつながり、自然なリズムで一体化して聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "male",
+   "text": "That sounds much better, could you fit me in then?",
+   "chunks": [
+    "That sounds much better,",
+    "could you",
+    "fit me in then?"
+   ],
+   "translationJa": "そちらの方が都合がいいです。その時間に入れていただけますか？",
+   "linking": [
+    {
+     "span": "could you",
+     "type": "palatalization",
+     "ipa": "/kʊdʒuː/",
+     "noteJa": "could の /d/ と you の /j/ が融合して「クッジュ」のように聞こえます。"
+    },
+    {
+     "span": "fit me in",
+     "type": "linking",
+     "ipa": "/fɪt miː ɪn/",
+     "noteJa": "me と in の母音が滑らかにつながって発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "female",
+   "text": "Yes, we have an opening with Doctor Miller right then.",
+   "chunks": [
+    "Yes,",
+    "we have an opening",
+    "with Doctor Miller",
+    "right then."
+   ],
+   "translationJa": "はい、ちょうどその時間にミラー先生の空きがございます。",
+   "linking": [
+    {
+     "span": "have an",
+     "type": "linking",
+     "ipa": "/hævən/",
+     "noteJa": "have の /v/ と an の /ə/ がつながり「ハヴァン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "male",
+   "text": "Perfect, please put me down for that slot.",
+   "chunks": [
+    "Perfect,",
+    "please put me down",
+    "for that slot."
+   ],
+   "translationJa": "完璧です。その枠で予約をお願いします。",
+   "linking": [
+    {
+     "span": "put me down",
+     "type": "reduction",
+     "ipa": "/pʊt mi daʊn/",
+     "noteJa": "put の語尾の /t/ が破裂せずに詰まる音になり、「プッミーダウン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "female",
+   "text": "All set, could I get your name and phone number?",
+   "chunks": [
+    "All set,",
+    "could I",
+    "get your name",
+    "and phone number?"
+   ],
+   "translationJa": "手配いたしました。お名前とお電話番号をいただけますか？",
+   "linking": [
+    {
+     "span": "could I",
+     "type": "linking",
+     "ipa": "/kʊdaɪ/",
+     "noteJa": "could の /d/ と I の /aɪ/ がつながり「クダイ」のように聞こえます。"
+    },
+    {
+     "span": "get your",
+     "type": "palatalization",
+     "ipa": "/ɡɛtʃər/",
+     "noteJa": "get の /t/ と your の /j/ が融合して「ゲッチャー」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "male",
+   "text": "Sure, it is Kenji Sato at five five five, one two three four.",
+   "chunks": [
+    "Sure,",
+    "it is Kenji Sato",
+    "at five five five,",
+    "one two three four."
+   ],
+   "translationJa": "はい、佐藤ケンジで、番号は555-1234です。",
+   "linking": [
+    {
+     "span": "it is",
+     "type": "flapping",
+     "ipa": "/ɪɾɪz/",
+     "noteJa": "it の /t/ が母音に挟まれて日本語のラ行のような軽い音（フラップT）に変化します。"
+    }
+   ]
+  }
+ ],
+ "id": "phone-appointment",
+ "category": "phone"
+}

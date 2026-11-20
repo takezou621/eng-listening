@@ -1,0 +1,236 @@
+{
+ "title": "Introducing My Hometown",
+ "titleJa": "故郷の紹介",
+ "type": "monologue",
+ "level": "intermediate",
+ "speakerNames": {
+  "narrator": "Speaker"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "text": "Today, I'd like to tell you a bit about my hometown.",
+   "chunks": [
+    "Today,",
+    "I'd like to tell you",
+    "a bit about",
+    "my hometown."
+   ],
+   "translationJa": "今日は、私の故郷について少しお話ししたいと思います。",
+   "linking": [
+    {
+     "span": "tell you",
+     "type": "palatalization",
+     "ipa": "/ˈtɛl.juː/",
+     "noteJa": "tellの末尾とyouが滑らかにつながり、「テリュ」のように1語のように発音されます。"
+    },
+    {
+     "span": "bit about",
+     "type": "flapping",
+     "ipa": "/ˈbɪɾ.ə.baʊt/",
+     "noteJa": "bitの語尾のtが母音に挟まれて日本語のラ行のような軽い音（フラップT）になり、「ビラバウト」と聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "text": "It is located in the northern part of the country.",
+   "chunks": [
+    "It is located",
+    "in the northern part",
+    "of the country."
+   ],
+   "translationJa": "そこはこの国の北部に位置しています。",
+   "linking": [
+    {
+     "span": "part of",
+     "type": "linking",
+     "ipa": "/ˈpɑːrt.əv/",
+     "noteJa": "partのtとofのoがつながり、「パーラヴ」または「パーツォヴ」のように流れるように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "text": "Most people think it gets too cold in the winter.",
+   "chunks": [
+    "Most people think",
+    "it gets too cold",
+    "in the winter."
+   ],
+   "translationJa": "多くの人は冬になると寒すぎると考えています。",
+   "linking": [
+    {
+     "span": "cold in",
+     "type": "linking",
+     "ipa": "/ˈkoʊld.ɪn/",
+     "noteJa": "coldのdとinのiがつながって「コルディン」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "text": "Actually, the snow makes the whole city look magical.",
+   "chunks": [
+    "Actually,",
+    "the snow makes",
+    "the whole city",
+    "look magical."
+   ],
+   "translationJa": "実は、雪のおかげで街全体が幻想的に見えるんですよ。",
+   "linking": [
+    {
+     "span": "city",
+     "type": "flapping",
+     "ipa": "/ˈsɪɾi/",
+     "noteJa": "cityのtが母音に挟まれて「シリー」に近いラ行の音で発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "text": "Our town is famous for fresh seafood and warm noodle soup.",
+   "chunks": [
+    "Our town is famous",
+    "for fresh seafood",
+    "and warm noodle soup."
+   ],
+   "translationJa": "私たちの町は新鮮な海鮮と温かい麺料理で有名です。",
+   "linking": [
+    {
+     "span": "town is",
+     "type": "linking",
+     "ipa": "/ˈtaʊn.ɪz/",
+     "noteJa": "townの末尾のnとisが結びつき、「タウニズ」と一気に発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "text": "You can find a great bowl of ramen on almost every corner.",
+   "chunks": [
+    "You can find",
+    "a great bowl of ramen",
+    "on almost every corner."
+   ],
+   "translationJa": "ほぼどの通りを曲がっても、おいしいラーメンの店を見つけることができます。",
+   "linking": [
+    {
+     "span": "bowl of",
+     "type": "linking",
+     "ipa": "/ˈboʊl.əv/",
+     "noteJa": "bowlの末尾lとofがつながり、「ボウラヴ」のように滑らかに聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "text": "If you visit, you must stop at the historic central park.",
+   "chunks": [
+    "If you visit,",
+    "you must stop at",
+    "the historic central park."
+   ],
+   "translationJa": "もし訪れるなら、歴史ある中央公園に絶対に立ち寄るべきです。",
+   "linking": [
+    {
+     "span": "stop at",
+     "type": "linking",
+     "ipa": "/ˈstɑːp.ət/",
+     "noteJa": "stopのpとatがつながって「スタッパッ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "text": "You can rent a bicycle and ride around the peaceful lake.",
+   "chunks": [
+    "You can rent a bicycle",
+    "and ride around",
+    "the peaceful lake."
+   ],
+   "translationJa": "自転車を借りて、穏やかな湖のまわりを走ることができます。",
+   "linking": [
+    {
+     "span": "rent a",
+     "type": "linking",
+     "ipa": "/ˈrɛnt.ə/",
+     "noteJa": "rentのtとaがつながって「レンタ」のように聞こえます。"
+    },
+    {
+     "span": "ride around",
+     "type": "linking",
+     "ipa": "/ˌraɪd.əˈraʊnd/",
+     "noteJa": "rideのdとaroundのaがつながり、「ライダラウンド」のように1語のように流れます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "text": "The local people are kind and always willing to help visitors.",
+   "chunks": [
+    "The local people are kind",
+    "and always willing",
+    "to help visitors."
+   ],
+   "translationJa": "地元の人々は親切で、観光客をいつでも喜んで手助けしてくれます。",
+   "linking": [
+    {
+     "span": "kind and",
+     "type": "linking",
+     "ipa": "/ˈkaɪnd.ənd/",
+     "noteJa": "kindのdとandの先頭母音が連結して「カインダン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "narrator",
+   "text": "Life moves at a relaxed pace compared to big cities.",
+   "chunks": [
+    "Life moves",
+    "at a relaxed pace",
+    "compared to big cities."
+   ],
+   "translationJa": "大都市と比べると、生活はとてもゆったりとしたペースで流れています。",
+   "linking": [
+    {
+     "span": "at a",
+     "type": "flapping",
+     "ipa": "/ˈæɾ.ə/",
+     "noteJa": "atのtが母音に挟まれて「アラ」のようにラ行化して聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 11,
+   "speaker": "narrator",
+   "text": "I hope you will take the chance to visit someday soon.",
+   "chunks": [
+    "I hope you will",
+    "take the chance",
+    "to visit someday soon."
+   ],
+   "translationJa": "いつか近いうちに、ぜひ訪れる機会を持っていただけたら嬉しいです。",
+   "linking": [
+    {
+     "span": "hope you",
+     "type": "linking",
+     "ipa": "/ˈhoʊp.juː/",
+     "noteJa": "hopeの語尾とyouがつながり、「ホウピュ」のようにスムーズに発音されます。"
+    }
+   ]
+  }
+ ],
+ "id": "introducing-my-hometown",
+ "category": "culture"
+}
