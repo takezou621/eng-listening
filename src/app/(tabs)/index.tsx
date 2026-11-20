@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { CONTENT_TYPE_LABELS, type ContentType } from '@/data/types';
 import { getLessonList } from '@/features/lesson/registry';
 import { loadUserDataAsync, useUserData } from '@/features/library/userStore';
+import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 type FilterType = 'all' | ContentType;
@@ -29,8 +30,11 @@ export default function LibraryScreen() {
   useEffect(() => {
     if (redirectedRef.current) return;
     void loadUserDataAsync().then(() => {
-      if (!onboardingDone && !redirectedRef.current) {
-        redirectedRef.current = true;
+      if (redirectedRef.current) return;
+      redirectedRef.current = true;
+      // 分析イベント: 初回起動 (ログに app_first_open がない場合のみ記録される)
+      logEvent('app_first_open');
+      if (!onboardingDone) {
         router.replace('/onboarding');
       }
     });

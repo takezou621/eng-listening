@@ -52,6 +52,7 @@ import {
   localDateStr,
   markLessonCompleted,
 } from '@/features/progress/progressStore';
+import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -91,6 +92,10 @@ function LessonPlayerScreen({
   const { colors } = useTheme();
   const { isSentenceWeak, toggleWeakSentence } = useUserData();
   const prefs = getPlayerPrefs();
+  // 分析イベント: レッスン開始 (端末内ログのみ)
+  useEffect(() => {
+    logEvent('lesson_started', { lessonId: lesson.id });
+  }, [lesson.id]);
   const [rate, setRate] = useState<PlaybackRate>(prefs.rate);
   const [repeatSentence, setRepeatSentence] = useState<number | null>(null);
   // 表示モード (カラオケ / チャンク) とチャンク直訳トグル。アプリ再起動まで保持
@@ -296,6 +301,7 @@ function LessonPlayerScreen({
     setLastRecordings((prev) => ({ ...prev, [sentenceIndex]: { uri, durationSec: duration } }));
     setShadowingCounts(addShadowingCount(lesson.id, sentenceIndex));
     addShadowingRecord(lesson.id);
+    logEvent('shadowing_recorded', { lessonId: lesson.id });
     append(`録音完了: 文${sentenceIndex + 1} ${duration.toFixed(1)} 秒`);
   };
 
@@ -421,6 +427,10 @@ function LessonPlayerScreen({
   useEffect(() => {
     if (status.didJustFinish) {
       markLessonCompleted(lesson.id);
+      logEvent('lesson_completed', {
+        lessonId: lesson.id,
+        seconds: Math.round(playedSecondsRef.current),
+      });
     }
   }, [status.didJustFinish, lesson.id]);
 

@@ -15,6 +15,7 @@ import {
 } from '@/features/onboarding/diagnostic';
 import { getLessonList } from '@/features/lesson/registry';
 import { useUserData } from '@/features/library/userStore';
+import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -56,6 +57,7 @@ export default function OnboardingScreen() {
   };
 
   const skip = () => {
+    logEvent('onboarding_skipped');
     completeOnboarding();
     router.replace('/(tabs)');
   };
@@ -68,7 +70,13 @@ export default function OnboardingScreen() {
           3 つの音声を聞いて、「何と聞こえたか」に答えるだけ。
           単語は知っているのに聞き取れない理由が、ここで見えます。
         </ThemedText>
-        <Pressable style={[styles.primaryButton, { backgroundColor: colors.primary }]} onPress={() => setPhase('question')}>
+        <Pressable
+          style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+          onPress={() => {
+            logEvent('onboarding_started');
+            setPhase('question');
+          }}
+        >
           <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
             診断をはじめる (約 60 秒)
           </ThemedText>
@@ -86,7 +94,17 @@ export default function OnboardingScreen() {
     return (
       <ResultScreen
         results={results}
-        onFinish={finish}
+        onFinish={() => {
+          logEvent('onboarding_completed', {
+            linking_correct: results.filter((r) => r.type === 'linking' && r.correct).length,
+            linking_missed: results.filter((r) => r.type === 'linking' && !r.correct).length,
+            reduction_correct: results.filter((r) => r.type === 'reduction' && r.correct).length,
+            reduction_missed: results.filter((r) => r.type === 'reduction' && !r.correct).length,
+            flapping_correct: results.filter((r) => r.type === 'flapping' && r.correct).length,
+            flapping_missed: results.filter((r) => r.type === 'flapping' && !r.correct).length,
+          });
+          finish();
+        }}
       />
     );
   }
