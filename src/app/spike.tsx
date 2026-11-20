@@ -102,9 +102,9 @@ export default function AudioSpikeScreen() {
       append('setPlaybackRate(0.7, high) // ピッチ補正あり');
     });
     at(4500, () => {
-      player.setPlaybackRate(1.2, PITCH_CORRECTION_QUALITY);
-      setRate(1.2);
-      append('setPlaybackRate(1.2, high) // ピッチ補正あり');
+      player.setPlaybackRate(1.3, PITCH_CORRECTION_QUALITY);
+      setRate(1.3);
+      append('setPlaybackRate(1.3, high) // ピッチ補正あり');
     });
     at(6500, () => {
       const sentence3 = SPIKE_SAMPLE.sentences.find((s) => s.index === 2);

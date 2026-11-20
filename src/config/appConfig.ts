@@ -21,7 +21,7 @@ export const APP_CONFIG: {
  * 学習コンテンツは「単一速度トラック + アプリ内速度変更」で難易度対応する (GM 決定)。
  * この配列が速度変更 UI とロジックの唯一の情報源。
  */
-export const PLAYBACK_RATES = [0.7, 0.85, 1.0, 1.2] as const;
+export const PLAYBACK_RATES = [0.7, 0.85, 1.0, 1.15, 1.3] as const;
 
 export type PlaybackRate = (typeof PLAYBACK_RATES)[number];
 
