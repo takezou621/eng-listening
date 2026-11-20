@@ -131,6 +131,15 @@ export function logEvent(
   type: AnalyticsEventType,
   payload?: Record<string, string | number | boolean>
 ) {
+  // まだ読み込みが完了していない場合は、読み込み完了後に改めて記録する
+  // (これによりアプリのどの画面から最初に logEvent が呼ばれても
+  //  ログの読み込みと永続化が行われる)
+  if (!isLoaded) {
+    void loadAnalyticsLogAsync().then(() => {
+      logEvent(type, payload);
+    });
+    return;
+  }
   // app_first_open は一度だけ記録する (2 回目以降の起動では発火しない)
   if (type === 'app_first_open' && cachedLog.some((e) => e.type === 'app_first_open')) {
     return;
