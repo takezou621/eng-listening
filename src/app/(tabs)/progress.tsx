@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { AppState, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 
 import { Screen } from '@/components/Screen';
@@ -22,17 +23,33 @@ function formatMinutes(seconds: number): string {
 }
 
 /** 学習進捗画面 (Issue #13) */
+function todayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, '0')}-${`${d.getDate()}`.padStart(2, '0')}`;
+}
+
 export default function ProgressScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const days = useProgressData();
+  // ローカル日を状態として保持し、AppState 復帰時に更新する
+  // (進捗画面を開いたまま日付をまたいでも表示が正しく更新されるように)
+  const [today, setToday] = useState(todayStr());
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        setToday(todayStr());
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
-  const streak = computeStreak(days);
+  const streak = computeStreak(days, new Date(today + 'T12:00:00'));
   const totalSeconds = computeTotalSeconds(days);
-  const weekSeconds = computeWeekSeconds(days);
+  const weekSeconds = computeWeekSeconds(days, new Date(today + 'T12:00:00'));
   const completedCount = computeCompletedLessonCount(days);
   const shadowingTotal = computeShadowingTotal(days);
-  const heatmap = buildHeatmap(days, new Date(), 12);
+  const heatmap = buildHeatmap(days, new Date(today + 'T12:00:00'), 12);
   const hasData = totalSeconds > 0 || shadowingTotal > 0 || completedCount > 0;
 
   // ヒートマップの色段 (0 / 〜15分 / 〜30分 / 30分超)。濃淡はテーマ側で定義
