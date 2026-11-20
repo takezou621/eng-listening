@@ -173,6 +173,7 @@ function LessonPlayerScreen({
     append(label ?? `setPlaybackRate(${nextRate}, ${PITCH_CORRECTION_QUALITY})`);
   };
   const togglePlay = () => {
+    setComparing(null);
     if (status.playing) {
       pause();
     } else if (
@@ -243,6 +244,7 @@ function LessonPlayerScreen({
   }, [lastRecordings]);
 
   const startRecording = async (sentenceIndex: number) => {
+    if (recordingSentence !== null) return; // 録音中の再入防止 (上書きされると実行中の録音を停止できなくなる)
     // 録音中はレッスン音声・比較再生と競合しないよう止める (GM 決定)
     player.pause();
     userAudioRef.current?.pause();
@@ -308,6 +310,12 @@ function LessonPlayerScreen({
   // レッスンを離れたら録音プレイヤーとキャッシュ内の録音ファイルを破棄する (GM 決定)
   useEffect(() => {
     return () => {
+      try {
+        recorder.stop(); // 録音中に画面を離れた場合は停止してマイクを解放する
+      } catch {
+        // 録音していない場合のエラーは無視
+      }
+      void setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true }).catch(() => {});
       userAudioRef.current?.release();
       userAudioRef.current = null;
       for (const rec of Object.values(lastRecordingsRef.current)) {
@@ -316,6 +324,8 @@ function LessonPlayerScreen({
         }
       }
     };
+    // recorder (SharedObject) はマウント中不変。クリーンアップのみで参照する
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ?demo=1: 再生→速度変更→文シーク→カラオケ確認→停止を自動実行
@@ -344,7 +354,7 @@ function LessonPlayerScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demoParam, player]);
 
-  // ?autorecord=1: 自動スクロール後に録音を開始し、4 秒で自動停止する
+  // ?autorecord=1: 自動スクロール後に録音を開始し、約 5 秒で自動停止する
   // (シミュレータでの録音フロー自動検証用。手動操作と同じ startRecording / stopRecording を呼ぶ)
   const autoRecordRanRef = useRef(false);
   useEffect(() => {
@@ -435,16 +445,27 @@ function LessonPlayerScreen({
     if (!activeSentence) return -1;
     return activeSentence.words.findIndex((w) => t >= w.startSec && t < w.endSec);
   }, [activeSentence, t]);
-  // お手本の区間再生: 文の終端に来たら一時停止して比較再生を止める
+  // お手本の区間再生: 文の終端を過ぎたら一時停止する (比較状態は再生位置から導出)
+  const comparingModelEndSec = useMemo(() => {
+    if (comparing?.source !== 'model') return null;
+    return sentences.find((s) => s.index === comparing.index)?.endSec ?? null;
+  }, [comparing, sentences]);
+  const modelCompareActive =
+    comparing?.source === 'model' && comparingModelEndSec !== null && t < comparingModelEndSec;
+  const modelPausedRef = useRef(false);
   useEffect(() => {
-    if (comparing?.source !== 'model') return;
-    const sentence = sentences.find((s) => s.index === comparing.index);
-    if (!sentence) return;
-    if (t >= sentence.endSec) {
+    if (comparing === null) {
+      modelPausedRef.current = false;
+    }
+  }, [comparing]);
+  useEffect(() => {
+    if (!modelCompareActive) return;
+    if (!modelPausedRef.current && t >= (comparingModelEndSec ?? 0) - 0.02) {
       player.pause();
+      modelPausedRef.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comparing, t]);
+  }, [t, modelCompareActive, comparingModelEndSec]);
   // このレッスンに登場する音の変化の種類 (凡例表示用)
   const legendTypes = useMemo(() => {
     const set = new Set<LessonLinkingNote['type']>();
@@ -478,10 +499,15 @@ function LessonPlayerScreen({
     if (initialSentenceIndex === null || autoScrolledRef.current) return;
     const timer = setTimeout(() => {
       const card = sentenceCardRefs.current[initialSentenceIndex];
-      if (!card) return;
-      card.measureInWindow((x: number, y: number, _w: number, _h: number) => {
-        scrollRef.current?.scrollTo({ y: Math.max(y - 200, 0), animated: true });
-        autoScrolledRef.current = true;
+      const scroller = scrollRef.current;
+      if (!card || !scroller) return;
+      // measureInWindow は画面座標のため、ScrollView 自身の位置を差し引いて
+      // コンテンツ座標に変換してから scrollTo する
+      scroller.measureInWindow((sx: number, sy: number) => {
+        card.measureInWindow((_x, y: number, _w, _h) => {
+          scroller.scrollTo({ y: Math.max(y - sy - 200, 0), animated: true });
+          autoScrolledRef.current = true;
+        });
       });
     }, 1200);
     return () => clearTimeout(timer);
@@ -725,12 +751,12 @@ function LessonPlayerScreen({
             )}
             <Pressable
               onPress={() => playModel(sentence.index)}
-              disabled={comparing?.index === sentence.index && comparing.source === 'model'}
               style={[
                 styles.shadowingButton,
                 { backgroundColor: colors.secondarySurface },
                 comparing?.index === sentence.index &&
-                  comparing.source === 'model' && { opacity: 0.5 },
+                  comparing.source === 'model' &&
+                  modelCompareActive && { opacity: 0.5 },
               ]}
             >
               <ThemedText variant="caption">🔊 お手本</ThemedText>
@@ -738,7 +764,6 @@ function LessonPlayerScreen({
             {lastRecordings[sentence.index] ? (
               <Pressable
                 onPress={() => playUserRecording(sentence.index)}
-                disabled={comparing?.index === sentence.index && comparing.source === 'user'}
                 style={[
                   styles.shadowingButton,
                   { backgroundColor: colors.secondarySurface },
