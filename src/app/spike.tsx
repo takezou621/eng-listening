@@ -72,11 +72,15 @@ export default function AudioSpikeScreen() {
 
   const status = useAudioPlayerStatus(player);
 
-  const seekTo = (seconds: number, label: string) => {
+  // seekTo + 後続処理 + エラーログを一箇所にまとめたヘルパー
+  const seekTo = (seconds: number, label: string, onDone?: () => void) => {
     const clamped = Math.min(Math.max(seconds, 0), status.duration || SPIKE_SAMPLE.durationSec);
     player
       .seekTo(clamped, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
-      .then(() => append(label))
+      .then(() => {
+        onDone?.();
+        append(label);
+      })
       .catch((e: unknown) => append(`seekTo(${clamped}) 失敗: ${String(e)}`));
   };
 
@@ -142,15 +146,15 @@ export default function AudioSpikeScreen() {
     if (status.playing) {
       player.pause();
       append('pause()');
-    } else if (status.didJustFinish) {
-      // 終端で停止している場合: iOS は再生位置を先頭へ戻さないため seekTo(0) してから再生
-      player
-        .seekTo(0, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
-        .then(() => {
-          player.play();
-          append('seekTo(0) + play() // 終端からの再再生');
-        })
-        .catch((e: unknown) => append(`再再生失敗: ${String(e)}`));
+    } else if (
+      // 終端で停止している場合: iOS は再生位置を先頭へ戻さないため seekTo(0) してから再生。
+      // didJustFinish は 1 回のステータス更新でしか立たないため、終端位置判定も併用する。
+      // 文リピート中はリピート側の effect が再開を担うため、ここでは触らない
+      repeatSentence === null &&
+      (status.didJustFinish ||
+        (status.duration > 0 && status.currentTime >= status.duration - 0.05))
+    ) {
+      seekTo(0, 'seekTo(0) + play() // 終端からの再再生', () => player.play());
     } else {
       player.play();
       append('play()');
@@ -194,13 +198,9 @@ export default function AudioSpikeScreen() {
       status.duration > 0 ? Math.min(sentence.endSec, status.duration - 0.05) : sentence.endSec;
     const shouldRepeat = status.didJustFinish || status.currentTime >= endThreshold;
     if (shouldRepeat) {
-      player
-        .seekTo(sentence.startSec, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS)
-        .then(() => {
-          if (!status.playing) player.play();
-          append(`文リピート: ${sentence.startSec.toFixed(2)}s へ戻す`);
-        })
-        .catch((e: unknown) => append(`文リピート失敗: ${String(e)}`));
+      seekTo(sentence.startSec, `文リピート: ${sentence.startSec.toFixed(2)}s へ戻す`, () => {
+        if (!status.playing) player.play();
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.currentTime, status.playing, status.didJustFinish, status.duration, repeatSentence]);

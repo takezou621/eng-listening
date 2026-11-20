@@ -11,10 +11,10 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <View style={[styles.row, { borderBottomColor: colors.border }]}>
       {/* 値が長い識別子でも折り返して行から溢れないようにする */}
-      <ThemedText style={{ flexShrink: 1 }} numberOfLines={2}>
+      <ThemedText style={styles.rowLabel} numberOfLines={2}>
         {label}
       </ThemedText>
-      <ThemedText color="muted" style={{ flexShrink: 1, textAlign: 'right' }} numberOfLines={2}>
+      <ThemedText color="muted" style={styles.rowValue} numberOfLines={2} selectable>
         {value}
       </ThemedText>
     </View>
@@ -61,6 +61,8 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  rowLabel: { flexShrink: 1 },
+  rowValue: { flexShrink: 1, textAlign: 'right' },
   section: {
     marginTop: 12,
     borderRadius: 12,
