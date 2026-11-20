@@ -28,7 +28,7 @@
 
 | 手順 | 状態 | 内容 |
 |---|---|---|
-| 3-1. Apple Developer Program への参加 | ⬜ | オーナーの個人アカウント (年額 ¥12,900) |
+| 3-1. Apple Developer Program の契約状態確認 | ⬜ | オーナーは参加済み (Paid Applications Agreement は 2026-11-08 に承諾済み)。membership の有効期限と、**Paid Apps Agreement が有効 (銀行・税務情報の登録完了)** であることを developer.apple.com の Agreements, Tax, and Banking で確認する。年間会費は 99 USD または地域別の同等額 (登録・更新時に現地通貨価格が表示されるため、その額を確認) |
 | 3-2. App ID / 証明書の確認 | ⬜ | `com.takezou.englistening` (appConfig 設定値と一致させる)。EAS が証明書を自動管理する設定を推奨 |
 | 3-3. ASC アプリレコードの作成 | ⬜ | 表示名「ミミトレ - 英語の音が見える」、バンドル ID `com.takezou.englistening`、SKU 任意。**表示名はオーナー確定** |
 | 3-4. RevenueCat との結合 | ⬜ | RevenueCat プロジェクト作成、ASC アプリの In-App Purchase Key を RevenueCat に登録 |
@@ -38,9 +38,12 @@
 | 手順 | 状態 | 内容 |
 |---|---|---|
 | 4-1. Entitlement の作成 | ⬜ | Entitlement ID `premium` (src/features/billing/config.ts の ENTITLEMENT_ID と一致させる) |
-| 4-2. 商品の作成 | ⬜ | 月額 ¥680 / 年額 ¥4,800 (年額は 7 日間無料トライアル)。**商品 ID は config.ts の PRODUCT_IDS プレースホルダを差し替える** |
-| 4-3. Offering への紐づけ | ⬜ | current Offering に月額・年額パッケージを追加 (ペイウォールが getOfferings で取得) |
-| 4-4. API キーの設定 | ⬜ | RevenueCat の公開 API キーを `EXPO_PUBLIC_REVENUECAT_API_KEY` に設定 (コードに埋め込まない) |
+| 4-2. ASC でサブスクリプション商品の作成 | ⬜ | 月額 ¥680 / 年額 ¥4,800 (年額は 7 日間無料トライアル)。同一サブスクリプショングループに作成する |
+| 4-3. **両商品を Entitlement `premium` に紐づけ** | ⬜ | RevenueCat の Entitlement 画面で、月額・年額の**両方の商品を Attach** する。**Offering への追加だけでは購入しても entitlements.active.premium が有効にならず、購入者をプレミアム扱いできない** (アプリの checkEntitlement が entitlements.active.premium を参照するため必須) |
+| 4-4. Offering への追加 | ⬜ | current Offering に月額・年額パッケージを追加 (ペイウォールの getOfferings で取得) |
+| 4-5. 公開 API キーの設定 (ローカル) | ⬜ | RevenueCat の公開 API キーをローカルの `.env` に `EXPO_PUBLIC_REVENUECAT_API_KEY=...` として設定 (コードに埋め込まない) |
+| 4-6. **公開 API キーを EAS 環境に設定** | ⬜ | ローカルの `.env` は Git 管理対象外のため EAS のクラウドビルドに含まれない。`eas secret:create --scope production --name EXPO_PUBLIC_REVENUECAT_API_KEY --value ...` (または eas.json の production environment) に登録する。**未設定の場合、production ビルドのペイウォールは購入不可のまま表示される** (フォールバック動作) |
+| 4-7. config.ts の PRODUCT_IDS について | — | **コードでは未使用** (購入用 ID は getOfferings() の current.monthly/annual.product.identifier から動的に取得する)。プレースホルダ定義として保持しているが、商品設定は 4-2〜4-4 の RevenueCat / ASC 側で完結する |
 
 ## 5. production プロファイルでのビルド (⬜ 未実施)
 
@@ -56,7 +59,8 @@
 |---|---|---|
 | 6-1. `eas submit --platform ios` | ⬜ | ビルドを TestFlight へアップロード (ASC API キーが必要) |
 | 6-2. 内部テスターでの検証 | ⬜ | 診断 → レッスン再生 → 購入 (Sandbox) → 復元 の一連を確認 |
-| 6-3. ストア審査への提出 | ⬜ | 掲載文・スクリーンショット (docs/store/listing-ja.md の計画) を入力して提出 |
+| 6-3. **初回のサブスクリプション商品を審査へ追加** | ⬜ | アプリ版の提出だけでは月額・年額のサブスクリプション商品は審査されない。ASC の提出ページで**アプリ版と同じ提出に、初回の月額・年額サブスクリプション (とサブスクリプショングループ) を追加**する |
+| 6-4. ストア審査への提出 | ⬜ | 掲載文・スクリーンショット (docs/store/listing-ja.md の計画) を入力して提出 |
 
 ## 7. リリース後の確認 (参考)
 
