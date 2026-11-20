@@ -12,6 +12,7 @@ import {
   restorePurchasesAsync,
   useEntitlement,
   type PurchaseResult,
+  type RestoreResult,
 } from '@/features/billing/billingStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
@@ -65,6 +66,10 @@ export default function PaywallScreen() {
       setHasProducts(result.hasProducts);
       setMonthlyProductId(result.monthlyProductId);
       setAnnualProductId(result.annualProductId);
+      // 既定の年額プランが Offerings にない場合は月額にフォールバックする
+      if (!result.annualProductId && result.monthlyProductId) {
+        setSelectedPlan('monthly');
+      }
     });
   }, [isAvailable]);
 
@@ -73,6 +78,14 @@ export default function PaywallScreen() {
     selectedPlan === 'monthly' ? monthlyProductId : annualProductId;
   const canPurchase =
     isAvailable && hasProducts && !purchasing && !isPremium && selectedProductId !== null;
+
+  const purchaseNote = getPurchaseNote({
+    isLoading,
+    purchasing,
+    isPremium,
+    isAvailable,
+    hasProducts,
+  });
 
   const handlePurchase = async () => {
     // 実購入: RevenueCat の purchaseProduct → 購入成功時のみ purchase_completed を発火する
@@ -91,11 +104,11 @@ export default function PaywallScreen() {
   const handleRestore = async () => {
     if (!isAvailable) return;
     setRestoring(true);
-    const ok = await restorePurchasesAsync();
+    const result: RestoreResult = await restorePurchasesAsync();
     setRestoring(false);
-    if (ok) {
-      // 復元成功は purchase_completed と同義 (RevenueCat の entitlement が復元される)
-      logEvent('purchase_completed', { productId: 'restored' });
+    if (result.restored) {
+      // 復元成功は purchase_completed と同義 (restored フラグで区別する)
+      logEvent('purchase_completed', { productId: 'restored', restored: true, premium_active: result.premium });
     }
   };
 
@@ -185,17 +198,9 @@ export default function PaywallScreen() {
           {isLoading || purchasing ? '読み込み中…' : isPremium ? 'プレミアム済み' : '購入する'}
         </ThemedText>
       </Pressable>
-      {!canPurchase ? (
+      {!canPurchase && purchaseNote ? (
         <ThemedText variant="caption" color="muted" style={styles.purchaseNote}>
-          {isLoading || purchasing
-            ? '課金機能の状態を確認しています…'
-            : isPremium
-              ? 'プレミアムエンタイトルメントが有効です。'
-              : !isAvailable
-                ? '⚠ 課金機能がこのビルドで有効になっていません (RevenueCat の API キー未設定またはネイティブ SDK 未同梱)。無料版としてご利用いただけます。'
-                : !hasProducts
-                  ? '⚠ ストア側のサブスクリプション商品がまだ作成されていないため、購入は現在できません。商品の準備ができ次第、購入できるようになります。'
-                  : ''}
+          {purchaseNote}
         </ThemedText>
       ) : null}
 
@@ -236,6 +241,25 @@ export default function PaywallScreen() {
       </View>
     </Screen>
   );
+}
+
+function getPurchaseNote(state: {
+  isLoading: boolean;
+  purchasing: boolean;
+  isPremium: boolean;
+  isAvailable: boolean;
+  hasProducts: boolean;
+}): string {
+  const { isLoading, purchasing, isPremium, isAvailable, hasProducts } = state;
+  if (isLoading || purchasing) return '課金機能の状態を確認しています…';
+  if (isPremium) return 'プレミアムエンタイトルメントが有効です。';
+  if (!isAvailable) {
+    return '⚠ 課金機能がこのビルドで有効になっていません (RevenueCat の API キー未設定またはネイティブ SDK 未同梱)。無料版としてご利用いただけます。';
+  }
+  if (!hasProducts) {
+    return '⚠ ストア側のサブスクリプション商品がまだ作成されていないため、購入は現在できません。商品の準備ができ次第、購入できるようになります。';
+  }
+  return '';
 }
 
 const styles = StyleSheet.create({

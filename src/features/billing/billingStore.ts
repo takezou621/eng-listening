@@ -37,6 +37,14 @@ export interface OfferingsResult {
 export interface PurchaseResult {
   purchased: boolean;
   premium: boolean;
+  /** purchased = false の理由 (ユーザーキャンセル / エラー)。UI のメッセージ分岐用 */
+  reason?: 'cancelled' | 'error';
+}
+
+/** restorePurchasesAsync の結果。restored は復元処理の成功、premium は復元後の状態 */
+export interface RestoreResult {
+  restored: boolean;
+  premium: boolean;
 }
 
 let configured = false;
@@ -187,31 +195,34 @@ export async function fetchOfferingsAsync(): Promise<OfferingsResult> {
  * ユーザーによるキャンセルは purchased = false (エラー扱いにしない)。
  */
 export async function purchaseAsync(productId: string): Promise<PurchaseResult> {
-  if (!available || !purchases) return { purchased: false, premium };
+  if (!available || !purchases) return { purchased: false, premium, reason: 'error' };
   try {
     const result = await purchases.purchaseProduct(productId);
     premium = checkEntitlement(result.customerInfo);
     notify();
     return { purchased: true, premium };
   } catch (e) {
-    // ユーザーキャンセルを含む失敗は purchased = false
+    // ユーザーによるキャンセルとその他のエラーを区別する (UI のメッセージ分岐用)
+    const cancelled = (e as { code?: string })?.code === 'PURCHASES_ERROR_CODE_USER_CANCELLED';
     console.error('Purchase failed:', e);
-    return { purchased: false, premium };
+    return { purchased: false, premium, reason: cancelled ? 'cancelled' : 'error' };
   }
 }
 
 /** 過去の購入を復元する (再インストール・機種変更時)。
- *  restorePurchases の戻り値は CustomerInfo そのもの。成功時は premium を更新して true を返す */
-export async function restorePurchasesAsync(): Promise<boolean> {
-  if (!available || !purchases) return false;
+ *  restorePurchases の戻り値は CustomerInfo そのもの。
+ *  restored は復元処理の成功、premium は復元後にエンタイトルメントが有効かを返す
+ *  (復元処理は成功してもプレミアム購入が見つからない場合があるため分離)。 */
+export async function restorePurchasesAsync(): Promise<RestoreResult> {
+  if (!available || !purchases) return { restored: false, premium };
   try {
     const customerInfo = await purchases.restorePurchases();
     premium = checkEntitlement(customerInfo);
     notify();
-    return true;
+    return { restored: true, premium };
   } catch (e) {
     console.error('Restore failed:', e);
-    return false;
+    return { restored: false, premium };
   }
 }
 

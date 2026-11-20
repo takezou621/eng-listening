@@ -47,7 +47,7 @@ This app provides English listening practice using AI-generated content. All les
 
 ## 2. Subscription
 
-Monthly plan: ¥680 / Annual plan: ¥4,800 (annual plan includes a 7-day free trial).
+Monthly plan: ¥680; Annual plan: ¥4,800 (annual plan includes a 7-day free trial).
 
 Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period.
 

@@ -17,6 +17,7 @@ import { useTheme } from '@/theme/AppThemeProvider';
 import { useEntitlement } from '@/features/billing/billingStore';
 import { useUserData } from '@/features/library/userStore';
 import { getLessonList } from '@/features/lesson/registry';
+import { LINKING_LABELS } from '@/features/lesson/linkingViz';
 
 const HEAT_MINUTES = [0, 15, 30];
 
@@ -39,8 +40,10 @@ export default function ProgressScreen() {
   const { weakSentences } = useUserData();
   const lessonList = getLessonList();
 
-  // 苦手フレーズの音の変化タイプ別集計 (プレミアムの詳細分析)
+  // 苦手フレーズの音の変化タイプ別集計 (プレミアムの詳細分析)。
+  // 非プレミアムでは表示しないため集計も行わない
   const weakByType = useMemo(() => {
+    if (!isPremium) return [] as [string, number][];
     const counts: Record<string, number> = {};
     for (const w of weakSentences) {
       const bundle = lessonList.find((l) => l.entry.id === w.lessonId)?.bundle;
@@ -52,7 +55,7 @@ export default function ProgressScreen() {
       }
     }
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  }, [weakSentences, lessonList]) as [string, number][];
+  }, [weakSentences, lessonList, isPremium]) as [string, number][];
   // ローカル日を状態として保持し、AppState 復帰時に更新する
   // (進捗画面を開いたまま日付をまたいでも表示が正しく更新されるように)
   const [today, setToday] = useState(todayStr());
@@ -187,7 +190,7 @@ export default function ProgressScreen() {
             {weakByType.length > 0 ? (
               weakByType.map(([type, count]) => (
                 <View key={type} style={styles.missedRow}>
-                  <ThemedText variant="caption">{type}</ThemedText>
+                  <ThemedText variant="caption">{LINKING_LABELS[type as keyof typeof LINKING_LABELS] ?? type}</ThemedText>
                   <ThemedText variant="caption" color="muted">
                     {count} 件
                   </ThemedText>
