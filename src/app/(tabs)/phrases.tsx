@@ -1,46 +1,74 @@
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
+
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
-import { WEAK_PHRASES } from '@/data';
+import { getLessonList } from '@/features/lesson/registry';
+import { useUserData } from '@/features/library/userStore';
 import { useTheme } from '@/theme/AppThemeProvider';
-import { StyleSheet, View } from 'react-native';
 
-/** 苦手フレーズ帳 (モック)。本実装は #12: プレイリスト・復習スケジュール込み */
+/** 苦手フレーズ帳 */
 export default function PhrasesScreen() {
   const { colors } = useTheme();
+  const router = useRouter();
+  const { weakSentences } = useUserData();
+
+  const lessonList = getLessonList();
 
   return (
-    <Screen>
+    <Screen scroll={false}>
       <ThemedText variant="title">苦手フレーズ</ThemedText>
       <ThemedText variant="caption" color="muted" style={styles.subtitle}>
-        {WEAK_PHRASES.length} 件 (モックデータ)
+        全 {weakSentences.length} 件 (タップで該当レッスンの文へ遷移します)
       </ThemedText>
-      {WEAK_PHRASES.map((phrase) => (
-        <View
-          key={phrase.id}
-          style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
-        >
-          <ThemedText variant="heading">{phrase.text}</ThemedText>
-          <ThemedText>{phrase.translationJa}</ThemedText>
-          <ThemedText variant="caption" color="muted">
-            {phrase.noteJa}
-          </ThemedText>
-        </View>
-      ))}
-      <ThemedText variant="caption" color="muted" style={styles.note}>
-        プレイヤーからの保存フロー・復習機能は次フェーズ (#12) で実装
-      </ThemedText>
+
+      <FlatList
+        data={weakSentences}
+        keyExtractor={(item) => `${item.lessonId}-${item.sentenceIndex}`}
+        contentContainerStyle={styles.list}
+        ListEmptyComponent={<ThemedText style={styles.empty}>登録された苦手フレーズはありません</ThemedText>}
+        renderItem={({ item }) => {
+          const lesson = lessonList.find((l) => l.entry.id === item.lessonId);
+          const bundle = lesson?.bundle;
+          if (!bundle) return null; // レッスン未生成の場合は表示しない
+
+          const sentence = bundle.data.sentences.find((s) => s.index === item.sentenceIndex);
+          if (!sentence) return null;
+
+          return (
+            <Pressable
+              onPress={() => router.push(`/lesson?lesson=${item.lessonId}&sentence=${item.sentenceIndex + 1}`)}
+              style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            >
+              <ThemedText variant="heading">{sentence.text}</ThemedText>
+              <ThemedText variant="caption" color="muted">
+                {sentence.translationJa}
+              </ThemedText>
+              <View style={styles.cardFooter}>
+                <ThemedText variant="caption" color="primary">
+                  {bundle.data.title}
+                </ThemedText>
+                <ThemedText variant="caption" color="muted">
+                  {new Date(item.addedAtMs).toLocaleDateString()}
+                </ThemedText>
+              </View>
+            </Pressable>
+          );
+        }}
+      />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  subtitle: { marginTop: 4 },
+  subtitle: { marginTop: 4, marginBottom: 12 },
+  list: { paddingBottom: 24, gap: 10 },
+  empty: { marginTop: 24, textAlign: 'center' },
   card: {
-    marginTop: 10,
     borderRadius: 12,
     borderWidth: 1,
     padding: 14,
     gap: 6,
   },
-  note: { marginTop: 16 },
+  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
 });

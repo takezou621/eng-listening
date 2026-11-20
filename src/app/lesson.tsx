@@ -45,6 +45,7 @@ import {
   getShadowingCounts,
   lessonShadowingTotal,
 } from '@/features/player/shadowingStore';
+import { useUserData } from '@/features/library/userStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -79,6 +80,7 @@ function LessonPlayerScreen({
 }) {
   const lesson = bundle.data;
   const { colors } = useTheme();
+  const { isSentenceWeak, toggleWeakSentence } = useUserData();
   const prefs = getPlayerPrefs();
   const [rate, setRate] = useState<PlaybackRate>(prefs.rate);
   const [repeatSentence, setRepeatSentence] = useState<number | null>(null);
@@ -724,7 +726,18 @@ function LessonPlayerScreen({
             [{sentence.startSec.toFixed(2)}s]
             {repeatSentence === sentence.index ? ' ・リピート中' : ''}
           </ThemedText>
-          <ThemedText>{sentence.text}</ThemedText>
+          <View style={styles.sentenceHeaderRow}>
+            <ThemedText style={styles.flex}>{sentence.text}</ThemedText>
+            <Pressable
+              hitSlop={8}
+              onPress={() => toggleWeakSentence(lesson.id, sentence.index)}
+              style={styles.weakIcon}
+            >
+              <ThemedText variant="caption" style={{ color: isSentenceWeak(lesson.id, sentence.index) ? '#F59E0B' : colors.textMuted }}>
+                {isSentenceWeak(lesson.id, sentence.index) ? '★ 苦手' : '☆ 苦手'}
+              </ThemedText>
+            </Pressable>
+          </View>
           <ThemedText variant="caption" color="muted">
             {sentence.translationJa}
           </ThemedText>
@@ -955,6 +968,9 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 4,
   },
+  sentenceHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
+  flex: { flex: 1 },
+  weakIcon: { padding: 4 },
   logPanel: {
     marginTop: 8,
     borderRadius: 10,
