@@ -62,25 +62,49 @@ lines の index は 1 から始まる連番。
 """
 
 
+# IPA 本文に使ってよい記号 (ASCII 句読点) — 文字そのものは is_phonetic_char で判定する
+IPA_PUNCT = set(" .-‿|‖'():,ː")
+# IPA として使われる Latin-1 系の英字 (æ ð þ など)
+IPA_LATIN1 = set("æðþœø")
+
+
+def is_phonetic_char(ch: str) -> bool:
+    """IPA 本文に現れてよい文字か。
+
+    - ASCII 英字 (/r/ /j/ などは ASCII で書かれることが多い)
+    - IPA で使われるラテン系文字のブロック (æ ð ŋ など)
+    - IPA で使われるギリシャ文字 (θ β ɣ χ など)
+    - IPA Extensions / Spacing Modifier / Combining Marks / Phonetic Extensions
+      (ɾ ʃ ː ˈ ̯ ̃ など)。☀ (U+2600) やキリル文字などは含めない
+    """
+    if ch in IPA_LATIN1 or "a" <= ch <= "z":
+        return True
+    code = ord(ch)
+    return (
+        0x00C0 <= code <= 0x024F        # Latin-1 補助 + Latin Extended-A/B (ŋ ð æ)
+        or 0x0250 <= code <= 0x02FF     # IPA Extensions + Spacing Modifiers (ː ˈ ʰ)
+        or 0x0300 <= code <= 0x036F     # Combining Diacritical Marks (̯ ̃)
+        or 0x0370 <= code <= 0x03FF     # Greek (θ β ɣ χ)
+        or 0x1D00 <= code <= 0x1DBF     # Phonetic Extensions (+ Supplement)
+    )
+
+
 def is_ipa_body(body: str) -> bool:
     """/.../ の中身が IPA として妥当な文字だけで構成されているか。
 
-    - 文字として有効: IPA_PUNCT の記号、何らかの言語の英字 (ð æ などの Latin-1 系
-      IPA 記号を含む)、Unicode 音声記号ブロック
-    - 空白で区切った各トークンについて「非 ASCII の英字 (音声記号) を含む」か
-      「2 文字以内の純 ASCII (/aɪ/ など)」を要求する。英単語 (would, you など) は
-      拒否される。絵文字など記号以外の文字も拒否。
+    - 空白で区切った各トークンについて「音声記号 (非 ASCII) を含む」か
+      「2 文字以内の純 ASCII (/aɪ/ など)」を要求する。英単語 (would, you など)
+      は拒否される。
     """
     for token in body.split(" "):
         if not token:
             continue
-        valid_chars = all(ch in IPA_PUNCT or ch.isalpha() or 0x0250 <= ord(ch) <= 0x2AFF
-                          for ch in token)
-        has_phonetic = any(ch.isalpha() and ord(ch) > 127 for ch in token)
+        valid_chars = all(is_phonetic_char(ch) or ch in IPA_PUNCT for ch in token)
+        has_phonetic = any(is_phonetic_char(ch) and not ch.isascii() for ch in token)
         if has_phonetic and valid_chars:
             continue
         # 純 ASCII トークンは短いものだけ許容 (aɪ / ɔɪ / ju など)
-        if len(token) <= 2 and all(ch in IPA_PUNCT or ch.isalpha() for ch in token):
+        if len(token) <= 2 and all(ch in IPA_PUNCT or ("a" <= ch <= "z") for ch in token):
             continue
         return False
     return True
@@ -235,11 +259,18 @@ def validate_script(script: dict, entry: dict, voice_roles: set[str]) -> list[st
 
     speaker_names = script.get("speakerNames") or {}
     used_roles = sorted({ln.get("speaker", "") for ln in lines})
+    planned_roles = set(entry["speakers"])
     for role in used_roles:
         if role not in voice_roles:
             errors.append(f"話者ロールが voice_config にない: {role!r}")
         elif role not in speaker_names or not str(speaker_names[role]).strip():
             errors.append(f"speakerNames に {role} の名前がない")
+    # 計画の speakers と実際に使用した役割が一致すること (会話で片役欠けや
+    # monologue の narrator 以外を弾く)
+    if set(used_roles) != planned_roles:
+        errors.append(
+            f"話者ロールが計画と不一致: 使用 {sorted(set(used_roles))} / 計画 {sorted(planned_roles)}"
+        )
 
     total_linking = 0
     for i, ln in enumerate(lines, start=1):

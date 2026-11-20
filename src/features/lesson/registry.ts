@@ -43,5 +43,9 @@ export const LESSONS: Record<string, LessonBundle> = {
 export const DEFAULT_LESSON_ID = cafeLesson.id;
 
 export function getLessonBundle(id: string | undefined): LessonBundle {
-  return LESSONS[id ?? ''] ?? LESSONS[DEFAULT_LESSON_ID];
+  // __proto__ など継承プロパティを返さないよう、登録表自身のプロパティだけを見る
+  if (id !== undefined && Object.prototype.hasOwnProperty.call(LESSONS, id)) {
+    return LESSONS[id];
+  }
+  return LESSONS[DEFAULT_LESSON_ID];
 }
