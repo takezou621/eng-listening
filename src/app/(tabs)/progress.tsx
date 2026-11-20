@@ -13,6 +13,8 @@ import {
 } from '@/features/progress/progressStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
+const HEAT_MINUTES = [0, 15, 30];
+
 function formatMinutes(seconds: number): string {
   const m = Math.round(seconds / 60);
   return `${m} 分`;
@@ -29,14 +31,15 @@ export default function ProgressScreen() {
   const completedCount = computeCompletedLessonCount(days);
   const shadowingTotal = computeShadowingTotal(days);
   const heatmap = buildHeatmap(days, new Date(), 12);
-  const hasData = totalSeconds > 0 || shadowingTotal > 0;
+  const hasData = totalSeconds > 0 || shadowingTotal > 0 || completedCount > 0;
 
-  // ヒートマップの色段 (0 / 〜15分 / 〜30分 / 30分超)
+  // ヒートマップの色段 (0 / 〜15分 / 〜30分 / 30分超)。濃淡はテーマ側で定義
   const heatColor = (seconds: number): string => {
-    if (seconds <= 0) return colors.secondarySurface;
-    if (seconds < 15 * 60) return '#93C5FD';
-    if (seconds < 30 * 60) return '#3B82F6';
-    return '#1D4ED8';
+    const [lv0, lv1, lv2, lv3] = colors.heatLevels;
+    if (seconds <= 0) return lv0;
+    if (seconds < HEAT_MINUTES[1] * 60) return lv1;
+    if (seconds < HEAT_MINUTES[2] * 60) return lv2;
+    return lv3;
   };
 
   return (
@@ -94,7 +97,7 @@ export default function ProgressScreen() {
       </View>
 
       <ThemedText variant="heading" style={styles.sectionTitle}>
-        学習カレンダー (直近 12 週間)
+        学習カレンダー (直近 84 日)
       </ThemedText>
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.heatmap}>
@@ -109,7 +112,7 @@ export default function ProgressScreen() {
           <ThemedText variant="caption" color="muted">
             少
           </ThemedText>
-          {['#93C5FD', '#3B82F6', '#1D4ED8'].map((c) => (
+          {colors.heatLevels.slice(1).map((c) => (
             <View key={c} style={[styles.heatCell, styles.heatLegendCell, { backgroundColor: c }]} />
           ))}
           <ThemedText variant="caption" color="muted">

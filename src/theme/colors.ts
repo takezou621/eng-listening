@@ -13,6 +13,8 @@ export interface ThemeColors {
   badgeTypeText: string;
   tabIconActive: string;
   tabIconInactive: string;
+  /** 学習ヒートマップの濃淡 (0 分 / 15 分未満 / 30 分未満 / 30 分以上) */
+  heatLevels: [string, string, string, string];
 }
 
 export const lightColors: ThemeColors = {
@@ -28,6 +30,8 @@ export const lightColors: ThemeColors = {
   badgeTypeText: '#1D4ED8',
   tabIconActive: '#2563EB',
   tabIconInactive: '#9CA3AF',
+  // ライト: 白背景の上で濃いほど学習量が多いことが見えるように青を濃くする
+  heatLevels: ['#E2E5EA', '#93C5FD', '#3B82F6', '#1D4ED8'],
 };
 
 export const darkColors: ThemeColors = {
@@ -43,6 +47,8 @@ export const darkColors: ThemeColors = {
   badgeTypeText: '#93C5FD',
   tabIconActive: '#60A5FA',
   tabIconInactive: '#64748B',
+  // ダーク: 暗い背景の上で明るい色ほど学習量が多いことが見えるようにする
+  heatLevels: ['#263248', '#1E40AF', '#3B82F6', '#93C5FD'],
 };
 
 export function getThemeColors(scheme: AppColorScheme): ThemeColors {

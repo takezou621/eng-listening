@@ -101,12 +101,16 @@ export function loadProgressDataAsync(): Promise<void> {
           updateData((current) => ({ ...current, ...parsed }));
         }
       } catch (e) {
+        // 読み込み失敗時は canPersist を true にしない (既存ファイルの保護)。
         console.error('Failed to load progress data:', e);
-      } finally {
-        canPersist = true;
         isLoaded = true;
         notify();
+        return;
       }
+      canPersist = true;
+      isLoaded = true;
+      // 読み込み待ち中に積まれた更新 (保留中の最新状態) をここで書き出す
+      await saveQueue;
     })();
   }
   return loadPromise;
