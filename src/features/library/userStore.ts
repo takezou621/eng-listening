@@ -142,6 +142,11 @@ export function loadUserDataAsync(): Promise<void> {
   return loadPromise;
 }
 
+/** 読み込み後の最新の完了状態を取得する (マウント時クロージャの古い値を避ける) */
+export function isOnboardingDone(): boolean {
+  return cachedData.onboardingDone;
+}
+
 export function useUserData() {
   const [data, setData] = useState(cachedData);
 

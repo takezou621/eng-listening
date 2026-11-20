@@ -25,9 +25,9 @@ export default function LegalScreen() {
 
   return (
     <Screen scroll={false}>
-      <Pressable onPress={() => router.back()} style={styles.back}>
+      <Pressable onPress={() => router.back()} style={styles.back} hitSlop={12}>
         <ThemedText variant="caption" color="primary">
-          ‹ 設定へ戻る
+          {lang === 'ja' ? '‹ 設定へ戻る' : '‹ Back to Settings'}
         </ThemedText>
       </Pressable>
       <ThemedText variant="title">{lang === 'ja' ? doc.titleJa : doc.titleEn}</ThemedText>
@@ -36,12 +36,22 @@ export default function LegalScreen() {
       </ThemedText>
 
       <View style={styles.langRow}>
-        <Pressable onPress={() => setLang('ja')} style={[styles.langChip, { backgroundColor: lang === 'ja' ? colors.primary : colors.secondarySurface }]}>
+        <Pressable
+          onPress={() => setLang('ja')}
+          accessibilityRole="button"
+          accessibilityState={{ selected: lang === 'ja' }}
+          style={[styles.langChip, { backgroundColor: lang === 'ja' ? colors.primary : colors.secondarySurface }]}
+        >
           <ThemedText variant="caption" style={lang === 'ja' ? { color: colors.primaryText, fontWeight: '700' } : undefined}>
             日本語
           </ThemedText>
         </Pressable>
-        <Pressable onPress={() => setLang('en')} style={[styles.langChip, { backgroundColor: lang === 'en' ? colors.primary : colors.secondarySurface }]}>
+        <Pressable
+          onPress={() => setLang('en')}
+          accessibilityRole="button"
+          accessibilityState={{ selected: lang === 'en' }}
+          style={[styles.langChip, { backgroundColor: lang === 'en' ? colors.primary : colors.secondarySurface }]}
+        >
           <ThemedText variant="caption" style={lang === 'en' ? { color: colors.primaryText, fontWeight: '700' } : undefined}>
             English
           </ThemedText>
@@ -65,10 +75,10 @@ export default function LegalScreen() {
 }
 
 const styles = StyleSheet.create({
-  back: { marginBottom: 8 },
+  back: { marginBottom: 12, paddingVertical: 4 },
   draft: { marginTop: 4, marginBottom: 8 },
   langRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  langChip: { borderRadius: 8, paddingHorizontal: 14, paddingVertical: 6 },
+  langChip: { borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10 },
   body: { flex: 1 },
   section: { marginBottom: 16 },
   paragraph: { marginTop: 4, lineHeight: 20 },

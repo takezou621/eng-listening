@@ -111,7 +111,11 @@ export function loadAnalyticsLogAsync(): Promise<void> {
       notify();
     } catch (e) {
       console.error('Failed to load analytics log:', e);
+      // 失敗時も isLoaded = true にして logEvent からの無限再試行を止める。
+      // canPersist は false のまま (壊れた既存ファイルの保護)。
+      // このセッションのイベントはメモリにのみ蓄積され、永続化は次回起動時に委ねる。
       loadPromise = null;
+      isLoaded = true;
       notify();
       return;
     }

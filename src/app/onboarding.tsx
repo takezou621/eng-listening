@@ -95,14 +95,17 @@ export default function OnboardingScreen() {
       <ResultScreen
         results={results}
         onFinish={() => {
-          logEvent('onboarding_completed', {
+          // 検証用 deep link (?step=result) の架空の結果は分析ログに記録しない
+          if (stepParam !== 'result') {
+            logEvent('onboarding_completed', {
             linking_correct: results.filter((r) => r.type === 'linking' && r.correct).length,
             linking_missed: results.filter((r) => r.type === 'linking' && !r.correct).length,
             reduction_correct: results.filter((r) => r.type === 'reduction' && r.correct).length,
             reduction_missed: results.filter((r) => r.type === 'reduction' && !r.correct).length,
             flapping_correct: results.filter((r) => r.type === 'flapping' && r.correct).length,
             flapping_missed: results.filter((r) => r.type === 'flapping' && !r.correct).length,
-          });
+            });
+          }
           finish();
         }}
       />

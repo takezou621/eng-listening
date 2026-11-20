@@ -15,7 +15,7 @@
 
 アプリの改善のため、起動・レッスン開始・完了・シャドーイング実施などの利用状況をイベントとして記録しています。
 
-これらのイベントは端末内のログとして保存されるのみで、v1.0 時点では外部へ送信されません。イベントには端末内の連番とローカル時刻のみが含まれ、個人を特定する情報は含まれません。
+これらのイベントは端末内のログとして保存されるのみで、v1.0 時点では外部へ送信されません。イベントには端末内の連番・ローカル時刻・イベント種別、および種別ごとの付随情報 (レッスン ID・学習秒数・診断の種類別正誤など) が含まれますが、個人を特定する情報は含まれません。
 
 外部送信を開始する場合は、事前に本ポリシーを改定してお知らせします。
 
@@ -49,7 +49,7 @@ No account registration is required, and we do not collect personally identifiab
 
 To improve the app, usage events (app launch, lesson start/completion, shadowing) are recorded.
 
-These events are stored in a local on-device log only and are NOT sent to any external service as of v1.0. Events contain only a device-local sequence number and local timestamp — no personally identifiable information.
+These events are stored in a local on-device log only and are NOT sent to any external service as of v1.0. Events contain a device-local sequence number, local timestamp, event type, and type-specific details (lesson ID, study seconds, diagnostic per-type results) — no personally identifiable information.
 
 If external collection is introduced in the future, this policy will be updated in advance.
 

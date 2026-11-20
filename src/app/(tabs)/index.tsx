@@ -7,7 +7,7 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { CONTENT_TYPE_LABELS, type ContentType } from '@/data/types';
 import { getLessonList } from '@/features/lesson/registry';
-import { loadUserDataAsync, useUserData } from '@/features/library/userStore';
+import { isOnboardingDone, loadUserDataAsync, useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
@@ -34,7 +34,8 @@ export default function LibraryScreen() {
       redirectedRef.current = true;
       // 分析イベント: 初回起動 (ログに app_first_open がない場合のみ記録される)
       logEvent('app_first_open');
-      if (!onboardingDone) {
+      // 読み込み後の最新値を参照する (マウント時のクロージャ値 false を使わない)
+      if (!isOnboardingDone()) {
         router.replace('/onboarding');
       }
     });

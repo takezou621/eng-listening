@@ -9,7 +9,8 @@
 | 運営責任者 | 〈運営責任者名〉 |
 | 所在地 | 〈所在地〉 |
 | お問い合わせ | 〈メールアドレス〉（受付時間: 〈平日 10:00〜18:00〉） |
-| 販売価格 | 月額プラン: ¥680 / 年額プラン: ¥4,800（7 日間無料トライアル付き）。Apple App Store を通じて課金されます |
+| 電話番号 | 〈電話番号〉（請求があった場合は遅滞なく開示します） |
+| 販売価格 | 月額プラン: ¥680 / 年額プラン: ¥4,800（年額プランには 7 日間の無料トライアルが付きます）。Apple App Store を通じて課金されます |
 | 支払方法 | Apple ID 決済（RevenueCat 経由） |
 | サービスの提供時期 | 購入後、アプリ内で即時に利用可能 |
 | キャンセル・解約について | サブスクリプションは自動更新です。解約は App Store のアカウント設定から次回更新日の 24 時間前までに行えます |
@@ -27,7 +28,8 @@
 | Operator | 〈operator name〉 |
 | Location | 〈address〉 |
 | Contact | 〈email address〉 (hours: 〈weekdays 10:00-18:00〉) |
-| Price | Monthly: ¥680 / Annual: ¥4,800 (7-day free trial). Billed through the Apple App Store |
+| Phone Number | 〈phone number〉 (disclosed upon request without delay) |
+| Price | Monthly: ¥680 / Annual: ¥4,800 (the annual plan includes a 7-day free trial). Billed through the Apple App Store |
 | Payment Method | Apple ID payment (via RevenueCat) |
 | Timing of Service | Available in-app immediately after purchase |
 | Cancellation | Subscriptions auto-renew. Cancel from your App Store account settings at least 24 hours before the next renewal date |
