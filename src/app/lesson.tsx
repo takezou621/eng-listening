@@ -46,6 +46,11 @@ import {
   lessonShadowingTotal,
 } from '@/features/player/shadowingStore';
 import { useUserData } from '@/features/library/userStore';
+import {
+  addShadowingRecord,
+  addStudySeconds,
+  markLessonCompleted,
+} from '@/features/progress/progressStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -286,6 +291,7 @@ function LessonPlayerScreen({
     }
     setLastRecordings((prev) => ({ ...prev, [sentenceIndex]: { uri, durationSec: duration } }));
     setShadowingCounts(addShadowingCount(lesson.id, sentenceIndex));
+    addShadowingRecord(lesson.id);
     append(`録音完了: 文${sentenceIndex + 1} ${duration.toFixed(1)} 秒`);
   };
 
@@ -378,6 +384,10 @@ function LessonPlayerScreen({
   // (シーク完了前に解除された古い操作からは再生を始めない)
   const seekingRef = useRef(false);
   const repeatSentenceRef = useRef<number | null>(null);
+
+  // --- 学習進捗の記録 (Issue #13): 実際に再生が進行した秒数のみを累計する ---
+  const playedSecondsRef = useRef(0);
+  const lastPlaybackTRef = useRef(0);
   const abRef = useRef<{ a: number; b: number } | null>(null);
   useEffect(() => {
     repeatSentenceRef.current = repeatSentence;
@@ -385,6 +395,13 @@ function LessonPlayerScreen({
   useEffect(() => {
     abRef.current = ab;
   }, [ab]);
+  // レッスン完了 (最後まで再生) を進捗に記録する
+  useEffect(() => {
+    if (status.didJustFinish) {
+      markLessonCompleted(lesson.id);
+    }
+  }, [status.didJustFinish, lesson.id]);
+
   // AB リピート (文リピートより優先。両方設定時は AB 区間を繰り返す)
   useEffect(() => {
     if (ab === null || seekingRef.current) return;
@@ -439,6 +456,28 @@ function LessonPlayerScreen({
 
   // カラオケ表示: 現在文と現在単語を再生位置から導出
   const t = status.currentTime;
+  // 実際に再生が進行した秒数のみを累計する (逆シーク・ジャンプは水増しになるためカウントしない)
+  useEffect(() => {
+    if (status.playing && t > lastPlaybackTRef.current && t - lastPlaybackTRef.current < 2) {
+      playedSecondsRef.current += t - lastPlaybackTRef.current;
+    }
+    lastPlaybackTRef.current = t;
+  }, [t, status.playing]);
+  // 一時停止への遷移・レッスン完了・アンマウントのタイミングで記録をフラッシュする
+  useEffect(() => {
+    if (playedSecondsRef.current >= 1) {
+      addStudySeconds(lesson.id, playedSecondsRef.current);
+      playedSecondsRef.current = 0;
+    }
+  }, [status.playing, status.didJustFinish, lesson.id]);
+  useEffect(() => {
+    return () => {
+      if (playedSecondsRef.current >= 1) {
+        addStudySeconds(lesson.id, playedSecondsRef.current);
+        playedSecondsRef.current = 0;
+      }
+    };
+  }, [lesson.id]);
   const activeSentence = useMemo(
     () => sentences.find((s) => t >= s.startSec && t < s.endSec) ?? null,
     [sentences, t]
