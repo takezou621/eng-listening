@@ -85,6 +85,15 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
     updateInterval: STATUS_UPDATE_INTERVAL_MILLIS,
   });
   const status = useAudioPlayerStatus(player);
+  // 保存済みの速度を新しい player にも適用する (player は 1.0 で初期化されるため)
+  const rateAppliedRef = useRef(false);
+  useEffect(() => {
+    if (rateAppliedRef.current || prefs.rate === 1.0) return;
+    rateAppliedRef.current = true;
+    player.setPlaybackRate(prefs.rate, PITCH_CORRECTION_QUALITY);
+    // player 生成時に一度だけ適用する (以降の速度変更は applyRate 経由)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [player]);
 
   const sentences = lesson.sentences;
 
@@ -121,11 +130,14 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
   };
 
   // --- 手動操作とデモが共用する操作関数 (ログはここで一度だけ記録する) ---
+  const manuallyPausedRef = useRef(false);
   const play = (label = 'play()') => {
+    manuallyPausedRef.current = false;
     player.play();
     append(label);
   };
   const pause = (label = 'pause()') => {
+    manuallyPausedRef.current = true;
     player.pause();
     append(label);
   };
@@ -224,13 +236,13 @@ function LessonPlayerScreen({ bundle, demoParam }: { bundle: LessonBundle; demoP
     if (ab === null || seekingRef.current) return;
     if (status.didJustFinish || status.currentTime >= ab.b - 0.05) {
       seekingRef.current = true;
-      const wasPlaying = status.playing;
       seekTo(
         ab.a,
         `AB リピート: ${ab.a.toFixed(2)}s へ戻す`,
         () => {
           seekingRef.current = false;
-          if (wasPlaying && abRef.current !== null) {
+          // 自然終了は再生を再開する。シーク中の手動一時停止は尊重して再開しない
+          if (abRef.current !== null && !manuallyPausedRef.current) {
             play();
           }
         },

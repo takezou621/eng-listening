@@ -36,27 +36,37 @@ export const LINKING_LABELS: Record<LessonLinkingNote['type'], string> = {
 export function wordLinkMap(sentence: LessonSentence): (number | null)[] {
   const words = sentence.text.split(/\s+/).filter((t) => t.length > 0);
   const map: (number | null)[] = words.map(() => null);
+  // トークン (単語) の文字範囲を求める
+  const tokens: { start: number; end: number }[] = [];
   let cursor = 0;
-  const ranges: { start: number; end: number }[] = [];
   for (const token of sentence.text.split(/\s+/)) {
     if (token.length === 0) {
       continue;
     }
     const start = sentence.text.indexOf(token, cursor);
-    ranges.push({ start, end: start + token.length });
+    tokens.push({ start, end: start + token.length });
     cursor = start + token.length;
   }
+  // span は「単語境界に一致するトークン列」にのみマッチさせる
+  // (indexOf の部分文字列一致だと "to" が "stopped" の中に一致してしまうため)。
+  // 複数語の span (例: "could you") は連続するトークン列の範囲一致で扱う。
   sentence.linking.forEach((note, noteIndex) => {
-    const spanStart = sentence.text.indexOf(note.span);
-    if (spanStart < 0) {
-      return;
-    }
-    const spanEnd = spanStart + note.span.length;
-    ranges.forEach((r, wordIndex) => {
-      if (map[wordIndex] === null && r.start < spanEnd && r.end > spanStart) {
-        map[wordIndex] = noteIndex;
+    for (let i = 0; i < tokens.length; i++) {
+      for (let j = i; j < tokens.length; j++) {
+        const candidate = sentence.text.slice(tokens[i].start, tokens[j].end);
+        if (candidate === note.span) {
+          for (let k = i; k <= j; k++) {
+            if (map[k] === null) {
+              map[k] = noteIndex;
+            }
+          }
+          return;
+        }
+        if (candidate.length > note.span.length) {
+          break; // この開始点では長くなる一方なので次へ
+        }
       }
-    });
+    }
   });
   return map;
 }
