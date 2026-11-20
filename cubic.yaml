@@ -83,7 +83,9 @@ reviews:
 
     - name: MVP スコープの遵守
       description: |
-        v1.0 は課金・広告なしの MVP。CarPlay / Apple Watch は v1.1 の必須要件だが
+        v1.0 は RevenueCat サブスクリプションのペイウォールを含む
+        (月額 ¥680 / 年額 ¥4,800、年額は 7 日間無料トライアル。Issues #17〜#19, #22)。
+        広告 SDK の導入は v1.0 スコープ外。CarPlay / Apple Watch は v1.1 の必須要件だが
         entitlement 申請は v1.0 リリース後に開始という計画。スコープ外の実装や、
         app.config.ts / eas.json / package.json への entitlement・ネイティブモジュール追加が
         計画と合致するかを確認し、意図が不明なら指摘する。
