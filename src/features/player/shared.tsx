@@ -10,7 +10,7 @@ import { useTheme } from '@/theme/AppThemeProvider';
 
 export function formatTime(seconds: number): string {
   const s = Math.max(0, seconds);
-  return `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`;
+  return `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
 }
 
 export function ControlButton({

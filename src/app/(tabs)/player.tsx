@@ -71,7 +71,7 @@ export default function PlayerScreen() {
       </ThemedText>
       {sentences.length === 0 ? (
         <ThemedText variant="caption" color="muted">
-          このコンテンツのスクリプトはまだ生成されていません (コンテンツパイプライン #1–#3 の出力で置き換え)
+          このコンテンツのスクリプトはまだありません
         </ThemedText>
       ) : (
         sentences.map((sentence) => (
