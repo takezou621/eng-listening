@@ -127,6 +127,17 @@ export function getLessonList(): LessonListItem[] {
   }));
 }
 
+/** 今日のおすすめ: 未完了の最初のレッスン。全て完了していれば先頭を復習用に返す */
+export function getTodaysLesson(
+  completedIds: Set<string>
+): { item: LessonListItem; isReview: boolean } | null {
+  const bundled = getLessonList().filter((it) => it.bundle !== null);
+  if (bundled.length === 0) return null;
+  const next = bundled.find((it) => !completedIds.has(it.entry.id));
+  if (next) return { item: next, isReview: false };
+  return { item: bundled[0], isReview: true };
+}
+
 export function getLessonBundle(id: string | undefined): LessonBundle {
   // __proto__ など継承プロパティを返さないよう、登録表自身のプロパティだけを見る
   if (id !== undefined && Object.prototype.hasOwnProperty.call(BUNDLES, id)) {

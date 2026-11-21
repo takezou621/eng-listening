@@ -6,7 +6,7 @@ import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { CONTENT_TYPE_LABELS, type ContentType } from '@/data/types';
-import { getLessonList } from '@/features/lesson/registry';
+import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
 import { isOnboardingDone, loadUserDataAsync, useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
@@ -34,6 +34,10 @@ export default function LibraryScreen() {
     }
     return set;
   }, [progressDays]);
+  const todaysLesson = useMemo(
+    () => getTodaysLesson(completedLessonIds),
+    [completedLessonIds]
+  );
 
   // 初回起動時のみオンボーディング診断へ誘導する (完了状態は端末内に永続化)
   const redirectedRef = useRef(false);
@@ -111,6 +115,29 @@ export default function LibraryScreen() {
         全 {lessonList.length} 本
       </ThemedText>
 
+      {filterType === 'all' && filterLevel === 'all' && !showFavoritesOnly && todaysLesson ? (
+        <Pressable
+          onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
+          style={[
+            styles.todayCard,
+            { backgroundColor: colors.secondarySurface, borderColor: colors.primary },
+          ]}
+        >
+          <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>
+            {todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}
+          </ThemedText>
+          <ThemedText variant="heading">{todaysLesson.item.bundle?.data.titleJa}</ThemedText>
+          <ThemedText variant="caption" color="muted">
+            {todaysLesson.item.entry.title} ・ 約{' '}
+            {Math.round(todaysLesson.item.bundle?.data.durationSec ?? 0)} 秒 /{' '}
+            {todaysLesson.item.bundle?.data.sentences.length ?? 0} 文
+          </ThemedText>
+          <ThemedText color="primary" style={{ fontWeight: '700' }}>
+            ▶ はじめる
+          </ThemedText>
+        </Pressable>
+      ) : null}
+
       {renderFilterChips()}
 
       <FlatList
@@ -182,6 +209,13 @@ export default function LibraryScreen() {
 }
 
 const styles = StyleSheet.create({
+  todayCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    gap: 4,
+    marginBottom: 12,
+  },
   subtitle: { marginTop: 4, marginBottom: 12 },
   filterSection: { marginBottom: 16 },
   chipScroll: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 8 },

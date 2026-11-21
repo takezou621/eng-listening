@@ -16,7 +16,7 @@ import {
 import { useTheme } from '@/theme/AppThemeProvider';
 import { useEntitlement } from '@/features/billing/billingStore';
 import { useUserData } from '@/features/library/userStore';
-import { getLessonList } from '@/features/lesson/registry';
+import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
 import { LINKING_LABELS } from '@/features/lesson/linkingViz';
 
 const HEAT_MINUTES = [0, 15, 30];
@@ -82,6 +82,18 @@ export default function ProgressScreen() {
   const shadowingTotal = computeShadowingTotal(days);
   const heatmap = buildHeatmap(days, new Date(today + 'T12:00:00'), 12);
   const hasData = totalSeconds > 0 || shadowingTotal > 0 || completedCount > 0;
+  const [selectedDay, setSelectedDay] = useState<{ date: string; seconds: number } | null>(null);
+  const todaysLesson = useMemo(() => {
+    const set = new Set<string>();
+    for (const day of Object.values(days)) {
+      for (const id of day.completedLessons ?? []) set.add(id);
+    }
+    return getTodaysLesson(set);
+  }, [days]);
+  const formatDayLabel = (date: string): string => {
+    const parts = date.split('-').map(Number);
+    return parts.length === 3 ? `${parts[1]}月${parts[2]}日` : date;
+  };
 
   // ヒートマップの色段 (0 / 〜15分 / 〜30分 / 30分超)。濃淡はテーマ側で定義
   const heatColor = (seconds: number): string => {
@@ -154,18 +166,48 @@ export default function ProgressScreen() {
         </View>
       </View>
 
+      {hasData && todaysLesson ? (
+        <Pressable
+          onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
+          style={[styles.todayCta, { backgroundColor: colors.primary }]}
+        >
+          <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
+            ▶ {todaysLesson.isReview ? '復習をはじめる' : '今日の1本をはじめる'}
+          </ThemedText>
+          <ThemedText variant="caption" style={{ color: colors.primaryText }}>
+            {todaysLesson.item.bundle?.data.titleJa ?? todaysLesson.item.entry.title}
+          </ThemedText>
+        </Pressable>
+      ) : null}
+
       <ThemedText variant="heading" style={styles.sectionTitle}>
         学習カレンダー (直近 84 日)
       </ThemedText>
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.heatmap}>
           {heatmap.map(({ date, seconds }) => (
-            <View
+            <Pressable
               key={date}
-              style={[styles.heatCell, { backgroundColor: heatColor(seconds) }]}
+              onPress={() => setSelectedDay({ date, seconds })}
+              style={[
+                styles.heatCell,
+                { backgroundColor: heatColor(seconds) },
+                selectedDay?.date === date
+                  ? { borderWidth: 2, borderColor: colors.primary }
+                  : null,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={`${formatDayLabel(date)}の学習記録`}
             />
           ))}
         </View>
+        <ThemedText variant="caption" color="muted" style={styles.gap}>
+          {selectedDay
+            ? `${formatDayLabel(selectedDay.date)}: ${
+                selectedDay.seconds > 0 ? formatMinutes(selectedDay.seconds) : '記録なし'
+              }`
+            : 'セルをタップすると、その日の学習時間が見られます'}
+        </ThemedText>
         <View style={styles.heatLegend}>
           <ThemedText variant="caption" color="muted">
             少
@@ -245,6 +287,14 @@ const styles = StyleSheet.create({
   sectionTitle: { marginTop: 20, marginBottom: 8 },
   emptyLink: { borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 8 },
   premiumLink: { borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 8 },
+  todayCta: {
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    gap: 2,
+    marginTop: 16,
+  },
   missedRow: { flexDirection: 'row', justifyContent: 'space-between' },
   heatmap: { flexDirection: 'row', flexWrap: 'wrap', gap: 3 },
   heatCell: { width: 16, height: 16, borderRadius: 3 },
