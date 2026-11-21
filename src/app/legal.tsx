@@ -28,7 +28,7 @@ export default function LegalScreen() {
         options={{
           headerShown: true,
           title: lang === 'ja' ? doc.titleJa : doc.titleEn,
-          headerBackTitle: '戻る',
+          headerBackTitle: lang === 'ja' ? '戻る' : 'Back',
         }}
       />
       <ThemedText variant="title">{lang === 'ja' ? doc.titleJa : doc.titleEn}</ThemedText>

@@ -259,9 +259,14 @@ function LessonPlayerScreen({
   const [pendingRecord, setPendingRecord] = useState<number | null>(null);
   const pendingRecordRef = useRef<number | null>(null);
   const recordStartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 録音予約の世代 (予約・取消・切替のたびに進み、古いタイマーやシーク完了を無効化する)
+  const recordGenRef = useRef(0);
+  // お手本シークの世代 (最新のシークだけが再生を開始する)
+  const seekTokenRef = useRef(0);
   const setPendingRecordBoth = (v: number | null) => {
     pendingRecordRef.current = v;
     setPendingRecord(v);
+    recordGenRef.current += 1;
   };
   const userAudioRef = useRef<AudioPlayer | null>(null);
   const lastRecordingsRef = useRef(lastRecordings);
@@ -326,7 +331,11 @@ function LessonPlayerScreen({
     }
     userAudioRef.current?.pause();
     setComparing({ index: sentenceIndex, source: 'model' });
-    seekTo(sentence.startSec, `お手本再生: 文${sentenceIndex + 1}`, () => play());
+    const token = ++seekTokenRef.current;
+    seekTo(sentence.startSec, `お手本再生: 文${sentenceIndex + 1}`, () => {
+      // 取消や別のシークが割り込んでいたら、このシーク完了では再生しない
+      if (seekTokenRef.current === token) play();
+    });
   };
 
   // 「録音」ボタン: いきなり録音せず、まずお手本を再生し、終わったら自動で録音を始める。
@@ -335,6 +344,7 @@ function LessonPlayerScreen({
     if (recordingSentence !== null) return;
     if (pendingRecordRef.current === sentenceIndex) {
       setPendingRecordBoth(null);
+      seekTokenRef.current += 1; // 進行中のお手本シークが完了しても再生を再開させない
       player.pause();
       append('録音予約を取り消しました');
       return;
@@ -572,9 +582,9 @@ function LessonPlayerScreen({
     comparing?.source === 'model' && comparingModelEndSec !== null && t < comparingModelEndSec;
   const modelPausedRef = useRef(false);
   useEffect(() => {
-    if (comparing === null) {
-      modelPausedRef.current = false;
-    }
+    // 比較再生が新しく始まるたびに「文末で一時停止した」フラグを戻す。
+    // 戻し忘れると2回目以降のお手本が文末で止まらず、録音導線も始まらない。
+    modelPausedRef.current = false;
   }, [comparing]);
   useEffect(() => {
     if (!modelCompareActive) return;
@@ -585,8 +595,12 @@ function LessonPlayerScreen({
       const pending = pendingRecordRef.current;
       if (pending !== null && comparing?.index === pending) {
         setPendingRecordBoth(null);
+        const gen = recordGenRef.current;
         recordStartTimerRef.current = setTimeout(() => {
-          void startRecording(pending);
+          // 待機中に別の予約・取消が入っていたら、古い文の録音は始めない
+          if (recordGenRef.current === gen) {
+            void startRecording(pending);
+          }
         }, 600);
       }
     }
@@ -662,19 +676,25 @@ function LessonPlayerScreen({
   // ただしユーザーが手でスクロールした直後 (6 秒間) は干渉しない。
   const lastDragAtRef = useRef(0);
   const followedIndexRef = useRef(-1);
+  const scrollOffsetRef = useRef(0);
   useEffect(() => {
     if (displayMode !== 'chunks' || !status.playing) return;
     const idx = activeSentence?.index;
     if (idx === undefined || idx === followedIndexRef.current) return;
-    followedIndexRef.current = idx;
+    // 手動スクロール直後は干渉しない。このとき追従済みにしない (次の文で再試行できるように)
     if (Date.now() - lastDragAtRef.current < 6000) return;
+    followedIndexRef.current = idx;
     const timer = setTimeout(() => {
       const card = sentenceCardRefs.current[idx];
       const scroller = scrollRef.current;
       if (!card || !scroller) return;
       scroller.measureInWindow((_sx: number, sy: number) => {
         card.measureInWindow((_x, y: number) => {
-          scroller.scrollTo({ y: Math.max(y - sy - 160, 0), animated: true });
+          // measureInWindow は画面座標。現在のスクロール量を加えてコンテンツ座標に直す
+          scroller.scrollTo({
+            y: Math.max(y - sy + scrollOffsetRef.current - 160, 0),
+            animated: true,
+          });
         });
       });
     }, 60);
@@ -686,6 +706,9 @@ function LessonPlayerScreen({
       scrollRef={scrollRef}
       onScrollBeginDrag={() => {
         lastDragAtRef.current = Date.now();
+      }}
+      onScroll={(e) => {
+        scrollOffsetRef.current = e.nativeEvent.contentOffset.y;
       }}
     >
       <Stack.Screen
