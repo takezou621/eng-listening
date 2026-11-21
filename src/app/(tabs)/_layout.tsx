@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { SymbolView, type SFSymbol } from 'expo-symbols';
+import { Text, type ColorValue } from 'react-native';
 
 import { useTheme } from '@/theme/AppThemeProvider';
 
@@ -27,39 +28,70 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'ホーム',
-          tabBarIcon: ({ size }) => <TabIcon symbol="📚" size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <TabIcon name="books.vertical.fill" fallback="📚" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="phrases"
         options={{
           title: '苦手フレーズ',
-          tabBarIcon: ({ size }) => <TabIcon symbol="⭐️" size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <TabIcon name="flag.fill" fallback="⭐️" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="progress"
         options={{
           title: '進捗',
-          tabBarIcon: ({ size }) => <TabIcon symbol="📈" size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <TabIcon name="chart.bar.fill" fallback="📈" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: '設定',
-          tabBarIcon: ({ size }) => <TabIcon symbol="⚙️" size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <TabIcon name="gearshape.fill" fallback="⚙️" color={color} size={size} />
+          ),
         }}
       />
     </Tabs>
   );
 }
 
-/** v0.1 は絵文字アイコンで土台のみ。ネイティブ SF Symbols / Material Icons は次フェーズで差し替え */
-function TabIcon({ symbol, size }: { symbol: string; size: number }) {
+/**
+ * タブアイコンは SF Symbols (E8)。色はタブのアクティブ/非アクティブ色に追随する。
+ * 記号を表示できない環境では従来の絵文字にフォールバックする。
+ * 苦手フレーズは、お気に入りの ★ と混同しないよう flag を使う。
+ */
+function TabIcon({
+  name,
+  fallback,
+  color,
+  size,
+}: {
+  name: SFSymbol;
+  fallback: string;
+  color: ColorValue;
+  size: number;
+}) {
   return (
-    <Text style={{ fontSize: Math.round(size * 0.8), lineHeight: Math.round(size * 1.1) }}>
-      {symbol}
-    </Text>
+    <SymbolView
+      name={name}
+      size={size}
+      tintColor={typeof color === 'string' ? color : undefined}
+      type="monochrome"
+      resizeMode="scaleAspectFit"
+      fallback={
+        <Text style={{ fontSize: Math.round(size * 0.8), lineHeight: Math.round(size * 1.1) }}>
+          {fallback}
+        </Text>
+      }
+    />
   );
 }
