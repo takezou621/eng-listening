@@ -13,7 +13,7 @@ import {
   type RecordingStatus,
 } from 'expo-audio';
 import { deleteAsync } from 'expo-file-system';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
@@ -25,7 +25,7 @@ import {
   STATUS_UPDATE_INTERVAL_MILLIS,
   type PlaybackRate,
 } from '@/config/appConfig';
-import { getLessonBundle, type LessonBundle } from '@/features/lesson/registry';
+import { getLessonBundle, type LessonBundle, getLessonList } from '@/features/lesson/registry';
 import {
   LINKING_COLORS,
   LINKING_LABELS,
@@ -50,10 +50,13 @@ import { useUserData } from '@/features/library/userStore';
 import {
   addShadowingRecord,
   addStudySeconds,
+  computeStreak,
   localDateStr,
   markLessonCompleted,
+  useProgressData,
 } from '@/features/progress/progressStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
+import { initBillingAsync, useEntitlement } from '@/features/billing/billingStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -92,6 +95,21 @@ function LessonPlayerScreen({
   const lesson = bundle.data;
   const { colors } = useTheme();
   const { isSentenceWeak, toggleWeakSentence } = useUserData();
+  const router = useRouter();
+  const progressDays = useProgressData();
+  const { isPremium } = useEntitlement();
+  // レッスン完了サマリ (E1): 最後まで再生したら一度だけ表示する
+  const [showSummary, setShowSummary] = useState(false);
+  const [summarySeconds, setSummarySeconds] = useState(0);
+  const summaryShownRef = useRef(false);
+  const nextLesson = useMemo(() => {
+    const list = getLessonList();
+    const i = list.findIndex((it) => it.entry.id === lesson.id);
+    for (let j = i + 1; j < list.length; j++) {
+      if (list[j].bundle) return list[j];
+    }
+    return null;
+  }, [lesson.id]);
   const prefs = getPlayerPrefs();
   // 分析イベント: レッスン開始 (端末内ログのみ)
   useEffect(() => {
@@ -127,6 +145,7 @@ function LessonPlayerScreen({
     }).catch(() => {
       // 設定に失敗しても再生自体は継続する
     });
+    void initBillingAsync();
   }, []);
 
   const player = useAudioPlayer(bundle.audio, {
@@ -469,7 +488,7 @@ function LessonPlayerScreen({
   useEffect(() => {
     abRef.current = ab;
   }, [ab]);
-  // レッスン完了 (最後まで再生) を進捗に記録する
+  // レッスン完了 (最後まで再生) を進捗に記録し、完了サマリを表示する (E1)
   useEffect(() => {
     if (status.didJustFinish) {
       markLessonCompleted(lesson.id);
@@ -477,6 +496,11 @@ function LessonPlayerScreen({
         lessonId: lesson.id,
         seconds: Math.round(sessionTotalSecondsRef.current),
       });
+      if (!summaryShownRef.current) {
+        summaryShownRef.current = true;
+        setSummarySeconds(Math.round(sessionTotalSecondsRef.current));
+        setShowSummary(true);
+      }
     }
   }, [status.didJustFinish, lesson.id]);
 
@@ -717,6 +741,54 @@ function LessonPlayerScreen({
       <Stack.Screen
         options={{ headerShown: true, title: lesson.titleJa, headerBackTitle: '戻る' }}
       />
+      {showSummary ? (
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: colors.secondarySurface, borderColor: colors.primary },
+          ]}
+        >
+          <ThemedText variant="heading">🎉 レッスン完了！</ThemedText>
+          <ThemedText variant="caption" color="muted">
+            学習時間{' '}
+            {summarySeconds >= 90
+              ? `約 ${Math.round(summarySeconds / 60)} 分`
+              : `${summarySeconds} 秒`}{' '}
+            ・ シャドーイング {lessonShadowingTotal(lesson.id)} 回 ・ 苦手フレーズ{' '}
+            {sentences.filter((st) => isSentenceWeak(lesson.id, st.index)).length} 件
+          </ThemedText>
+          <ThemedText variant="caption" color="muted">
+            連続学習 {computeStreak(progressDays)} 日目です。この調子で続けましょう。
+          </ThemedText>
+          {!isPremium ? (
+            <Pressable onPress={() => router.push('/paywall')} hitSlop={6}>
+              <ThemedText variant="caption" color="primary">
+                プレミアムでは、完了後に詳細な弱点分析が見られます ›
+              </ThemedText>
+            </Pressable>
+          ) : null}
+          <View style={styles.summaryButtons}>
+            {nextLesson ? (
+              <Pressable
+                style={[styles.summaryPrimary, { backgroundColor: colors.primary }]}
+                onPress={() =>
+                  router.replace({
+                    pathname: '/lesson',
+                    params: { lesson: nextLesson.entry.id },
+                  })
+                }
+              >
+                <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
+                  次のレッスンへ
+                </ThemedText>
+              </Pressable>
+            ) : null}
+            <Pressable style={styles.summaryGhost} onPress={() => setShowSummary(false)}>
+              <ThemedText color="primary">閉じる</ThemedText>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
       <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ThemedText variant="heading">{lesson.title}</ThemedText>
         <ThemedText variant="caption" color="muted">
@@ -1093,6 +1165,25 @@ function ChunkLine({
 }
 
 const styles = StyleSheet.create({
+  summaryCard: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    gap: 6,
+  },
+  summaryButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 6,
+  },
+  summaryPrimary: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+  },
+  summaryGhost: { paddingVertical: 10, paddingHorizontal: 8 },
   panel: {
     marginTop: 8,
     borderRadius: 12,
