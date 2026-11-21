@@ -65,6 +65,7 @@ const config: ExpoConfig = {
   },
   plugins: [
     'expo-router',
+    '@bacons/apple-targets',
     [
       'expo-splash-screen',
       {
