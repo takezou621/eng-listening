@@ -1,6 +1,6 @@
 # ミミトレ 運用手順書
 
-最終更新: 2026-11-21（v1.0.0）
+最終更新: 2026-11-22（v1.0 修正版の再提出で得た知見を反映）
 
 日常運用とリリース作業の手順をまとめたものです。設計は `docs/architecture.md`、計測の定義は `docs/metrics.md`、コンテンツ生成は `docs/content-pipeline.md` を参照してください。
 
@@ -11,13 +11,13 @@ EAS クラウドビルドは使いません（Expo アカウントを持たな�
 **提出前ゲート（必須）**: 審査提出・TestFlight 配信の前に、(1) 全画面をライトモードとダークモードの両方で実画面撮影して文字の視認性を検証し、(2) 初回診断を含む設問コンテンツを全問通しで確認する（正解が設問文に含まれていないこと、選択肢の位置が固定されていないこと）。根拠ルールは `docs/ui-design-rules.md` の W7 / W8。
 
 1. `main` がクリーンで `npm run lint` と `npm run typecheck` が通ることを確認する。
-2. バージョン／ビルド番号を決める。バージョンは `src/config/appConfig.json` が単一ソース。ビルド番号は appConfig.json に項目がないため、prebuild で生成した iOS プロジェクト側（CURRENT_PROJECT_VERSION）で提出ごとに +1 する（初回提出は 1）。
+2. バージョン／ビルド番号を決める。バージョンは `src/config/appConfig.json` が単一ソース。ビルド番号の実体は `ios/app/Info.plist` のリテラル `CFBundleVersion` で、提出ごとに PlistBuddy で +1 する（CURRENT_PROJECT_VERSION ではない）。アーカイブ後は元の値に戻し、作業ツリーを汚さない。
 3. `.env` に `EXPO_PUBLIC_REVENUECAT_API_KEY`（RevenueCat の公開キー）が設定されていることを確認する（値は表示・記録しない）。
 4. `npx expo prebuild --platform ios` → `pod install`（`ios/` 内）。
-5. `xcodebuild archive`（自動署名、`-allowProvisioningUpdates` と ASC API キー認証を付ける）。署名で詰まった場合は証明書を削除・再発行せず、エラー文をそのまま記録して止まる。
+5. `xcodebuild archive`（自動署名、`-allowProvisioningUpdates` と ASC API キー認証を付ける）。SSH セッションからはログインキーチェーンがロックされ codesign が `errSecInternalComponent` で失敗するため、アーカイブは GUI セッションへ bootstrap した一時 LaunchAgent 経由で実行する。xcodebuild には `DEVELOPMENT_TEAM=4B873Q67MK` を渡すこと（prebuild はチームなしでプロジェクトを生成する）。pod install 等は `LANG=en_US.UTF-8` で実行する（ロケールがないと Ruby が日本語アプリ名で落ちる）。署名で詰まった場合は証明書を削除・再発行せず、エラー文をそのまま記録して止まる。
 6. App Store 配布用に IPA を書き出し、ASC API キー認証でアップロードする（eyechecker の asc-submit と同じ方式。キー: `~/.appstoreconnect/AuthKey_8HM846FQ5Z.p8`、環境変数は `~/.appstoreconnect/eyechecker-local-upload.env`）。
 7. ASC API で builds を照会し、対象ビルドが `VALID` になることを確認する。
-8. ASC でメタデータ（`docs/store/listing-ja.md` が正）とスクリーンショット（`docs/store/screenshots/`）をそろえ、ビルドとサブスクリプション（年額・月額）をバージョンにひも付けて審査提出する。
+8. ASC でメタデータ（`docs/store/listing-ja-final.md` が正）とスクリーンショット（`docs/store/screenshots/`）をそろえ、ビルドをバージョンにひも付けて審査提出する。審査提出アイテムはサブスクリプション本体ではなく **subscriptionVersion**、グループは **subscriptionGroupVersion** を `reviewSubmissionItems` に追加する（本体 ID で POST すると 409 unknown relationship になる）。バージョン ID は各リソースの `versions` 関係から取得する。提出後はバージョン・両サブスクリプション・グループの全てが `WAITING_FOR_REVIEW` であることを API で確認する（バージョンだけ提出された状態にしない）。
 
 ## 2. コンテンツ（レッスン）の追加
 
