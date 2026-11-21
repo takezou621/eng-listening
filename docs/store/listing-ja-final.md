@@ -1,7 +1,6 @@
 # App Store 掲載メタデータ 最終ドラフト (提出用)
 
-> ⚠ **ドラフト**: ASC への入力はオーナーが行います。法務プレースホルダ（〈…〉表記）は
-> docs/store/legal-placeholders-todo.md の確定後に反映します。
+> 法務項目（連絡先・販売者情報・URL・著作権）は 2026-11-21 に確定済み。確定値は docs/store/legal-placeholders-todo.md を参照。
 
 ## 文字数実測 (2026-11-21 測定)
 
@@ -60,7 +59,7 @@
 
 ---
 【利用規約】
-〈規約ページ URL〉 (利用規約の全文は docs/legal/terms-of-service.md を参照)
+https://www.apple.com/legal/internet-services/itunes/dev/stdeula (Apple 標準 EULA。アプリ独自の利用規約の全文はアプリ内の「設定 → 利用規約」に掲載)
 
 【価格について】
 すべてのレッスンの基本機能は無料。プレミアムプラン（月額 ¥680 / 年額 ¥4,800）では、完了後の詳細な弱点分析などの拡張機能が利用できます。年額プランには 7 日間の無料トライアルが付きます（無料トライアルは、同じサブスクリプショングループでトライアルを利用したことがない方のみご利用いただけます）。サブスクリプションは自動更新で、解約は App Store のアカウント設定から次回更新日の 24 時間前までに行えます。
@@ -71,18 +70,16 @@
 
 ## サポート URL / プライバシーポリシー URL / マーケティング URL
 
-- **サポート URL (必須)**: 〈公開 URL・オーナー確定待ち。docs/store/legal-placeholders-todo.md 参照〉
-- **プライバシーポリシー URL (必須)**: 〈公開 URL・オーナー確定待ち〉。プライバシーポリシーの文面は
-  docs/legal/privacy-policy.md (ドラフト)。Web 公開用の URL を確定後に設定する
-- マーケティング URL (任意): 〈オーナー確定待ち〉
+- **サポート URL (必須)**: https://33eigo.win/support
+- **プライバシーポリシー URL (必須)**: https://33eigo.win/privacy（文面は docs/legal/privacy-policy.md の確定版と同一）
+- マーケティング URL (任意): https://33eigo.win/
 
 ## 利用規約 (EULA)
 
 - 自動更新サブスクリプションを掲載するため、利用規約へのリンクが必要:
-  - 説明文の末尾に「利用規約: 〈規約ページ URL〉」を追記する (下記説明文に反映済み)
-  - ASC の App Information → License Agreement (EULA) で、カスタム EULA URL を設定するか
-    Apple 標準 EULA を選択する (カスタム利用規約を使う場合は URL を設定)
-- 利用規約の文面は docs/legal/terms-of-service.md (ドラフト)
+  - 説明文の末尾に Apple 標準 EULA へのリンクを記載する (上記説明文に反映済み)
+  - ASC の App Information → License Agreement (EULA) では Apple 標準 EULA を選択する (2026-11-21 決定。アプリ独自の利用規約はアプリ内に掲載)
+- 利用規約の文面は docs/legal/terms-of-service.md (確定版)
 
 ## 年齢レーティング想定
 
@@ -107,4 +104,4 @@
 
 ## 著作権表記
 
-Copyright © 2026 〈オーナー名〉 (docs/store/legal-placeholders-todo.md 参照)
+© 2026 川合 毅

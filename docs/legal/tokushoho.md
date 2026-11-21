@@ -1,15 +1,14 @@
-# 特定商取引法に基づく表記 (ドラフト)
+# 特定商取引法に基づく表記
 
-> ※ この文面はドラフトです。最終確定は GM／オーナーが行います。〈…〉の項目は差し替えが必要なプレースホルダです。
 > アプリ内表示は `src/features/legal/legalContent.ts` を正としています。
 
 | 項目 | 内容 |
 |---|---|
-| 販売者 | 〈販売者名〉 |
-| 運営責任者 | 〈運営責任者名〉 |
-| 所在地 | 〈所在地〉 |
-| お問い合わせ | 〈メールアドレス〉（受付時間: 〈平日 10:00〜18:00〉） |
-| 電話番号 | 〈電話番号〉（請求があった場合は遅滞なく開示します） |
+| 販売者 | 川合 毅 |
+| 運営責任者 | 川合 毅 |
+| 所在地 | 請求があった場合は遅滞なく開示します |
+| お問い合わせ | support@33eigo.win（受付時間: 平日 10:00〜19:00） |
+| 電話番号 | 請求があった場合は遅滞なく開示します |
 | 販売価格 | 月額プラン: ¥680 / 年額プラン: ¥4,800（年額プランには 7 日間の無料トライアルが付きます）。Apple App Store を通じて課金されます |
 | 支払方法 | Apple ID 決済（RevenueCat 経由） |
 | サービスの提供時期 | 購入後、アプリ内で即時に利用可能 |
@@ -18,17 +17,16 @@
 
 ---
 
-# Information Based on the Act on Specified Commercial Transactions (Draft)
+# Information Based on the Act on Specified Commercial Transactions
 
-> Note: This document is a draft. Final version will be approved by the GM / app owner. Items marked 〈…〉 are placeholders to be replaced.
 
 | Item | Content |
 |---|---|
-| Seller | 〈seller name〉 |
-| Operator | 〈operator name〉 |
-| Location | 〈address〉 |
-| Contact | 〈email address〉 (hours: 〈weekdays 10:00-18:00〉) |
-| Phone Number | 〈phone number〉 (disclosed upon request without delay) |
+| Seller | Takeshi Kawai |
+| Operator | Takeshi Kawai |
+| Location | Disclosed upon request without delay |
+| Contact | support@33eigo.win (hours: weekdays 10:00-19:00) |
+| Phone Number | Disclosed upon request without delay |
 | Price | Monthly: ¥680 / Annual: ¥4,800 (the annual plan includes a 7-day free trial). Billed through the Apple App Store |
 | Payment Method | Apple ID payment (via RevenueCat) |
 | Timing of Service | Available in-app immediately after purchase |
