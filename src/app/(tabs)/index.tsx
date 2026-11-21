@@ -98,7 +98,7 @@ export default function LibraryScreen() {
     <Screen scroll={false}>
       <ThemedText variant="title">ライブラリ</ThemedText>
       <ThemedText variant="caption" color="muted" style={styles.subtitle}>
-        全 {lessonList.length} 本 (生成完了)
+        全 {lessonList.length} 本
       </ThemedText>
 
       {renderFilterChips()}

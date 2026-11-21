@@ -602,15 +602,10 @@ function LessonPlayerScreen({
 
   return (
     <Screen scrollRef={scrollRef}>
-      <ThemedText variant="caption" color="muted">
-        パイプライン生成レッスン (Google Cloud TTS Neural2 + faster-whisper)
-      </ThemedText>
-
       <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ThemedText variant="heading">{lesson.title}</ThemedText>
         <ThemedText variant="caption" color="muted">
-          {lesson.titleJa} ・ {lesson.durationSec.toFixed(1)} 秒 / {sentences.length} 文 ・
-          config {lesson.configHash.slice(0, 8)}
+          {lesson.titleJa} ・ 約 {Math.round(lesson.durationSec)} 秒 / {sentences.length} 文
         </ThemedText>
 
         <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
@@ -619,8 +614,7 @@ function LessonPlayerScreen({
           />
         </View>
         <ThemedText variant="caption" color="muted">
-          {formatTime(status.currentTime)} / {formatTime(status.duration)} ・ rate=
-          {status.playbackRate.toFixed(2)}
+          {formatTime(status.currentTime)} / {formatTime(status.duration)}
         </ThemedText>
 
         <View style={styles.controlsRow}>
