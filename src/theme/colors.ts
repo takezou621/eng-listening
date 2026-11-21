@@ -41,7 +41,7 @@ export const darkColors: ThemeColors = {
   text: '#F3F4F6',
   textMuted: '#9CA3AF',
   primary: '#3B82F6',
-  primaryText: '#0B1220',
+  primaryText: '#FFFFFF',
   secondarySurface: '#1E293B',
   badgeTypeBg: '#1E3A8A',
   badgeTypeText: '#93C5FD',

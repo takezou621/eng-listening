@@ -8,6 +8,8 @@
 
 EAS クラウドビルドは使いません（Expo アカウントを持たないため）。Mac mini 上のローカルアーカイブ＋ App Store Connect（ASC）API アップロードが正規経路です。
 
+**提出前ゲート（必須）**: 審査提出・TestFlight 配信の前に、(1) 全画面をライトモードとダークモードの両方で実画面撮影して文字の視認性を検証し、(2) 初回診断を含む設問コンテンツを全問通しで確認する（正解が設問文に含まれていないこと、選択肢の位置が固定されていないこと）。根拠ルールは `docs/ui-design-rules.md` の W7 / W8。
+
 1. `main` がクリーンで `npm run lint` と `npm run typecheck` が通ることを確認する。
 2. バージョン／ビルド番号を決める。バージョンは `src/config/appConfig.json` が単一ソース。ビルド番号は appConfig.json に項目がないため、prebuild で生成した iOS プロジェクト側（CURRENT_PROJECT_VERSION）で提出ごとに +1 する（初回提出は 1）。
 3. `.env` に `EXPO_PUBLIC_REVENUECAT_API_KEY`（RevenueCat の公開キー）が設定されていることを確認する（値は表示・記録しない）。

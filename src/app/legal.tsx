@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
@@ -16,7 +16,6 @@ import { useTheme } from '@/theme/AppThemeProvider';
 export default function LegalScreen() {
   const params = useLocalSearchParams<{ doc?: string | string[] }>();
   const docParam = Array.isArray(params.doc) ? params.doc[0] : params.doc;
-  const router = useRouter();
   const { colors } = useTheme();
   const [lang, setLang] = useState<'ja' | 'en'>('ja');
 
@@ -25,11 +24,13 @@ export default function LegalScreen() {
 
   return (
     <Screen scroll={false}>
-      <Pressable onPress={() => router.back()} style={styles.back} hitSlop={12}>
-        <ThemedText variant="caption" color="primary">
-          {lang === 'ja' ? '‹ 設定へ戻る' : '‹ Back to Settings'}
-        </ThemedText>
-      </Pressable>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: lang === 'ja' ? doc.titleJa : doc.titleEn,
+          headerBackTitle: '戻る',
+        }}
+      />
       <ThemedText variant="title">{lang === 'ja' ? doc.titleJa : doc.titleEn}</ThemedText>
       <ThemedText variant="caption" color="muted" style={styles.draft}>
         {lang === 'ja' ? doc.draftNoticeJa : doc.draftNoticeEn}
@@ -75,7 +76,6 @@ export default function LegalScreen() {
 }
 
 const styles = StyleSheet.create({
-  back: { marginBottom: 12, paddingVertical: 4 },
   draft: { marginTop: 4, marginBottom: 8 },
   langRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   langChip: { borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10 },

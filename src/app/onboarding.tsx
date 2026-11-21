@@ -146,6 +146,41 @@ function QuestionPhase({
   const resolved = useMemo(() => resolveQuestionData(question), [question]);
   const [answered, setAnswered] = useState<number | null>(null);
 
+  // 選択肢の表示順を問題ごとに変える (正解が常に先頭に来る固定配置にしない)。
+  // 描画の純粋性を保つため、問題内容から決まるシードの決定的シャッフルを使う。
+  const shuffledChoices = useMemo(() => {
+    const items = question.choices.map((choice, i) => ({ choice, correct: i === 0 }));
+    let seed = question.sentenceIndex + 1;
+    for (const ch of question.lessonId) {
+      seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+    }
+    seed = (seed + questionIndex * 7919) >>> 0;
+    let state = seed >>> 0;
+    const nextRandom = () => {
+      state = (state + 0x6d2b79f5) >>> 0;
+      let t = state;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(nextRandom() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    return items;
+  }, [question, questionIndex]);
+
+  // 設問文に正解 (span) を出さないため、文中の該当箇所を空欄に置き換えた表示を作る
+  const maskedSentence = useMemo(() => {
+    if (!resolved) return null;
+    const idx = resolved.text.indexOf(question.span);
+    if (idx < 0) return null;
+    return {
+      before: resolved.text.slice(0, idx),
+      after: resolved.text.slice(idx + question.span.length),
+    };
+  }, [resolved, question]);
+
   // 区間再生: 文の startSec から再生し、endSec を超えたら一時停止する
   const player = useAudioPlayer(resolved ? resolved.bundle.audio : undefined);
   const status = useAudioPlayerStatus(player);
@@ -178,7 +213,7 @@ function QuestionPhase({
       {
         type: question.type,
         span: question.span,
-        correct: choiceIndex === 0,
+        correct: shuffledChoices[choiceIndex]?.correct ?? false,
       },
     ]);
   };
@@ -222,11 +257,19 @@ function QuestionPhase({
         </Pressable>
       ) : null}
 
+      {maskedSentence ? (
+        <ThemedText style={styles.maskedSentence}>
+          {maskedSentence.before}
+          <ThemedText style={{ color: colors.primary, fontWeight: '700' }}>＿＿＿＿</ThemedText>
+          {maskedSentence.after}
+        </ThemedText>
+      ) : null}
       <ThemedText variant="heading" style={styles.questionTitle}>
-        「{question.span}」の部分は何と聞こえた？
+        空欄の部分は何と聞こえた？
       </ThemedText>
-      {question.choices.map((choice, i) => {
-        const isCorrect = i === 0;
+      {shuffledChoices.map((item, i) => {
+        const choice = item.choice;
+        const isCorrect = item.correct;
         const isSelected = answered === i;
         const showState = answered !== null;
         return (
@@ -241,7 +284,7 @@ function QuestionPhase({
               showState && isSelected && !isCorrect && { borderColor: '#DC2626', borderWidth: 2 },
             ]}
           >
-            <ThemedText style={{ color: showState && isCorrect ? '#16A34A' : undefined }}>
+            <ThemedText style={showState && isCorrect ? { color: '#16A34A' } : undefined}>
               {choice}
             </ThemedText>
           </Pressable>
@@ -373,7 +416,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  questionTitle: { marginTop: 16 },
+  questionTitle: { marginTop: 8 },
+  maskedSentence: { marginTop: 16, lineHeight: 24 },
   choiceButton: {
     borderRadius: 10,
     borderWidth: 1,

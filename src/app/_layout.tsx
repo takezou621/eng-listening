@@ -51,6 +51,7 @@ export default function RootLayout() {
     }
   }, [router, autoDemo]);
 
+
   return (
     <AppThemeProvider>
       <ThemeProvider value={navTheme}>
@@ -61,6 +62,45 @@ export default function RootLayout() {
             <Stack.Screen
               name="spike"
               options={{ headerShown: true, title: 'オーディオスパイク', headerBackTitle: '戻る' }}
+            />
+            <Stack.Screen
+              name="lesson"
+              options={{
+                headerShown: true,
+                title: 'レッスン',
+                headerBackTitle: '戻る',
+                headerTransparent: false,
+                headerStyle: {
+                  backgroundColor: isDark ? darkColors.surface : lightColors.surface,
+                },
+                headerTintColor: isDark ? darkColors.text : lightColors.text,
+              }}
+            />
+            <Stack.Screen
+              name="paywall"
+              options={{
+                headerShown: true,
+                title: 'プレミアム',
+                headerBackTitle: '戻る',
+                headerTransparent: false,
+                headerStyle: {
+                  backgroundColor: isDark ? darkColors.surface : lightColors.surface,
+                },
+                headerTintColor: isDark ? darkColors.text : lightColors.text,
+              }}
+            />
+            <Stack.Screen
+              name="legal"
+              options={{
+                headerShown: true,
+                title: '法的情報',
+                headerBackTitle: '戻る',
+                headerTransparent: false,
+                headerStyle: {
+                  backgroundColor: isDark ? darkColors.surface : lightColors.surface,
+                },
+                headerTintColor: isDark ? darkColors.text : lightColors.text,
+              }}
             />
           </Stack>
         </SelectionProvider>
