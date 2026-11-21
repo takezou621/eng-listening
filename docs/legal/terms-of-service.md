@@ -1,6 +1,5 @@
-# 利用規約 (ドラフト)
+# 利用規約
 
-> ※ この文面はドラフトです。最終確定は GM／オーナーが行います。
 > アプリ内表示は `src/features/legal/legalContent.ts` を正としています。
 
 ## 1. サービス内容
@@ -33,13 +32,12 @@
 
 ## 5. お問い合わせ
 
-本規約に関するお問い合わせは、〈お問い合わせ先メールアドレス〉までお願いします。
+本規約に関するお問い合わせは、support@33eigo.winまでお願いします。
 
 ---
 
-# Terms of Service (Draft)
+# Terms of Service
 
-> Note: This document is a draft. Final version will be approved by the GM / app owner.
 
 ## 1. Service Description
 
@@ -71,4 +69,4 @@ Features may change or the service may be discontinued without notice.
 
 ## 5. Contact
 
-For questions about these terms, contact <contact email address>.
+For questions about these terms, contact support@33eigo.win.

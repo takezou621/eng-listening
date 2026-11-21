@@ -1,6 +1,5 @@
-# プライバシーポリシー (ドラフト)
+# プライバシーポリシー
 
-> ※ この文面はドラフトです。最終確定は GM／オーナーが行います。
 > アプリ内表示は `src/features/legal/legalContent.ts` を正としています (本ファイルは同じ内容のMarkdown版)。
 
 ## 1. 収集する情報
@@ -25,7 +24,7 @@
 
 ## 4. お問い合わせ
 
-本ポリシーに関するお問い合わせは、〈お問い合わせ先メールアドレス〉までお願いします。
+本ポリシーに関するお問い合わせは、support@33eigo.winまでお願いします。
 
 ## 5. ポリシーの改定
 
@@ -33,9 +32,8 @@
 
 ---
 
-# Privacy Policy (Draft)
+# Privacy Policy
 
-> Note: This document is a draft. Final version will be approved by the GM / app owner.
 
 ## 1. Information We Collect
 
@@ -59,7 +57,7 @@ Subscription purchases and restoration are processed through Apple (App Store) a
 
 ## 4. Contact
 
-For questions about this policy, contact <contact email address>.
+For questions about this policy, contact support@33eigo.win.
 
 ## 5. Changes to This Policy
 

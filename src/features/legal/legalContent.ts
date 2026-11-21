@@ -1,10 +1,10 @@
 /**
  * 法務ドキュメントの文面 (プライバシーポリシー / 利用規約 / 特商法表記)。
  *
- * ※ この文面はドラフトです。最終確定は GM／オーナーが行います。
+ * 文面は 2026-11-21 に確定済み。
  * ※ docs/legal/ 配下の Markdown にも同じ内容を保存しています。
  *
- * プレースホルダ〈…〉は GM が差し替える項目です。
+ * 連絡先・販売者情報は確定値を使用しています。
  */
 
 import { DISPLAY_PRICES } from '@/features/billing/config';
@@ -25,11 +25,11 @@ export interface LegalDoc {
   sectionsEn: LegalSection[];
 }
 
-const DRAFT_JA = '※ この文面はドラフトです。最終確定は GM／オーナーが行います。';
-const DRAFT_EN = 'Note: This document is a draft. Final version will be approved by the GM / app owner.';
+const DRAFT_JA = '';
+const DRAFT_EN = '';
 
-const CONTACT_JA = '〈お問い合わせ先メールアドレス〉';
-const CONTACT_EN = '<contact email address>';
+const CONTACT_JA = 'support@33eigo.win';
+const CONTACT_EN = 'support@33eigo.win';
 
 export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
   privacy: {
@@ -186,11 +186,11 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
     draftNoticeJa: DRAFT_JA,
     draftNoticeEn: DRAFT_EN,
     sectionsJa: [
-      { heading: '販売者', paragraphs: ['〈販売者名〉'] },
-      { heading: '運営責任者', paragraphs: ['〈運営責任者名〉'] },
-      { heading: '所在地', paragraphs: ['〈所在地〉'] },
-      { heading: 'お問い合わせ', paragraphs: ['〈メールアドレス〉（受付時間: 〈平日 10:00〜18:00〉）'] },
-      { heading: '電話番号', paragraphs: ['〈電話番号〉（請求があった場合は遅滞なく開示します）'] },
+      { heading: '販売者', paragraphs: ['川合 毅'] },
+      { heading: '運営責任者', paragraphs: ['川合 毅'] },
+      { heading: '所在地', paragraphs: ['請求があった場合は遅滞なく開示します'] },
+      { heading: 'お問い合わせ', paragraphs: ['support@33eigo.win（受付時間: 平日 10:00〜19:00）'] },
+      { heading: '電話番号', paragraphs: ['請求があった場合は遅滞なく開示します'] },
       { heading: '販売価格', paragraphs: [`${DISPLAY_PRICES.monthlyJa} / ${DISPLAY_PRICES.annualJa}。Apple App Store を通じて課金されます。`] },
       { heading: '支払方法', paragraphs: ['Apple ID 決済（RevenueCat 経由）'] },
       { heading: 'サービスの提供時期', paragraphs: ['購入後、アプリ内で即時に利用可能'] },
@@ -198,11 +198,11 @@ export const LEGAL_DOCS: Record<LegalDocId, LegalDoc> = {
       { heading: '返金について', paragraphs: ['返金は Apple のポリシーに従います。詳細は Apple サポートにお問い合わせください。'] },
     ],
     sectionsEn: [
-      { heading: 'Seller', paragraphs: ['<seller name>'] },
-      { heading: 'Operator', paragraphs: ['<operator name>'] },
-      { heading: 'Location', paragraphs: ['<address>'] },
-      { heading: 'Contact', paragraphs: ['<email address> (hours: <weekdays 10:00-18:00>)'] },
-      { heading: 'Phone Number', paragraphs: ['<phone number> (disclosed upon request without delay)'] },
+      { heading: 'Seller', paragraphs: ['Takeshi Kawai'] },
+      { heading: 'Operator', paragraphs: ['Takeshi Kawai'] },
+      { heading: 'Location', paragraphs: ['Disclosed upon request without delay'] },
+      { heading: 'Contact', paragraphs: ['support@33eigo.win (hours: weekdays 10:00-19:00)'] },
+      { heading: 'Phone Number', paragraphs: ['Disclosed upon request without delay'] },
       { heading: 'Price', paragraphs: [`${DISPLAY_PRICES.monthlyEn}; ${DISPLAY_PRICES.annualEn}. Billed through the Apple App Store.`] },
       { heading: 'Payment Method', paragraphs: ['Apple ID payment (via RevenueCat)'] },
       { heading: 'Timing of Service', paragraphs: ['Available in-app immediately after purchase'] },
