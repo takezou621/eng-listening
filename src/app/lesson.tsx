@@ -29,6 +29,7 @@ import { getLessonBundle, type LessonBundle } from '@/features/lesson/registry';
 import {
   LINKING_COLORS,
   LINKING_LABELS,
+  LINKING_TEXT_DECORATIONS,
   wordLinkMap,
 } from '@/features/lesson/linkingViz';
 import type { LessonLinkingNote, LessonSentence } from '@/features/lesson/types';
@@ -666,7 +667,14 @@ function LessonPlayerScreen({
           {legendTypes.map((type) => (
             <View key={type} style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: LINKING_COLORS[type] }]} />
-              <ThemedText variant="caption" color="muted">
+              <ThemedText
+                variant="caption"
+                color="muted"
+                style={[
+                  LINKING_TEXT_DECORATIONS[type],
+                  { textDecorationColor: LINKING_COLORS[type] },
+                ]}
+              >
                 {LINKING_LABELS[type]}
               </ThemedText>
             </View>
@@ -930,6 +938,7 @@ function KaraokeLine({
                   { color: isActive ? colors.primary : linkColor ?? (isPast ? colors.text : colors.textMuted) },
                   isActive && styles.karaokeWordActive,
                   linkColor !== null && !isActive && styles.karaokeWordLinked,
+                  note ? LINKING_TEXT_DECORATIONS[note.type] : null,
                 ]}
               >
                 {word.text}
@@ -1007,7 +1016,7 @@ const styles = StyleSheet.create({
   karaokeChunk: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 5 },
   karaokeWord: { fontSize: 16, lineHeight: 24 },
   karaokeWordActive: { fontWeight: '700' },
-  karaokeWordLinked: { fontWeight: '600', textDecorationLine: 'underline' },
+  karaokeWordLinked: { fontWeight: '600' },
   chunkRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chunkBox: {
     borderRadius: 8,
