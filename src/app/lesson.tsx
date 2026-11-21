@@ -33,7 +33,7 @@ import {
   wordLinkMap,
 } from '@/features/lesson/linkingViz';
 import type { LessonLinkingNote, LessonSentence } from '@/features/lesson/types';
-import { ControlButton, formatTime } from '@/features/player/shared';
+import { formatTime } from '@/features/player/shared';
 import {
   getPlayerPrefs,
   setPlayerPrefsDisplayMode,
@@ -74,6 +74,122 @@ function chunkWordRanges(sentence: LessonSentence): { from: number; to: number }
     ptr += n;
   }
   return ranges;
+}
+
+/**
+ * 下部固定の再生バー (E2)。文単位の移動とタップシークを提供する。
+ * 親のメモ化分析と干渉しないよう独立コンポーネントにしている。
+ */
+function TransportBar({
+  progress,
+  currentTime,
+  duration,
+  playing,
+  sentenceIndex,
+  sentenceCount,
+  firstStartSec,
+  onPrev,
+  onNext,
+  onTogglePlay,
+  onSeek,
+}: {
+  progress: number;
+  currentTime: number;
+  duration: number;
+  playing: boolean;
+  sentenceIndex: number;
+  sentenceCount: number;
+  firstStartSec: number;
+  onPrev: () => void;
+  onNext: () => void;
+  onTogglePlay: () => void;
+  onSeek: (seconds: number) => void;
+}) {
+  const { colors } = useTheme();
+  const trackWidthRef = useRef(0);
+  const canPrev = !(sentenceIndex === 0 && currentTime <= firstStartSec + 0.3);
+  const canNext = sentenceIndex < sentenceCount - 1;
+  return (
+    <View
+      style={[
+        styles.transportBar,
+        { backgroundColor: colors.surface, borderTopColor: colors.border },
+      ]}
+    >
+      <View style={styles.seekRow}>
+        <ThemedText variant="caption" color="muted" style={styles.seekTime}>
+          {formatTime(currentTime)}
+        </ThemedText>
+        <Pressable
+          style={styles.seekTrackTouch}
+          onLayout={(e) => {
+            trackWidthRef.current = e.nativeEvent.layout.width;
+          }}
+          onPress={(e) => {
+            const width = trackWidthRef.current;
+            if (!width || !duration) return;
+            const ratio = Math.min(Math.max(e.nativeEvent.locationX / width, 0), 1);
+            onSeek(ratio * duration);
+          }}
+          accessibilityRole="adjustable"
+          accessibilityLabel="再生位置"
+        >
+          <View style={[styles.seekTrack, { backgroundColor: colors.border }]}>
+            <View
+              style={[
+                styles.seekFill,
+                { backgroundColor: colors.primary, width: `${progress * 100}%` },
+              ]}
+            />
+          </View>
+        </Pressable>
+        <ThemedText variant="caption" color="muted" style={styles.seekTime}>
+          {formatTime(duration)}
+        </ThemedText>
+      </View>
+      <View style={styles.transportRow}>
+        <Pressable
+          style={[
+            styles.transportSide,
+            { backgroundColor: colors.secondarySurface },
+            !canPrev ? styles.transportDisabled : null,
+          ]}
+          disabled={!canPrev}
+          onPress={onPrev}
+          accessibilityRole="button"
+          accessibilityLabel="前の文"
+        >
+          <ThemedText style={{ fontWeight: '600' }}>⏮ 前の文</ThemedText>
+        </Pressable>
+        <Pressable
+          style={[styles.transportPlay, { backgroundColor: colors.primary }]}
+          onPress={onTogglePlay}
+          accessibilityRole="button"
+          accessibilityLabel={playing ? '一時停止' : '再生'}
+        >
+          <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
+            {playing ? '⏸ 一時停止' : '▶ 再生'}
+          </ThemedText>
+        </Pressable>
+        <Pressable
+          style={[
+            styles.transportSide,
+            { backgroundColor: colors.secondarySurface },
+            !canNext ? styles.transportDisabled : null,
+          ]}
+          disabled={!canNext}
+          onPress={onNext}
+          accessibilityRole="button"
+          accessibilityLabel="次の文"
+        >
+          <ThemedText style={{ fontWeight: '600' }}>次の文 ⏭</ThemedText>
+        </Pressable>
+      </View>
+      <ThemedText variant="caption" color="muted" style={styles.transportMeta}>
+        文 {sentenceIndex + 1} / {sentenceCount}
+      </ThemedText>
+    </View>
+  );
 }
 
 function LessonPlayerScreen({
@@ -223,6 +339,40 @@ function LessonPlayerScreen({
     } else {
       play();
     }
+  };
+  // --- 下部固定の再生バー (E2): 文単位の移動とタップシーク ---
+  const goToSentence = (targetIndex: number) => {
+    const target = sentences[targetIndex];
+    if (!target) return;
+    // 文を移動したらリピート系は解除する (AB/文リピートが移動先と競合するため)
+    setRepeatSentence(null);
+    setAb(null);
+    seekTo(target.startSec, `文${targetIndex + 1} へ移動`, () => {
+      if (statusRef.current.playing) play();
+    });
+  };
+  // 現在位置が属する文のインデックス (開始済みの最後の文)。
+  // activeSentence の useMemo より前に定義するため、ref 経由で現在位置から導出する
+  const lastStartedSentenceIndex = () => {
+    const t = statusRef.current.currentTime;
+    let idx = 0;
+    sentences.forEach((st, i) => {
+      if (t >= st.startSec) idx = i;
+    });
+    return idx;
+  };
+  const goPrevSentence = () => {
+    const idx = lastStartedSentenceIndex();
+    const current = sentences[idx];
+    // 現在の文に入って 2 秒以上なら文頭へ、そうでなければ前の文へ
+    if (current && statusRef.current.currentTime - current.startSec > 2) {
+      goToSentence(idx);
+    } else {
+      goToSentence(Math.max(0, idx - 1));
+    }
+  };
+  const goNextSentence = () => {
+    goToSentence(Math.min(sentences.length - 1, lastStartedSentenceIndex() + 1));
   };
   const toggleRepeat = (sentenceIndex: number) => {
     const next = repeatSentence === sentenceIndex ? null : sentenceIndex;
@@ -737,6 +887,21 @@ function LessonPlayerScreen({
       onScroll={(e) => {
         scrollOffsetRef.current = e.nativeEvent.contentOffset.y;
       }}
+      footer={
+        <TransportBar
+          progress={progress}
+          currentTime={status.currentTime}
+          duration={status.duration || lesson.durationSec}
+          playing={status.playing}
+          sentenceIndex={activeSentence?.index ?? 0}
+          sentenceCount={sentences.length}
+          firstStartSec={sentences[0]?.startSec ?? 0}
+          onPrev={goPrevSentence}
+          onNext={goNextSentence}
+          onTogglePlay={togglePlay}
+          onSeek={(sec) => seekTo(sec, 'シークバー')}
+        />
+      }
     >
       <Stack.Screen
         options={{ headerShown: true, title: lesson.titleJa, headerBackTitle: '戻る' }}
@@ -795,18 +960,6 @@ function LessonPlayerScreen({
           {lesson.titleJa} ・ 約 {Math.round(lesson.durationSec)} 秒 / {sentences.length} 文
         </ThemedText>
 
-        <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
-          <View
-            style={[styles.progressFill, { backgroundColor: colors.primary, width: `${progress * 100}%` }]}
-          />
-        </View>
-        <ThemedText variant="caption" color="muted">
-          {formatTime(status.currentTime)} / {formatTime(status.duration)}
-        </ThemedText>
-
-        <View style={styles.controlsRow}>
-          <ControlButton label={status.playing ? '⏸ 一時停止' : '▶ 再生'} primary onPress={togglePlay} />
-        </View>
         <View style={styles.rateRow}>
           {PLAYBACK_RATES.map((r) => (
             <Chip key={r} label={`${r}x`} active={rate === r} onPress={() => applyRate(r)} />
@@ -1165,6 +1318,36 @@ function ChunkLine({
 }
 
 const styles = StyleSheet.create({
+  transportBar: {
+    borderTopWidth: 1,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 6,
+    gap: 6,
+  },
+  seekRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  seekTime: { minWidth: 34, textAlign: 'center' },
+  seekTrackTouch: { flex: 1, paddingVertical: 8 },
+  seekTrack: { height: 6, borderRadius: 3, overflow: 'hidden' },
+  seekFill: { height: 6, borderRadius: 3 },
+  transportRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  transportSide: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  transportPlay: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 999,
+    alignItems: 'center',
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  transportDisabled: { opacity: 0.4 },
+  transportMeta: { textAlign: 'center' },
   summaryCard: {
     borderWidth: 1,
     borderRadius: 12,
