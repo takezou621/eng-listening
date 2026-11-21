@@ -1,110 +1,138 @@
-
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_CONFIG } from '@/config/appConfig';
 import { useRouter } from 'expo-router';
+import {
+  initBillingAsync,
+  restorePurchasesAsync,
+  useEntitlement,
+  type RestoreResult,
+} from '@/features/billing/billingStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 function Row({ label, value }: { label: string; value: string }) {
   const { colors } = useTheme();
   return (
     <View style={[styles.row, { borderBottomColor: colors.border }]}>
-      {/* 値が長い識別子でも折り返して行から溢れないようにする */}
       <ThemedText style={styles.rowLabel} numberOfLines={2}>
         {label}
       </ThemedText>
-      <ThemedText color="muted" style={styles.rowValue} numberOfLines={2} selectable>
+      <ThemedText color="muted" style={styles.rowValue} numberOfLines={2}>
         {value}
       </ThemedText>
     </View>
   );
 }
 
-/** 設定 (骨格)。永続化は次フェーズで AsyncStorage 導入 */
+function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
+  const { colors } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[styles.legalRow, { borderBottomColor: colors.border }]}
+    >
+      <ThemedText>{label}</ThemedText>
+      <ThemedText color="muted">›</ThemedText>
+    </Pressable>
+  );
+}
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { scheme, colors } = useTheme();
+  const { isPremium, isLoading, isAvailable } = useEntitlement();
+  const [restoring, setRestoring] = useState(false);
+  const [restoreMessage, setRestoreMessage] = useState('');
+
+  useEffect(() => {
+    void initBillingAsync();
+  }, []);
+
+  const handleRestore = async () => {
+    if (!isAvailable || restoring) return;
+    setRestoreMessage('');
+    setRestoring(true);
+    const result: RestoreResult = await restorePurchasesAsync();
+    setRestoring(false);
+    if (result.restored && result.premium) {
+      setRestoreMessage('プレミアムが復元されました。');
+    } else if (result.restored) {
+      setRestoreMessage('復元できるプレミアム購入が見つかりませんでした。');
+    } else {
+      setRestoreMessage('復元に失敗しました。時間をおいて再度お試しください。');
+    }
+  };
 
   return (
     <Screen>
-      <Pressable
-        onPress={() => router.push('/onboarding')}
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: colors.secondarySurface,
-          borderRadius: 12,
-          padding: 14,
-          marginBottom: 8,
-        }}
-      >
-        <ThemedText>聞き取り診断をもう一度行う</ThemedText>
-        <ThemedText color="muted">›</ThemedText>
-      </Pressable>
-      <Pressable
-        onPress={() => router.push('/paywall')}
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          backgroundColor: colors.secondarySurface,
-          borderRadius: 12,
-          padding: 14,
-          marginBottom: 16,
-        }}
-      >
-        <ThemedText>プレミアムについて</ThemedText>
-        <ThemedText color="muted">›</ThemedText>
-      </Pressable>
       <ThemedText variant="title">設定</ThemedText>
 
+      <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Row
+          label="現在のプラン"
+          value={isLoading ? '確認中…' : isPremium ? 'プレミアム' : '無料プラン'}
+        />
+        <LinkRow label="プレミアムについて" onPress={() => router.push('/paywall')} />
+        <Pressable
+          onPress={handleRestore}
+          disabled={!isAvailable || isLoading || restoring}
+          style={[styles.legalRow, { borderBottomColor: colors.border }]}
+        >
+          <ThemedText color="primary">購入を復元</ThemedText>
+          <ThemedText color="muted">{restoring ? '復元中…' : ''}</ThemedText>
+        </Pressable>
+      </View>
+      {restoreMessage ? (
+        <ThemedText variant="caption" color="muted" style={styles.note}>
+          {restoreMessage}
+        </ThemedText>
+      ) : null}
+
+      <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <LinkRow
+          label="聞き取り診断をもう一度行う"
+          onPress={() => router.push('/onboarding')}
+        />
+      </View>
+
+      <ThemedText variant="heading" style={styles.sectionTitle}>
+        サポート
+      </ThemedText>
+      <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <LinkRow
+          label="サポートページを開く"
+          onPress={() => void Linking.openURL('https://33eigo.win/support')}
+        />
+        <Row label="お問い合わせ" value="support@33eigo.win" />
+      </View>
+
+      <ThemedText variant="heading" style={styles.sectionTitle}>
+        法的情報
+      </ThemedText>
       <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         {([
           { doc: 'privacy', label: 'プライバシーポリシー' },
           { doc: 'terms', label: '利用規約' },
           { doc: 'tokushoho', label: '特定商取引法に基づく表記' },
         ] as const).map((item) => (
-          <Pressable
+          <LinkRow
             key={item.doc}
+            label={item.label}
             onPress={() => router.push(`/legal?doc=${item.doc}`)}
-            style={[styles.legalRow, { borderBottomColor: colors.border }]}
-          >
-            <ThemedText>{item.label}</ThemedText>
-            <ThemedText color="muted">›</ThemedText>
-          </Pressable>
+          />
         ))}
       </View>
 
-      <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Row label="テーマ" value={scheme === 'dark' ? 'ダーク (システム追従)' : 'ライト (システム追従)'} />
-        <Row label="バージョン" value={`v${APP_CONFIG.version}`} />
-        <Row label="iOS Bundle ID (仮)" value={APP_CONFIG.iosBundleIdentifier} />
-        <Row label="Android package (仮)" value={APP_CONFIG.androidPackageName} />
-      </View>
-
       <ThemedText variant="heading" style={styles.sectionTitle}>
-        開発
+        アプリ情報
       </ThemedText>
       <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <View style={styles.row}>
-          <ThemedText>オーディオスパイク</ThemedText>
-          <ThemedText
-            color="primary"
-            style={styles.link}
-            onPress={() => router.push('/spike')}
-          >
-            開く →
-          </ThemedText>
-        </View>
+        <Row label="テーマ" value={scheme === 'dark' ? 'ダーク (端末の設定に連動)' : 'ライト (端末の設定に連動)'} />
+        <Row label="バージョン" value={`v${APP_CONFIG.version}`} />
       </View>
-
-      <ThemedText variant="caption" color="muted" style={styles.note}>
-        設定項目の永続化・課金状態の表示は課金フェーズ (#17–) で実装予定
-      </ThemedText>
     </Screen>
   );
 }
@@ -135,6 +163,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     gap: 12,
   },
-  link: { fontWeight: '600' },
-  note: { marginTop: 16 },
+  note: { marginTop: 8 },
 });

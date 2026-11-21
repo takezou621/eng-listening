@@ -4,7 +4,6 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
-import { DISPLAY_PRICES } from '@/features/billing/config';
 import {
   fetchOfferingsAsync,
   initBillingAsync,
@@ -48,6 +47,11 @@ export default function PaywallScreen() {
   const [hasProducts, setHasProducts] = useState(false);
   const [monthlyProductId, setMonthlyProductId] = useState<string | null>(null);
   const [annualProductId, setAnnualProductId] = useState<string | null>(null);
+  // 表示価格はストアの実価格を優先する (コード内の固定文字列はフォールバック)
+  const [monthlyPriceString, setMonthlyPriceString] = useState<string | null>(null);
+  const [annualPriceString, setAnnualPriceString] = useState<string | null>(null);
+  const [annualPerMonthString, setAnnualPerMonthString] = useState<string | null>(null);
+  const [annualHasFreeTrial, setAnnualHasFreeTrial] = useState(false);
   // 選択中のプラン ('monthly' | 'annual')。既定は年額 (GM 決定の主力プラン)
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('annual');
   const [purchasing, setPurchasing] = useState(false);
@@ -68,6 +72,10 @@ export default function PaywallScreen() {
       setHasProducts(result.hasProducts);
       setMonthlyProductId(result.monthlyProductId);
       setAnnualProductId(result.annualProductId);
+      setMonthlyPriceString(result.monthlyPriceString);
+      setAnnualPriceString(result.annualPriceString);
+      setAnnualPerMonthString(result.annualPerMonthString);
+      setAnnualHasFreeTrial(result.annualHasFreeTrial);
       // 既定の年額プランが Offerings にない場合は月額にフォールバックする
       if (!result.annualProductId && result.monthlyProductId) {
         setSelectedPlan('monthly');
@@ -192,7 +200,9 @@ export default function PaywallScreen() {
             !monthlyProductId && { opacity: 0.5 },
           ]}
         >
-          <ThemedText style={styles.priceRow}>{DISPLAY_PRICES.monthlyJa}</ThemedText>
+          <ThemedText style={styles.priceRow}>
+            月額 {monthlyPriceString ?? '¥680'}
+          </ThemedText>
           <ThemedText variant="caption" color="muted">
             自動更新。いつでも解約できます。
           </ThemedText>
@@ -209,8 +219,12 @@ export default function PaywallScreen() {
             !annualProductId && { opacity: 0.5 },
           ]}
         >
-          <ThemedText style={styles.priceRow}>{DISPLAY_PRICES.annualJa}</ThemedText>
+          <ThemedText style={styles.priceRow}>
+            年額 {annualPriceString ?? '¥4,800'}
+            {annualHasFreeTrial ? ' (7 日間の無料トライアル付き)' : ''}
+          </ThemedText>
           <ThemedText variant="caption" color="muted">
+            {annualPerMonthString ? `月あたり約 ${annualPerMonthString}。` : ''}
             トライアル期間中に解約すれば請求されません。
           </ThemedText>
         </Pressable>
@@ -227,7 +241,15 @@ export default function PaywallScreen() {
         ]}
       >
         <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-          {isLoading || purchasing ? '読み込み中…' : isPremium ? 'プレミアム済み' : '購入する'}
+          {isLoading || purchasing
+            ? '読み込み中…'
+            : isPremium
+              ? 'プレミアム済み'
+              : selectedPlan === 'annual' && annualHasFreeTrial
+                ? '7 日間無料で始める'
+                : selectedPlan === 'annual'
+                  ? `年額 ${annualPriceString ?? '¥4,800'} で始める`
+                  : `月額 ${monthlyPriceString ?? '¥680'} で始める`}
         </ThemedText>
       </Pressable>
       {!canPurchase && purchaseNote ? (
@@ -288,13 +310,12 @@ function getPurchaseNote(state: {
   hasProducts: boolean;
 }): string {
   const { isLoading, purchasing, isPremium, isAvailable, hasProducts } = state;
-  if (isLoading || purchasing) return '課金機能の状態を確認しています…';
-  if (isPremium) return 'プレミアムエンタイトルメントが有効です。';
+  if (isLoading || purchasing || isPremium) return '';
   if (!isAvailable) {
-    return '⚠ 課金機能がこのビルドで有効になっていません (RevenueCat の API キー未設定またはネイティブ SDK 未同梱)。無料版としてご利用いただけます。';
+    return '現在、この端末では購入手続きを利用できません。無料版としてご利用いただけます。';
   }
   if (!hasProducts) {
-    return '⚠ ストア側のサブスクリプション商品がまだ作成されていないため、購入は現在できません。商品の準備ができ次第、購入できるようになります。';
+    return '現在、購入の受付を準備中です。開始まで今しばらくお待ちください。';
   }
   return '';
 }

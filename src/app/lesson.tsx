@@ -118,8 +118,14 @@ function LessonPlayerScreen({
   };
 
   useEffect(() => {
-    setAudioModeAsync({ playsInSilentMode: true }).catch(() => {
-      // スパイク画面と異なりロック画面は使わないため、失敗しても再生は継続する
+    // バックグラウンド再生を有効にする (画面ロックや他アプリ切替でも聞き続けられるように。
+    // UIBackgroundModes: ['audio'] は app.config.ts で設定済み)
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
+      interruptionMode: 'doNotMix',
+    }).catch(() => {
+      // 設定に失敗しても再生自体は継続する
     });
   }, []);
 
@@ -139,15 +145,12 @@ function LessonPlayerScreen({
 
   const sentences = lesson.sentences;
 
-  // 画面内ログ = 実証エビデンス (Metro コンソールにも出力)。id はレンダーの鍵として安定させる
-  const [log, setLog] = useState<{ id: number; text: string }[]>([]);
-  const logIdRef = useRef(0);
+  // 操作ログは開発時のみコンソールへ出す (本番画面には表示しない。D10)
   const append = (action: string) => {
-    const at = new Date().toLocaleTimeString('ja-JP', { hour12: false });
-    logIdRef.current += 1;
-    const id = logIdRef.current;
-    setLog((prev) => [{ id, text: `${at}  ${action}` }, ...prev].slice(0, 8));
-    if (__DEV__) console.log(`[lesson] ${at} ${action}`);
+    if (__DEV__) {
+      const at = new Date().toLocaleTimeString('ja-JP', { hour12: false });
+      console.log(`[lesson] ${at} ${action}`);
+    }
   };
 
   const seekTo = (
@@ -917,8 +920,7 @@ function LessonPlayerScreen({
           ]}
         >
           <ThemedText variant="caption" color="muted">
-            文{sentence.index + 1} ・ {lesson.speakerNames[sentence.speaker] ?? sentence.speaker} ・
-            [{sentence.startSec.toFixed(2)}s]
+            文{sentence.index + 1} ・ {lesson.speakerNames[sentence.speaker] ?? sentence.speaker}
             {repeatSentence === sentence.index ? ' ・リピート中' : ''}
           </ThemedText>
           <View style={styles.sentenceHeaderRow}>
@@ -1000,22 +1002,6 @@ function LessonPlayerScreen({
         </Pressable>
       ))}
 
-      <ThemedText variant="heading" style={styles.sectionTitle}>
-        アクションログ
-      </ThemedText>
-      <View style={[styles.logPanel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        {log.length === 0 ? (
-          <ThemedText variant="caption" color="muted">
-            操作するとここにログが記録されます
-          </ThemedText>
-        ) : (
-          log.map((entry) => (
-            <ThemedText key={entry.id} variant="caption">
-              {entry.text}
-            </ThemedText>
-          ))
-        )}
-      </View>
     </Screen>
   );
 }
@@ -1178,13 +1164,6 @@ const styles = StyleSheet.create({
   sentenceHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
   flex: { flex: 1 },
   weakIcon: { padding: 4 },
-  logPanel: {
-    marginTop: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    padding: 12,
-    gap: 4,
-  },
 });
 
 /** ルート: ?lesson=<id>&sentence=<n>&autorecord=1&demo=1 で対象文を選択 (既定は cafe-ordering)。
