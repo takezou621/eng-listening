@@ -5,15 +5,44 @@ import type { LessonLinkingNote, LessonSentence } from '@/features/lesson/types'
  * 文中のどの単語がどの注釈に重なるかのマッピング。
  */
 
+// 音の変化の色。UI のアクセント (青, colors.primary) と意味が衝突しないよう、
+// 音変化カラーには青系を使わない (Issue #45 C1)。
 export const LINKING_COLORS: Record<LessonLinkingNote['type'], string> = {
-  linking: '#2563EB',
-  reduction: '#D97706',
-  flapping: '#8B5CF6',
-  assimilation: '#0D9488',
-  palatalization: '#DB2777',
-  elision: '#65A30D',
-  intrusion: '#7C3AED',
-  'weak-form': '#64748B',
+  linking: '#6D28D9',
+  reduction: '#B45309',
+  flapping: '#C026D3',
+  assimilation: '#0F766E',
+  palatalization: '#BE185D',
+  elision: '#4D7C0F',
+  intrusion: '#B91C1C',
+  'weak-form': '#475569',
+};
+
+/**
+ * 色以外の手がかり (Issue #45 C2)。種類ごとに下線の形状・取り消し線・
+ * イタリック・背景色を変え、色が判別できなくても種類を区別できるようにする。
+ * textDecorationStyle は iOS のみ対応 (Android では実線の下線にフォールバックする)。
+ */
+export const LINKING_TEXT_DECORATIONS: Record<
+  LessonLinkingNote['type'],
+  import('react-native').TextStyle
+> = {
+  linking: { textDecorationLine: 'underline', textDecorationStyle: 'solid' },
+  reduction: { textDecorationLine: 'underline', textDecorationStyle: 'dotted' },
+  flapping: { textDecorationLine: 'underline', textDecorationStyle: 'dashed' },
+  assimilation: { textDecorationLine: 'underline', textDecorationStyle: 'double' },
+  palatalization: {
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'solid',
+    fontStyle: 'italic',
+  },
+  elision: { textDecorationLine: 'line-through', textDecorationStyle: 'solid' },
+  intrusion: { backgroundColor: '#B91C1C26' },
+  'weak-form': {
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dotted',
+    fontStyle: 'italic',
+  },
 };
 
 export const LINKING_LABELS: Record<LessonLinkingNote['type'], string> = {
