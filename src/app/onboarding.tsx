@@ -238,7 +238,31 @@ function QuestionPhase({
   }
 
   return (
-    <Screen>
+    <Screen
+      footer={
+        answered !== null ? (
+          <View
+            style={[
+              styles.footerBar,
+              { backgroundColor: colors.surface, borderTopColor: colors.border },
+            ]}
+          >
+            <Pressable
+              style={[
+                styles.primaryButton,
+                styles.footerButton,
+                { backgroundColor: colors.primary },
+              ]}
+              onPress={next}
+            >
+              <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
+                {questionIndex + 1 < DIAGNOSTIC_QUESTIONS.length ? '次の問題へ' : '結果を見る'}
+              </ThemedText>
+            </Pressable>
+          </View>
+        ) : undefined
+      }
+    >
       <ThemedText variant="caption" color="muted">
         診断 {questionIndex + 1} / {DIAGNOSTIC_QUESTIONS.length}
       </ThemedText>
@@ -304,11 +328,6 @@ function QuestionPhase({
           <Pressable onPress={playSegment}>
             <ThemedText variant="caption" color="primary">
               ↻ もう一度再生する
-            </ThemedText>
-          </Pressable>
-          <Pressable style={[styles.primaryButton, { backgroundColor: colors.primary }]} onPress={next}>
-            <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-              {questionIndex + 1 < DIAGNOSTIC_QUESTIONS.length ? '次の問題へ' : '結果を見る'}
             </ThemedText>
           </Pressable>
         </View>
@@ -411,6 +430,13 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   skipButton: { alignItems: 'center', marginTop: 16, padding: 8 },
+  footerBar: {
+    borderTopWidth: 1,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  footerButton: { marginTop: 0 },
   playButton: {
     borderRadius: 12,
     paddingVertical: 14,
