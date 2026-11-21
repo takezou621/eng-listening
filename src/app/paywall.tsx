@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
@@ -33,7 +33,7 @@ const PREMIUM_FEATURES_JA = [
 ];
 
 const FREE_FEATURES_JA = [
-  '全 12 レッスンの再生・カラオケ表示・AB リピート',
+  '全 12 レッスンの再生・カラオケ風表示・AB リピート',
   'シャドーイング録音と比較再生',
   'ライブラリ・お気に入り・苦手フレーズ帳',
   '学習進捗の記録と表示',
@@ -143,6 +143,9 @@ export default function PaywallScreen() {
 
   return (
     <Screen>
+      <Stack.Screen
+        options={{ headerShown: true, title: 'プレミアム', headerBackTitle: '戻る' }}
+      />
       <ThemedText variant="title">プレミアムに切り替える</ThemedText>
       <ThemedText variant="caption" color="muted" style={styles.subtitle}>
         単語は知っているのに聞き取れない — その理由を見つけたあとも、継続して鍛えられます。

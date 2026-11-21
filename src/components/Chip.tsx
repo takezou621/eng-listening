@@ -25,7 +25,7 @@ export function Chip({ label, active = false, onPress, disabled }: ChipProps) {
         { borderColor: colors.border },
         active
           ? { backgroundColor: colors.primary, borderColor: colors.primary }
-          : { backgroundColor: colors.surface },
+          : { backgroundColor: colors.secondarySurface },
         disabled && styles.disabled,
       ]}
     >

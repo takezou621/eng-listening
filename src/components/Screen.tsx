@@ -1,5 +1,5 @@
 import { type ComponentRef, type ReactNode, type RefObject } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTheme } from '@/theme/AppThemeProvider';
@@ -11,9 +11,13 @@ interface ScreenProps {
   padded?: boolean;
   /** スクロールをプログラムで制御したい場合に渡す (深い位置の要素へのジャンプなど) */
   scrollRef?: RefObject<ComponentRef<typeof ScrollView> | null>;
+  /** ユーザーが手でスクロールを始めたときに呼ばれる (自動スクロールとの干渉回避用) */
+  onScrollBeginDrag?: () => void;
+  /** スクロール位置の通知 (自動スクロールの座標計算用) */
+  onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
 }
 
-export function Screen({ children, scroll = true, padded = true, scrollRef }: ScreenProps) {
+export function Screen({ children, scroll = true, padded = true, scrollRef, onScrollBeginDrag, onScroll }: ScreenProps) {
   const { colors } = useTheme();
   // 背景色はコンテナとスクロール領域の両方に敷く (バウンス時の露出防止)
   const paddedStyle = [styles.content, { backgroundColor: colors.background }, padded && styles.padded];
@@ -23,6 +27,9 @@ export function Screen({ children, scroll = true, padded = true, scrollRef }: Sc
       {scroll ? (
         <ScrollView
           ref={scrollRef}
+          onScrollBeginDrag={onScrollBeginDrag}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           style={styles.flex}
           contentContainerStyle={paddedStyle}
           showsVerticalScrollIndicator={false}

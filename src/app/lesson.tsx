@@ -13,7 +13,7 @@ import {
   type RecordingStatus,
 } from 'expo-audio';
 import { deleteAsync } from 'expo-file-system';
-import { useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 
 import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
@@ -254,6 +254,20 @@ function LessonPlayerScreen({
   const [comparing, setComparing] = useState<{ index: number; source: 'model' | 'user' } | null>(
     null
   );
+  // 録音導線: 「録音」を押すとまずお手本を再生し、終わったら自動で録音を始める
+  // (いきなり録音が始まると構える間がない、という実機フィードバックへの対応)
+  const [pendingRecord, setPendingRecord] = useState<number | null>(null);
+  const pendingRecordRef = useRef<number | null>(null);
+  const recordStartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 録音予約の世代 (予約・取消・切替のたびに進み、古いタイマーやシーク完了を無効化する)
+  const recordGenRef = useRef(0);
+  // お手本シークの世代 (最新のシークだけが再生を開始する)
+  const seekTokenRef = useRef(0);
+  const setPendingRecordBoth = (v: number | null) => {
+    pendingRecordRef.current = v;
+    setPendingRecord(v);
+    recordGenRef.current += 1;
+  };
   const userAudioRef = useRef<AudioPlayer | null>(null);
   const lastRecordingsRef = useRef(lastRecordings);
   useEffect(() => {
@@ -283,15 +297,17 @@ function LessonPlayerScreen({
     }
   };
 
-  const stopRecording = (sentenceIndex: number) => {
+  const stopRecording = async (sentenceIndex: number) => {
+    // duration は停止前に確定させる (停止後は currentTime が 0 に戻る)。
+    // uri は stop() の完了後に読む (完了前に読むと未確定ファイルになり再生できない)。
+    const duration = recorder.currentTime;
     try {
-      recorder.stop();
+      await recorder.stop();
     } catch {
       append('録音の停止に失敗しました');
       setRecordingSentence(null);
       return;
     }
-    const duration = recorder.currentTime;
     const uri = recorder.uri;
     setRecordingSentence(null);
     void setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true }).catch(() => {});
@@ -310,9 +326,32 @@ function LessonPlayerScreen({
   const playModel = (sentenceIndex: number) => {
     const sentence = sentences.find((s) => s.index === sentenceIndex);
     if (!sentence) return;
+    if (pendingRecordRef.current !== null && pendingRecordRef.current !== sentenceIndex) {
+      setPendingRecordBoth(null);
+    }
     userAudioRef.current?.pause();
     setComparing({ index: sentenceIndex, source: 'model' });
-    seekTo(sentence.startSec, `お手本再生: 文${sentenceIndex + 1}`, () => play());
+    const token = ++seekTokenRef.current;
+    seekTo(sentence.startSec, `お手本再生: 文${sentenceIndex + 1}`, () => {
+      // 取消や別のシークが割り込んでいたら、このシーク完了では再生しない
+      if (seekTokenRef.current === token) play();
+    });
+  };
+
+  // 「録音」ボタン: いきなり録音せず、まずお手本を再生し、終わったら自動で録音を始める。
+  // 予約中にもう一度押すと取り消す。実際の録音開始はお手本終了を検出する effect 側で行う。
+  const beginRecordFlow = (sentenceIndex: number) => {
+    if (recordingSentence !== null) return;
+    if (pendingRecordRef.current === sentenceIndex) {
+      setPendingRecordBoth(null);
+      seekTokenRef.current += 1; // 進行中のお手本シークが完了しても再生を再開させない
+      player.pause();
+      append('録音予約を取り消しました');
+      return;
+    }
+    setPendingRecordBoth(sentenceIndex);
+    playModel(sentenceIndex);
+    append(`お手本の後に録音します: 文${sentenceIndex + 1}`);
   };
 
   const playUserRecording = (sentenceIndex: number) => {
@@ -329,6 +368,7 @@ function LessonPlayerScreen({
   // レッスンを離れたら録音プレイヤーとキャッシュ内の録音ファイルを破棄する (GM 決定)
   useEffect(() => {
     return () => {
+      if (recordStartTimerRef.current) clearTimeout(recordStartTimerRef.current);
       try {
         recorder.stop(); // 録音中に画面を離れた場合は停止してマイクを解放する
       } catch {
@@ -385,7 +425,7 @@ function LessonPlayerScreen({
       timers.push(setTimeout(fn, delayMs));
     };
     at(1800, () => void startRecording(target));
-    at(6800, () => stopRecording(target));
+    at(6800, () => void stopRecording(target));
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autorecordParam]);
@@ -542,15 +582,27 @@ function LessonPlayerScreen({
     comparing?.source === 'model' && comparingModelEndSec !== null && t < comparingModelEndSec;
   const modelPausedRef = useRef(false);
   useEffect(() => {
-    if (comparing === null) {
-      modelPausedRef.current = false;
-    }
+    // 比較再生が新しく始まるたびに「文末で一時停止した」フラグを戻す。
+    // 戻し忘れると2回目以降のお手本が文末で止まらず、録音導線も始まらない。
+    modelPausedRef.current = false;
   }, [comparing]);
   useEffect(() => {
     if (!modelCompareActive) return;
     if (!modelPausedRef.current && t >= (comparingModelEndSec ?? 0) - 0.02) {
       player.pause();
       modelPausedRef.current = true;
+      // 録音予約があれば、お手本の余韻 (0.6 秒) を置いてから録音を始める
+      const pending = pendingRecordRef.current;
+      if (pending !== null && comparing?.index === pending) {
+        setPendingRecordBoth(null);
+        const gen = recordGenRef.current;
+        recordStartTimerRef.current = setTimeout(() => {
+          // 待機中に別の予約・取消が入っていたら、古い文の録音は始めない
+          if (recordGenRef.current === gen) {
+            void startRecording(pending);
+          }
+        }, 600);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t, modelCompareActive, comparingModelEndSec]);
@@ -577,6 +629,25 @@ function LessonPlayerScreen({
 
   const progress = status.duration > 0 ? Math.min(1, status.currentTime / status.duration) : 0;
 
+  // AB 区間のフレーズ: 秒数だけでは対象が分からないため、単語タイムスタンプから復元して表示する
+  const abPhrase = useMemo(() => {
+    if (!ab) return null;
+    const texts = sentences
+      .flatMap((sen) => sen.words)
+      .filter((w) => w.endSec > ab.a + 0.01 && w.startSec < ab.b - 0.01)
+      .map((w) => w.text);
+    if (texts.length === 0) return null;
+    return texts.length > 14
+      ? `${texts.slice(0, 7).join(' ')} … ${texts.slice(-5).join(' ')}`
+      : texts.join(' ');
+  }, [ab, sentences]);
+
+  // 音の変化の詳細表示対象 (現在の文に対するタップ選択がある場合のみ)
+  const detailNote =
+    activeSentence && noteDetail && noteDetail.sentenceIndex === activeSentence.index
+      ? (activeSentence.linking[noteDetail.noteIndex] ?? null)
+      : null;
+
   // ?sentence=<n> 指定時: 該当文カードまで自動スクロールする (録音導線のショートカット)
   const scrollRef = useRef<ComponentRef<typeof ScrollView> | null>(null);
   const sentenceCardRefs = useRef<
@@ -601,8 +672,48 @@ function LessonPlayerScreen({
     return () => clearTimeout(timer);
   }, [initialSentenceIndex]);
 
+  // チャンク表示中は、再生中の文カードが常にほぼ同じ位置に見えるよう自動で追従スクロールする。
+  // ただしユーザーが手でスクロールした直後 (6 秒間) は干渉しない。
+  const lastDragAtRef = useRef(0);
+  const followedIndexRef = useRef(-1);
+  const scrollOffsetRef = useRef(0);
+  useEffect(() => {
+    if (displayMode !== 'chunks' || !status.playing) return;
+    const idx = activeSentence?.index;
+    if (idx === undefined || idx === followedIndexRef.current) return;
+    // 手動スクロール直後は干渉しない。このとき追従済みにしない (次の文で再試行できるように)
+    if (Date.now() - lastDragAtRef.current < 6000) return;
+    followedIndexRef.current = idx;
+    const timer = setTimeout(() => {
+      const card = sentenceCardRefs.current[idx];
+      const scroller = scrollRef.current;
+      if (!card || !scroller) return;
+      scroller.measureInWindow((_sx: number, sy: number) => {
+        card.measureInWindow((_x, y: number) => {
+          // measureInWindow は画面座標。現在のスクロール量を加えてコンテンツ座標に直す
+          scroller.scrollTo({
+            y: Math.max(y - sy + scrollOffsetRef.current - 160, 0),
+            animated: true,
+          });
+        });
+      });
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [activeSentence?.index, displayMode, status.playing]);
+
   return (
-    <Screen scrollRef={scrollRef}>
+    <Screen
+      scrollRef={scrollRef}
+      onScrollBeginDrag={() => {
+        lastDragAtRef.current = Date.now();
+      }}
+      onScroll={(e) => {
+        scrollOffsetRef.current = e.nativeEvent.contentOffset.y;
+      }}
+    >
+      <Stack.Screen
+        options={{ headerShown: true, title: lesson.titleJa, headerBackTitle: '戻る' }}
+      />
       <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ThemedText variant="heading">{lesson.title}</ThemedText>
         <ThemedText variant="caption" color="muted">
@@ -642,12 +753,17 @@ function LessonPlayerScreen({
             区間リピート (現在位置を A / B に設定)
           </ThemedText>
         </View>
+        {ab !== null && abPhrase ? (
+          <ThemedText variant="caption" style={{ color: colors.primary, fontWeight: '600' }}>
+            🔁 リピート区間: 「{abPhrase}」
+          </ThemedText>
+        ) : null}
       </View>
 
       {/* 表示モード: カラオケ (単語ハイライト) / チャンク (意味の塊 + 直訳トグル) */}
       <View style={styles.displayRow}>
         <Chip
-          label="カラオケ"
+          label="カラオケ風"
           active={displayMode === 'karaoke'}
           onPress={() => setDisplayMode('karaoke')}
         />
@@ -684,96 +800,88 @@ function LessonPlayerScreen({
 
       {/* 表示: カラオケ (単語ハイライト + 音の変化の色分け) またはチャンク (意味の塊) */}
       <ThemedText variant="heading" style={styles.sectionTitle}>
-        {displayMode === 'karaoke' ? 'カラオケ表示 (現在文)' : 'チャンク表示 (現在文)'}
+        {displayMode === 'karaoke' ? 'カラオケ風表示 (現在文)' : 'チャンク表示 (現在文)'}
       </ThemedText>
-      {activeSentence ? (
-        <View style={[styles.karaoke, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ThemedText variant="caption" color="muted">
-            {lesson.speakerNames[activeSentence.speaker] ?? activeSentence.speaker}
-          </ThemedText>
-          {displayMode === 'karaoke' ? (
-            <KaraokeLine
-              sentence={activeSentence}
-              activeWordIndex={activeWordIndex}
-              onWordPress={(wordIndex) => handleWordPress(activeSentence, wordIndex)}
-            />
+      {/* 現在文のステージ: 文が切り替わっても高さが変わらない固定レイアウトにする。
+          カードの表示/非表示や高さの変化で下の要素が跳ねると視点が定まらないため、
+          話者・単語・訳・注釈の各ゾーンは常に同じ高さを確保する。 */}
+      <View style={[styles.karaoke, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <ThemedText variant="caption" color="muted">
+          {activeSentence
+            ? (lesson.speakerNames[activeSentence.speaker] ?? activeSentence.speaker)
+            : '　'}
+        </ThemedText>
+        <View style={styles.stageWords}>
+          {activeSentence ? (
+            displayMode === 'karaoke' ? (
+              <KaraokeLine
+                sentence={activeSentence}
+                activeWordIndex={activeWordIndex}
+                onWordPress={(wordIndex) => handleWordPress(activeSentence, wordIndex)}
+              />
+            ) : (
+              <ChunkLine
+                sentence={activeSentence}
+                onChunkPress={(chunk) =>
+                  seekTo(chunk.startSec, `seekTo(${chunk.startSec}) // チャンク「${chunk.text}」`)
+                }
+              />
+            )
           ) : (
-            <ChunkLine
-              sentence={activeSentence}
-              onChunkPress={(chunk) =>
-                seekTo(chunk.startSec, `seekTo(${chunk.startSec}) // チャンク「${chunk.text}」`)
-              }
-            />
+            <ThemedText variant="caption" color="muted">
+              再生すると現在の文がここに表示されます
+            </ThemedText>
           )}
-          {(displayMode === 'karaoke' || showChunkJa) ? (
+        </View>
+        <View style={styles.stageTranslation}>
+          {activeSentence && (displayMode === 'karaoke' || showChunkJa) ? (
             <ThemedText variant="caption" color="muted">
               {activeSentence.translationJa}
             </ThemedText>
           ) : null}
-          {/* タップした音の変化の詳細 */}
-          {noteDetail && activeSentence.index === noteDetail.sentenceIndex ? (
-            (() => {
-              const note = activeSentence.linking[noteDetail.noteIndex];
-              if (!note) return null;
-              return (
-                <View
-                  style={[
-                    styles.noteDetail,
-                    { borderLeftColor: LINKING_COLORS[note.type] },
-                  ]}
+        </View>
+        {displayMode === 'karaoke' ? (
+          <View style={styles.stageNotes}>
+            {detailNote ? (
+              <View style={[styles.noteDetail, { borderLeftColor: LINKING_COLORS[detailNote.type] }]}>
+                <ThemedText
+                  variant="caption"
+                  style={{ color: LINKING_COLORS[detailNote.type], fontWeight: '700' }}
                 >
-                  <ThemedText variant="caption" style={{ color: LINKING_COLORS[note.type], fontWeight: '700' }}>
-                    {LINKING_LABELS[note.type]} ・ {note.span} {note.ipa}
-                  </ThemedText>
-                  <ThemedText variant="caption" color="muted">
-                    {note.noteJa}
-                  </ThemedText>
-                </View>
-              );
-            })()
-          ) : null}
-          {displayMode === 'karaoke' && activeSentence.linking.length > 0 ? (
-            <View style={styles.linkingBox}>
-              {activeSentence.linking.map((note, noteIndex) => (
+                  {LINKING_LABELS[detailNote.type]} ・ {detailNote.span} {detailNote.ipa}
+                </ThemedText>
+                <ThemedText variant="caption" color="muted" numberOfLines={4}>
+                  {detailNote.noteJa}
+                </ThemedText>
+              </View>
+            ) : activeSentence && activeSentence.linking.length > 0 ? (
+              activeSentence.linking.map((note, noteIndex) => (
                 <Pressable
                   key={`${noteIndex}-${note.span}`}
                   onPress={() =>
                     setNoteDetail({ sentenceIndex: activeSentence.index, noteIndex })
                   }
                 >
-                  <ThemedText
-                    variant="caption"
-                    style={{
-                      color: noteDetail?.sentenceIndex === activeSentence.index &&
-                        noteDetail?.noteIndex === noteIndex
-                        ? LINKING_COLORS[note.type]
-                        : undefined,
-                      fontWeight:
-                        noteDetail?.sentenceIndex === activeSentence.index &&
-                        noteDetail?.noteIndex === noteIndex
-                          ? '700'
-                          : undefined,
-                    }}
-                  >
+                  <ThemedText variant="caption" numberOfLines={1}>
                     <ThemedText color="muted">🔗 </ThemedText>
-                    {note.span} {note.ipa} — {note.noteJa}
+                    {note.span} {note.ipa}
                   </ThemedText>
                 </Pressable>
-              ))}
-            </View>
-          ) : null}
-        </View>
-      ) : (
-        <ThemedText variant="caption" color="muted">
-          再生すると現在の文がここに表示されます (タップで文ジャンプ)
-        </ThemedText>
-      )}
+              ))
+            ) : (
+              <ThemedText variant="caption" color="muted">
+                {activeSentence ? 'この文に音の変化の注釈はありません' : '　'}
+              </ThemedText>
+            )}
+          </View>
+        ) : null}
+      </View>
 
       <ThemedText variant="heading" style={styles.sectionTitle}>
         シャドーイング (録音して比較再生 ・ 合計 {lessonShadowingTotal(lesson.id)} 回)
       </ThemedText>
       <ThemedText variant="caption" color="muted">
-        文の 🎙 録音 → 🔊 お手本 / 🎤 自分の録音 で聞き比べ。録音は端末内にのみ保存され、
+        🎙 録音を押すと、まずお手本が再生され、終わると自動で録音が始まります。録音は端末内にのみ保存され、
         レッスンを離れると破棄されます (このレッスンの録音合計:{' '}
         {lessonShadowingTotal(lesson.id)} 回)
       </ThemedText>
@@ -832,16 +940,25 @@ function LessonPlayerScreen({
           <View style={styles.shadowingRow}>
             {recordingSentence === sentence.index ? (
               <Pressable
-                onPress={() => stopRecording(sentence.index)}
+                onPress={() => void stopRecording(sentence.index)}
                 style={[styles.shadowingButton, { backgroundColor: colors.secondarySurface }]}
               >
                 <ThemedText variant="caption" style={styles.recordingText}>
                   ⏹ 録音停止 ({recorder.currentTime.toFixed(1)} 秒)
                 </ThemedText>
               </Pressable>
+            ) : pendingRecord === sentence.index ? (
+              <Pressable
+                onPress={() => beginRecordFlow(sentence.index)}
+                style={[styles.shadowingButton, { backgroundColor: colors.secondarySurface }]}
+              >
+                <ThemedText variant="caption">
+                  🔊 お手本再生中… 終わると録音開始 (タップで取消)
+                </ThemedText>
+              </Pressable>
             ) : (
               <Pressable
-                onPress={() => startRecording(sentence.index)}
+                onPress={() => beginRecordFlow(sentence.index)}
                 style={[styles.shadowingButton, { backgroundColor: colors.secondarySurface }]}
               >
                 <ThemedText variant="caption">
@@ -1034,7 +1151,9 @@ const styles = StyleSheet.create({
     gap: 2,
     marginTop: 4,
   },
-  linkingBox: { marginTop: 4, gap: 2 },
+  stageWords: { height: 124, justifyContent: 'center' },
+  stageTranslation: { height: 36 },
+  stageNotes: { height: 88, gap: 2, justifyContent: 'flex-start' },
   shadowingRow: {
     flexDirection: 'row',
     alignItems: 'center',
