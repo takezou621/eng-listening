@@ -19,8 +19,8 @@
 
 古典的な MVC（Model-View-Controller）は採用していません。React の一方向データフローに合わせ、以下の3層で構成します。
 
-- **View**: React コンポーネント（`src/app/` の画面、`src/components/` と各 feature の画面部品）。表示と入力の受け付けだけを行い、業務ロジックは持たない。
-- **Store**: 機能ごとの小さな TypeScript モジュール（`src/features/*/​*Store.ts` 等）が状態と処理を持ち、React フック経由で View に渡す。Controller に相当する層は置かない。
+- **View**: React コンポーネント（`src/app/` の画面、`src/components/` と各 feature の画面部品）。表示と、再生制御のような表示に密着した操作を担う（例: プレイヤー画面 `src/app/lesson.tsx` は AB リピートや録音の制御を持つ）。一方、状態の保持・永続化・課金判定といった業務ロジックはストア側に寄せている。
+- **Store**: 機能ごとの小さな TypeScript モジュール（`src/features/` 配下の `*Store.ts` 等）が状態と処理を持ち、React フック経由で View に渡す。Controller に相当する層は置かない。
 - **Model**: 型定義とコンテンツデータ（`src/data/`、`src/features/lesson/`）。レッスン本文・音声・リンキング情報は静的アセットとして同梱する。
 
 強いて分類すれば MVVM に近い形ですが、ViewModel のような定型層も作らず、「画面 → ストア → データ」の単純な流れを守ることを優先しています。
@@ -28,7 +28,8 @@
 ### 2.2 状態管理は「機能別ストア＋フック」で完結させる
 
 - 状態はアプリ全体で1つの巨大ストアに集約せず、機能（feature）ごとに独立したストアモジュールへ分割する。
-- 各ストアは「モジュール内のキャッシュ＋読み書き関数＋購読用フック」という同じ型で実装する。変更時は必ず新しい参照を作る（イミュータブル更新）ことで React の再描画検知に乗せる。
+- 永続化するストア（progressStore、userStore 等）は「モジュール内のキャッシュ＋読み書き関数＋購読用フック」という同じ型で実装する。変更時は必ず新しい参照を作る（イミュータブル更新）ことで React の再描画検知に乗せる。
+- 例外: 永続化しない軽量な状態（`playerPrefs` の表示設定、`shadowingStore` のセッション内カウント）は、購読用フックを持たないモジュール変数で管理している。
 - 画面をまたぐ共有が最小限のものだけ React Context を使う（例: `src/state/SelectionContext.tsx` の選択中レッスン）。
 - 理由: v1.0 の規模では専用ライブラリの学習・配線コストが利点を上回ること、ストアが素の TS なので単体でテスト・差し替えが容易なこと。
 
@@ -41,7 +42,7 @@
 
 - アプリ識別子・名前・バージョン: `src/config/appConfig.json`（`app.config.ts` と画面表示の両方が同じ JSON を読む）
 - プレミアム判定: `billingStore` が唯一の判定箇所。画面側は `isPremium` 相当の結果だけを見る
-- レッスンの登録状態: `src/features/lesson/registry.ts` の CATALOG / BUNDLES が唯一の登録表
+- レッスンの登録状態: `src/features/lesson/registry.ts` の LESSON_CATALOG / BUNDLES が唯一の登録表
 
 ### 2.5 失敗してもアプリが落ちない設計（フォールバック）
 
@@ -92,7 +93,7 @@
 ## 6. 課金まわりの構成
 
 - 商品は App Store Connect のサブスクリプション（年額・月額）を RevenueCat の商品にひも付け、entitlement は `premium`、Offering は `default`（`$rc_monthly` / `$rc_annual`）。
-- アプリ側は RevenueCat の Offering から商品を引くため、価格や商品 ID の変更はストア／RevenueCat 側の設定で完結し、アプリの再提出なしに変更できる。
+- アプリ側は RevenueCat の Offering から商品を引くため、実際に課金される価格と商品構成はストア／RevenueCat 側の設定で変更できる。ただし、ペイウォールと法務文面に表示する価格文字列は `src/features/billing/config.ts` の `DISPLAY_PRICES` に定数として持っているため、表示価格を変える場合はコード変更と再提出が必要。
 - 設定値の置き場: `src/features/billing/config.ts`（entitlement ID 等）と環境変数（公開 API キー）。
 
 ## 7. 採用していないもの（v1.0）
@@ -107,5 +108,5 @@
 
 - 新しい状態は、まず置くべき feature のストアがないか探し、無ければその feature 内に小さなストアを新設する。`src/state/` への安易な追加はしない。
 - 識別子・名前・バージョンを変えるときは `src/config/appConfig.json` だけを編集する。
-- レッスンを追加するときは `tools/content/` で生成し、`registry.ts` の CATALOG / BUNDLES に登録する（require パスは Metro の静的解決のためリテラルで書く）。
+- レッスンを追加するときは `tools/content/` で生成し、`registry.ts` の LESSON_CATALOG / BUNDLES に登録する（require パスは Metro の静的解決のためリテラルで書く）。
 - フォールバック方針（§2.5）を崩す変更は、理由を PR 本文に明記する。

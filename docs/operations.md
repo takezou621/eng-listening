@@ -9,7 +9,7 @@
 EAS クラウドビルドは使いません（Expo アカウントを持たないため）。Mac mini 上のローカルアーカイブ＋ App Store Connect（ASC）API アップロードが正規経路です。
 
 1. `main` がクリーンで `npm run lint` と `npm run typecheck` が通ることを確認する。
-2. バージョン／ビルド番号を決める。バージョンは `src/config/appConfig.json` が単一ソース。ビルド番号は提出ごとに +1 する。
+2. バージョン／ビルド番号を決める。バージョンは `src/config/appConfig.json` が単一ソース。ビルド番号は appConfig.json に項目がないため、prebuild で生成した iOS プロジェクト側（CURRENT_PROJECT_VERSION）で提出ごとに +1 する（初回提出は 1）。
 3. `.env` に `EXPO_PUBLIC_REVENUECAT_API_KEY`（RevenueCat の公開キー）が設定されていることを確認する（値は表示・記録しない）。
 4. `npx expo prebuild --platform ios` → `pod install`（`ios/` 内）。
 5. `xcodebuild archive`（自動署名、`-allowProvisioningUpdates` と ASC API キー認証を付ける）。署名で詰まった場合は証明書を削除・再発行せず、エラー文をそのまま記録して止まる。
@@ -29,7 +29,7 @@ EAS クラウドビルドは使いません（Expo アカウントを持たな�
 
 | 変更したいこと | 触る場所 |
 |---|---|
-| 価格 | ASC のサブスクリプション価格（アプリ再提出は不要な場合が多いが、価格変更はユーザー通知ルールに注意） |
+| 価格 | 実際の課金価格は ASC のサブスクリプション価格（価格変更はユーザー通知ルールに注意）。ただし表示価格は `src/features/billing/config.ts` の `DISPLAY_PRICES` 定数のため、表示を変える場合はコード変更＋再提出が必要 |
 | 商品の追加・構成 | ASC で商品作成 → RevenueCat で商品・entitlement `premium`・Offering `default` のパッケージに反映 |
 | 無料／プレミアムの境界 | アプリ側は `billingStore` の判定のみ。境界の仕様変更はコード変更＋再提出が必要 |
 | RevenueCat の公開キー差し替え | `.env` の `EXPO_PUBLIC_REVENUECAT_API_KEY` を差し替えて再ビルド |
