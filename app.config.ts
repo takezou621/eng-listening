@@ -43,7 +43,7 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'automatic',
   ios: {
     bundleIdentifier: APP_CONFIG.iosBundleIdentifier,
-    icon: './assets/expo.icon',
+    icon: './assets/images/icon.png',
     infoPlist: {
       // バックグラウンド再生 (ロック画面コントロールとセットで利用)
       UIBackgroundModes: ['audio'],
@@ -60,7 +60,7 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
   },
   web: {
-    output: 'server',
+    output: 'single',
     favicon: './assets/images/favicon.png',
   },
   plugins: [
@@ -68,7 +68,7 @@ const config: ExpoConfig = {
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#208AEF',
+        backgroundColor: '#0B1220',
         image: './assets/images/splash-icon.png',
         imageWidth: 76,
       },
