@@ -14,11 +14,15 @@ func drawMark(context: CGContext, rect: CGRect) {
     let cy = h / 2
     let unit = min(w, h)
 
-    // 背景: 濃色ネイビー
-    context.setFillColor(CGColor(red: 0.043, green: 0.071, blue: 0.125, alpha: 1.0))
+    // 背景: 濃色ネイビー (#0B1220)。
+    // CGColor(red:green:blue:alpha:) は generic RGB 扱いになりカラーマッチで
+    // 色がずれるため、sRGB を明示して作成する
+    let sRGB = CGColorSpace(name: CGColorSpace.sRGB)!
+    let navy = CGColor(colorSpace: sRGB, components: [0.043, 0.071, 0.125, 1.0])!
+    context.setFillColor(navy)
     context.fill(rect)
 
-    let white = CGColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+    let white = CGColor(colorSpace: sRGB, components: [1.0, 1.0, 1.0, 1.0])!
     let lineWidth = unit * 0.055
     context.setStrokeColor(white)
     context.setLineWidth(lineWidth)
@@ -81,10 +85,18 @@ func render(size: CGFloat, out: String) {
     opaque.draw(drawn, in: rect)
     let image = opaque.makeImage()!
 
-    let dest = CGImageDestinationCreateWithURL(URL(fileURLWithPath: out) as CFURL,
-                                               UTType.png.identifier as CFString, 1, nil)!
+    guard let dest = CGImageDestinationCreateWithURL(URL(fileURLWithPath: out) as CFURL,
+                                                     UTType.png.identifier as CFString, 1, nil) else {
+        FileHandle.standardError.write("ERROR: failed to create image destination for \(out)\n".data(using: .utf8)!)
+        exit(1)
+    }
     CGImageDestinationAddImage(dest, image, nil)
-    CGImageDestinationFinalize(dest)
+    // Finalize が false を返した場合は書き出し失敗 (ディスク満杯等)。
+    // 成功メッセージを出さず非ゼロで終了する
+    if !CGImageDestinationFinalize(dest) {
+        FileHandle.standardError.write("ERROR: failed to finalize PNG for \(out)\n".data(using: .utf8)!)
+        exit(1)
+    }
     print("wrote \(out) (\(Int(size))x\(Int(size)))")
 }
 
