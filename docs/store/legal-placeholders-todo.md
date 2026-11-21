@@ -14,4 +14,4 @@
 | プライバシーポリシー URL | https://33eigo.win/privacy |
 | 著作権表記 (ASC) | © 2026 川合 毅 |
 
-RevenueCat 公開 API キーの設定と ASC 側の商品 ID は 2026-11-21 に設定完了済み（本書の旧記載は解消）。
+RevenueCat 公開 API キーは Mac mini の ~/dev/eng-listening/.env（EXPO_PUBLIC_REVENUECAT_API_KEY、リポジトリ外）に設定済み。ASC のサブスクリプション商品は 2026-11-21 に API で作成済み（annual ¥4,800 / monthly ¥680、JPN 提供、年額に 7 日間無料トライアル）。アプリの購入処理は RevenueCat の getOfferings() から商品 ID を取得する（config.ts の PRODUCT_IDS は参照用定数）。EAS チェックリストのキー登録項目は、EAS を使わないローカルビルド方式のため対象外。

@@ -32,8 +32,8 @@ export const ENTITLEMENT_ID = 'premium';
 
 /** ストア商品 ID (定義のみ・コードでは未使用。購入用 ID は getOfferings() の product.identifier から取得する) */
 export const PRODUCT_IDS = {
-  monthly: 'placeholder_englistening_monthly_680',
-  annual: 'placeholder_englistening_annual_4800',
+  monthly: 'com.takezou.englistening.premium.monthly',
+  annual: 'com.takezou.englistening.premium.annual',
 } as const;
 
 /** GM 決定の価格表示 (ユーザーへの表示用。実際の課金額はストア設定に従う) */
