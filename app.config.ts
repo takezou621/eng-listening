@@ -60,7 +60,7 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
   },
   web: {
-    output: 'server',
+    output: 'single',
     favicon: './assets/images/favicon.png',
   },
   plugins: [
