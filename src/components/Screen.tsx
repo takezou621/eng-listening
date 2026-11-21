@@ -15,15 +15,20 @@ interface ScreenProps {
   onScrollBeginDrag?: () => void;
   /** スクロール位置の通知 (自動スクロールの座標計算用) */
   onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  /** スクロール領域の下に固定表示するフッター (再生バーなど)。指定時は下部セーフエリアも確保する */
+  footer?: ReactNode;
 }
 
-export function Screen({ children, scroll = true, padded = true, scrollRef, onScrollBeginDrag, onScroll }: ScreenProps) {
+export function Screen({ children, scroll = true, padded = true, scrollRef, onScrollBeginDrag, onScroll, footer }: ScreenProps) {
   const { colors } = useTheme();
   // 背景色はコンテナとスクロール領域の両方に敷く (バウンス時の露出防止)
   const paddedStyle = [styles.content, { backgroundColor: colors.background }, padded && styles.padded];
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView
+      style={[styles.safe, { backgroundColor: colors.background }]}
+      edges={footer ? ['top', 'bottom'] : ['top']}
+    >
       {scroll ? (
         <ScrollView
           ref={scrollRef}
@@ -39,6 +44,7 @@ export function Screen({ children, scroll = true, padded = true, scrollRef, onSc
       ) : (
         <View style={[styles.flex, paddedStyle]}>{children}</View>
       )}
+      {footer}
     </SafeAreaView>
   );
 }
