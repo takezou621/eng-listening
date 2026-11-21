@@ -11,7 +11,7 @@ import { useTheme } from '@/theme/AppThemeProvider';
 export default function PhrasesScreen() {
   const { colors } = useTheme();
   const router = useRouter();
-  const { weakSentences } = useUserData();
+  const { weakSentences, toggleWeakSentence } = useUserData();
 
   const lessonList = getLessonList();
 
@@ -26,7 +26,14 @@ export default function PhrasesScreen() {
         data={weakSentences}
         keyExtractor={(item) => `${item.lessonId}-${item.sentenceIndex}`}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<ThemedText style={styles.empty}>登録された苦手フレーズはありません</ThemedText>}
+        ListEmptyComponent={
+          <View>
+            <ThemedText style={styles.empty}>登録された苦手フレーズはありません</ThemedText>
+            <ThemedText variant="caption" color="muted" style={styles.emptyHint}>
+              レッスンの各文にある「☆ 苦手」をタップすると、聞き取れなかった文をここに集められます。
+            </ThemedText>
+          </View>
+        }
         renderItem={({ item }) => {
           const lesson = lessonList.find((l) => l.entry.id === item.lessonId);
           const bundle = lesson?.bundle;
@@ -48,9 +55,21 @@ export default function PhrasesScreen() {
                 <ThemedText variant="caption" color="primary">
                   {bundle.data.title}
                 </ThemedText>
-                <ThemedText variant="caption" color="muted">
-                  {new Date(item.addedAtMs).toLocaleDateString()}
-                </ThemedText>
+                <View style={styles.footerRight}>
+                  <ThemedText variant="caption" color="muted">
+                    {new Date(item.addedAtMs).toLocaleDateString('ja-JP')}
+                  </ThemedText>
+                  <Pressable
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel="苦手フレーズから外す"
+                    onPress={() => toggleWeakSentence(item.lessonId, item.sentenceIndex)}
+                  >
+                    <ThemedText variant="caption" color="primary" style={{ fontWeight: '600' }}>
+                      外す
+                    </ThemedText>
+                  </Pressable>
+                </View>
               </View>
             </Pressable>
           );
@@ -71,4 +90,6 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 },
+  footerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  emptyHint: { marginTop: 8, textAlign: 'center', lineHeight: 18 },
 });

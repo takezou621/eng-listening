@@ -31,6 +31,13 @@ export interface OfferingsResult {
   /** ストア商品 ID (PurchasesPackage.product.identifier。パッケージ ID ではない) */
   monthlyProductId: string | null;
   annualProductId: string | null;
+  /** ストアのローカライズ済み価格文字列 (表示用。ハードコード価格より優先する) */
+  monthlyPriceString: string | null;
+  annualPriceString: string | null;
+  /** 年額を12で割った月あたり換算 (通貨は annual と同じ) */
+  annualPerMonthString: string | null;
+  /** 年額に無料トライアルのイントロオファーがあるか */
+  annualHasFreeTrial: boolean;
 }
 
 /** purchaseAsync の結果。purchased は購入 API の成否、premium はエンタイトルメントの有効状態 */
@@ -57,6 +64,15 @@ const listeners = new Set<() => void>();
 /** CustomerInfo の形状 (entitlements.active に有効なエンタイトルメントが入る) */
 type CustomerInfo = { entitlements: { active: Record<string, unknown> } };
 
+/** ストア商品のうち表示に使うフィールド (react-native-purchases の PurchasesStoreProduct 抜粋) */
+type StoreProductShape = {
+  identifier: string;
+  priceString?: string;
+  price?: number;
+  currencyCode?: string;
+  introPrice?: { price: number } | null;
+};
+
 /** Purchases モジュール (利用可能な場合のみ non-null) */
 type PurchasesModule = {
   configure: (config: { apiKey: string }) => Promise<void> | void;
@@ -68,11 +84,11 @@ type PurchasesModule = {
     current: {
       monthly: {
         identifier: string;
-        product: { identifier: string };
+        product: StoreProductShape;
       } | null;
       annual: {
         identifier: string;
-        product: { identifier: string };
+        product: StoreProductShape;
       } | null;
     } | null;
   }>;
@@ -176,14 +192,42 @@ export async function fetchOfferingsAsync(): Promise<OfferingsResult> {
     hasProducts: false,
     monthlyProductId: null,
     annualProductId: null,
+    monthlyPriceString: null,
+    annualPriceString: null,
+    annualPerMonthString: null,
+    annualHasFreeTrial: false,
   };
   if (!available || !purchases) return empty;
   try {
     const offerings = await purchases.getOfferings();
     const current = offerings?.current ?? null;
-    const monthly = current?.monthly?.product?.identifier ?? null;
-    const annual = current?.annual?.product?.identifier ?? null;
-    return { hasProducts: Boolean(monthly || annual), monthlyProductId: monthly, annualProductId: annual };
+    const monthlyProduct = current?.monthly?.product ?? null;
+    const annualProduct = current?.annual?.product ?? null;
+    const monthly = monthlyProduct?.identifier ?? null;
+    const annual = annualProduct?.identifier ?? null;
+    let annualPerMonthString: string | null = null;
+    if (annualProduct && typeof annualProduct.price === 'number' && annualProduct.currencyCode) {
+      try {
+        annualPerMonthString = new Intl.NumberFormat('ja-JP', {
+          style: 'currency',
+          currency: annualProduct.currencyCode,
+          maximumFractionDigits: 0,
+        }).format(Math.round(annualProduct.price / 12));
+      } catch {
+        annualPerMonthString = null;
+      }
+    }
+    return {
+      hasProducts: Boolean(monthly || annual),
+      monthlyProductId: monthly,
+      annualProductId: annual,
+      monthlyPriceString: monthlyProduct?.priceString ?? null,
+      annualPriceString: annualProduct?.priceString ?? null,
+      annualPerMonthString,
+      annualHasFreeTrial: Boolean(
+        annualProduct?.introPrice && annualProduct.introPrice.price === 0
+      ),
+    };
   } catch (e) {
     console.error('Failed to fetch offerings:', e);
     return empty;

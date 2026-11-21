@@ -285,6 +285,7 @@ function QuestionPhase({
             ]}
           >
             <ThemedText style={showState && isCorrect ? { color: '#16A34A' } : undefined}>
+              {showState && isCorrect ? '✓ ' : showState && isSelected ? '✗ ' : ''}
               {choice}
             </ThemedText>
           </Pressable>

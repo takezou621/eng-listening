@@ -10,6 +10,7 @@ import { getLessonList } from '@/features/lesson/registry';
 import { isOnboardingDone, loadUserDataAsync, useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
+import { useProgressData } from '@/features/progress/progressStore';
 
 type FilterType = 'all' | ContentType;
 type FilterLevel = 'all' | 'beginner' | 'intermediate';
@@ -24,6 +25,15 @@ export default function LibraryScreen() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   const lessonList = getLessonList();
+  const progressDays = useProgressData();
+  // 完了済みレッスンの集合 (進捗データの日別完了記録から復元)
+  const completedLessonIds = useMemo(() => {
+    const set = new Set<string>();
+    for (const day of Object.values(progressDays)) {
+      for (const id of day.completedLessons ?? []) set.add(id);
+    }
+    return set;
+  }, [progressDays]);
 
   // 初回起動時のみオンボーディング診断へ誘導する (完了状態は端末内に永続化)
   const redirectedRef = useRef(false);
@@ -131,9 +141,16 @@ export default function LibraryScreen() {
                 </View>
                 <View style={[styles.badgeLevel, { backgroundColor: colors.secondarySurface }]}>
                   <ThemedText variant="caption" color="primary">
-                    {entry.level}
+                    {entry.level === 'beginner' ? '初級' : '中級'}
                   </ThemedText>
                 </View>
+                {completedLessonIds.has(entry.id) ? (
+                  <View style={[styles.badgeLevel, { backgroundColor: colors.secondarySurface }]}>
+                    <ThemedText variant="caption" style={{ color: '#16A34A', fontWeight: '700' }}>
+                      ✓ 完了
+                    </ThemedText>
+                  </View>
+                ) : null}
                 <Pressable
                   hitSlop={8}
                   accessibilityRole="button"

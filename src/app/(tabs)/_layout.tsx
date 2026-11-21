@@ -4,8 +4,9 @@ import { Text } from 'react-native';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
- * タブ構成 (GM 指示):
- * ホーム = ライブラリ / 学習プレイヤー / 苦手フレーズ / 進捗 / 設定
+ * タブ構成:
+ * ホーム = ライブラリ / 苦手フレーズ / 進捗 / 設定
+ * (旧「プレイヤー」タブは未完成の骨格画面だったため廃止。再生はレッスン画面に一本化)
  */
 export default function TabsLayout() {
   const { colors } = useTheme();
@@ -27,13 +28,6 @@ export default function TabsLayout() {
         options={{
           title: 'ホーム',
           tabBarIcon: ({ size }) => <TabIcon symbol="📚" size={size} />,
-        }}
-      />
-      <Tabs.Screen
-        name="player"
-        options={{
-          title: 'プレイヤー',
-          tabBarIcon: ({ size }) => <TabIcon symbol="🎧" size={size} />,
         }}
       />
       <Tabs.Screen
