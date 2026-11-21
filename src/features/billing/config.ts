@@ -2,7 +2,7 @@
  * 課金設定の定数 (コード側の単一の定義場所)。
  *
  * ⚠ ストア側の実商品は未作成 (GM／オーナーの判断後に App Store Connect で作成)。
- * PRODUCT_IDS はプレースホルダのため、RevenueCat の Offerings からは取得できず、
+ * 商品が作成されるまで RevenueCat の Offerings は空のため、
  * ペイウォールの購入ボタンは無効化される (理由を画面上に表示)。
  *
  * 実商品を設定する際の手順 (詳細は docs/store/eas-production-checklist.md):
@@ -30,7 +30,7 @@ export const REVENUECAT_API_KEY: string | undefined =
 /** RevenueCat の Entitlement ID (プレースホルダ) */
 export const ENTITLEMENT_ID = 'premium';
 
-/** ストア商品 ID (プレースホルダ。実商品作成後に差し替える) */
+/** ストア商品 ID (定義のみ・コードでは未使用。購入用 ID は getOfferings() の product.identifier から取得する) */
 export const PRODUCT_IDS = {
   monthly: 'placeholder_englistening_monthly_680',
   annual: 'placeholder_englistening_annual_4800',
