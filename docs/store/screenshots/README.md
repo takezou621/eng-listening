@@ -41,9 +41,8 @@ sleep 12   # JS バンドルの起動完了を待つ
 xcrun simctl io $UDID screenshot <出力先>.png
 ```
 
-画面遷移は deep link (`xcrun simctl openurl <UDID> "englistening://..."`) または
-撮影用ビルド (`EXPO_PUBLIC_SHOT_ROUTE="/<route>"` をビルド時に与えると起動直後に
-そのルートへ遷移する。docs/legal の撮影では使用していない) で行う。
+画面遷移は deep link (`xcrun simctl openurl <UDID> "englistening://..."`) で行う
+(遷移時に「"ミミトレ"で開きますか？」の確認ダイアログが出る場合は [開く] をタップ)。
 
 ## 撮影画面とファイル名
 
