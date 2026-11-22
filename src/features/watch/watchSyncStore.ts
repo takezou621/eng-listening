@@ -1,6 +1,9 @@
 import { File, Paths } from 'expo-file-system';
 
-import { mergeExternalStudyRecords } from '@/features/progress/progressStore';
+import {
+  flushProgressData,
+  mergeExternalStudyRecords,
+} from '@/features/progress/progressStore';
 import type { WatchSessionRecord } from '../../../modules/watch-bridge/src/index';
 
 /**
@@ -52,14 +55,20 @@ export function applyWatchSessions(sessions: WatchSessionRecord[]): Promise<void
         appliedIds = await loadAppliedIds();
       }
       const seen = new Set(appliedIds);
-      const fresh = sessions.filter(
-        (s) =>
-          s !== null &&
-          typeof s === 'object' &&
-          typeof s.id === 'string' &&
-          s.id.length > 0 &&
-          !seen.has(s.id),
-      );
+      const fresh = sessions.filter((s) => {
+        if (
+          s === null ||
+          typeof s !== 'object' ||
+          typeof s.id !== 'string' ||
+          s.id.length === 0 ||
+          seen.has(s.id)
+        ) {
+          return false;
+        }
+        // 同一バッチ内の重複もここで落とす (同じセッションが複数経路で届くため)。
+        seen.add(s.id);
+        return true;
+      });
       if (fresh.length === 0) return;
       mergeExternalStudyRecords(
         fresh.map((s) => ({
@@ -69,6 +78,9 @@ export function applyWatchSessions(sessions: WatchSessionRecord[]): Promise<void
           completed: s.completed === true,
         })),
       );
+      // 進捗の書き込みが実際に試行されてから適用済みIDを保存する
+      // (ack はこの保存の後に返るため、未保存の進捗だけが消える事態を避ける)。
+      await flushProgressData();
       appliedIds = [...appliedIds, ...fresh.map((s) => s.id)].slice(-MAX_APPLIED_IDS);
       await saveAppliedIds(appliedIds);
     })

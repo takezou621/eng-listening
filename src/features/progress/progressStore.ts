@@ -227,7 +227,12 @@ export function markLessonCompleted(lessonId: string) {
   });
 }
 
-/** シャドーイング (録音完了) 1 回を記録する */
+/** キューに入っている永続化書き込みがすべて試行されるまで待つ。 */
+export function flushProgressData(): Promise<void> {
+  return saveQueue;
+}
+
+/** 外部デバイス (Apple Watch 単体学習) から届く学習記録1件。 */
 export interface ExternalStudyRecord {
   /** 学習した日 (yyyy-MM-dd、そのデバイスのローカル日) */
   date: string;
@@ -275,6 +280,7 @@ export function mergeExternalStudyRecords(records: ExternalStudyRecord[]): void 
   });
 }
 
+/** シャドーイング (録音完了) 1 回を記録する */
 export function addShadowingRecord(lessonId: string) {
   const date = localDateStr();
   updateData((current) => {

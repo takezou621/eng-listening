@@ -14,11 +14,12 @@ import { applyWatchSessions } from './watchSyncStore';
  */
 export function WatchSessionSync(): null {
   useEffect(() => {
-    // 適用できたら Watch へ ack (適用済みID) を返すため、状態を再送する。
-    void applyWatchSessions(getPendingWatchSessions()).then(() => pushWatchState());
+    // 先に購読してからバッファを回収する (間の到着を取り逃がさないため。
+    // 二重に届いても watchSyncStore が ID で重複排除する)。
     const subscription = addWatchSessionsListener((sessions) => {
       void applyWatchSessions(sessions).then(() => pushWatchState());
     });
+    void applyWatchSessions(getPendingWatchSessions()).then(() => pushWatchState());
     return () => subscription.remove();
   }, []);
   return null;

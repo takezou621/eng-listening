@@ -92,7 +92,17 @@ final class WatchSessionStore {
         }
         defaults.set(all.map { $0.asDictionary }, forKey: key)
         publishContext()
-        flush()
+        transferOne(session)
+    }
+
+    /// 追加した1件だけを即時配送の補助経路に載せる (一覧全体は context が担う)。
+    private func transferOne(_ item: WatchStudySession) {
+        let session = WCSession.default
+        guard session.activationState == .activated else { return }
+        session.transferUserInfo(["session": item.asDictionary])
+        if session.isReachable {
+            session.sendMessage(["session": item.asDictionary], replyHandler: nil, errorHandler: nil)
+        }
     }
 
     /// iPhone が適用済みと返してきたセッションを取り除き、残りを再公開する。
@@ -290,6 +300,8 @@ final class LocalPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
 
     /// 5秒以上聴いた分をセッションとして記録する (完了は秒数に関わらず記録)。
+    /// 閾値未満の一時停止ではリセットせず、同じレッスンの再開で積み上がるようにする
+    /// (レッスン切替時は start() が明示的にゼロへ戻す)。
     private func flushSession() {
         guard let lesson = lesson else { return }
         let seconds = Int(sessionSeconds)
@@ -305,8 +317,8 @@ final class LocalPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 seconds: max(seconds, 0),
                 completed: sessionCompleted
             ))
+            sessionSeconds = 0
+            sessionCompleted = false
         }
-        sessionSeconds = 0
-        sessionCompleted = false
     }
 }

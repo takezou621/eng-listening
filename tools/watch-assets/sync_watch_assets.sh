@@ -6,6 +6,7 @@
 # コンテンツパイプラインでレッスンを再生成したら再実行し、結果をコミットすること。
 set -e
 cd "$(dirname "$0")/../.."
+rm -rf targets/watch/Lessons
 mkdir -p targets/watch/Lessons
 for d in assets/lessons/*/; do
   id=$(basename "$d")

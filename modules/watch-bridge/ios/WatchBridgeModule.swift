@@ -156,7 +156,15 @@ public class WatchBridgeModule: Module {
     }
     sessionDelegate.onStudySession = { [weak self] studySession in
       guard let self = self else { return }
-      self.stateQueue.sync { self.pendingStudySessions.append(studySession) }
+      self.stateQueue.sync {
+        // Watch は未適用一覧を丸ごと再送するため、同じIDはバッファに重ねない。
+        let id = studySession["id"] as? String
+        let alreadyBuffered = id != nil
+          && self.pendingStudySessions.contains { ($0["id"] as? String) == id }
+        if !alreadyBuffered {
+          self.pendingStudySessions.append(studySession)
+        }
+      }
       self.sendEvent("onWatchSessions", ["sessions": [studySession]])
     }
     sessionDelegate.onActivated = { [weak self] in
