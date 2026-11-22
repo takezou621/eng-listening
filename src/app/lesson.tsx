@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { type ComponentRef } from 'react';
 import {
   createAudioPlayer,
   RecordingPresets,
@@ -20,33 +19,45 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import {
   PITCH_CORRECTION_QUALITY,
-  PLAYBACK_RATES,
   SEEK_TOLERANCE_MILLIS,
   STATUS_UPDATE_INTERVAL_MILLIS,
   type PlaybackRate,
 } from '@/config/appConfig';
-import { getLessonBundle, type LessonBundle, getLessonList } from '@/features/lesson/registry';
+import { logEvent } from '@/features/analytics/analyticsStore';
+import { initBillingAsync, useEntitlement } from '@/features/billing/billingStore';
 import {
-  LINKING_COLORS,
+  CompletionSummaryModal,
+  LegendSheet,
+  LinkingNoteSheet,
+  PlaybackToolsSheet,
+} from '@/features/lesson/components/LessonSheets';
+import {
+  ShadowingFooterBar,
+  ShadowingStage,
+} from '@/features/lesson/components/ShadowingStage';
+import {
   LINKING_LABELS,
   LINKING_TEXT_DECORATIONS,
+  getLinkingColor,
   wordLinkMap,
 } from '@/features/lesson/linkingViz';
+import { getLessonBundle, getLessonList, type LessonBundle } from '@/features/lesson/registry';
 import type { LessonLinkingNote, LessonSentence } from '@/features/lesson/types';
-import { formatTime } from '@/features/player/shared';
+import { useUserData } from '@/features/library/userStore';
 import {
   getPlayerPrefs,
-  setPlayerPrefsDisplayMode,
+  setPlayerPrefsAutoRecord,
+  setPlayerPrefsLessonMode,
   setPlayerPrefsRate,
   togglePlayerPrefsChunkJa,
-  type ChunkDisplayMode,
+  type LessonMode,
 } from '@/features/player/playerPrefs';
 import {
   addShadowingCount,
   getShadowingCounts,
   lessonShadowingTotal,
 } from '@/features/player/shadowingStore';
-import { useUserData } from '@/features/library/userStore';
+import { formatTime } from '@/features/player/shared';
 import {
   addShadowingRecord,
   addStudySeconds,
@@ -55,16 +66,16 @@ import {
   markLessonCompleted,
   useProgressData,
 } from '@/features/progress/progressStore';
-import { logEvent } from '@/features/analytics/analyticsStore';
-import { initBillingAsync, useEntitlement } from '@/features/billing/billingStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
-/**
- * パイプライン生成レッスンのプレイヤー (カラオケ表示・文シーク・文リピート)。
- * 再生ロジックの基本型はオーディオスパイク画面 (src/app/spike.tsx) で検証済みのものを使う。
- */
+const LESSON_MODES: readonly { key: LessonMode; label: string }[] = [
+  { key: 'listen', label: '聞く' },
+  { key: 'read', label: '読む' },
+  { key: 'speak', label: '話す' },
+  { key: 'script', label: 'スクリプト' },
+];
 
-/** チャンクごとの単語インデックス範囲 (パイプラインが台本トークンを順に消費して作るため 1:1) */
+/** チャンクごとの単語インデックス範囲 */
 function chunkWordRanges(sentence: LessonSentence): { from: number; to: number }[] {
   const ranges: { from: number; to: number }[] = [];
   let ptr = 0;
@@ -77,8 +88,8 @@ function chunkWordRanges(sentence: LessonSentence): { from: number; to: number }
 }
 
 /**
- * 下部固定の再生バー (E2)。文単位の移動とタップシークを提供する。
- * 親のメモ化分析と干渉しないよう独立コンポーネントにしている。
+ * 下部固定の再生バー (1段構成、P1/P3 準拠)。
+ * 親の React Compiler メモ化分析と干渉しないよう独立コンポーネントにしている。
  */
 function TransportBar({
   progress,
@@ -88,6 +99,9 @@ function TransportBar({
   sentenceIndex,
   sentenceCount,
   firstStartSec,
+  rate,
+  abActive,
+  onOpenTools,
   onPrev,
   onNext,
   onTogglePlay,
@@ -100,6 +114,9 @@ function TransportBar({
   sentenceIndex: number;
   sentenceCount: number;
   firstStartSec: number;
+  rate: PlaybackRate;
+  abActive: boolean;
+  onOpenTools: () => void;
   onPrev: () => void;
   onNext: () => void;
   onTogglePlay: () => void;
@@ -109,6 +126,9 @@ function TransportBar({
   const trackWidthRef = useRef(0);
   const canPrev = !(sentenceIndex === 0 && currentTime <= firstStartSec + 0.3);
   const canNext = sentenceIndex < sentenceCount - 1;
+  const toolsModified = rate !== 1.0 || abActive;
+  const toolsLabel = abActive ? 'AB' : `${rate}x`;
+
   return (
     <View
       style={[
@@ -150,6 +170,26 @@ function TransportBar({
       <View style={styles.transportRow}>
         <Pressable
           style={[
+            styles.transportTools,
+            {
+              borderColor: toolsModified ? colors.primary : colors.border,
+              backgroundColor: toolsModified ? colors.secondarySurface : colors.surface,
+            },
+          ]}
+          onPress={onOpenTools}
+          accessibilityRole="button"
+          accessibilityLabel="再生速度と区間リピート"
+        >
+          <ThemedText
+            variant="caption"
+            color={toolsModified ? 'primary' : 'default'}
+            style={styles.transportToolsText}
+          >
+            {toolsLabel}
+          </ThemedText>
+        </Pressable>
+        <Pressable
+          style={[
             styles.transportSide,
             { backgroundColor: colors.secondarySurface },
             !canPrev ? styles.transportDisabled : null,
@@ -159,7 +199,7 @@ function TransportBar({
           accessibilityRole="button"
           accessibilityLabel="前の文"
         >
-          <ThemedText style={{ fontWeight: '600' }}>⏮ 前の文</ThemedText>
+          <ThemedText style={styles.transportSideText}>⏮</ThemedText>
         </Pressable>
         <Pressable
           style={[styles.transportPlay, { backgroundColor: colors.primary }]}
@@ -182,7 +222,7 @@ function TransportBar({
           accessibilityRole="button"
           accessibilityLabel="次の文"
         >
-          <ThemedText style={{ fontWeight: '600' }}>次の文 ⏭</ThemedText>
+          <ThemedText style={styles.transportSideText}>⏭</ThemedText>
         </Pressable>
       </View>
       <ThemedText variant="caption" color="muted" style={styles.transportMeta}>
@@ -196,28 +236,31 @@ function LessonPlayerScreen({
   bundle,
   demoParam,
   initialSentenceIndex,
+  initialMode,
+  initialSheet,
   autorecordParam,
   autostudyParam,
 }: {
   bundle: LessonBundle;
   demoParam: boolean;
-  /** 深い位置の文へ自動スクロールする (deep link の ?sentence=<n>) */
   initialSentenceIndex: number | null;
-  /** 自動録音デモ (スクロール後に録音開始 → 4 秒で停止) */
+  initialMode: LessonMode | null;
+  initialSheet: 'linking' | 'tools' | 'legend' | null;
   autorecordParam: boolean;
-  /** 自動学習デモ (再生して 6 秒後に一時停止。進捗記録の収集を検証) */
   autostudyParam: boolean;
 }) {
   const lesson = bundle.data;
-  const { colors } = useTheme();
+  const sentences = lesson.sentences;
+  const { scheme, colors } = useTheme();
   const { isSentenceWeak, toggleWeakSentence } = useUserData();
   const router = useRouter();
   const progressDays = useProgressData();
   const { isPremium } = useEntitlement();
-  // レッスン完了サマリ (E1): 最後まで再生したら一度だけ表示する
+
   const [showSummary, setShowSummary] = useState(false);
   const [summarySeconds, setSummarySeconds] = useState(0);
   const summaryShownRef = useRef(false);
+
   const nextLesson = useMemo(() => {
     const list = getLessonList();
     const i = list.findIndex((it) => it.entry.id === lesson.id);
@@ -226,41 +269,60 @@ function LessonPlayerScreen({
     }
     return null;
   }, [lesson.id]);
+
   const prefs = getPlayerPrefs();
-  // 分析イベント: レッスン開始 (端末内ログのみ)
   useEffect(() => {
     logEvent('lesson_started', { lessonId: lesson.id });
   }, [lesson.id]);
-  const [rate, setRate] = useState<PlaybackRate>(prefs.rate);
-  const [repeatSentence, setRepeatSentence] = useState<number | null>(null);
-  // 表示モード (カラオケ / チャンク) とチャンク直訳トグル。アプリ再起動まで保持
-  const [displayMode, setDisplayModeState] = useState<ChunkDisplayMode>(prefs.displayMode);
-  const [showChunkJa, setShowChunkJaState] = useState(prefs.showChunkJa);
-  // AB リピート区間 (任意の開始点 A・終了点 B)
-  const [ab, setAb] = useState<{ a: number; b: number } | null>(null);
-  // タップした音の変化の詳細 (どの文のどの注釈か)
-  const [noteDetail, setNoteDetail] = useState<{ sentenceIndex: number; noteIndex: number } | null>(
-    null
-  );
 
-  const setDisplayMode = (mode: ChunkDisplayMode) => {
-    setDisplayModeState(mode);
-    setPlayerPrefsDisplayMode(mode);
-  };
+  const clampedInitialPos =
+    initialSentenceIndex !== null &&
+    initialSentenceIndex >= 0 &&
+    initialSentenceIndex < sentences.length
+      ? initialSentenceIndex
+      : 0;
+
+  const [lessonMode, setLessonModeState] = useState<LessonMode>(
+    initialMode ?? (autorecordParam ? 'speak' : prefs.lessonMode)
+  );
+  const [focusedPos, setFocusedPos] = useState<number>(clampedInitialPos);
+  const [rate, setRate] = useState<PlaybackRate>(prefs.rate);
+  const [showChunkJa, setShowChunkJaState] = useState(prefs.showChunkJa);
+  const [autoRecordAfterModel, setAutoRecordAfterModelState] = useState(
+    prefs.autoRecordAfterModel
+  );
+  const [repeatSentence, setRepeatSentence] = useState<number | null>(null);
+  const [ab, setAb] = useState<{ a: number; b: number } | null>(null);
+
+  // ボトムシートの段階開示状態 (D6 / D7)
+  const initialLinkingIdx =
+    initialSheet === 'linking' && (sentences[clampedInitialPos]?.linking.length ?? 0) > 0
+      ? { sentenceIndex: sentences[clampedInitialPos].index, noteIndex: 0 }
+      : null;
+  const [linkingSheetTarget, setLinkingSheetTarget] = useState<{
+    sentenceIndex: number;
+    noteIndex: number;
+  } | null>(initialLinkingIdx);
+  const [showLegendSheet, setShowLegendSheet] = useState(initialSheet === 'legend');
+  const [showToolsSheet, setShowToolsSheet] = useState(initialSheet === 'tools');
+
   const toggleChunkJa = () => {
     setShowChunkJaState(togglePlayerPrefsChunkJa());
   };
+  const toggleAutoRecord = () => {
+    setAutoRecordAfterModelState((prev) => {
+      const next = !prev;
+      setPlayerPrefsAutoRecord(next);
+      return next;
+    });
+  };
 
   useEffect(() => {
-    // バックグラウンド再生を有効にする (画面ロックや他アプリ切替でも聞き続けられるように。
-    // UIBackgroundModes: ['audio'] は app.config.ts で設定済み)
     setAudioModeAsync({
       playsInSilentMode: true,
       shouldPlayInBackground: true,
       interruptionMode: 'doNotMix',
-    }).catch(() => {
-      // 設定に失敗しても再生自体は継続する
-    });
+    }).catch(() => {});
     void initBillingAsync();
   }, []);
 
@@ -268,19 +330,26 @@ function LessonPlayerScreen({
     updateInterval: STATUS_UPDATE_INTERVAL_MILLIS,
   });
   const status = useAudioPlayerStatus(player);
-  // 保存済みの速度を新しい player にも適用する (player は 1.0 で初期化されるため)
+
   const rateAppliedRef = useRef(false);
   useEffect(() => {
     if (rateAppliedRef.current || prefs.rate === 1.0) return;
     rateAppliedRef.current = true;
     player.setPlaybackRate(prefs.rate, PITCH_CORRECTION_QUALITY);
-    // player 生成時に一度だけ適用する (以降の速度変更は applyRate 経由)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player]);
 
-  const sentences = lesson.sentences;
+  // 初期 ?sentence=<n> 指定時は再生位置も対象文の先頭へ合わせる
+  const initialSeekRef = useRef(false);
+  useEffect(() => {
+    if (initialSeekRef.current || initialSentenceIndex === null) return;
+    const target = sentences[clampedInitialPos];
+    if (!target) return;
+    initialSeekRef.current = true;
+    void player.seekTo(target.startSec, SEEK_TOLERANCE_MILLIS, SEEK_TOLERANCE_MILLIS).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [player]);
 
-  // 操作ログは開発時のみコンソールへ出す (本番画面には表示しない。D10)
   const append = (action: string) => {
     if (__DEV__) {
       const at = new Date().toLocaleTimeString('ja-JP', { hour12: false });
@@ -302,15 +371,72 @@ function LessonPlayerScreen({
         append(label);
       })
       .catch(() => {
-        // シーク失敗は再生位置を変えないだけで致命的ではないが、
-        // 失敗時の後処理 (ガード解除など) は必ず実行する
         append(`seekTo(${clamped}) 失敗`);
         onFail?.();
       });
   };
 
-  // --- 手動操作とデモが共用する操作関数 (ログはここで一度だけ記録する) ---
   const manuallyPausedRef = useRef(false);
+  const statusRef = useRef(status);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
+
+  // --- シャドーイング録音・連続聞き比べ状態 ---
+  const [recordingSentence, setRecordingSentence] = useState<number | null>(null);
+  const [recorderStatus, setRecorderStatus] = useState<RecordingStatus | null>(null);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY, (recStatus) =>
+    setRecorderStatus(recStatus)
+  );
+  const [micDenied, setMicDenied] = useState(false);
+  const [lastRecordings, setLastRecordings] = useState<
+    Record<number, { uri: string; durationSec: number }>
+  >({});
+  const [shadowingCounts, setShadowingCounts] = useState<Record<number, number>>(() =>
+    getShadowingCounts(lesson.id)
+  );
+  const [comparing, setComparing] = useState<{ index: number; source: 'model' | 'user' } | null>(
+    null
+  );
+  const [pendingRecord, setPendingRecord] = useState<number | null>(null);
+  const pendingRecordRef = useRef<number | null>(null);
+  const recordStartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const compareTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const compareSeqRef = useRef<{ sentenceIndex: number; gen: number } | null>(null);
+  const recordGenRef = useRef(0);
+  const seekTokenRef = useRef(0);
+  const userAudioRef = useRef<AudioPlayer | null>(null);
+  const lastRecordingsRef = useRef(lastRecordings);
+  useEffect(() => {
+    lastRecordingsRef.current = lastRecordings;
+  }, [lastRecordings]);
+
+  const setPendingRecordBoth = (v: number | null) => {
+    pendingRecordRef.current = v;
+    setPendingRecord(v);
+    recordGenRef.current += 1;
+  };
+
+  const cancelAsyncFlow = () => {
+    if (recordStartTimerRef.current) {
+      clearTimeout(recordStartTimerRef.current);
+      recordStartTimerRef.current = null;
+    }
+    if (compareTimerRef.current) {
+      clearTimeout(compareTimerRef.current);
+      compareTimerRef.current = null;
+    }
+    compareSeqRef.current = null;
+    if (pendingRecordRef.current !== null) {
+      setPendingRecordBoth(null);
+    } else {
+      recordGenRef.current += 1;
+    }
+    seekTokenRef.current += 1;
+    userAudioRef.current?.pause();
+    setComparing(null);
+  };
+
   const play = (label = 'play()') => {
     manuallyPausedRef.current = false;
     player.play();
@@ -327,128 +453,24 @@ function LessonPlayerScreen({
     player.setPlaybackRate(nextRate, PITCH_CORRECTION_QUALITY);
     append(label ?? `setPlaybackRate(${nextRate}, ${PITCH_CORRECTION_QUALITY})`);
   };
+
   const togglePlay = () => {
-    setComparing(null);
+    cancelAsyncFlow();
     if (status.playing) {
       pause();
     } else if (
       repeatSentence === null &&
       (status.didJustFinish || (status.duration > 0 && status.currentTime >= status.duration - 0.05))
     ) {
+      setFocusedPos(0);
       seekTo(0, 'seekTo(0) // 終端から先頭へ', () => play());
     } else {
       play();
     }
   };
-  // --- 下部固定の再生バー (E2): 文単位の移動とタップシーク ---
-  const goToSentence = (targetIndex: number) => {
-    const target = sentences[targetIndex];
-    if (!target) return;
-    // 文を移動したらリピート系は解除する (AB/文リピートが移動先と競合するため)
-    setRepeatSentence(null);
-    setAb(null);
-    seekTo(target.startSec, `文${targetIndex + 1} へ移動`, () => {
-      if (statusRef.current.playing) play();
-    });
-  };
-  // 現在位置が属する文のインデックス (開始済みの最後の文)。
-  // activeSentence の useMemo より前に定義するため、ref 経由で現在位置から導出する
-  const lastStartedSentenceIndex = () => {
-    const t = statusRef.current.currentTime;
-    let idx = 0;
-    sentences.forEach((st, i) => {
-      if (t >= st.startSec) idx = i;
-    });
-    return idx;
-  };
-  const goPrevSentence = () => {
-    const idx = lastStartedSentenceIndex();
-    const current = sentences[idx];
-    // 現在の文に入って 2 秒以上なら文頭へ、そうでなければ前の文へ
-    if (current && statusRef.current.currentTime - current.startSec > 2) {
-      goToSentence(idx);
-    } else {
-      goToSentence(Math.max(0, idx - 1));
-    }
-  };
-  const goNextSentence = () => {
-    goToSentence(Math.min(sentences.length - 1, lastStartedSentenceIndex() + 1));
-  };
-  const toggleRepeat = (sentenceIndex: number) => {
-    const next = repeatSentence === sentenceIndex ? null : sentenceIndex;
-    setRepeatSentence(next);
-    append(
-      next === null
-        ? `文${sentenceIndex + 1} リピート解除`
-        : `文${sentenceIndex + 1} リピート開始`
-    );
-  };
-
-  // --- AB リピート (任意の開始点 A・終了点 B を現在位置に設定) ---
-  // デモの setTimeout から呼ばれても最新の再生位置を使えるよう status を ref にミラーする
-  const statusRef = useRef(status);
-  useEffect(() => {
-    statusRef.current = status;
-  }, [status]);
-  const setAbPoint = (which: 'a' | 'b') => {
-    const now = statusRef.current.currentTime;
-    const duration = statusRef.current.duration || lesson.durationSec;
-    setAb((prev) => {
-      const a = which === 'a' ? now : (prev?.a ?? Math.max(0, now - 3));
-      const b = which === 'b' ? now : (prev?.b ?? Math.min(duration, now + 3));
-      const lo = Math.min(a, b);
-      const hi = Math.max(a, b);
-      // 同一位置タップによるゼロ長区間は B 到達判定との無限シークループになるため拒否
-      return hi - lo > 0.2 ? { a: lo, b: hi } : (prev ?? null);
-    });
-    append(`AB: ${which.toUpperCase()} = ${now.toFixed(2)}s 設定`);
-  };
-  const clearAb = () => {
-    setAb(null);
-    append('AB リピート解除');
-  };
-
-  // --- シャドーイング録音と比較再生 (Issue #10) ---
-  // 録音は端末内のみ (GM 決定: 外部送信は一切しない)。ファイルはキャッシュ領域に置き、
-  // レッスンを離れたら破棄する。録音回数 (文ごと / レッスンごと) はアプリ再起動まで保持。
-  const [recordingSentence, setRecordingSentence] = useState<number | null>(null);
-  const [recorderStatus, setRecorderStatus] = useState<RecordingStatus | null>(null);
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY, (recStatus) =>
-    setRecorderStatus(recStatus)
-  );
-  const [micDenied, setMicDenied] = useState(false);
-  const [lastRecordings, setLastRecordings] = useState<
-    Record<number, { uri: string; durationSec: number }>
-  >({});
-  const [shadowingCounts, setShadowingCounts] = useState<Record<number, number>>(() =>
-    getShadowingCounts(lesson.id)
-  );
-  const [comparing, setComparing] = useState<{ index: number; source: 'model' | 'user' } | null>(
-    null
-  );
-  // 録音導線: 「録音」を押すとまずお手本を再生し、終わったら自動で録音を始める
-  // (いきなり録音が始まると構える間がない、という実機フィードバックへの対応)
-  const [pendingRecord, setPendingRecord] = useState<number | null>(null);
-  const pendingRecordRef = useRef<number | null>(null);
-  const recordStartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // 録音予約の世代 (予約・取消・切替のたびに進み、古いタイマーやシーク完了を無効化する)
-  const recordGenRef = useRef(0);
-  // お手本シークの世代 (最新のシークだけが再生を開始する)
-  const seekTokenRef = useRef(0);
-  const setPendingRecordBoth = (v: number | null) => {
-    pendingRecordRef.current = v;
-    setPendingRecord(v);
-    recordGenRef.current += 1;
-  };
-  const userAudioRef = useRef<AudioPlayer | null>(null);
-  const lastRecordingsRef = useRef(lastRecordings);
-  useEffect(() => {
-    lastRecordingsRef.current = lastRecordings;
-  }, [lastRecordings]);
 
   const startRecording = async (sentenceIndex: number) => {
-    if (recordingSentence !== null) return; // 録音中の再入防止 (上書きされると実行中の録音を停止できなくなる)
-    // 録音中はレッスン音声・比較再生と競合しないよう止める (GM 決定)
+    if (recordingSentence !== null) return;
     player.pause();
     userAudioRef.current?.pause();
     const permission = await requestRecordingPermissionsAsync();
@@ -459,7 +481,6 @@ function LessonPlayerScreen({
     }
     setMicDenied(false);
     try {
-      // iOS で録音するには allowsRecording: true が必要 (停止後に解除してスピーカー再生に戻す)
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       recorder.record();
       setRecordingSentence(sentenceIndex);
@@ -470,8 +491,6 @@ function LessonPlayerScreen({
   };
 
   const stopRecording = async (sentenceIndex: number) => {
-    // duration は停止前に確定させる (停止後は currentTime が 0 に戻る)。
-    // uri は stop() の完了後に読む (完了前に読むと未確定ファイルになり再生できない)。
     const duration = recorder.currentTime;
     try {
       await recorder.stop();
@@ -494,10 +513,12 @@ function LessonPlayerScreen({
     append(`録音完了: 文${sentenceIndex + 1} ${duration.toFixed(1)} 秒`);
   };
 
-  // お手本 = 該当文の区間再生 (レッスン音声)。文の終端で自動停止する
-  const playModel = (sentenceIndex: number) => {
+  const playModel = (sentenceIndex: number, keepCompareSeq = false) => {
     const sentence = sentences.find((s) => s.index === sentenceIndex);
     if (!sentence) return;
+    if (!keepCompareSeq) {
+      compareSeqRef.current = null;
+    }
     if (pendingRecordRef.current !== null && pendingRecordRef.current !== sentenceIndex) {
       setPendingRecordBoth(null);
     }
@@ -505,29 +526,12 @@ function LessonPlayerScreen({
     setComparing({ index: sentenceIndex, source: 'model' });
     const token = ++seekTokenRef.current;
     seekTo(sentence.startSec, `お手本再生: 文${sentenceIndex + 1}`, () => {
-      // 取消や別のシークが割り込んでいたら、このシーク完了では再生しない
       if (seekTokenRef.current === token) play();
     });
   };
 
-  // 「録音」ボタン: いきなり録音せず、まずお手本を再生し、終わったら自動で録音を始める。
-  // 予約中にもう一度押すと取り消す。実際の録音開始はお手本終了を検出する effect 側で行う。
-  const beginRecordFlow = (sentenceIndex: number) => {
-    if (recordingSentence !== null) return;
-    if (pendingRecordRef.current === sentenceIndex) {
-      setPendingRecordBoth(null);
-      seekTokenRef.current += 1; // 進行中のお手本シークが完了しても再生を再開させない
-      player.pause();
-      append('録音予約を取り消しました');
-      return;
-    }
-    setPendingRecordBoth(sentenceIndex);
-    playModel(sentenceIndex);
-    append(`お手本の後に録音します: 文${sentenceIndex + 1}`);
-  };
-
   const playUserRecording = (sentenceIndex: number) => {
-    const rec = lastRecordings[sentenceIndex];
+    const rec = lastRecordingsRef.current[sentenceIndex];
     if (!rec) return;
     player.pause();
     userAudioRef.current?.release();
@@ -537,14 +541,133 @@ function LessonPlayerScreen({
     append(`自分の録音を再生: 文${sentenceIndex + 1} (${rec.durationSec.toFixed(1)} 秒)`);
   };
 
-  // レッスンを離れたら録音プレイヤーとキャッシュ内の録音ファイルを破棄する (GM 決定)
+  const beginRecordFlow = (sentenceIndex: number) => {
+    if (recordingSentence !== null) return;
+    compareSeqRef.current = null;
+    if (pendingRecordRef.current === sentenceIndex) {
+      setPendingRecordBoth(null);
+      seekTokenRef.current += 1;
+      player.pause();
+      append('録音予約を取り消しました');
+      return;
+    }
+    if (!autoRecordAfterModel) {
+      void startRecording(sentenceIndex);
+      return;
+    }
+    setPendingRecordBoth(sentenceIndex);
+    playModel(sentenceIndex);
+    append(`お手本の後に録音します: 文${sentenceIndex + 1}`);
+  };
+
+  const compareSequential = (sentenceIndex: number) => {
+    if (recordingSentence !== null) return;
+    if (!lastRecordingsRef.current[sentenceIndex]) return;
+    cancelAsyncFlow();
+    const gen = recordGenRef.current;
+    compareSeqRef.current = { sentenceIndex, gen };
+    playModel(sentenceIndex, true);
+    append(`連続聞き比べ開始: 文${sentenceIndex + 1}`);
+  };
+
+  // --- 文移動・モード切替 ---
+  const goToPosition = (pos: number, keepPlaying = true) => {
+    const clamped = Math.min(Math.max(pos, 0), sentences.length - 1);
+    const target = sentences[clamped];
+    if (!target) return;
+    cancelAsyncFlow();
+    setFocusedPos(clamped);
+    setRepeatSentence(null);
+    setAb(null);
+    const shouldResume = keepPlaying && statusRef.current.playing;
+    seekTo(target.startSec, `文${clamped + 1} へ移動`, () => {
+      if (shouldResume) play();
+    });
+  };
+
+  const lastStartedPosition = () => {
+    const tNow = statusRef.current.currentTime;
+    if (tNow <= 0.01) return focusedPos;
+    let pos = 0;
+    sentences.forEach((st, i) => {
+      if (tNow >= st.startSec) pos = i;
+    });
+    return pos;
+  };
+
+  const goPrevSentence = () => {
+    const pos = lastStartedPosition();
+    if (lessonMode === 'speak') {
+      goToPosition(Math.max(0, pos - 1), false);
+      return;
+    }
+    const current = sentences[pos];
+    if (current && statusRef.current.currentTime - current.startSec > 2) {
+      goToPosition(pos);
+    } else {
+      goToPosition(Math.max(0, pos - 1));
+    }
+  };
+
+  const goNextSentence = () => {
+    const pos = lastStartedPosition();
+    if (lessonMode === 'speak') {
+      goToPosition(Math.min(sentences.length - 1, pos + 1), false);
+      return;
+    }
+    goToPosition(Math.min(sentences.length - 1, pos + 1));
+  };
+
+  const switchMode = (nextMode: LessonMode) => {
+    if (nextMode === lessonMode) return;
+    if (recordingSentence !== null) {
+      void stopRecording(recordingSentence);
+    }
+    cancelAsyncFlow();
+    if (nextMode === 'speak' && statusRef.current.playing) {
+      pause('話すモードへ切替');
+    }
+    setLessonModeState(nextMode);
+    setPlayerPrefsLessonMode(nextMode);
+  };
+
+  const toggleRepeat = (sentenceIndex: number) => {
+    const next = repeatSentence === sentenceIndex ? null : sentenceIndex;
+    setRepeatSentence(next);
+    append(
+      next === null
+        ? `文${sentenceIndex + 1} リピート解除`
+        : `文${sentenceIndex + 1} リピート開始`
+    );
+  };
+
+  const setAbPoint = (which: 'a' | 'b') => {
+    const now = statusRef.current.currentTime;
+    const duration = statusRef.current.duration || lesson.durationSec;
+    setAb((prev) => {
+      const a = which === 'a' ? now : (prev?.a ?? Math.max(0, now - 3));
+      const b = which === 'b' ? now : (prev?.b ?? Math.min(duration, now + 3));
+      const lo = Math.min(a, b);
+      const hi = Math.max(a, b);
+      return hi - lo > 0.2 ? { a: lo, b: hi } : (prev ?? null);
+    });
+    append(`AB: ${which.toUpperCase()} 設定`);
+  };
+
+  const clearAb = () => {
+    setAb(null);
+    append('AB リピート解除');
+  };
+
+  // アンマウント時に録音と一時ファイルを破棄 (GM 決定)
   useEffect(() => {
     return () => {
       if (recordStartTimerRef.current) clearTimeout(recordStartTimerRef.current);
+      if (compareTimerRef.current) clearTimeout(compareTimerRef.current);
       try {
-        recorder.stop(); // 録音中に画面を離れた場合は停止してマイクを解放する
+        recorder.stop();
       } catch {
-        // 録音していない場合のエラーは無視
+        // 録音していない場合は無視
       }
       void setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true }).catch(() => {});
       userAudioRef.current?.release();
@@ -555,12 +678,10 @@ function LessonPlayerScreen({
         }
       }
     };
-    // recorder (SharedObject) はマウント中不変。クリーンアップのみで参照する
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ?demo=1: 再生→速度変更→文シーク→カラオケ確認→停止を自動実行
-  // (手動操作と同じ操作関数を呼ぶ。ログは操作関数側で一度だけ記録される)
+  // ?demo=1 / ?autorecord=1 / ?autostudy=1 自動検証用フック
   const demoRanRef = useRef(false);
   useEffect(() => {
     if (!__DEV__ || !demoParam || demoRanRef.current) return;
@@ -569,76 +690,59 @@ function LessonPlayerScreen({
     const at = (delayMs: number, fn: () => void) => {
       timers.push(setTimeout(fn, delayMs));
     };
-    append('--- 自動デモ開始 (?demo=1) ---');
     at(500, () => play('play()'));
-    at(2500, () => applyRate(1.15, 'setPlaybackRate(1.15, high) // ピッチ補正あり'));
-    at(4500, () => applyRate(1.0, 'setPlaybackRate(1.0, high)'));
+    at(2500, () => applyRate(1.15));
+    at(4500, () => applyRate(1.0));
     at(5500, () => {
       const s3 = sentences.find((s) => s.index === 2);
-      if (!s3) return;
-      seekTo(s3.startSec, `seekTo(${s3.startSec}) // 文3の冒頭へ (文シーク)`);
+      if (s3) seekTo(s3.startSec, '文3 冒頭へ');
     });
     at(7000, () => setAbPoint('a'));
     at(8500, () => setAbPoint('b'));
-    at(10000, () => pause('pause() // デモ終了'));
+    at(10000, () => pause('デモ終了'));
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demoParam, player]);
 
-  // ?autorecord=1: 自動スクロール後に録音を開始し、約 5 秒で自動停止する
-  // (シミュレータでの録音フロー自動検証用。手動操作と同じ startRecording / stopRecording を呼ぶ)
   const autoRecordRanRef = useRef(false);
   useEffect(() => {
     if (!__DEV__ || !autorecordParam || autoRecordRanRef.current) return;
     autoRecordRanRef.current = true;
-    const target = initialSentenceIndex ?? 0;
+    const target = sentences[clampedInitialPos]?.index ?? 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    const at = (delayMs: number, fn: () => void) => {
-      timers.push(setTimeout(fn, delayMs));
-    };
-    at(1800, () => void startRecording(target));
-    at(6800, () => void stopRecording(target));
+    timers.push(setTimeout(() => void startRecording(target), 1800));
+    timers.push(setTimeout(() => void stopRecording(target), 6800));
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autorecordParam]);
 
-  // ?autostudy=1: 再生を開始して 6 秒後に一時停止する
-  // (進捗記録の収集フローを自動検証する用。?demo=1 と同じく既存操作関数を呼ぶだけ)
   const autoStudyRanRef = useRef(false);
   useEffect(() => {
     if (!__DEV__ || !autostudyParam || autoStudyRanRef.current) return;
     autoStudyRanRef.current = true;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    const at = (delayMs: number, fn: () => void) => {
-      timers.push(setTimeout(fn, delayMs));
-    };
-    at(800, () => play('自動学習デモ: play()'));
-    at(6800, () => pause('自動学習デモ: pause() // 6 秒再生して記録'));
+    timers.push(setTimeout(() => play('自動学習デモ: play()'), 800));
+    timers.push(setTimeout(() => pause('自動学習デモ: pause()'), 6800));
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autostudyParam, player]);
 
-  // 文リピート (スパイク画面と同じ終端判定)。シーク先込み中の重複発行をガードし、
-  // 完了時には「リピートがまだ有効か」を ref で確認してから再開する
-  // (シーク完了前に解除された古い操作からは再生を始めない)
+  // 完了判定 + サマリモーダル
   const seekingRef = useRef(false);
   const repeatSentenceRef = useRef<number | null>(null);
-
-  // --- 学習進捗の記録 (Issue #13): 実際に再生が進行した秒数のみを累計する ---
+  const abRef = useRef<{ a: number; b: number } | null>(null);
   const playedSecondsRef = useRef(0);
-  // レッスン全体の累計秒数 (フラッシュでリセットされない。lesson_completed の payload 用)
   const sessionTotalSecondsRef = useRef(0);
   const lastPlaybackTRef = useRef(0);
-  // 日またぎ対応: 累計開始時のローカル日を保持し、日付変更時に分割フラッシュする
   const playedDateRef = useRef<string>(localDateStr());
-  const abRef = useRef<{ a: number; b: number } | null>(null);
+
   useEffect(() => {
     repeatSentenceRef.current = repeatSentence;
   }, [repeatSentence]);
   useEffect(() => {
     abRef.current = ab;
   }, [ab]);
-  // レッスン完了 (最後まで再生) を進捗に記録し、完了サマリを表示する (E1)
+
   useEffect(() => {
     if (status.didJustFinish) {
       markLessonCompleted(lesson.id);
@@ -654,17 +758,16 @@ function LessonPlayerScreen({
     }
   }, [status.didJustFinish, lesson.id]);
 
-  // AB リピート (文リピートより優先。両方設定時は AB 区間を繰り返す)
+  // AB リピート
   useEffect(() => {
     if (ab === null || seekingRef.current) return;
     if (status.didJustFinish || status.currentTime >= ab.b - 0.05) {
       seekingRef.current = true;
       seekTo(
         ab.a,
-        `AB リピート: ${ab.a.toFixed(2)}s へ戻す`,
+        'AB リピート',
         () => {
           seekingRef.current = false;
-          // 自然終了は再生を再開する。シーク中の手動一時停止は尊重して再開しない
           if (abRef.current !== null && !manuallyPausedRef.current) {
             play();
           }
@@ -676,6 +779,8 @@ function LessonPlayerScreen({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.currentTime, status.playing, status.didJustFinish, status.duration, ab]);
+
+  // 単文リピート
   useEffect(() => {
     if (repeatSentence === null || ab !== null) return;
     const sentence = sentences.find((s) => s.index === repeatSentence);
@@ -685,12 +790,10 @@ function LessonPlayerScreen({
     if (seekingRef.current) return;
     if (status.didJustFinish || status.currentTime >= endThreshold) {
       seekingRef.current = true;
-      // シーク発行時の再生状態を記録しておき、完了時にそれを優先する
-      // (シーク中のユーザーの一時停止を上書きしない)
       const wasPlaying = status.playing;
       seekTo(
         sentence.startSec,
-        `文リピート: ${sentence.startSec.toFixed(2)}s へ戻す`,
+        '文リピート',
         () => {
           seekingRef.current = false;
           if (wasPlaying && repeatSentenceRef.current === sentence.index) {
@@ -698,7 +801,6 @@ function LessonPlayerScreen({
           }
         },
         () => {
-          // シーク失敗でもガードは必ず解除する (リピートが永久停止しないように)
           seekingRef.current = false;
         }
       );
@@ -706,18 +808,14 @@ function LessonPlayerScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.currentTime, status.playing, status.didJustFinish, status.duration, repeatSentence]);
 
-  // カラオケ表示: 現在文と現在単語を再生位置から導出
+  // 再生時間記録 (1秒以上の進行のみ蓄積)
   const t = status.currentTime;
-  // 実際に再生が進行した秒数のみを累計する (逆シーク・ジャンプは水増しになるためカウントしない)
   useEffect(() => {
     if (status.playing && t > lastPlaybackTRef.current && t - lastPlaybackTRef.current < 2) {
       playedSecondsRef.current += t - lastPlaybackTRef.current;
       sessionTotalSecondsRef.current += t - lastPlaybackTRef.current;
     }
     lastPlaybackTRef.current = t;
-    // 日またぎ検出: ローカル日が変わったら蓄積分を前日でフラッシュし、
-    // 累計量にかかわらず playedDateRef を今日へ更新する
-    // (23:59 に開いて 00:01 から再生すると前日に記録される問題の解消)
     const today = localDateStr();
     if (today !== playedDateRef.current) {
       if (playedSecondsRef.current >= 1) {
@@ -727,13 +825,14 @@ function LessonPlayerScreen({
       playedDateRef.current = today;
     }
   }, [t, status.playing, lesson.id]);
-  // 一時停止への遷移・レッスン完了・アンマウントのタイミングで記録をフラッシュする
+
   useEffect(() => {
     if (playedSecondsRef.current >= 1) {
       addStudySeconds(lesson.id, playedSecondsRef.current, playedDateRef.current);
       playedSecondsRef.current = 0;
     }
   }, [status.playing, status.didJustFinish, lesson.id]);
+
   useEffect(() => {
     return () => {
       if (playedSecondsRef.current >= 1) {
@@ -742,15 +841,36 @@ function LessonPlayerScreen({
       }
     };
   }, [lesson.id]);
-  const activeSentence = useMemo(
-    () => sentences.find((s) => t >= s.startSec && t < s.endSec) ?? null,
-    [sentences, t]
-  );
+
+  // 現在文と表示対象文の導出 (宣言順序を維持して React Compiler に準拠)
+  // 文間の無音区間でも直前に開始した文を維持し、シーク/再生開始前の t <= 0.01 では focusedPos を使う
+  const activePos = useMemo(() => {
+    return sentences.findIndex((s) => t >= s.startSec && t < s.endSec);
+  }, [sentences, t]);
+
+  const timePos = useMemo(() => {
+    if (t <= 0.01) return -1;
+    let pos = 0;
+    sentences.forEach((st, i) => {
+      if (t >= st.startSec) pos = i;
+    });
+    return pos;
+  }, [sentences, t]);
+
+  const effectivePos = timePos >= 0 ? timePos : focusedPos;
+  const displaySentence = sentences[effectivePos] ?? sentences[0];
+
   const activeWordIndex = useMemo(() => {
-    if (!activeSentence) return -1;
-    return activeSentence.words.findIndex((w) => t >= w.startSec && t < w.endSec);
-  }, [activeSentence, t]);
-  // お手本の区間再生: 文の終端を過ぎたら一時停止する (比較状態は再生位置から導出)
+    if (activePos !== effectivePos || !displaySentence) return -1;
+    return displaySentence.words.findIndex((w) => t >= w.startSec && t < w.endSec);
+  }, [activePos, effectivePos, displaySentence, t]);
+
+  const activeChunkIndex = useMemo(() => {
+    if (activePos !== effectivePos || !displaySentence) return -1;
+    return displaySentence.chunks.findIndex((c) => t >= c.startSec && t < c.endSec);
+  }, [activePos, effectivePos, displaySentence, t]);
+
+  // お手本区間再生の文末停止 → 自動録音 or 連続聞き比べ
   const comparingModelEndSec = useMemo(() => {
     if (comparing?.source !== 'model') return null;
     return sentences.find((s) => s.index === comparing.index)?.endSec ?? null;
@@ -759,31 +879,40 @@ function LessonPlayerScreen({
     comparing?.source === 'model' && comparingModelEndSec !== null && t < comparingModelEndSec;
   const modelPausedRef = useRef(false);
   useEffect(() => {
-    // 比較再生が新しく始まるたびに「文末で一時停止した」フラグを戻す。
-    // 戻し忘れると2回目以降のお手本が文末で止まらず、録音導線も始まらない。
     modelPausedRef.current = false;
   }, [comparing]);
+
   useEffect(() => {
     if (!modelCompareActive) return;
     if (!modelPausedRef.current && t >= (comparingModelEndSec ?? 0) - 0.02) {
       player.pause();
       modelPausedRef.current = true;
-      // 録音予約があれば、お手本の余韻 (0.6 秒) を置いてから録音を始める
       const pending = pendingRecordRef.current;
       if (pending !== null && comparing?.index === pending) {
         setPendingRecordBoth(null);
         const gen = recordGenRef.current;
         recordStartTimerRef.current = setTimeout(() => {
-          // 待機中に別の予約・取消が入っていたら、古い文の録音は始めない
           if (recordGenRef.current === gen) {
             void startRecording(pending);
           }
         }, 600);
+        return;
+      }
+      const seq = compareSeqRef.current;
+      if (seq && comparing?.index === seq.sentenceIndex && seq.gen === recordGenRef.current) {
+        compareSeqRef.current = null;
+        const seqGen = seq.gen;
+        const idx = seq.sentenceIndex;
+        compareTimerRef.current = setTimeout(() => {
+          if (recordGenRef.current === seqGen) {
+            playUserRecording(idx);
+          }
+        }, 400);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t, modelCompareActive, comparingModelEndSec]);
-  // このレッスンに登場する音の変化の種類 (凡例表示用)
+
   const legendTypes = useMemo(() => {
     const set = new Set<LessonLinkingNote['type']>();
     for (const s of sentences) {
@@ -794,19 +923,6 @@ function LessonPlayerScreen({
     return [...set];
   }, [sentences]);
 
-  // 単語タップ → その単語に重なる音の変化の詳細を表示
-  const handleWordPress = (sentence: LessonSentence, wordIndex: number) => {
-    const noteIndex = wordLinkMap(sentence)[wordIndex];
-    if (noteIndex === null || noteIndex === undefined) return;
-    const note = sentence.linking[noteIndex];
-    if (!note) return;
-    setNoteDetail({ sentenceIndex: sentence.index, noteIndex });
-    append(`音の変化: ${note.span} (${LINKING_LABELS[note.type]})`);
-  };
-
-  const progress = status.duration > 0 ? Math.min(1, status.currentTime / status.duration) : 0;
-
-  // AB 区間のフレーズ: 秒数だけでは対象が分からないため、単語タイムスタンプから復元して表示する
   const abPhrase = useMemo(() => {
     if (!ab) return null;
     const texts = sentences
@@ -819,419 +935,464 @@ function LessonPlayerScreen({
       : texts.join(' ');
   }, [ab, sentences]);
 
-  // 音の変化の詳細表示対象 (現在の文に対するタップ選択がある場合のみ)
-  const detailNote =
-    activeSentence && noteDetail && noteDetail.sentenceIndex === activeSentence.index
-      ? (activeSentence.linking[noteDetail.noteIndex] ?? null)
-      : null;
-
-  // ?sentence=<n> 指定時: 該当文カードまで自動スクロールする (録音導線のショートカット)
+  // スクリプトモードで ?sentence=<n> 指定時にスクロール
   const scrollRef = useRef<ComponentRef<typeof ScrollView> | null>(null);
   const sentenceCardRefs = useRef<
-    Record<number, { measureInWindow: (cb: (x: number, y: number, w: number, h: number) => void) => void } | null>
+    Record<
+      number,
+      { measureInWindow: (cb: (x: number, y: number, w: number, h: number) => void) => void } | null
+    >
   >({});
   const autoScrolledRef = useRef(false);
   useEffect(() => {
-    if (initialSentenceIndex === null || autoScrolledRef.current) return;
+    if (lessonMode !== 'script' || initialSentenceIndex === null || autoScrolledRef.current) return;
+    const targetSentence = sentences[clampedInitialPos];
+    if (!targetSentence) return;
     const timer = setTimeout(() => {
-      const card = sentenceCardRefs.current[initialSentenceIndex];
-      const scroller = scrollRef.current;
-      if (!card || !scroller) return;
-      // measureInWindow は画面座標のため、ScrollView 自身の位置を差し引いて
-      // コンテンツ座標に変換してから scrollTo する
-      scroller.measureInWindow((sx: number, sy: number) => {
-        card.measureInWindow((_x, y: number, _w, _h) => {
-          scroller.scrollTo({ y: Math.max(y - sy - 200, 0), animated: true });
-          autoScrolledRef.current = true;
-        });
-      });
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, [initialSentenceIndex]);
-
-  // チャンク表示中は、再生中の文カードが常にほぼ同じ位置に見えるよう自動で追従スクロールする。
-  // ただしユーザーが手でスクロールした直後 (6 秒間) は干渉しない。
-  const lastDragAtRef = useRef(0);
-  const followedIndexRef = useRef(-1);
-  const scrollOffsetRef = useRef(0);
-  useEffect(() => {
-    if (displayMode !== 'chunks' || !status.playing) return;
-    const idx = activeSentence?.index;
-    if (idx === undefined || idx === followedIndexRef.current) return;
-    // 手動スクロール直後は干渉しない。このとき追従済みにしない (次の文で再試行できるように)
-    if (Date.now() - lastDragAtRef.current < 6000) return;
-    followedIndexRef.current = idx;
-    const timer = setTimeout(() => {
-      const card = sentenceCardRefs.current[idx];
+      const card = sentenceCardRefs.current[targetSentence.index];
       const scroller = scrollRef.current;
       if (!card || !scroller) return;
       scroller.measureInWindow((_sx: number, sy: number) => {
         card.measureInWindow((_x, y: number) => {
-          // measureInWindow は画面座標。現在のスクロール量を加えてコンテンツ座標に直す
-          scroller.scrollTo({
-            y: Math.max(y - sy + scrollOffsetRef.current - 160, 0),
-            animated: true,
-          });
+          scroller.scrollTo({ y: Math.max(y - sy - 160, 0), animated: true });
+          autoScrolledRef.current = true;
         });
       });
-    }, 60);
+    }, 600);
     return () => clearTimeout(timer);
-  }, [activeSentence?.index, displayMode, status.playing]);
+  }, [lessonMode, initialSentenceIndex, clampedInitialPos, sentences]);
+
+  const handleWordPress = (sentence: LessonSentence, wordIndex: number) => {
+    const noteIndex = wordLinkMap(sentence)[wordIndex];
+    if (noteIndex === null || noteIndex === undefined) return;
+    setLinkingSheetTarget({ sentenceIndex: sentence.index, noteIndex });
+    const note = sentence.linking[noteIndex];
+    if (note) {
+      append(`音の変化: ${note.span} (${LINKING_LABELS[note.type]})`);
+    }
+  };
+
+  const progress = status.duration > 0 ? Math.min(1, status.currentTime / status.duration) : 0;
+  const sentenceRatio = (effectivePos + 1) / Math.max(sentences.length, 1);
+  const weakActiveColor = scheme === 'dark' ? '#FBBF24' : '#B45309';
+
+  const sheetSentence = linkingSheetTarget
+    ? (sentences.find((s) => s.index === linkingSheetTarget.sentenceIndex) ?? null)
+    : null;
+
+  const isWeakCurrent = displaySentence ? isSentenceWeak(lesson.id, displaySentence.index) : false;
 
   return (
     <Screen
       scrollRef={scrollRef}
-      onScrollBeginDrag={() => {
-        lastDragAtRef.current = Date.now();
-      }}
-      onScroll={(e) => {
-        scrollOffsetRef.current = e.nativeEvent.contentOffset.y;
-      }}
       footer={
-        <TransportBar
-          progress={progress}
-          currentTime={status.currentTime}
-          duration={status.duration || lesson.durationSec}
-          playing={status.playing}
-          sentenceIndex={activeSentence?.index ?? 0}
-          sentenceCount={sentences.length}
-          firstStartSec={sentences[0]?.startSec ?? 0}
-          onPrev={goPrevSentence}
-          onNext={goNextSentence}
-          onTogglePlay={togglePlay}
-          onSeek={(sec) => seekTo(sec, 'シークバー')}
-        />
+        lessonMode === 'speak' && displaySentence ? (
+          <ShadowingFooterBar
+            sentenceIndex={effectivePos}
+            sentenceCount={sentences.length}
+            rate={rate}
+            isRecording={recordingSentence === displaySentence.index}
+            recordingElapsedSec={recorder.currentTime}
+            isPendingRecord={pendingRecord === displaySentence.index}
+            autoRecordAfterModel={autoRecordAfterModel}
+            onOpenTools={() => setShowToolsSheet(true)}
+            onPrev={goPrevSentence}
+            onNext={goNextSentence}
+            onTriggerRecord={() => beginRecordFlow(displaySentence.index)}
+            onStopRecord={() => void stopRecording(displaySentence.index)}
+          />
+        ) : (
+          <TransportBar
+            progress={progress}
+            currentTime={status.currentTime}
+            duration={status.duration || lesson.durationSec}
+            playing={status.playing}
+            sentenceIndex={effectivePos}
+            sentenceCount={sentences.length}
+            firstStartSec={sentences[0]?.startSec ?? 0}
+            rate={rate}
+            abActive={ab !== null}
+            onOpenTools={() => setShowToolsSheet(true)}
+            onPrev={goPrevSentence}
+            onNext={goNextSentence}
+            onTogglePlay={togglePlay}
+            onSeek={(sec) => seekTo(sec, 'シークバー')}
+          />
+        )
       }
     >
       <Stack.Screen
         options={{ headerShown: true, title: lesson.titleJa, headerBackTitle: '戻る' }}
       />
-      {showSummary ? (
+
+      {/* 上端 3pt 進捗バー (R3.1: 戻る + タイトル1行 + 進捗表示) */}
+      <View style={[styles.topProgressTrack, { backgroundColor: colors.border }]}>
         <View
           style={[
-            styles.summaryCard,
+            styles.topProgressFill,
+            { backgroundColor: colors.primary, width: `${sentenceRatio * 100}%` },
+          ]}
+        />
+      </View>
+
+      {/* ブロック 1: 4モード排他セグメントコントロール (D5 / P6) */}
+      <View
+        style={[
+          styles.modeSegmented,
+          { backgroundColor: colors.secondarySurface, borderColor: colors.border },
+        ]}
+      >
+        {LESSON_MODES.map((m) => {
+          const active = lessonMode === m.key;
+          return (
+            <Pressable
+              key={m.key}
+              onPress={() => switchMode(m.key)}
+              style={[
+                styles.modeSegmentItem,
+                active && {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                  borderWidth: 1,
+                },
+              ]}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={`${m.label}モード`}
+            >
+              <ThemedText
+                variant="caption"
+                color={active ? 'primary' : 'muted'}
+                style={styles.modeSegmentLabel}
+              >
+                {m.label}
+              </ThemedText>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* AB リピート中の簡易バナー (設定中のみ表示) */}
+      {ab !== null && lessonMode !== 'speak' ? (
+        <View
+          style={[
+            styles.abBanner,
             { backgroundColor: colors.secondarySurface, borderColor: colors.primary },
           ]}
         >
-          <ThemedText variant="heading">🎉 レッスン完了！</ThemedText>
-          <ThemedText variant="caption" color="muted">
-            学習時間{' '}
-            {summarySeconds >= 90
-              ? `約 ${Math.round(summarySeconds / 60)} 分`
-              : `${summarySeconds} 秒`}{' '}
-            ・ シャドーイング {lessonShadowingTotal(lesson.id)} 回 ・ 苦手フレーズ{' '}
-            {sentences.filter((st) => isSentenceWeak(lesson.id, st.index)).length} 件
+          <ThemedText variant="caption" color="primary" style={styles.abBannerText} numberOfLines={1}>
+            🔁 {abPhrase ? `「${abPhrase}」` : `${formatTime(ab.a)} – ${formatTime(ab.b)}`}
           </ThemedText>
-          <ThemedText variant="caption" color="muted">
-            連続学習 {computeStreak(progressDays)} 日目です。この調子で続けましょう。
-          </ThemedText>
-          {!isPremium ? (
-            <Pressable onPress={() => router.push('/paywall')} hitSlop={6}>
-              <ThemedText variant="caption" color="primary">
-                プレミアムでは、完了後に詳細な弱点分析が見られます ›
-              </ThemedText>
-            </Pressable>
-          ) : null}
-          <View style={styles.summaryButtons}>
-            {nextLesson ? (
-              <Pressable
-                style={[styles.summaryPrimary, { backgroundColor: colors.primary }]}
-                onPress={() =>
-                  router.replace({
-                    pathname: '/lesson',
-                    params: { lesson: nextLesson.entry.id },
-                  })
-                }
-              >
-                <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-                  次のレッスンへ
-                </ThemedText>
-              </Pressable>
-            ) : null}
-            <Pressable style={styles.summaryGhost} onPress={() => setShowSummary(false)}>
-              <ThemedText color="primary">閉じる</ThemedText>
-            </Pressable>
-          </View>
-        </View>
-      ) : null}
-      <View style={[styles.panel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <ThemedText variant="heading">{lesson.title}</ThemedText>
-        <ThemedText variant="caption" color="muted">
-          {lesson.titleJa} ・ 約 {Math.round(lesson.durationSec)} 秒 / {sentences.length} 文
-        </ThemedText>
-
-        <View style={styles.rateRow}>
-          {PLAYBACK_RATES.map((r) => (
-            <Chip key={r} label={`${r}x`} active={rate === r} onPress={() => applyRate(r)} />
-          ))}
-        </View>
-        <View style={styles.abRow}>
-          <Chip
-            label={`A ${ab ? ab.a.toFixed(1) : '–'}`}
-            active={ab !== null}
-            onPress={() => setAbPoint('a')}
-          />
-          <Chip
-            label={`B ${ab ? ab.b.toFixed(1) : '–'}`}
-            active={ab !== null}
-            onPress={() => setAbPoint('b')}
-          />
-          {ab !== null ? <Chip label="解除" onPress={clearAb} /> : null}
-          <ThemedText variant="caption" color="muted">
-            区間リピート (現在位置を A / B に設定)
-          </ThemedText>
-        </View>
-        {ab !== null && abPhrase ? (
-          <ThemedText variant="caption" style={{ color: colors.primary, fontWeight: '600' }}>
-            🔁 リピート区間: 「{abPhrase}」
-          </ThemedText>
-        ) : null}
-      </View>
-
-      {/* 表示モード: カラオケ (単語ハイライト) / チャンク (意味の塊 + 直訳トグル) */}
-      <View style={styles.displayRow}>
-        <Chip
-          label="カラオケ風"
-          active={displayMode === 'karaoke'}
-          onPress={() => setDisplayMode('karaoke')}
-        />
-        <Chip
-          label="チャンク"
-          active={displayMode === 'chunks'}
-          onPress={() => setDisplayMode('chunks')}
-        />
-        {displayMode === 'chunks' ? (
-          <Chip label={`直訳 ${showChunkJa ? 'ON' : 'OFF'}`} active={showChunkJa} onPress={toggleChunkJa} />
-        ) : null}
-      </View>
-
-      {/* 音の変化の凡例 (このレッスンに登場する種類だけ) */}
-      {legendTypes.length > 0 ? (
-        <View style={styles.legendRow}>
-          {legendTypes.map((type) => (
-            <View key={type} style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: LINKING_COLORS[type] }]} />
-              <ThemedText
-                variant="caption"
-                color="muted"
-                style={[
-                  LINKING_TEXT_DECORATIONS[type],
-                  { textDecorationColor: LINKING_COLORS[type] },
-                ]}
-              >
-                {LINKING_LABELS[type]}
-              </ThemedText>
-            </View>
-          ))}
-        </View>
-      ) : null}
-
-      {/* 表示: カラオケ (単語ハイライト + 音の変化の色分け) またはチャンク (意味の塊) */}
-      <ThemedText variant="heading" style={styles.sectionTitle}>
-        {displayMode === 'karaoke' ? 'カラオケ風表示 (現在文)' : 'チャンク表示 (現在文)'}
-      </ThemedText>
-      {/* 現在文のステージ: 文が切り替わっても高さが変わらない固定レイアウトにする。
-          カードの表示/非表示や高さの変化で下の要素が跳ねると視点が定まらないため、
-          話者・単語・訳・注釈の各ゾーンは常に同じ高さを確保する。 */}
-      <View style={[styles.karaoke, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <ThemedText variant="caption" color="muted">
-          {activeSentence
-            ? (lesson.speakerNames[activeSentence.speaker] ?? activeSentence.speaker)
-            : '　'}
-        </ThemedText>
-        <View style={styles.stageWords}>
-          {activeSentence ? (
-            displayMode === 'karaoke' ? (
-              <KaraokeLine
-                sentence={activeSentence}
-                activeWordIndex={activeWordIndex}
-                onWordPress={(wordIndex) => handleWordPress(activeSentence, wordIndex)}
-              />
-            ) : (
-              <ChunkLine
-                sentence={activeSentence}
-                onChunkPress={(chunk) =>
-                  seekTo(chunk.startSec, `seekTo(${chunk.startSec}) // チャンク「${chunk.text}」`)
-                }
-              />
-            )
-          ) : (
-            <ThemedText variant="caption" color="muted">
-              再生すると現在の文がここに表示されます
+          <Pressable onPress={clearAb} hitSlop={8} accessibilityRole="button">
+            <ThemedText variant="caption" color="primary" style={styles.abClearText}>
+              解除
             </ThemedText>
-          )}
+          </Pressable>
         </View>
-        <View style={styles.stageTranslation}>
-          {activeSentence && (displayMode === 'karaoke' || showChunkJa) ? (
-            <ThemedText variant="caption" color="muted">
-              {activeSentence.translationJa}
-            </ThemedText>
-          ) : null}
-        </View>
-        {displayMode === 'karaoke' ? (
-          <View style={styles.stageNotes}>
-            {detailNote ? (
-              <View style={[styles.noteDetail, { borderLeftColor: LINKING_COLORS[detailNote.type] }]}>
-                <ThemedText
-                  variant="caption"
-                  style={{ color: LINKING_COLORS[detailNote.type], fontWeight: '700' }}
-                >
-                  {LINKING_LABELS[detailNote.type]} ・ {detailNote.span} {detailNote.ipa}
-                </ThemedText>
-                <ThemedText variant="caption" color="muted" numberOfLines={4}>
-                  {detailNote.noteJa}
-                </ThemedText>
-              </View>
-            ) : activeSentence && activeSentence.linking.length > 0 ? (
-              activeSentence.linking.map((note, noteIndex) => (
-                <Pressable
-                  key={`${noteIndex}-${note.span}`}
-                  onPress={() =>
-                    setNoteDetail({ sentenceIndex: activeSentence.index, noteIndex })
-                  }
-                >
-                  <ThemedText variant="caption" numberOfLines={1}>
-                    <ThemedText color="muted">🔗 </ThemedText>
-                    {note.span} {note.ipa}
-                  </ThemedText>
-                </Pressable>
-              ))
-            ) : (
-              <ThemedText variant="caption" color="muted">
-                {activeSentence ? 'この文に音の変化の注釈はありません' : '　'}
-              </ThemedText>
-            )}
-          </View>
-        ) : null}
-      </View>
+      ) : null}
 
-      <ThemedText variant="heading" style={styles.sectionTitle}>
-        シャドーイング (録音して比較再生 ・ 合計 {lessonShadowingTotal(lesson.id)} 回)
-      </ThemedText>
-      <ThemedText variant="caption" color="muted">
-        🎙 録音を押すと、まずお手本が再生され、終わると自動で録音が始まります。録音は端末内にのみ保存され、
-        レッスンを離れると破棄されます (このレッスンの録音合計:{' '}
-        {lessonShadowingTotal(lesson.id)} 回)
-      </ThemedText>
-      {micDenied ? (
-        <ThemedText variant="caption" style={styles.micDeniedText}>
-          マイク権限が拒否されています。iOS 設定 &gt; プライバシーとセキュリティ &gt; マイク
-          でこのアプリを許可すると録音できます。
-        </ThemedText>
-      ) : null}
-      {recorderStatus?.hasError ? (
-        <ThemedText variant="caption" style={styles.micDeniedText}>
-          録音中にエラーが発生しました: {recorderStatus.error ?? '原因不明のエラー'}
-        </ThemedText>
-      ) : null}
-      <ThemedText variant="heading" style={styles.sectionTitle}>
-        スクリプト (タップで冒頭へシーク ・ 長押しでリピート)
-      </ThemedText>
-      {sentences.map((sentence) => (
-        <Pressable
-          key={sentence.index}
-          ref={(node) => {
-            sentenceCardRefs.current[sentence.index] = node;
-          }}
-          onPress={() =>
-            seekTo(sentence.startSec, `seekTo(${sentence.startSec}) // 文${sentence.index + 1} 冒頭`)
-          }
-          onLongPress={() => toggleRepeat(sentence.index)}
+      {/* モード 1: 聞く (カラオケ風表示) */}
+      {lessonMode === 'listen' && displaySentence ? (
+        <View
           style={[
-            styles.sentence,
+            styles.stageCard,
             { backgroundColor: colors.surface, borderColor: colors.border },
-            activeSentence?.index === sentence.index && { borderColor: colors.primary, borderWidth: 2 },
-            repeatSentence === sentence.index && { borderColor: colors.primary, borderWidth: 2 },
           ]}
         >
-          <ThemedText variant="caption" color="muted">
-            文{sentence.index + 1} ・ {lesson.speakerNames[sentence.speaker] ?? sentence.speaker}
-            {repeatSentence === sentence.index ? ' ・リピート中' : ''}
+          <View style={styles.stageHeader}>
+            <ThemedText variant="caption" color="muted" style={styles.speakerLabel}>
+              {lesson.speakerNames[displaySentence.speaker] ?? displaySentence.speaker}
+            </ThemedText>
+            <View style={styles.stageHeaderActions}>
+              {legendTypes.length > 0 ? (
+                <Pressable
+                  onPress={() => setShowLegendSheet(true)}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel="音変化の凡例を開く"
+                >
+                  <ThemedText variant="caption" color="primary" style={styles.headerActionText}>
+                    ? 凡例
+                  </ThemedText>
+                </Pressable>
+              ) : null}
+              <Pressable
+                onPress={() => toggleWeakSentence(lesson.id, displaySentence.index)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={isWeakCurrent ? '苦手フレーズから外す' : '苦手フレーズに登録'}
+              >
+                <ThemedText
+                  variant="caption"
+                  style={{
+                    color: isWeakCurrent ? weakActiveColor : colors.textMuted,
+                    fontWeight: '600',
+                  }}
+                >
+                  {isWeakCurrent ? '★ 苦手' : '☆ 苦手'}
+                </ThemedText>
+              </Pressable>
+            </View>
+          </View>
+
+          <View style={styles.stageBody}>
+            <KaraokeLine
+              sentence={displaySentence}
+              activeWordIndex={activeWordIndex}
+              onWordPress={(wordIndex) => handleWordPress(displaySentence, wordIndex)}
+            />
+          </View>
+
+          <ThemedText variant="caption" color="muted" style={styles.translationText}>
+            {displaySentence.translationJa}
           </ThemedText>
-          <View style={styles.sentenceHeaderRow}>
-            <ThemedText style={styles.flex}>{sentence.text}</ThemedText>
+
+          {displaySentence.linking.length > 0 ? (
             <Pressable
-              hitSlop={8}
-              onPress={() => toggleWeakSentence(lesson.id, sentence.index)}
-              style={styles.weakIcon}
+              onPress={() =>
+                setLinkingSheetTarget({ sentenceIndex: displaySentence.index, noteIndex: 0 })
+              }
+              style={[styles.hintRow, { borderTopColor: colors.border }]}
+              accessibilityRole="button"
+              accessibilityLabel="音の変化の解説を開く"
             >
-              <ThemedText variant="caption" style={{ color: isSentenceWeak(lesson.id, sentence.index) ? '#B45309' : colors.textMuted }}>
-                {isSentenceWeak(lesson.id, sentence.index) ? '★ 苦手' : '☆ 苦手'}
+              <ThemedText variant="caption" color="primary" style={styles.hintRowText}>
+                下線の語句をタップで音変化を解説（{displaySentence.linking.length}件）›
               </ThemedText>
             </Pressable>
+          ) : (
+            <View style={[styles.hintRow, { borderTopColor: colors.border }]}>
+              <ThemedText variant="caption" color="muted">
+                カラオケ風表示 — 再生すると単語ごとに進みます
+              </ThemedText>
+            </View>
+          )}
+        </View>
+      ) : null}
+
+      {/* モード 2: 読む (チャンク表示) */}
+      {lessonMode === 'read' && displaySentence ? (
+        <View
+          style={[
+            styles.stageCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.stageHeader}>
+            <ThemedText variant="caption" color="muted" style={styles.speakerLabel}>
+              {lesson.speakerNames[displaySentence.speaker] ?? displaySentence.speaker}
+            </ThemedText>
+            <View style={styles.stageHeaderActions}>
+              <Chip
+                label={`訳 ${showChunkJa ? 'ON' : 'OFF'}`}
+                active={showChunkJa}
+                onPress={toggleChunkJa}
+              />
+              <Pressable
+                onPress={() => toggleWeakSentence(lesson.id, displaySentence.index)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={isWeakCurrent ? '苦手フレーズから外す' : '苦手フレーズに登録'}
+              >
+                <ThemedText
+                  variant="caption"
+                  style={{
+                    color: isWeakCurrent ? weakActiveColor : colors.textMuted,
+                    fontWeight: '600',
+                  }}
+                >
+                  {isWeakCurrent ? '★ 苦手' : '☆ 苦手'}
+                </ThemedText>
+              </Pressable>
+            </View>
           </View>
+
+          <View style={styles.stageBody}>
+            <ChunkLine
+              sentence={displaySentence}
+              activeChunkIndex={activeChunkIndex}
+              onChunkPress={(chunk) => {
+                setFocusedPos(effectivePos);
+                seekTo(chunk.startSec, `チャンク「${chunk.text}」へ移動`, () => {
+                  if (!statusRef.current.playing) play();
+                });
+              }}
+            />
+          </View>
+
+          {showChunkJa ? (
+            <ThemedText variant="caption" color="muted" style={styles.translationText}>
+              {displaySentence.translationJa}
+            </ThemedText>
+          ) : (
+            <View style={[styles.hintRow, { borderTopColor: colors.border }]}>
+              <ThemedText variant="caption" color="muted">
+                意味のまとまり（チャンク）をタップするとそこから再生します
+              </ThemedText>
+            </View>
+          )}
+        </View>
+      ) : null}
+
+      {/* モード 3: 話す (シャドーイング 1文フォーカス) */}
+      {lessonMode === 'speak' && displaySentence ? (
+        <ShadowingStage
+          sentence={displaySentence}
+          speakerName={lesson.speakerNames[displaySentence.speaker] ?? displaySentence.speaker}
+          isWeak={isWeakCurrent}
+          onToggleWeak={() => toggleWeakSentence(lesson.id, displaySentence.index)}
+          recordingCount={shadowingCounts[displaySentence.index] ?? 0}
+          isRecording={recordingSentence === displaySentence.index}
+          recordingElapsedSec={recorder.currentTime}
+          isPendingRecord={pendingRecord === displaySentence.index}
+          autoRecordAfterModel={autoRecordAfterModel}
+          hasUserRecording={Boolean(lastRecordings[displaySentence.index])}
+          userRecordingDurationSec={lastRecordings[displaySentence.index]?.durationSec ?? 0}
+          comparingSource={
+            comparing?.index === displaySentence.index ? comparing.source : null
+          }
+          isCompareActive={
+            comparing?.index === displaySentence.index &&
+            (comparing.source === 'user' || modelCompareActive)
+          }
+          micDenied={micDenied}
+          recorderError={
+            recorderStatus?.hasError ? (recorderStatus.error ?? '原因不明のエラー') : null
+          }
+          onPlayModel={() => playModel(displaySentence.index)}
+          onPlayUser={() => playUserRecording(displaySentence.index)}
+          onCompareSequential={() => compareSequential(displaySentence.index)}
+        />
+      ) : null}
+
+      {/* モード 4: スクリプト (全文一覧・シーク/リピート専用。R6.3 により他モード部品を残さない) */}
+      {lessonMode === 'script' ? (
+        <View style={styles.scriptList}>
           <ThemedText variant="caption" color="muted">
-            {sentence.translationJa}
+            タップで再生位置へ移動・長押しで1文リピートします
           </ThemedText>
-          {/* シャドーイング録音と比較再生 (Issue #10)。録音は端末内のみ */}
-          <View style={styles.shadowingRow}>
-            {recordingSentence === sentence.index ? (
+          {sentences.map((sentence, pos) => {
+            const isActive = pos === effectivePos;
+            const isRepeat = repeatSentence === sentence.index;
+            const weak = isSentenceWeak(lesson.id, sentence.index);
+            return (
               <Pressable
-                onPress={() => void stopRecording(sentence.index)}
-                style={[styles.shadowingButton, { backgroundColor: colors.secondarySurface }]}
-              >
-                <ThemedText variant="caption" style={styles.recordingText}>
-                  ⏹ 録音停止 ({recorder.currentTime.toFixed(1)} 秒)
-                </ThemedText>
-              </Pressable>
-            ) : pendingRecord === sentence.index ? (
-              <Pressable
-                onPress={() => beginRecordFlow(sentence.index)}
-                style={[styles.shadowingButton, { backgroundColor: colors.secondarySurface }]}
-              >
-                <ThemedText variant="caption">
-                  🔊 お手本再生中… 終わると録音開始 (タップで取消)
-                </ThemedText>
-              </Pressable>
-            ) : (
-              <Pressable
-                onPress={() => beginRecordFlow(sentence.index)}
-                style={[styles.shadowingButton, { backgroundColor: colors.secondarySurface }]}
-              >
-                <ThemedText variant="caption">
-                  🎙 録音{lastRecordings[sentence.index] ? ' (録り直す)' : ''}
-                </ThemedText>
-              </Pressable>
-            )}
-            <Pressable
-              onPress={() => playModel(sentence.index)}
-              style={[
-                styles.shadowingButton,
-                { backgroundColor: colors.secondarySurface },
-                comparing?.index === sentence.index &&
-                  comparing.source === 'model' &&
-                  modelCompareActive && { opacity: 0.5 },
-              ]}
-            >
-              <ThemedText variant="caption">🔊 お手本</ThemedText>
-            </Pressable>
-            {lastRecordings[sentence.index] ? (
-              <Pressable
-                onPress={() => playUserRecording(sentence.index)}
+                key={sentence.index}
+                ref={(node) => {
+                  sentenceCardRefs.current[sentence.index] = node;
+                }}
+                onPress={() => {
+                  setFocusedPos(pos);
+                  seekTo(sentence.startSec, `文${pos + 1} 冒頭へ移動`);
+                }}
+                onLongPress={() => toggleRepeat(sentence.index)}
                 style={[
-                  styles.shadowingButton,
-                  { backgroundColor: colors.secondarySurface },
-                  comparing?.index === sentence.index &&
-                    comparing.source === 'user' && { opacity: 0.5 },
+                  styles.scriptCard,
+                  { backgroundColor: colors.surface, borderColor: colors.border },
+                  (isActive || isRepeat) && { borderColor: colors.primary, borderWidth: 2 },
                 ]}
               >
-                <ThemedText variant="caption">🎤 自分の録音</ThemedText>
+                <View style={styles.scriptCardTop}>
+                  <ThemedText variant="caption" color={isActive ? 'primary' : 'muted'}>
+                    文{pos + 1} ・ {lesson.speakerNames[sentence.speaker] ?? sentence.speaker}
+                    {isRepeat ? ' ・リピート中' : ''}
+                  </ThemedText>
+                  <Pressable
+                    hitSlop={8}
+                    onPress={() => toggleWeakSentence(lesson.id, sentence.index)}
+                    accessibilityRole="button"
+                    accessibilityLabel={weak ? '苦手フレーズから外す' : '苦手フレーズに登録'}
+                  >
+                    <ThemedText
+                      variant="caption"
+                      style={{
+                        color: weak ? weakActiveColor : colors.textMuted,
+                        fontWeight: '600',
+                      }}
+                    >
+                      {weak ? '★ 苦手' : '☆ 苦手'}
+                    </ThemedText>
+                  </Pressable>
+                </View>
+                <ThemedText style={styles.scriptEnglish}>{sentence.text}</ThemedText>
+                <ThemedText variant="caption" color="muted">
+                  {sentence.translationJa}
+                </ThemedText>
               </Pressable>
-            ) : null}
-            {shadowingCounts[sentence.index] ? (
-              <ThemedText variant="caption" color="muted">
-                録音 {shadowingCounts[sentence.index]} 回
-              </ThemedText>
-            ) : null}
-          </View>
-        </Pressable>
-      ))}
+            );
+          })}
+        </View>
+      ) : null}
 
+      {/* 段階開示シート群 (D6 / D7) */}
+      <LinkingNoteSheet
+        visible={linkingSheetTarget !== null}
+        sentence={sheetSentence}
+        noteIndex={linkingSheetTarget?.noteIndex ?? 0}
+        onSelectNote={(noteIndex) =>
+          setLinkingSheetTarget((prev) => (prev ? { ...prev, noteIndex } : null))
+        }
+        onReplaySentence={() => {
+          if (!sheetSentence) return;
+          seekTo(sheetSentence.startSec, `解説文再生: 文${sheetSentence.index + 1}`, () => {
+            play();
+          });
+        }}
+        onOpenLegend={() => {
+          setLinkingSheetTarget(null);
+          setShowLegendSheet(true);
+        }}
+        onClose={() => setLinkingSheetTarget(null)}
+      />
+
+      <LegendSheet
+        visible={showLegendSheet}
+        legendTypes={legendTypes}
+        onClose={() => setShowLegendSheet(false)}
+      />
+
+      <PlaybackToolsSheet
+        visible={showToolsSheet}
+        rate={rate}
+        onSelectRate={(r) => applyRate(r)}
+        ab={ab}
+        abPhrase={abPhrase}
+        onSetAbPoint={setAbPoint}
+        onClearAb={clearAb}
+        autoRecordAfterModel={autoRecordAfterModel}
+        onToggleAutoRecord={toggleAutoRecord}
+        onClose={() => setShowToolsSheet(false)}
+      />
+
+      <CompletionSummaryModal
+        visible={showSummary}
+        summarySeconds={summarySeconds}
+        shadowingCount={lessonShadowingTotal(lesson.id)}
+        weakCount={sentences.filter((st) => isSentenceWeak(lesson.id, st.index)).length}
+        streak={computeStreak(progressDays)}
+        isPremium={isPremium}
+        hasNextLesson={nextLesson !== null}
+        onNextLesson={() => {
+          if (!nextLesson) return;
+          setShowSummary(false);
+          router.replace({
+            pathname: '/lesson',
+            params: { lesson: nextLesson.entry.id },
+          });
+        }}
+        onOpenPaywall={() => {
+          setShowSummary(false);
+          router.push('/paywall');
+        }}
+        onClose={() => setShowSummary(false)}
+      />
     </Screen>
   );
 }
 
-/** 現在文の単語ハイライト表示。チャンク境界にスラッシュ、音の変化箇所は色分け + タップで詳細 */
+/**
+ * カラオケ風表示の現在文。単語ベースラインが揃うよう単一ラップ構造にしている。
+ */
 function KaraokeLine({
   sentence,
   activeWordIndex,
@@ -1241,9 +1402,10 @@ function KaraokeLine({
   activeWordIndex: number;
   onWordPress?: (wordIndex: number) => void;
 }) {
-  const { colors } = useTheme();
+  const { scheme, colors } = useTheme();
   const ranges = chunkWordRanges(sentence);
   const linkMap = useMemo(() => wordLinkMap(sentence), [sentence]);
+
   return (
     <View style={styles.karaokeLine}>
       {ranges.map((range, chunkIdx) => (
@@ -1253,39 +1415,45 @@ function KaraokeLine({
             const isActive = wordIndex === activeWordIndex;
             const isPast = wordIndex < activeWordIndex;
             const noteIndex = linkMap[wordIndex];
-            // linkMap は text トークン基準のため words と長さがずれると undefined になり得る
             const note =
               noteIndex === null || noteIndex === undefined
                 ? undefined
                 : sentence.linking[noteIndex];
-            const linkColor = note ? LINKING_COLORS[note.type] : null;
-            const wordNode = (
+            const linkColor = note ? getLinkingColor(note.type, scheme) : null;
+            const textColor = isActive
+              ? colors.primary
+              : (linkColor ?? (isPast ? colors.text : colors.textMuted));
+
+            const wordText = (
               <ThemedText
                 style={[
                   styles.karaokeWord,
-                  { color: isActive ? colors.primary : linkColor ?? (isPast ? colors.text : colors.textMuted) },
+                  { color: textColor },
                   isActive && styles.karaokeWordActive,
                   linkColor !== null && !isActive && styles.karaokeWordLinked,
-                  note ? LINKING_TEXT_DECORATIONS[note.type] : null,
+                  note ? [LINKING_TEXT_DECORATIONS[note.type], { textDecorationColor: textColor }] : null,
                 ]}
               >
                 {word.text}
               </ThemedText>
             );
+
             return note && onWordPress ? (
               <Pressable
                 key={`${word.text}-${wordIndex}`}
                 hitSlop={4}
                 onPress={() => onWordPress(wordIndex)}
+                accessibilityRole="button"
+                accessibilityLabel={`${word.text}の音変化解説を開く`}
               >
-                {wordNode}
+                {wordText}
               </Pressable>
             ) : (
-              <ThemedText key={`${word.text}-${wordIndex}`}>{wordNode}</ThemedText>
+              <View key={`${word.text}-${wordIndex}`}>{wordText}</View>
             );
           })}
           {chunkIdx < ranges.length - 1 ? (
-            <ThemedText style={[styles.karaokeWord, { color: colors.textMuted }]}> / </ThemedText>
+            <ThemedText style={[styles.karaokeWord, { color: colors.textMuted }]}>/</ThemedText>
           ) : null}
         </View>
       ))}
@@ -1293,174 +1461,293 @@ function KaraokeLine({
   );
 }
 
-/** チャンク (意味の塊) 表示。タップでチャンクの冒頭へシーク */
+/** チャンク (意味の塊) 表示。タップでそのチャンク冒頭へシーク */
 function ChunkLine({
   sentence,
+  activeChunkIndex,
   onChunkPress,
 }: {
   sentence: LessonSentence;
+  activeChunkIndex: number;
   onChunkPress: (chunk: { text: string; startSec: number }) => void;
 }) {
   const { colors } = useTheme();
   return (
     <View style={styles.chunkRow}>
-      {sentence.chunks.map((chunk, i) => (
-        <Pressable
-          key={`${chunk.text}-${i}`}
-          onPress={() => onChunkPress(chunk)}
-          style={[styles.chunkBox, { backgroundColor: colors.secondarySurface }]}
-        >
-          <ThemedText style={styles.karaokeWord}>{chunk.text}</ThemedText>
-        </Pressable>
-      ))}
+      {sentence.chunks.map((chunk, i) => {
+        const isActive = i === activeChunkIndex;
+        return (
+          <Pressable
+            key={`${chunk.text}-${i}`}
+            onPress={() => onChunkPress(chunk)}
+            style={[
+              styles.chunkBox,
+              {
+                backgroundColor: colors.secondarySurface,
+                borderColor: isActive ? colors.primary : colors.border,
+              },
+            ]}
+          >
+            <ThemedText
+              style={[styles.chunkWord, isActive && { color: colors.primary, fontWeight: '700' }]}
+            >
+              {chunk.text}
+            </ThemedText>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  topProgressTrack: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  topProgressFill: {
+    height: 4,
+    borderRadius: 2,
+  },
+  modeSegmented: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 4,
+    gap: 4,
+    marginBottom: 16,
+  },
+  modeSegmentItem: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modeSegmentLabel: {
+    fontWeight: '700',
+  },
+  abBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 12,
+    gap: 8,
+  },
+  abBannerText: {
+    flex: 1,
+    fontWeight: '600',
+  },
+  abClearText: {
+    fontWeight: '700',
+  },
+  stageCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    gap: 16,
+  },
+  stageHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  speakerLabel: {
+    fontWeight: '600',
+  },
+  stageHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerActionText: {
+    fontWeight: '600',
+  },
+  stageBody: {
+    minHeight: 120,
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  translationText: {
+    lineHeight: 20,
+  },
+  hintRow: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingTop: 12,
+  },
+  hintRowText: {
+    fontWeight: '600',
+  },
+  karaokeLine: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    alignItems: 'center',
+  },
+  karaokeChunk: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 6,
+  },
+  karaokeWord: {
+    fontSize: 20,
+    lineHeight: 30,
+  },
+  karaokeWordActive: {
+    fontWeight: '700',
+  },
+  karaokeWordLinked: {
+    fontWeight: '600',
+  },
+  chunkRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chunkBox: {
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  chunkWord: {
+    fontSize: 17,
+    lineHeight: 24,
+  },
+  scriptList: {
+    gap: 8,
+    paddingBottom: 16,
+  },
+  scriptCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+    gap: 6,
+  },
+  scriptCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  scriptEnglish: {
+    fontWeight: '500',
+  },
   transportBar: {
     borderTopWidth: 1,
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingBottom: 6,
+    paddingBottom: 8,
     gap: 6,
   },
-  seekRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  seekTime: { minWidth: 34, textAlign: 'center' },
-  seekTrackTouch: { flex: 1, paddingVertical: 8 },
-  seekTrack: { height: 6, borderRadius: 3, overflow: 'hidden' },
-  seekFill: { height: 6, borderRadius: 3 },
-  transportRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  transportSide: {
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  transportPlay: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 999,
-    alignItems: 'center',
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  transportDisabled: { opacity: 0.4 },
-  transportMeta: { textAlign: 'center' },
-  summaryCard: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
-    gap: 6,
-  },
-  summaryButtons: {
+  seekRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginTop: 6,
-  },
-  summaryPrimary: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-  },
-  summaryGhost: { paddingVertical: 10, paddingHorizontal: 8 },
-  panel: {
-    marginTop: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 14,
     gap: 8,
   },
-  progressTrack: {
+  seekTime: {
+    minWidth: 34,
+    textAlign: 'center',
+  },
+  seekTrackTouch: {
+    flex: 1,
+    paddingVertical: 8,
+  },
+  seekTrack: {
     height: 6,
     borderRadius: 3,
     overflow: 'hidden',
   },
-  progressFill: { height: 6, borderRadius: 3 },
-  controlsRow: { flexDirection: 'row', gap: 8 },
-  rateRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  sectionTitle: { marginTop: 18 },
-  karaoke: {
-    borderRadius: 10,
-    borderWidth: 1,
-    padding: 12,
-    gap: 6,
+  seekFill: {
+    height: 6,
+    borderRadius: 3,
   },
-  karaokeLine: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
-  karaokeChunk: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 5 },
-  karaokeWord: { fontSize: 16, lineHeight: 24 },
-  karaokeWordActive: { fontWeight: '700' },
-  karaokeWordLinked: { fontWeight: '600' },
-  chunkRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chunkBox: {
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  abRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  displayRow: { flexDirection: 'row', gap: 8, marginTop: 14 },
-  legendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 8 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  legendDot: { width: 8, height: 8, borderRadius: 4 },
-  noteDetail: {
-    borderLeftWidth: 3,
-    paddingLeft: 8,
-    gap: 2,
-    marginTop: 4,
-  },
-  stageWords: { height: 124, justifyContent: 'center' },
-  stageTranslation: { height: 36 },
-  stageNotes: { height: 88, gap: 2, justifyContent: 'flex-start' },
-  shadowingRow: {
+  transportRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
     gap: 8,
-    marginTop: 6,
   },
-  shadowingButton: {
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  recordingText: { color: '#DC2626', fontWeight: '700' },
-  micDeniedText: { color: '#DC2626', marginTop: 4 },
-  sentence: {
-    marginTop: 8,
-    borderRadius: 10,
+  transportTools: {
+    paddingHorizontal: 12,
+    borderRadius: 999,
     borderWidth: 1,
-    padding: 12,
-    gap: 4,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  sentenceHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 },
-  flex: { flex: 1 },
-  weakIcon: { padding: 4 },
+  transportToolsText: {
+    fontWeight: '700',
+  },
+  transportSide: {
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  transportSideText: {
+    fontWeight: '600',
+  },
+  transportPlay: {
+    flex: 1,
+    borderRadius: 999,
+    alignItems: 'center',
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  transportDisabled: {
+    opacity: 0.4,
+  },
+  transportMeta: {
+    textAlign: 'center',
+  },
 });
 
-/** ルート: ?lesson=<id>&sentence=<n>&autorecord=1&demo=1 で対象文を選択 (既定は cafe-ordering)。
- *  autorecord=1 は自動スクロール後に録音を開始して数秒で停止する
- *  (自動検証用。?demo=1 と同じく既存の操作関数を呼ぶだけ) */
+/**
+ * ルート: ?lesson=<id>&sentence=<n>&mode=listen|read|speak|script&sheet=linking|tools|legend
+ */
 export default function LessonRoute() {
   const params = useLocalSearchParams<{
     demo?: string;
     lesson?: string | string[];
     sentence?: string | string[];
+    mode?: string | string[];
+    sheet?: string | string[];
     autorecord?: string | string[];
     autostudy?: string | string[];
   }>();
   const lessonParam = Array.isArray(params.lesson) ? params.lesson[0] : params.lesson;
   const sentenceParam = Array.isArray(params.sentence) ? params.sentence[0] : params.sentence;
+  const modeParam = Array.isArray(params.mode) ? params.mode[0] : params.mode;
+  const sheetParam = Array.isArray(params.sheet) ? params.sheet[0] : params.sheet;
+
   const bundle = getLessonBundle(lessonParam);
   const sentenceNumber = Number.parseInt(sentenceParam ?? '', 10);
+  const validModes: LessonMode[] = ['listen', 'read', 'speak', 'script'];
+  const initialMode = validModes.includes(modeParam as LessonMode)
+    ? (modeParam as LessonMode)
+    : null;
+  const validSheets = ['linking', 'tools', 'legend'] as const;
+  const initialSheet = validSheets.includes(sheetParam as (typeof validSheets)[number])
+    ? (sheetParam as 'linking' | 'tools' | 'legend')
+    : null;
+
   return (
     <LessonPlayerScreen
-      key={bundle.data.id}
+      key={`${bundle.data.id}-${modeParam ?? ''}-${sheetParam ?? ''}-${sentenceParam ?? ''}`}
       bundle={bundle}
       demoParam={params.demo === '1'}
       initialSentenceIndex={Number.isFinite(sentenceNumber) ? sentenceNumber - 1 : null}
+      initialMode={initialMode}
+      initialSheet={initialSheet}
       autorecordParam={params.autorecord === '1'}
       autostudyParam={params.autostudy === '1'}
     />
