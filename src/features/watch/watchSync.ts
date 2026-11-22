@@ -3,6 +3,7 @@ import {
   updateWatchContext,
   type WatchCommand,
 } from '../../../modules/watch-bridge/src/index';
+import { getAppliedSessionIds } from './watchSyncStore';
 
 /**
  * Apple Watch へ送るアプリ状態の管理 (Phase 1)。
@@ -42,7 +43,14 @@ function pushMerged(): void {
   const state: Record<string, unknown> = { updatedAtMs: Date.now() };
   if (playback) state.playback = playback;
   if (library) state.library = library;
+  // Watch 単体学習セッションの適用済みID (Watch は受け取った分を未適用一覧から除く)。
+  state.appliedSessionIds = getAppliedSessionIds();
   updateWatchContext(state);
+}
+
+/** 現在の状態をそのまま再送する (セッション適用後の ack 送出などに使う)。 */
+export function pushWatchState(): void {
+  pushMerged();
 }
 
 /** レッスン画面が再生状態を送る。null は「レッスンを開いていない」。

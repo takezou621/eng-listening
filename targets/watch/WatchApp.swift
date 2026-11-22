@@ -90,6 +90,9 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
     @Published var library: LibraryState?
     @Published var connectionText: String = "未接続"
 
+    /// Watch 単体再生 (Phase 2)。iPhone がなくてもレッスンを再生する。
+    let localPlayer = LocalPlayer()
+
     private static let rates: [Double] = [0.7, 0.85, 1.0, 1.15, 1.3]
 
     /// 送信ごとの世代。失敗時の巻き戻しは、その送信が最新のときだけ行う
@@ -157,6 +160,9 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
             // 再起動時は新しい context が届くまで表示が空になるため、
             // 受信済みの最新 context をそのまま反映する。
             self.session(session, didReceiveApplicationContext: session.receivedApplicationContext)
+            // 溜まっている学習セッションがあれば iPhone へ送る。
+            WatchSessionStore.shared.flush()
+            WatchSessionStore.shared.publishContext()
         }
     }
 
@@ -174,6 +180,12 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
             if let raw = state["library"] as? [String: Any] {
                 self.library = LibraryState(raw)
             }
+            if let ack = state["appliedSessionIds"] as? [Any] {
+                let ids = ack.compactMap { $0 as? String }
+                if !ids.isEmpty {
+                    WatchSessionStore.shared.removeApplied(ids)
+                }
+            }
         }
     }
 }
@@ -181,11 +193,21 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
 // MARK: - Views
 
 struct ContentView: View {
+    @EnvironmentObject private var connectivity: WatchConnectivityManager
+    @State private var page = 0
+
     var body: some View {
-        TabView {
-            NowPlayingView()
+        TabView(selection: $page) {
+            NowPlayingView(localPlayer: connectivity.localPlayer)
+                .tag(0)
+            LessonsView(localPlayer: connectivity.localPlayer) {
+                page = 0
+            }
+            .tag(1)
             ProgressView()
+                .tag(2)
             PhrasesView()
+                .tag(3)
         }
         .tabViewStyle(.verticalPage)
     }
@@ -193,10 +215,13 @@ struct ContentView: View {
 
 struct NowPlayingView: View {
     @EnvironmentObject private var connectivity: WatchConnectivityManager
+    @ObservedObject var localPlayer: LocalPlayer
 
     var body: some View {
         ScrollView {
-            if let playback = connectivity.playback {
+            if localPlayer.hasLesson {
+                LocalNowPlayingView(player: localPlayer)
+            } else if let playback = connectivity.playback {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(playback.lessonTitle)
                         .font(.caption2)
@@ -253,6 +278,10 @@ struct NowPlayingView: View {
                     Text("iPhoneでレッスンを開いてください")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+                    Text("レッスン一覧から、Watchだけでも再生できます")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
                     Text(connectivity.connectionText)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -326,6 +355,97 @@ struct PhrasesView: View {
                     Text("苦手フレーズ")
                         .font(.headline)
                     Text("まだありません")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Watch 単体再生の画面
+
+struct LocalNowPlayingView: View {
+    @ObservedObject var player: LocalPlayer
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Text("Watchで再生中")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            if let lesson = player.lesson {
+                Text(lesson.titleJa)
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                Text("文 \(player.sentenceIndex + 1) / \(lesson.sentences.count)")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                if let sentence = player.currentSentence {
+                    Text(sentence.text)
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(4)
+                    Text(sentence.translationJa)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(3)
+                }
+                HStack(spacing: 16) {
+                    Button {
+                        player.prevSentence()
+                    } label: {
+                        Image(systemName: "backward.fill")
+                    }
+                    .accessibilityLabel("前の文")
+                    Button {
+                        player.togglePlay()
+                    } label: {
+                        Image(systemName: player.isPlaying ? "pause.fill" : "play.fill")
+                            .font(.title3)
+                    }
+                    .accessibilityLabel(player.isPlaying ? "一時停止" : "再生")
+                    Button {
+                        player.nextSentence()
+                    } label: {
+                        Image(systemName: "forward.fill")
+                    }
+                    .accessibilityLabel("次の文")
+                }
+                Button {
+                    player.cycleRate()
+                } label: {
+                    Text(String(format: "%gx", player.rate))
+                        .font(.caption)
+                }
+                .accessibilityLabel("再生速度")
+                Button("ローカル再生を終了") {
+                    player.stopAndUnload()
+                }
+                .font(.caption2)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 4)
+    }
+}
+
+struct LessonsView: View {
+    @ObservedObject var localPlayer: LocalPlayer
+    var onSelect: () -> Void
+
+    var body: some View {
+        List(LessonLibrary.all) { lesson in
+            Button {
+                localPlayer.start(lesson)
+                onSelect()
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(lesson.titleJa)
+                        .font(.headline)
+                        .lineLimit(2)
+                    Text("\(Int(lesson.durationSec.rounded()))秒")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }

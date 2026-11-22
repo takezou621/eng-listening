@@ -1,0 +1,835 @@
+{
+ "id": "cafe-ordering",
+ "title": "Ordering at a Café",
+ "titleJa": "カフェで注文する",
+ "type": "conversation",
+ "level": "beginner",
+ "category": "cafe",
+ "audio": "audio.m4a",
+ "durationSec": 36.987,
+ "speakerNames": {
+  "female": "Barista",
+  "male": "Customer"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T04:53:47Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "female",
+   "startSec": 0.0,
+   "endSec": 4.572,
+   "text": "Good morning! Welcome to Sunbeam Coffee. What can I get started for you?",
+   "translationJa": "おはようございます！サンビームコーヒーへようこそ。ご注文お決まりでしょうか。",
+   "chunks": [
+    {
+     "text": "Good morning!",
+     "startSec": 0.0,
+     "endSec": 0.54
+    },
+    {
+     "text": "Welcome to Sunbeam Coffee.",
+     "startSec": 0.9,
+     "endSec": 2.18
+    },
+    {
+     "text": "What can I get started for you?",
+     "startSec": 2.74,
+     "endSec": 4.08
+    }
+   ],
+   "words": [
+    {
+     "text": "Good",
+     "startSec": 0.0,
+     "endSec": 0.16
+    },
+    {
+     "text": "morning!",
+     "startSec": 0.16,
+     "endSec": 0.54
+    },
+    {
+     "text": "Welcome",
+     "startSec": 0.9,
+     "endSec": 1.2
+    },
+    {
+     "text": "to",
+     "startSec": 1.2,
+     "endSec": 1.46
+    },
+    {
+     "text": "Sunbeam",
+     "startSec": 1.46,
+     "endSec": 1.86
+    },
+    {
+     "text": "Coffee.",
+     "startSec": 1.86,
+     "endSec": 2.18
+    },
+    {
+     "text": "What",
+     "startSec": 2.74,
+     "endSec": 2.86
+    },
+    {
+     "text": "can",
+     "startSec": 2.86,
+     "endSec": 3.04
+    },
+    {
+     "text": "I",
+     "startSec": 3.04,
+     "endSec": 3.16
+    },
+    {
+     "text": "get",
+     "startSec": 3.16,
+     "endSec": 3.3
+    },
+    {
+     "text": "started",
+     "startSec": 3.3,
+     "endSec": 3.6
+    },
+    {
+     "text": "for",
+     "startSec": 3.6,
+     "endSec": 3.9
+    },
+    {
+     "text": "you?",
+     "startSec": 3.9,
+     "endSec": 4.08
+    }
+   ],
+   "linking": []
+  },
+  {
+   "index": 1,
+   "speaker": "male",
+   "startSec": 5.072,
+   "endSec": 8.497,
+   "text": "Hi. I'd like a medium latte with oat milk, please.",
+   "translationJa": "こんにちは。ミディアムサイズのラテをオートミルクでお願いします。",
+   "chunks": [
+    {
+     "text": "Hi.",
+     "startSec": 5.072,
+     "endSec": 5.372
+    },
+    {
+     "text": "I'd like a medium latte",
+     "startSec": 5.652,
+     "endSec": 6.812
+    },
+    {
+     "text": "with oat milk,",
+     "startSec": 6.812,
+     "endSec": 7.392
+    },
+    {
+     "text": "please.",
+     "startSec": 7.652,
+     "endSec": 7.812
+    }
+   ],
+   "words": [
+    {
+     "text": "Hi.",
+     "startSec": 5.072,
+     "endSec": 5.372
+    },
+    {
+     "text": "I'd",
+     "startSec": 5.652,
+     "endSec": 5.752
+    },
+    {
+     "text": "like",
+     "startSec": 5.752,
+     "endSec": 5.872
+    },
+    {
+     "text": "a",
+     "startSec": 5.872,
+     "endSec": 6.012
+    },
+    {
+     "text": "medium",
+     "startSec": 6.012,
+     "endSec": 6.272
+    },
+    {
+     "text": "latte",
+     "startSec": 6.272,
+     "endSec": 6.812
+    },
+    {
+     "text": "with",
+     "startSec": 6.812,
+     "endSec": 6.952
+    },
+    {
+     "text": "oat",
+     "startSec": 6.952,
+     "endSec": 7.212
+    },
+    {
+     "text": "milk,",
+     "startSec": 7.212,
+     "endSec": 7.392
+    },
+    {
+     "text": "please.",
+     "startSec": 7.652,
+     "endSec": 7.812
+    }
+   ],
+   "linking": [
+    {
+     "span": "I'd like a",
+     "type": "linking",
+     "ipa": "/aɪd laɪk‿ə/",
+     "noteJa": "I'd の /d/ と like の /l/、like の /k/ と a の /ə/ がひと続きにつながる。単語ごとに区切らず「アイドラ イクア」と1ブロックで発音する。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "female",
+   "startSec": 8.997,
+   "endSec": 11.555,
+   "text": "Sure. Would you like whipped cream on that?",
+   "translationJa": "かしこまりました。ホイップクリームを付けますか。",
+   "chunks": [
+    {
+     "text": "Sure.",
+     "startSec": 8.997,
+     "endSec": 9.277
+    },
+    {
+     "text": "Would you like",
+     "startSec": 9.617,
+     "endSec": 10.057
+    },
+    {
+     "text": "whipped cream",
+     "startSec": 10.057,
+     "endSec": 10.577
+    },
+    {
+     "text": "on that?",
+     "startSec": 10.577,
+     "endSec": 11.037
+    }
+   ],
+   "words": [
+    {
+     "text": "Sure.",
+     "startSec": 8.997,
+     "endSec": 9.277
+    },
+    {
+     "text": "Would",
+     "startSec": 9.617,
+     "endSec": 9.797
+    },
+    {
+     "text": "you",
+     "startSec": 9.797,
+     "endSec": 9.917
+    },
+    {
+     "text": "like",
+     "startSec": 9.917,
+     "endSec": 10.057
+    },
+    {
+     "text": "whipped",
+     "startSec": 10.057,
+     "endSec": 10.297
+    },
+    {
+     "text": "cream",
+     "startSec": 10.297,
+     "endSec": 10.577
+    },
+    {
+     "text": "on",
+     "startSec": 10.577,
+     "endSec": 10.817
+    },
+    {
+     "text": "that?",
+     "startSec": 10.817,
+     "endSec": 11.037
+    }
+   ],
+   "linking": [
+    {
+     "span": "Would you",
+     "type": "palatalization",
+     "ipa": "/wʊdʒə/",
+     "noteJa": "would の語尾 /d/ と you の /j/ が融けて「ウッジュ」になる音の同化 (口語では Wouldja にも聞こえる)。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "male",
+   "startSec": 12.055,
+   "endSec": 15.012,
+   "text": "No, thanks. Just the latte is fine.",
+   "translationJa": "いえ、結構です。ラテだけで大丈夫です。",
+   "chunks": [
+    {
+     "text": "No, thanks.",
+     "startSec": 12.055,
+     "endSec": 12.795
+    },
+    {
+     "text": "Just the latte",
+     "startSec": 13.215,
+     "endSec": 14.035
+    },
+    {
+     "text": "is fine.",
+     "startSec": 14.035,
+     "endSec": 14.435
+    }
+   ],
+   "words": [
+    {
+     "text": "No,",
+     "startSec": 12.055,
+     "endSec": 12.255
+    },
+    {
+     "text": "thanks.",
+     "startSec": 12.515,
+     "endSec": 12.795
+    },
+    {
+     "text": "Just",
+     "startSec": 13.215,
+     "endSec": 13.435
+    },
+    {
+     "text": "the",
+     "startSec": 13.435,
+     "endSec": 13.635
+    },
+    {
+     "text": "latte",
+     "startSec": 13.635,
+     "endSec": 14.035
+    },
+    {
+     "text": "is",
+     "startSec": 14.035,
+     "endSec": 14.175
+    },
+    {
+     "text": "fine.",
+     "startSec": 14.175,
+     "endSec": 14.435
+    }
+   ],
+   "linking": [
+    {
+     "span": "Just the",
+     "type": "assimilation",
+     "ipa": "/dʒʌs ðə/",
+     "noteJa": "just の語尾の /t/ が almost 消えて「ジャス(ト)・ザ」。次が /ð/ のため t を発音しない方がネイティブらしく聞こえる。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "female",
+   "startSec": 15.512,
+   "endSec": 19.37,
+   "text": "Anything to eat? Our blueberry muffin is fresh out of the oven.",
+   "translationJa": "食べ物はいかがですか？うちのブルーベリーマフィンは焼きたてです。",
+   "chunks": [
+    {
+     "text": "Anything to eat?",
+     "startSec": 15.512,
+     "endSec": 16.312
+    },
+    {
+     "text": "Our blueberry muffin",
+     "startSec": 16.652,
+     "endSec": 17.752
+    },
+    {
+     "text": "is fresh out of the oven.",
+     "startSec": 17.752,
+     "endSec": 18.832
+    }
+   ],
+   "words": [
+    {
+     "text": "Anything",
+     "startSec": 15.512,
+     "endSec": 15.752
+    },
+    {
+     "text": "to",
+     "startSec": 15.752,
+     "endSec": 16.092
+    },
+    {
+     "text": "eat?",
+     "startSec": 16.092,
+     "endSec": 16.312
+    },
+    {
+     "text": "Our",
+     "startSec": 16.652,
+     "endSec": 16.812
+    },
+    {
+     "text": "blueberry",
+     "startSec": 16.812,
+     "endSec": 17.272
+    },
+    {
+     "text": "muffin",
+     "startSec": 17.272,
+     "endSec": 17.752
+    },
+    {
+     "text": "is",
+     "startSec": 17.752,
+     "endSec": 17.872
+    },
+    {
+     "text": "fresh",
+     "startSec": 17.872,
+     "endSec": 18.112
+    },
+    {
+     "text": "out",
+     "startSec": 18.112,
+     "endSec": 18.392
+    },
+    {
+     "text": "of",
+     "startSec": 18.392,
+     "endSec": 18.492
+    },
+    {
+     "text": "the",
+     "startSec": 18.492,
+     "endSec": 18.592
+    },
+    {
+     "text": "oven.",
+     "startSec": 18.592,
+     "endSec": 18.832
+    }
+   ],
+   "linking": [
+    {
+     "span": "fresh out",
+     "type": "linking",
+     "ipa": "/freʃ‿aʊt/",
+     "noteJa": "fresh の /ʃ/ と out の /aʊ/ がつながり「フレッシャウト」のようになる。out of も「アウタ」に縮む。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "male",
+   "startSec": 19.87,
+   "endSec": 22.892,
+   "text": "That sounds great. I'll take one muffin too.",
+   "translationJa": "それは良さそうですね。マフィンも一つ頼みます。",
+   "chunks": [
+    {
+     "text": "That sounds great.",
+     "startSec": 19.87,
+     "endSec": 20.69
+    },
+    {
+     "text": "I'll take",
+     "startSec": 21.09,
+     "endSec": 21.39
+    },
+    {
+     "text": "one muffin",
+     "startSec": 21.39,
+     "endSec": 22.05
+    },
+    {
+     "text": "too.",
+     "startSec": 22.05,
+     "endSec": 22.29
+    }
+   ],
+   "words": [
+    {
+     "text": "That",
+     "startSec": 19.87,
+     "endSec": 20.01
+    },
+    {
+     "text": "sounds",
+     "startSec": 20.01,
+     "endSec": 20.25
+    },
+    {
+     "text": "great.",
+     "startSec": 20.25,
+     "endSec": 20.69
+    },
+    {
+     "text": "I'll",
+     "startSec": 21.09,
+     "endSec": 21.21
+    },
+    {
+     "text": "take",
+     "startSec": 21.21,
+     "endSec": 21.39
+    },
+    {
+     "text": "one",
+     "startSec": 21.39,
+     "endSec": 21.63
+    },
+    {
+     "text": "muffin",
+     "startSec": 21.63,
+     "endSec": 22.05
+    },
+    {
+     "text": "too.",
+     "startSec": 22.05,
+     "endSec": 22.29
+    }
+   ],
+   "linking": [
+    {
+     "span": "That sounds",
+     "type": "assimilation",
+     "ipa": "/ðæ(t) saʊndz/",
+     "noteJa": "that の語尾の /t/ が次の /s/ の前でほぼ消える。that's sounds のように聞こえやすい。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "female",
+   "startSec": 23.392,
+   "endSec": 27.432,
+   "text": "Perfect. That comes to nine fifty. Can I get your name?",
+   "translationJa": "かしこまりました。合計9ドル50セントです。お名前を頂けますか？",
+   "chunks": [
+    {
+     "text": "Perfect.",
+     "startSec": 23.392,
+     "endSec": 23.752
+    },
+    {
+     "text": "That comes to nine fifty.",
+     "startSec": 24.172,
+     "endSec": 25.332
+    },
+    {
+     "text": "Can I get your name?",
+     "startSec": 26.012,
+     "endSec": 26.852
+    }
+   ],
+   "words": [
+    {
+     "text": "Perfect.",
+     "startSec": 23.392,
+     "endSec": 23.752
+    },
+    {
+     "text": "That",
+     "startSec": 24.172,
+     "endSec": 24.372
+    },
+    {
+     "text": "comes",
+     "startSec": 24.372,
+     "endSec": 24.672
+    },
+    {
+     "text": "to",
+     "startSec": 24.672,
+     "endSec": 24.912
+    },
+    {
+     "text": "nine",
+     "startSec": 24.912,
+     "endSec": 25.08
+    },
+    {
+     "text": "fifty.",
+     "startSec": 25.08,
+     "endSec": 25.332
+    },
+    {
+     "text": "Can",
+     "startSec": 26.012,
+     "endSec": 26.212
+    },
+    {
+     "text": "I",
+     "startSec": 26.212,
+     "endSec": 26.332
+    },
+    {
+     "text": "get",
+     "startSec": 26.332,
+     "endSec": 26.492
+    },
+    {
+     "text": "your",
+     "startSec": 26.492,
+     "endSec": 26.652
+    },
+    {
+     "text": "name?",
+     "startSec": 26.652,
+     "endSec": 26.852
+    }
+   ],
+   "linking": [
+    {
+     "span": "Can I",
+     "type": "linking",
+     "ipa": "/kæ‿naɪ/",
+     "noteJa": "can の語尾の /n/ が I の母音に乗って「キャナイ」とひと続きになる。"
+    },
+    {
+     "span": "get your",
+     "type": "palatalization",
+     "ipa": "/gɛtʃər/",
+     "noteJa": "get の /t/ と your の /j/ が同化して「ゲッチャ」。ネイティブはほぼ必ずこの形で発音する。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "male",
+   "startSec": 27.932,
+   "endSec": 29.81,
+   "text": "It's Ken. Ken Tanaka.",
+   "translationJa": "ケンです。ケン・タナカです。",
+   "chunks": [
+    {
+     "text": "It's Ken.",
+     "startSec": 27.932,
+     "endSec": 28.352
+    },
+    {
+     "text": "Ken Tanaka.",
+     "startSec": 28.652,
+     "endSec": 29.112
+    }
+   ],
+   "words": [
+    {
+     "text": "It's",
+     "startSec": 27.932,
+     "endSec": 28.112
+    },
+    {
+     "text": "Ken.",
+     "startSec": 28.112,
+     "endSec": 28.352
+    },
+    {
+     "text": "Ken",
+     "startSec": 28.652,
+     "endSec": 28.872
+    },
+    {
+     "text": "Tanaka.",
+     "startSec": 28.872,
+     "endSec": 29.112
+    }
+   ],
+   "linking": []
+  },
+  {
+   "index": 8,
+   "speaker": "female",
+   "startSec": 30.31,
+   "endSec": 34.622,
+   "text": "Thanks, Ken. We'll call your name at the counter in a few minutes.",
+   "translationJa": "ありがとう、ケンさん。数分でカウンターでお名前をお呼びします。",
+   "chunks": [
+    {
+     "text": "Thanks, Ken.",
+     "startSec": 30.31,
+     "endSec": 31.35
+    },
+    {
+     "text": "We'll call your name",
+     "startSec": 31.71,
+     "endSec": 32.55
+    },
+    {
+     "text": "at the counter",
+     "startSec": 32.55,
+     "endSec": 33.07
+    },
+    {
+     "text": "in a few minutes.",
+     "startSec": 33.07,
+     "endSec": 33.91
+    }
+   ],
+   "words": [
+    {
+     "text": "Thanks,",
+     "startSec": 30.31,
+     "endSec": 30.55
+    },
+    {
+     "text": "Ken.",
+     "startSec": 31.09,
+     "endSec": 31.35
+    },
+    {
+     "text": "We'll",
+     "startSec": 31.71,
+     "endSec": 31.99
+    },
+    {
+     "text": "call",
+     "startSec": 31.99,
+     "endSec": 32.17
+    },
+    {
+     "text": "your",
+     "startSec": 32.17,
+     "endSec": 32.33
+    },
+    {
+     "text": "name",
+     "startSec": 32.33,
+     "endSec": 32.55
+    },
+    {
+     "text": "at",
+     "startSec": 32.55,
+     "endSec": 32.71
+    },
+    {
+     "text": "the",
+     "startSec": 32.71,
+     "endSec": 32.81
+    },
+    {
+     "text": "counter",
+     "startSec": 32.81,
+     "endSec": 33.07
+    },
+    {
+     "text": "in",
+     "startSec": 33.07,
+     "endSec": 33.39
+    },
+    {
+     "text": "a",
+     "startSec": 33.39,
+     "endSec": 33.45
+    },
+    {
+     "text": "few",
+     "startSec": 33.45,
+     "endSec": 33.65
+    },
+    {
+     "text": "minutes.",
+     "startSec": 33.65,
+     "endSec": 33.91
+    }
+   ],
+   "linking": [
+    {
+     "span": "call your",
+     "type": "linking",
+     "ipa": "/kɔːl jər/",
+     "noteJa": "call の語尾の /l/ が your の /j/ に滑らかにつながる。l 自体を強く発音しない。"
+    },
+    {
+     "span": "at the",
+     "type": "reduction",
+     "ipa": "/ə ðə/",
+     "noteJa": "at の母音が弱化して「アット」でなく「ウ(ッ)・ザ」に近くなる。機能語は弱く発音する。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "male",
+   "startSec": 35.122,
+   "endSec": 36.987,
+   "text": "Awesome. Thank you so much!",
+   "translationJa": "ばっちり。本当にありがとう！",
+   "chunks": [
+    {
+     "text": "Awesome.",
+     "startSec": 35.122,
+     "endSec": 35.422
+    },
+    {
+     "text": "Thank you",
+     "startSec": 35.782,
+     "endSec": 36.102
+    },
+    {
+     "text": "so much!",
+     "startSec": 36.102,
+     "endSec": 36.622
+    }
+   ],
+   "words": [
+    {
+     "text": "Awesome.",
+     "startSec": 35.122,
+     "endSec": 35.422
+    },
+    {
+     "text": "Thank",
+     "startSec": 35.782,
+     "endSec": 35.902
+    },
+    {
+     "text": "you",
+     "startSec": 35.902,
+     "endSec": 36.102
+    },
+    {
+     "text": "so",
+     "startSec": 36.102,
+     "endSec": 36.282
+    },
+    {
+     "text": "much!",
+     "startSec": 36.282,
+     "endSec": 36.622
+    }
+   ],
+   "linking": []
+  }
+ ]
+}

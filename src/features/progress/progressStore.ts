@@ -228,6 +228,53 @@ export function markLessonCompleted(lessonId: string) {
 }
 
 /** シャドーイング (録音完了) 1 回を記録する */
+export interface ExternalStudyRecord {
+  /** 学習した日 (yyyy-MM-dd、そのデバイスのローカル日) */
+  date: string;
+  lessonId: string;
+  seconds: number;
+  completed: boolean;
+}
+
+/**
+ * 外部 (Apple Watch 単体学習) で記録された学習分を日別レコードへ合算する。
+ * 重複排除は呼び出し側 (watchSyncStore) がセッションIDで行う前提。
+ */
+export function mergeExternalStudyRecords(records: ExternalStudyRecord[]): void {
+  const valid = records.filter(
+    (r) =>
+      /^\d{4}-\d{2}-\d{2}$/.test(r.date) &&
+      typeof r.lessonId === 'string' &&
+      r.lessonId.length > 0 &&
+      Number.isFinite(r.seconds),
+  );
+  if (valid.length === 0) return;
+  updateData((current) => {
+    const next: ProgressData = { ...current };
+    for (const r of valid) {
+      const prev: DayRecord = next[r.date] ?? {
+        date: r.date,
+        seconds: 0,
+        shadowingCount: 0,
+        playedLessons: [],
+        completedLessons: [],
+      };
+      next[r.date] = {
+        ...prev,
+        seconds: prev.seconds + Math.max(0, Math.floor(r.seconds)),
+        playedLessons: prev.playedLessons.includes(r.lessonId)
+          ? prev.playedLessons
+          : [...prev.playedLessons, r.lessonId],
+        completedLessons:
+          r.completed && !prev.completedLessons.includes(r.lessonId)
+            ? [...prev.completedLessons, r.lessonId]
+            : prev.completedLessons,
+      };
+    }
+    return next;
+  });
+}
+
 export function addShadowingRecord(lessonId: string) {
   const date = localDateStr();
   updateData((current) => {

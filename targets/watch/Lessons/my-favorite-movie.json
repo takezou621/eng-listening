@@ -1,0 +1,888 @@
+{
+ "id": "my-favorite-movie",
+ "title": "My Favorite Movie",
+ "titleJa": "好きな映画",
+ "type": "monologue",
+ "level": "beginner",
+ "category": "entertainment",
+ "audio": "audio.m4a",
+ "durationSec": 36.147,
+ "speakerNames": {
+  "narrator": "Speaker"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T10:08:55Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "narrator",
+   "startSec": 0.0,
+   "endSec": 2.793,
+   "text": "Today, I want to talk about my favorite movie.",
+   "translationJa": "今日は、私のお気に入りの映画についてお話ししたいと思います。",
+   "chunks": [
+    {
+     "text": "Today,",
+     "startSec": 0.0,
+     "endSec": 0.26
+    },
+    {
+     "text": "I want to talk",
+     "startSec": 0.58,
+     "endSec": 1.16
+    },
+    {
+     "text": "about my favorite movie.",
+     "startSec": 1.16,
+     "endSec": 2.24
+    }
+   ],
+   "words": [
+    {
+     "text": "Today,",
+     "startSec": 0.0,
+     "endSec": 0.26
+    },
+    {
+     "text": "I",
+     "startSec": 0.58,
+     "endSec": 0.66
+    },
+    {
+     "text": "want",
+     "startSec": 0.66,
+     "endSec": 0.84
+    },
+    {
+     "text": "to",
+     "startSec": 0.84,
+     "endSec": 0.96
+    },
+    {
+     "text": "talk",
+     "startSec": 0.96,
+     "endSec": 1.16
+    },
+    {
+     "text": "about",
+     "startSec": 1.16,
+     "endSec": 1.4
+    },
+    {
+     "text": "my",
+     "startSec": 1.4,
+     "endSec": 1.58
+    },
+    {
+     "text": "favorite",
+     "startSec": 1.58,
+     "endSec": 1.88
+    },
+    {
+     "text": "movie.",
+     "startSec": 1.88,
+     "endSec": 2.24
+    }
+   ],
+   "linking": [
+    {
+     "span": "want to",
+     "type": "reduction",
+     "ipa": "/wɑnə/",
+     "noteJa": "want to が縮まって「ワナ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "startSec": 3.293,
+   "endSec": 6.127,
+   "text": "It is a heartwarming story about a young boy.",
+   "translationJa": "それはある幼い少年を描いた、心温まる物語です。",
+   "chunks": [
+    {
+     "text": "It is",
+     "startSec": 3.293,
+     "endSec": 3.473
+    },
+    {
+     "text": "a heartwarming story",
+     "startSec": 3.473,
+     "endSec": 4.533
+    },
+    {
+     "text": "about a young boy.",
+     "startSec": 4.533,
+     "endSec": 5.553
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 3.293,
+     "endSec": 3.373
+    },
+    {
+     "text": "is",
+     "startSec": 3.373,
+     "endSec": 3.473
+    },
+    {
+     "text": "a",
+     "startSec": 3.473,
+     "endSec": 3.613
+    },
+    {
+     "text": "heartwarming",
+     "startSec": 3.613,
+     "endSec": 4.133
+    },
+    {
+     "text": "story",
+     "startSec": 4.133,
+     "endSec": 4.533
+    },
+    {
+     "text": "about",
+     "startSec": 4.533,
+     "endSec": 4.913
+    },
+    {
+     "text": "a",
+     "startSec": 4.913,
+     "endSec": 5.073
+    },
+    {
+     "text": "young",
+     "startSec": 5.073,
+     "endSec": 5.233
+    },
+    {
+     "text": "boy.",
+     "startSec": 5.233,
+     "endSec": 5.553
+    }
+   ],
+   "linking": [
+    {
+     "span": "It is a",
+     "type": "flapping",
+     "ipa": "/ɪɾɪzə/",
+     "noteJa": "It の t が母音に挟まれてラ行のように軽く弾かれ、「イリザ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "startSec": 6.627,
+   "endSec": 9.141,
+   "text": "He moves to a new city with his family.",
+   "translationJa": "彼は家族と一緒に新しい街へ引っ越します。",
+   "chunks": [
+    {
+     "text": "He moves",
+     "startSec": 6.627,
+     "endSec": 6.967
+    },
+    {
+     "text": "to a new city",
+     "startSec": 6.967,
+     "endSec": 7.807
+    },
+    {
+     "text": "with his family.",
+     "startSec": 7.807,
+     "endSec": 8.627
+    }
+   ],
+   "words": [
+    {
+     "text": "He",
+     "startSec": 6.627,
+     "endSec": 6.727
+    },
+    {
+     "text": "moves",
+     "startSec": 6.727,
+     "endSec": 6.967
+    },
+    {
+     "text": "to",
+     "startSec": 6.967,
+     "endSec": 7.247
+    },
+    {
+     "text": "a",
+     "startSec": 7.247,
+     "endSec": 7.347
+    },
+    {
+     "text": "new",
+     "startSec": 7.347,
+     "endSec": 7.527
+    },
+    {
+     "text": "city",
+     "startSec": 7.527,
+     "endSec": 7.807
+    },
+    {
+     "text": "with",
+     "startSec": 7.807,
+     "endSec": 8.087
+    },
+    {
+     "text": "his",
+     "startSec": 8.087,
+     "endSec": 8.227
+    },
+    {
+     "text": "family.",
+     "startSec": 8.227,
+     "endSec": 8.627
+    }
+   ],
+   "linking": [
+    {
+     "span": "with his",
+     "type": "weak-form",
+     "ipa": "/wɪðɪz/",
+     "noteJa": "his の h 音が脱落して直前の with とつながり、「ウィディズ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "startSec": 9.641,
+   "endSec": 12.932,
+   "text": "At first, he feels lonely and has no friends.",
+   "translationJa": "最初は寂しさを感じ、友達も一人もいません。",
+   "chunks": [
+    {
+     "text": "At first,",
+     "startSec": 9.641,
+     "endSec": 10.081
+    },
+    {
+     "text": "he feels lonely",
+     "startSec": 10.461,
+     "endSec": 11.141
+    },
+    {
+     "text": "and has no friends.",
+     "startSec": 11.141,
+     "endSec": 12.321
+    }
+   ],
+   "words": [
+    {
+     "text": "At",
+     "startSec": 9.641,
+     "endSec": 9.781
+    },
+    {
+     "text": "first,",
+     "startSec": 9.781,
+     "endSec": 10.081
+    },
+    {
+     "text": "he",
+     "startSec": 10.461,
+     "endSec": 10.561
+    },
+    {
+     "text": "feels",
+     "startSec": 10.561,
+     "endSec": 10.841
+    },
+    {
+     "text": "lonely",
+     "startSec": 10.841,
+     "endSec": 11.141
+    },
+    {
+     "text": "and",
+     "startSec": 11.141,
+     "endSec": 11.561
+    },
+    {
+     "text": "has",
+     "startSec": 11.561,
+     "endSec": 11.721
+    },
+    {
+     "text": "no",
+     "startSec": 11.721,
+     "endSec": 11.941
+    },
+    {
+     "text": "friends.",
+     "startSec": 11.941,
+     "endSec": 12.321
+    }
+   ],
+   "linking": [
+    {
+     "span": "At first,",
+     "type": "elision",
+     "ipa": "/ət fɜːrst/",
+     "noteJa": "At の弱化と t の脱落（あるいは閉鎖音化）により、「アッフォースト」のように短く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "startSec": 13.432,
+   "endSec": 16.428,
+   "text": "Then, he meets an unusual dog in the park.",
+   "translationJa": "そんな時、彼は公園でちょっと変わった犬に出会います。",
+   "chunks": [
+    {
+     "text": "Then,",
+     "startSec": 13.432,
+     "endSec": 13.752
+    },
+    {
+     "text": "he meets an unusual dog",
+     "startSec": 13.932,
+     "endSec": 15.252
+    },
+    {
+     "text": "in the park.",
+     "startSec": 15.252,
+     "endSec": 15.832
+    }
+   ],
+   "words": [
+    {
+     "text": "Then,",
+     "startSec": 13.432,
+     "endSec": 13.752
+    },
+    {
+     "text": "he",
+     "startSec": 13.932,
+     "endSec": 14.012
+    },
+    {
+     "text": "meets",
+     "startSec": 14.012,
+     "endSec": 14.232
+    },
+    {
+     "text": "an",
+     "startSec": 14.232,
+     "endSec": 14.392
+    },
+    {
+     "text": "unusual",
+     "startSec": 14.392,
+     "endSec": 14.732
+    },
+    {
+     "text": "dog",
+     "startSec": 14.732,
+     "endSec": 15.252
+    },
+    {
+     "text": "in",
+     "startSec": 15.252,
+     "endSec": 15.512
+    },
+    {
+     "text": "the",
+     "startSec": 15.512,
+     "endSec": 15.612
+    },
+    {
+     "text": "park.",
+     "startSec": 15.612,
+     "endSec": 15.832
+    }
+   ],
+   "linking": [
+    {
+     "span": "meets an",
+     "type": "linking",
+     "ipa": "/miːtsən/",
+     "noteJa": "meets の末尾の s 音と an が連結して「ミーツァン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "startSec": 16.928,
+   "endSec": 19.819,
+   "text": "They become best friends and go on an adventure.",
+   "translationJa": "二人は親友になり、冒険の旅に出ます。",
+   "chunks": [
+    {
+     "text": "They become best friends",
+     "startSec": 16.928,
+     "endSec": 18.108
+    },
+    {
+     "text": "and go on",
+     "startSec": 18.108,
+     "endSec": 18.748
+    },
+    {
+     "text": "an adventure.",
+     "startSec": 18.748,
+     "endSec": 19.148
+    }
+   ],
+   "words": [
+    {
+     "text": "They",
+     "startSec": 16.928,
+     "endSec": 17.048
+    },
+    {
+     "text": "become",
+     "startSec": 17.048,
+     "endSec": 17.348
+    },
+    {
+     "text": "best",
+     "startSec": 17.348,
+     "endSec": 17.668
+    },
+    {
+     "text": "friends",
+     "startSec": 17.668,
+     "endSec": 18.108
+    },
+    {
+     "text": "and",
+     "startSec": 18.108,
+     "endSec": 18.368
+    },
+    {
+     "text": "go",
+     "startSec": 18.368,
+     "endSec": 18.568
+    },
+    {
+     "text": "on",
+     "startSec": 18.568,
+     "endSec": 18.748
+    },
+    {
+     "text": "an",
+     "startSec": 18.748,
+     "endSec": 18.828
+    },
+    {
+     "text": "adventure.",
+     "startSec": 18.828,
+     "endSec": 19.148
+    }
+   ],
+   "linking": [
+    {
+     "span": "go on an",
+     "type": "linking",
+     "ipa": "/ɡoʊ ɑːnən/",
+     "noteJa": "go on の音のつながりと on an の連結が続き、「ゴーオナン」のように滑らかに聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "startSec": 20.319,
+   "endSec": 24.585,
+   "text": "I will not tell you how the film ends, so please watch it yourself.",
+   "translationJa": "映画の結末は言わないでおきますね。",
+   "chunks": [
+    {
+     "text": "I will not tell you",
+     "startSec": 20.319,
+     "endSec": 21.179
+    },
+    {
+     "text": "how the film ends,",
+     "startSec": 21.179,
+     "endSec": 22.039
+    },
+    {
+     "text": "so please watch it yourself.",
+     "startSec": 22.339,
+     "endSec": 23.519
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 20.319,
+     "endSec": 20.399
+    },
+    {
+     "text": "will",
+     "startSec": 20.399,
+     "endSec": 20.539
+    },
+    {
+     "text": "not",
+     "startSec": 20.539,
+     "endSec": 20.739
+    },
+    {
+     "text": "tell",
+     "startSec": 20.739,
+     "endSec": 20.999
+    },
+    {
+     "text": "you",
+     "startSec": 20.999,
+     "endSec": 21.179
+    },
+    {
+     "text": "how",
+     "startSec": 21.179,
+     "endSec": 21.339
+    },
+    {
+     "text": "the",
+     "startSec": 21.339,
+     "endSec": 21.479
+    },
+    {
+     "text": "film",
+     "startSec": 21.479,
+     "endSec": 21.699
+    },
+    {
+     "text": "ends,",
+     "startSec": 21.699,
+     "endSec": 22.039
+    },
+    {
+     "text": "so",
+     "startSec": 22.339,
+     "endSec": 22.479
+    },
+    {
+     "text": "please",
+     "startSec": 22.479,
+     "endSec": 22.759
+    },
+    {
+     "text": "watch",
+     "startSec": 22.759,
+     "endSec": 23.039
+    },
+    {
+     "text": "it",
+     "startSec": 23.039,
+     "endSec": 23.239
+    },
+    {
+     "text": "yourself.",
+     "startSec": 23.239,
+     "endSec": 23.519
+    }
+   ],
+   "linking": [
+    {
+     "span": "tell you",
+     "type": "linking",
+     "ipa": "/tɛljuː/",
+     "noteJa": "tell の語尾 /l/ と you の /j/ がつながり、「テルユー」のように滑らかに聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "startSec": 25.085,
+   "endSec": 27.713,
+   "text": "What I love most is the beautiful music.",
+   "translationJa": "私が一番気に入っているのは、美しい音楽です。",
+   "chunks": [
+    {
+     "text": "What I love most",
+     "startSec": 25.085,
+     "endSec": 26.045
+    },
+    {
+     "text": "is the beautiful music.",
+     "startSec": 26.045,
+     "endSec": 27.185
+    }
+   ],
+   "words": [
+    {
+     "text": "What",
+     "startSec": 25.085,
+     "endSec": 25.205
+    },
+    {
+     "text": "I",
+     "startSec": 25.205,
+     "endSec": 25.345
+    },
+    {
+     "text": "love",
+     "startSec": 25.345,
+     "endSec": 25.565
+    },
+    {
+     "text": "most",
+     "startSec": 25.565,
+     "endSec": 26.045
+    },
+    {
+     "text": "is",
+     "startSec": 26.045,
+     "endSec": 26.245
+    },
+    {
+     "text": "the",
+     "startSec": 26.245,
+     "endSec": 26.405
+    },
+    {
+     "text": "beautiful",
+     "startSec": 26.405,
+     "endSec": 26.705
+    },
+    {
+     "text": "music.",
+     "startSec": 26.705,
+     "endSec": 27.185
+    }
+   ],
+   "linking": [
+    {
+     "span": "What I",
+     "type": "flapping",
+     "ipa": "/wʌɾaɪ/",
+     "noteJa": "What の t が母音に挟まれてラ行化し、「ワライ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "startSec": 28.213,
+   "endSec": 31.062,
+   "text": "It always makes me feel happy and energetic.",
+   "translationJa": "その音楽を聴くと、いつも明るく元気な気持ちになれます。",
+   "chunks": [
+    {
+     "text": "It always makes me",
+     "startSec": 28.213,
+     "endSec": 29.153
+    },
+    {
+     "text": "feel happy",
+     "startSec": 29.153,
+     "endSec": 29.713
+    },
+    {
+     "text": "and energetic.",
+     "startSec": 29.713,
+     "endSec": 30.453
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 28.213,
+     "endSec": 28.293
+    },
+    {
+     "text": "always",
+     "startSec": 28.293,
+     "endSec": 28.513
+    },
+    {
+     "text": "makes",
+     "startSec": 28.513,
+     "endSec": 28.913
+    },
+    {
+     "text": "me",
+     "startSec": 28.913,
+     "endSec": 29.153
+    },
+    {
+     "text": "feel",
+     "startSec": 29.153,
+     "endSec": 29.473
+    },
+    {
+     "text": "happy",
+     "startSec": 29.473,
+     "endSec": 29.713
+    },
+    {
+     "text": "and",
+     "startSec": 29.713,
+     "endSec": 30.033
+    },
+    {
+     "text": "energetic.",
+     "startSec": 30.033,
+     "endSec": 30.453
+    }
+   ],
+   "linking": [
+    {
+     "span": "and energetic.",
+     "type": "linking",
+     "ipa": "/ənd‿ɛnərdʒɛtɪk/",
+     "noteJa": "and の d が弱まるか脱落し、母音へと滑らかにつながります。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "startSec": 31.562,
+   "endSec": 33.68,
+   "text": "I have watched it a lot of times.",
+   "translationJa": "私はこの映画を何度も観返しました。",
+   "chunks": [
+    {
+     "text": "I have watched it",
+     "startSec": 31.562,
+     "endSec": 32.322
+    },
+    {
+     "text": "a lot of times.",
+     "startSec": 32.322,
+     "endSec": 33.082
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 31.562,
+     "endSec": 31.662
+    },
+    {
+     "text": "have",
+     "startSec": 31.662,
+     "endSec": 31.802
+    },
+    {
+     "text": "watched",
+     "startSec": 31.802,
+     "endSec": 32.062
+    },
+    {
+     "text": "it",
+     "startSec": 32.062,
+     "endSec": 32.322
+    },
+    {
+     "text": "a",
+     "startSec": 32.322,
+     "endSec": 32.422
+    },
+    {
+     "text": "lot",
+     "startSec": 32.422,
+     "endSec": 32.602
+    },
+    {
+     "text": "of",
+     "startSec": 32.602,
+     "endSec": 32.722
+    },
+    {
+     "text": "times.",
+     "startSec": 32.722,
+     "endSec": 33.082
+    }
+   ],
+   "linking": [
+    {
+     "span": "lot of",
+     "type": "flapping",
+     "ipa": "/lɑːɾəv/",
+     "noteJa": "lot の t がラ行化し、of とつながって「ララヴ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "narrator",
+   "startSec": 34.18,
+   "endSec": 36.147,
+   "text": "You should check it out this weekend.",
+   "translationJa": "今週末にぜひチェックしてみてくださいね。",
+   "chunks": [
+    {
+     "text": "You should check it out",
+     "startSec": 34.18,
+     "endSec": 35.06
+    },
+    {
+     "text": "this weekend.",
+     "startSec": 35.06,
+     "endSec": 35.62
+    }
+   ],
+   "words": [
+    {
+     "text": "You",
+     "startSec": 34.18,
+     "endSec": 34.3
+    },
+    {
+     "text": "should",
+     "startSec": 34.3,
+     "endSec": 34.5
+    },
+    {
+     "text": "check",
+     "startSec": 34.5,
+     "endSec": 34.72
+    },
+    {
+     "text": "it",
+     "startSec": 34.72,
+     "endSec": 34.92
+    },
+    {
+     "text": "out",
+     "startSec": 34.92,
+     "endSec": 35.06
+    },
+    {
+     "text": "this",
+     "startSec": 35.06,
+     "endSec": 35.24
+    },
+    {
+     "text": "weekend.",
+     "startSec": 35.24,
+     "endSec": 35.62
+    }
+   ],
+   "linking": [
+    {
+     "span": "check it out",
+     "type": "linking",
+     "ipa": "/tʃɛkɪɾaʊt/",
+     "noteJa": "check it がつながり、it の t が母音 out の前でラ行化して「チェキラウト」のように聞こえます。"
+    }
+   ]
+  }
+ ]
+}

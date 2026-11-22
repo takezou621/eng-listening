@@ -4,6 +4,7 @@
 
 ### 機能
 - Apple Watch コンパニオン（Phase 1）: Watch からレッスン再生を操作（再生/一時停止・文送り/文戻し・速度変更）、現在文（英語＋日本語訳）の表示、今日の進捗（学習時間・連続日数・完了数）の確認、苦手フレーズの閲覧（読み取り専用）。iPhone との通信は WatchConnectivity（状態は applicationContext、操作は sendMessage）
+- Apple Watch 単体再生（Phase 2）: 全12レッスンの音声＋テキストを Watch に同梱し、iPhone なしでもレッスン再生（文送り・速度変更・現在文表示、終了後は次のレッスンを自動再生）ができる。Watch で学習した進捗はセッションとして記録し、iPhone 接続時に applicationContext 経由で同期して戻す（ID で重複排除、適用済み ack で Watch 側を消去）
 
 ## 1.0.0（2026-11-28 提出予定）
 

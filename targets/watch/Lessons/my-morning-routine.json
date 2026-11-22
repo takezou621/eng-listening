@@ -1,0 +1,1087 @@
+{
+ "id": "my-morning-routine",
+ "title": "My Morning Routine",
+ "titleJa": "朝の習慣",
+ "type": "monologue",
+ "level": "beginner",
+ "category": "daily-life",
+ "audio": "audio.m4a",
+ "durationSec": 46.013,
+ "speakerNames": {
+  "narrator": "Speaker"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T10:07:20Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "narrator",
+   "startSec": 0.0,
+   "endSec": 2.982,
+   "text": "I usually wake up at six thirty in the morning.",
+   "translationJa": "私は普段、朝の6時半に目を覚まします。",
+   "chunks": [
+    {
+     "text": "I usually wake up",
+     "startSec": 0.0,
+     "endSec": 1.1
+    },
+    {
+     "text": "at six thirty",
+     "startSec": 1.1,
+     "endSec": 1.88
+    },
+    {
+     "text": "in the morning.",
+     "startSec": 1.88,
+     "endSec": 2.48
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 0.0,
+     "endSec": 0.1
+    },
+    {
+     "text": "usually",
+     "startSec": 0.1,
+     "endSec": 0.4
+    },
+    {
+     "text": "wake",
+     "startSec": 0.4,
+     "endSec": 0.88
+    },
+    {
+     "text": "up",
+     "startSec": 0.88,
+     "endSec": 1.1
+    },
+    {
+     "text": "at",
+     "startSec": 1.1,
+     "endSec": 1.3
+    },
+    {
+     "text": "six",
+     "startSec": 1.3,
+     "endSec": 1.493
+    },
+    {
+     "text": "thirty",
+     "startSec": 1.493,
+     "endSec": 1.88
+    },
+    {
+     "text": "in",
+     "startSec": 1.88,
+     "endSec": 2.12
+    },
+    {
+     "text": "the",
+     "startSec": 2.12,
+     "endSec": 2.18
+    },
+    {
+     "text": "morning.",
+     "startSec": 2.18,
+     "endSec": 2.48
+    }
+   ],
+   "linking": [
+    {
+     "span": "wake up",
+     "type": "linking",
+     "ipa": "/weɪ.kʌp/",
+     "noteJa": "wakeの語尾/k/とupの語頭/ʌ/がつながり、「ウェイカップ」のようにひとまとまりで発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "startSec": 3.482,
+   "endSec": 7.095,
+   "text": "I try not to look at my phone right away when I wake up.",
+   "translationJa": "起きてすぐにはスマートフォンを見ないようにしています。",
+   "chunks": [
+    {
+     "text": "I try not to",
+     "startSec": 3.482,
+     "endSec": 4.162
+    },
+    {
+     "text": "look at my phone",
+     "startSec": 4.162,
+     "endSec": 4.862
+    },
+    {
+     "text": "right away",
+     "startSec": 4.862,
+     "endSec": 5.382
+    },
+    {
+     "text": "when I wake up.",
+     "startSec": 5.382,
+     "endSec": 6.262
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 3.482,
+     "endSec": 3.562
+    },
+    {
+     "text": "try",
+     "startSec": 3.562,
+     "endSec": 3.762
+    },
+    {
+     "text": "not",
+     "startSec": 3.762,
+     "endSec": 4.002
+    },
+    {
+     "text": "to",
+     "startSec": 4.002,
+     "endSec": 4.162
+    },
+    {
+     "text": "look",
+     "startSec": 4.162,
+     "endSec": 4.322
+    },
+    {
+     "text": "at",
+     "startSec": 4.322,
+     "endSec": 4.462
+    },
+    {
+     "text": "my",
+     "startSec": 4.462,
+     "endSec": 4.602
+    },
+    {
+     "text": "phone",
+     "startSec": 4.602,
+     "endSec": 4.862
+    },
+    {
+     "text": "right",
+     "startSec": 4.862,
+     "endSec": 5.122
+    },
+    {
+     "text": "away",
+     "startSec": 5.122,
+     "endSec": 5.382
+    },
+    {
+     "text": "when",
+     "startSec": 5.382,
+     "endSec": 5.702
+    },
+    {
+     "text": "I",
+     "startSec": 5.702,
+     "endSec": 5.842
+    },
+    {
+     "text": "wake",
+     "startSec": 5.842,
+     "endSec": 6.042
+    },
+    {
+     "text": "up.",
+     "startSec": 6.042,
+     "endSec": 6.262
+    }
+   ],
+   "linking": [
+    {
+     "span": "right away",
+     "type": "flapping",
+     "ipa": "/raɪ.ɾə.weɪ/",
+     "noteJa": "rightの/t/が母音に挟まれて日本語のラ行のような音に変化し、「ライラウェイ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "startSec": 7.595,
+   "endSec": 11.285,
+   "text": "Instead, I get out of bed and drink a glass of water.",
+   "translationJa": "その代わりにベッドから起き上がり、コップ1杯の水を飲みます。",
+   "chunks": [
+    {
+     "text": "Instead,",
+     "startSec": 7.595,
+     "endSec": 7.975
+    },
+    {
+     "text": "I get out of bed",
+     "startSec": 8.275,
+     "endSec": 9.055
+    },
+    {
+     "text": "and drink a glass of water.",
+     "startSec": 9.055,
+     "endSec": 10.375
+    }
+   ],
+   "words": [
+    {
+     "text": "Instead,",
+     "startSec": 7.595,
+     "endSec": 7.975
+    },
+    {
+     "text": "I",
+     "startSec": 8.275,
+     "endSec": 8.395
+    },
+    {
+     "text": "get",
+     "startSec": 8.395,
+     "endSec": 8.555
+    },
+    {
+     "text": "out",
+     "startSec": 8.555,
+     "endSec": 8.695
+    },
+    {
+     "text": "of",
+     "startSec": 8.695,
+     "endSec": 8.815
+    },
+    {
+     "text": "bed",
+     "startSec": 8.815,
+     "endSec": 9.055
+    },
+    {
+     "text": "and",
+     "startSec": 9.055,
+     "endSec": 9.295
+    },
+    {
+     "text": "drink",
+     "startSec": 9.295,
+     "endSec": 9.495
+    },
+    {
+     "text": "a",
+     "startSec": 9.495,
+     "endSec": 9.695
+    },
+    {
+     "text": "glass",
+     "startSec": 9.695,
+     "endSec": 9.895
+    },
+    {
+     "text": "of",
+     "startSec": 9.895,
+     "endSec": 10.115
+    },
+    {
+     "text": "water.",
+     "startSec": 10.115,
+     "endSec": 10.375
+    }
+   ],
+   "linking": [
+    {
+     "span": "get out of",
+     "type": "flapping",
+     "ipa": "/ɡɛ.ɾaʊ.ɾəv/",
+     "noteJa": "getの/t/とoutの/t/がフラップ化して後続の母音とつながり、「ゲラウラヴ」のように滑らかに聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "startSec": 11.785,
+   "endSec": 14.655,
+   "text": "Then I go to the kitchen to make some fresh coffee.",
+   "translationJa": "それから台所へ行き、淹れたてのコーヒーを淹れます。",
+   "chunks": [
+    {
+     "text": "Then I go to the kitchen",
+     "startSec": 11.785,
+     "endSec": 12.725
+    },
+    {
+     "text": "to make some fresh coffee.",
+     "startSec": 12.725,
+     "endSec": 14.065
+    }
+   ],
+   "words": [
+    {
+     "text": "Then",
+     "startSec": 11.785,
+     "endSec": 11.945
+    },
+    {
+     "text": "I",
+     "startSec": 11.945,
+     "endSec": 12.105
+    },
+    {
+     "text": "go",
+     "startSec": 12.105,
+     "endSec": 12.285
+    },
+    {
+     "text": "to",
+     "startSec": 12.285,
+     "endSec": 12.425
+    },
+    {
+     "text": "the",
+     "startSec": 12.425,
+     "endSec": 12.505
+    },
+    {
+     "text": "kitchen",
+     "startSec": 12.505,
+     "endSec": 12.725
+    },
+    {
+     "text": "to",
+     "startSec": 12.725,
+     "endSec": 13.045
+    },
+    {
+     "text": "make",
+     "startSec": 13.045,
+     "endSec": 13.185
+    },
+    {
+     "text": "some",
+     "startSec": 13.185,
+     "endSec": 13.425
+    },
+    {
+     "text": "fresh",
+     "startSec": 13.425,
+     "endSec": 13.705
+    },
+    {
+     "text": "coffee.",
+     "startSec": 13.705,
+     "endSec": 14.065
+    }
+   ],
+   "linking": []
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "startSec": 15.155,
+   "endSec": 18.408,
+   "text": "The smell of coffee always helps me wake up properly.",
+   "translationJa": "コーヒーの香りをかぐと、いつもすっきりと目が覚めます。",
+   "chunks": [
+    {
+     "text": "The smell of coffee",
+     "startSec": 15.155,
+     "endSec": 16.095
+    },
+    {
+     "text": "always helps me",
+     "startSec": 16.095,
+     "endSec": 17.015
+    },
+    {
+     "text": "wake up properly.",
+     "startSec": 17.015,
+     "endSec": 17.755
+    }
+   ],
+   "words": [
+    {
+     "text": "The",
+     "startSec": 15.155,
+     "endSec": 15.235
+    },
+    {
+     "text": "smell",
+     "startSec": 15.235,
+     "endSec": 15.455
+    },
+    {
+     "text": "of",
+     "startSec": 15.455,
+     "endSec": 15.695
+    },
+    {
+     "text": "coffee",
+     "startSec": 15.695,
+     "endSec": 16.095
+    },
+    {
+     "text": "always",
+     "startSec": 16.095,
+     "endSec": 16.455
+    },
+    {
+     "text": "helps",
+     "startSec": 16.455,
+     "endSec": 16.775
+    },
+    {
+     "text": "me",
+     "startSec": 16.775,
+     "endSec": 17.015
+    },
+    {
+     "text": "wake",
+     "startSec": 17.015,
+     "endSec": 17.235
+    },
+    {
+     "text": "up",
+     "startSec": 17.235,
+     "endSec": 17.375
+    },
+    {
+     "text": "properly.",
+     "startSec": 17.375,
+     "endSec": 17.755
+    }
+   ],
+   "linking": [
+    {
+     "span": "smell of",
+     "type": "linking",
+     "ipa": "/smɛ.ləv/",
+     "noteJa": "smellの/l/とofの/əv/が連結し、「スメラヴ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "startSec": 18.908,
+   "endSec": 22.196,
+   "text": "While the coffee is brewing, I make a quick breakfast.",
+   "translationJa": "コーヒーを抽出している間に、手早く朝食を作ります。",
+   "chunks": [
+    {
+     "text": "While the coffee is brewing,",
+     "startSec": 18.908,
+     "endSec": 20.108
+    },
+    {
+     "text": "I make a quick breakfast.",
+     "startSec": 20.448,
+     "endSec": 21.468
+    }
+   ],
+   "words": [
+    {
+     "text": "While",
+     "startSec": 18.908,
+     "endSec": 19.068
+    },
+    {
+     "text": "the",
+     "startSec": 19.068,
+     "endSec": 19.208
+    },
+    {
+     "text": "coffee",
+     "startSec": 19.208,
+     "endSec": 19.488
+    },
+    {
+     "text": "is",
+     "startSec": 19.488,
+     "endSec": 19.768
+    },
+    {
+     "text": "brewing,",
+     "startSec": 19.768,
+     "endSec": 20.108
+    },
+    {
+     "text": "I",
+     "startSec": 20.448,
+     "endSec": 20.528
+    },
+    {
+     "text": "make",
+     "startSec": 20.528,
+     "endSec": 20.688
+    },
+    {
+     "text": "a",
+     "startSec": 20.688,
+     "endSec": 20.848
+    },
+    {
+     "text": "quick",
+     "startSec": 20.848,
+     "endSec": 21.048
+    },
+    {
+     "text": "breakfast.",
+     "startSec": 21.048,
+     "endSec": 21.468
+    }
+   ],
+   "linking": [
+    {
+     "span": "make a",
+     "type": "linking",
+     "ipa": "/meɪ.kə/",
+     "noteJa": "makeの/k/とaの/ə/がつながり、「メイカ」のように短く聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "startSec": 22.696,
+   "endSec": 25.565,
+   "text": "I often eat some toast with a little butter on it.",
+   "translationJa": "よくバターを少し塗ったトーストを食べます。",
+   "chunks": [
+    {
+     "text": "I often eat some toast",
+     "startSec": 22.696,
+     "endSec": 23.836
+    },
+    {
+     "text": "with a little butter",
+     "startSec": 23.836,
+     "endSec": 24.716
+    },
+    {
+     "text": "on it.",
+     "startSec": 24.716,
+     "endSec": 25.156
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 22.696,
+     "endSec": 22.776
+    },
+    {
+     "text": "often",
+     "startSec": 22.776,
+     "endSec": 23.036
+    },
+    {
+     "text": "eat",
+     "startSec": 23.036,
+     "endSec": 23.296
+    },
+    {
+     "text": "some",
+     "startSec": 23.296,
+     "endSec": 23.516
+    },
+    {
+     "text": "toast",
+     "startSec": 23.516,
+     "endSec": 23.836
+    },
+    {
+     "text": "with",
+     "startSec": 23.836,
+     "endSec": 24.156
+    },
+    {
+     "text": "a",
+     "startSec": 24.156,
+     "endSec": 24.256
+    },
+    {
+     "text": "little",
+     "startSec": 24.256,
+     "endSec": 24.436
+    },
+    {
+     "text": "butter",
+     "startSec": 24.436,
+     "endSec": 24.716
+    },
+    {
+     "text": "on",
+     "startSec": 24.716,
+     "endSec": 24.996
+    },
+    {
+     "text": "it.",
+     "startSec": 24.996,
+     "endSec": 25.156
+    }
+   ],
+   "linking": [
+    {
+     "span": "on it",
+     "type": "linking",
+     "ipa": "/ɑː.nɪt/",
+     "noteJa": "onの/n/とitの/ɪ/がつながり、「オニット」のようにひと息で発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "startSec": 26.065,
+   "endSec": 29.686,
+   "text": "After eating, I wash the dishes and clean up the table.",
+   "translationJa": "食べた後は食器を洗い、テーブルを片付けます。",
+   "chunks": [
+    {
+     "text": "After eating,",
+     "startSec": 26.065,
+     "endSec": 26.585
+    },
+    {
+     "text": "I wash the dishes",
+     "startSec": 26.905,
+     "endSec": 27.685
+    },
+    {
+     "text": "and clean up the table.",
+     "startSec": 27.685,
+     "endSec": 28.825
+    }
+   ],
+   "words": [
+    {
+     "text": "After",
+     "startSec": 26.065,
+     "endSec": 26.325
+    },
+    {
+     "text": "eating,",
+     "startSec": 26.325,
+     "endSec": 26.585
+    },
+    {
+     "text": "I",
+     "startSec": 26.905,
+     "endSec": 26.985
+    },
+    {
+     "text": "wash",
+     "startSec": 26.985,
+     "endSec": 27.185
+    },
+    {
+     "text": "the",
+     "startSec": 27.185,
+     "endSec": 27.425
+    },
+    {
+     "text": "dishes",
+     "startSec": 27.425,
+     "endSec": 27.685
+    },
+    {
+     "text": "and",
+     "startSec": 27.685,
+     "endSec": 27.965
+    },
+    {
+     "text": "clean",
+     "startSec": 27.965,
+     "endSec": 28.185
+    },
+    {
+     "text": "up",
+     "startSec": 28.185,
+     "endSec": 28.385
+    },
+    {
+     "text": "the",
+     "startSec": 28.385,
+     "endSec": 28.545
+    },
+    {
+     "text": "table.",
+     "startSec": 28.545,
+     "endSec": 28.825
+    }
+   ],
+   "linking": [
+    {
+     "span": "clean up",
+     "type": "linking",
+     "ipa": "/kliː.nʌp/",
+     "noteJa": "cleanの/n/とupの/ʌ/が結合して「クリーナップ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "startSec": 30.186,
+   "endSec": 33.359,
+   "text": "Next, I take a quick shower and brush my teeth.",
+   "translationJa": "次に、さっとシャワーを浴びて歯を磨きます。",
+   "chunks": [
+    {
+     "text": "Next,",
+     "startSec": 30.186,
+     "endSec": 30.526
+    },
+    {
+     "text": "I take a quick shower",
+     "startSec": 30.806,
+     "endSec": 31.726
+    },
+    {
+     "text": "and brush my teeth.",
+     "startSec": 31.726,
+     "endSec": 32.786
+    }
+   ],
+   "words": [
+    {
+     "text": "Next,",
+     "startSec": 30.186,
+     "endSec": 30.526
+    },
+    {
+     "text": "I",
+     "startSec": 30.806,
+     "endSec": 30.886
+    },
+    {
+     "text": "take",
+     "startSec": 30.886,
+     "endSec": 31.086
+    },
+    {
+     "text": "a",
+     "startSec": 31.086,
+     "endSec": 31.226
+    },
+    {
+     "text": "quick",
+     "startSec": 31.226,
+     "endSec": 31.446
+    },
+    {
+     "text": "shower",
+     "startSec": 31.446,
+     "endSec": 31.726
+    },
+    {
+     "text": "and",
+     "startSec": 31.726,
+     "endSec": 32.086
+    },
+    {
+     "text": "brush",
+     "startSec": 32.086,
+     "endSec": 32.266
+    },
+    {
+     "text": "my",
+     "startSec": 32.266,
+     "endSec": 32.526
+    },
+    {
+     "text": "teeth.",
+     "startSec": 32.526,
+     "endSec": 32.786
+    }
+   ],
+   "linking": []
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "startSec": 33.859,
+   "endSec": 37.24,
+   "text": "I choose my clothes and put them on before seven thirty.",
+   "translationJa": "服を選び、7時半前には着替えます。",
+   "chunks": [
+    {
+     "text": "I choose my clothes",
+     "startSec": 33.859,
+     "endSec": 34.759
+    },
+    {
+     "text": "and put them on",
+     "startSec": 34.759,
+     "endSec": 35.679
+    },
+    {
+     "text": "before seven thirty.",
+     "startSec": 35.679,
+     "endSec": 36.759
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 33.859,
+     "endSec": 33.959
+    },
+    {
+     "text": "choose",
+     "startSec": 33.959,
+     "endSec": 34.199
+    },
+    {
+     "text": "my",
+     "startSec": 34.199,
+     "endSec": 34.439
+    },
+    {
+     "text": "clothes",
+     "startSec": 34.439,
+     "endSec": 34.759
+    },
+    {
+     "text": "and",
+     "startSec": 34.759,
+     "endSec": 35.099
+    },
+    {
+     "text": "put",
+     "startSec": 35.099,
+     "endSec": 35.279
+    },
+    {
+     "text": "them",
+     "startSec": 35.279,
+     "endSec": 35.459
+    },
+    {
+     "text": "on",
+     "startSec": 35.459,
+     "endSec": 35.679
+    },
+    {
+     "text": "before",
+     "startSec": 35.679,
+     "endSec": 36.019
+    },
+    {
+     "text": "seven",
+     "startSec": 36.019,
+     "endSec": 36.327
+    },
+    {
+     "text": "thirty.",
+     "startSec": 36.327,
+     "endSec": 36.759
+    }
+   ],
+   "linking": [
+    {
+     "span": "put them on",
+     "type": "reduction",
+     "ipa": "/pʊ.ðəm‿ɑːn/",
+     "noteJa": "themが弱形となって直前のputおよび直後のonとつながり、「プットゥマーン」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "narrator",
+   "startSec": 37.74,
+   "endSec": 41.799,
+   "text": "Before leaving the house, I make sure that I have my keys.",
+   "translationJa": "家を出る前に、鍵を持ったか必ず確認します。",
+   "chunks": [
+    {
+     "text": "Before leaving the house,",
+     "startSec": 37.74,
+     "endSec": 38.94
+    },
+    {
+     "text": "I make sure",
+     "startSec": 39.24,
+     "endSec": 39.8
+    },
+    {
+     "text": "that I have my keys.",
+     "startSec": 39.8,
+     "endSec": 40.76
+    }
+   ],
+   "words": [
+    {
+     "text": "Before",
+     "startSec": 37.74,
+     "endSec": 38.02
+    },
+    {
+     "text": "leaving",
+     "startSec": 38.02,
+     "endSec": 38.34
+    },
+    {
+     "text": "the",
+     "startSec": 38.34,
+     "endSec": 38.58
+    },
+    {
+     "text": "house,",
+     "startSec": 38.58,
+     "endSec": 38.94
+    },
+    {
+     "text": "I",
+     "startSec": 39.24,
+     "endSec": 39.36
+    },
+    {
+     "text": "make",
+     "startSec": 39.36,
+     "endSec": 39.52
+    },
+    {
+     "text": "sure",
+     "startSec": 39.52,
+     "endSec": 39.8
+    },
+    {
+     "text": "that",
+     "startSec": 39.8,
+     "endSec": 40.04
+    },
+    {
+     "text": "I",
+     "startSec": 40.04,
+     "endSec": 40.16
+    },
+    {
+     "text": "have",
+     "startSec": 40.16,
+     "endSec": 40.32
+    },
+    {
+     "text": "my",
+     "startSec": 40.32,
+     "endSec": 40.5
+    },
+    {
+     "text": "keys.",
+     "startSec": 40.5,
+     "endSec": 40.76
+    }
+   ],
+   "linking": []
+  },
+  {
+   "index": 11,
+   "speaker": "narrator",
+   "startSec": 42.299,
+   "endSec": 46.013,
+   "text": "I walk to the train station to catch the eight o'clock train.",
+   "translationJa": "8時ちょうどの電車に乗るために駅まで歩きます。",
+   "chunks": [
+    {
+     "text": "I walk to the train station",
+     "startSec": 42.299,
+     "endSec": 43.619
+    },
+    {
+     "text": "to catch",
+     "startSec": 43.619,
+     "endSec": 44.079
+    },
+    {
+     "text": "the eight o'clock train.",
+     "startSec": 44.079,
+     "endSec": 45.099
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 42.299,
+     "endSec": 42.399
+    },
+    {
+     "text": "walk",
+     "startSec": 42.399,
+     "endSec": 42.639
+    },
+    {
+     "text": "to",
+     "startSec": 42.639,
+     "endSec": 42.859
+    },
+    {
+     "text": "the",
+     "startSec": 42.859,
+     "endSec": 42.939
+    },
+    {
+     "text": "train",
+     "startSec": 42.939,
+     "endSec": 43.139
+    },
+    {
+     "text": "station",
+     "startSec": 43.139,
+     "endSec": 43.619
+    },
+    {
+     "text": "to",
+     "startSec": 43.619,
+     "endSec": 43.859
+    },
+    {
+     "text": "catch",
+     "startSec": 43.859,
+     "endSec": 44.079
+    },
+    {
+     "text": "the",
+     "startSec": 44.079,
+     "endSec": 44.319
+    },
+    {
+     "text": "eight",
+     "startSec": 44.319,
+     "endSec": 44.527
+    },
+    {
+     "text": "o'clock",
+     "startSec": 44.527,
+     "endSec": 44.819
+    },
+    {
+     "text": "train.",
+     "startSec": 44.819,
+     "endSec": 45.099
+    }
+   ],
+   "linking": [
+    {
+     "span": "eight o'clock",
+     "type": "linking",
+     "ipa": "/eɪ.tə.klɑːk/",
+     "noteJa": "eightの語尾/t/とo'clockの/ə/がつながり、「エイタクロック」のように聞こえます。"
+    }
+   ]
+  }
+ ]
+}

@@ -31,6 +31,7 @@ export interface WatchConnectionState {
 interface WatchBridgeNative {
   updateContext(state: Record<string, unknown>): boolean;
   getConnectionState(): WatchConnectionState;
+  getPendingStudySessions(): WatchSessionRecord[];
 }
 
 let native: WatchBridgeNative | null = null;
@@ -44,6 +45,10 @@ interface WatchEventEmitter {
   addListener(
     eventName: 'onWatchCommand',
     listener: (command: WatchCommand) => void,
+  ): { remove: () => void };
+  addListener(
+    eventName: 'onWatchSessions',
+    listener: (payload: { sessions: WatchSessionRecord[] }) => void,
   ): { remove: () => void };
 }
 
@@ -63,6 +68,36 @@ export function updateWatchContext(state: Record<string, unknown>): boolean {
   } catch {
     return false;
   }
+}
+
+/** Watch 単体学習のセッション記録 (Watch → iPhone の同期戻し)。 */
+export interface WatchSessionRecord {
+  id: string;
+  /** Watch 側のローカル日 (yyyy-MM-dd) */
+  date: string;
+  lessonId: string;
+  seconds: number;
+  completed: boolean;
+}
+
+/** 購読開始前に届いていた学習セッションを回収する (なければ空配列)。 */
+export function getPendingWatchSessions(): WatchSessionRecord[] {
+  if (!native) return [];
+  try {
+    return native.getPendingStudySessions() ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** Watch から届く学習セッションを購読する。戻り値の remove() で解除する。 */
+export function addWatchSessionsListener(
+  listener: (sessions: WatchSessionRecord[]) => void,
+): { remove: () => void } {
+  if (!emitter) return { remove: () => undefined };
+  return emitter.addListener('onWatchSessions', (payload) => {
+    listener(Array.isArray(payload?.sessions) ? payload.sessions : []);
+  });
 }
 
 export function getWatchConnectionState(): WatchConnectionState | null {
