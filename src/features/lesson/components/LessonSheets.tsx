@@ -1,4 +1,5 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { SymbolView, type SFSymbol } from 'expo-symbols';
 
 import { BottomSheet } from '@/components/BottomSheet';
 import { Chip } from '@/components/Chip';
@@ -7,12 +8,55 @@ import { PLAYBACK_RATES, type PlaybackRate } from '@/config/appConfig';
 import {
   LINKING_DESCRIPTIONS,
   LINKING_LABELS,
-  LINKING_TEXT_DECORATIONS,
+  LINKING_SYMBOLS,
   getLinkingColor,
+  getLinkingTextDecoration,
 } from '@/features/lesson/linkingViz';
 import type { LessonLinkingNote, LessonSentence } from '@/features/lesson/types';
 import { formatTime } from '@/features/player/shared';
 import { useTheme } from '@/theme/AppThemeProvider';
+
+function SheetIcon({
+  name,
+  fallback,
+  color,
+  size = 14,
+}: {
+  name: SFSymbol;
+  fallback: string;
+  color: string;
+  size?: number;
+}) {
+  return (
+    <SymbolView
+      name={name}
+      size={size}
+      tintColor={color}
+      type="monochrome"
+      resizeMode="scaleAspectFit"
+      fallback={<ThemedText style={{ color, fontSize: size }}>{fallback}</ThemedText>}
+    />
+  );
+}
+
+/**
+ * 音変化種別の一意識別シンボルバッジ (C2 強化: 色や下線種が見分けられなくても形で区別できる)。
+ */
+function LinkingSymbolBadge({
+  type,
+  color,
+}: {
+  type: LessonLinkingNote['type'];
+  color: string;
+}) {
+  return (
+    <View style={[styles.symbolBadge, { borderColor: color }]}>
+      <ThemedText variant="caption" style={[styles.symbolText, { color }]}>
+        {LINKING_SYMBOLS[type]}
+      </ThemedText>
+    </View>
+  );
+}
 
 /**
  * 音変化の解説ボトムシート (D6 解消: 常設解説カードを廃しタップ時に展開)。
@@ -23,6 +67,7 @@ export function LinkingNoteSheet({
   noteIndex,
   onSelectNote,
   onReplaySentence,
+  onPracticeSpeak,
   onOpenLegend,
   onClose,
 }: {
@@ -31,6 +76,7 @@ export function LinkingNoteSheet({
   noteIndex: number;
   onSelectNote: (index: number) => void;
   onReplaySentence: () => void;
+  onPracticeSpeak?: () => void;
   onOpenLegend: () => void;
   onClose: () => void;
 }) {
@@ -57,15 +103,20 @@ export function LinkingNoteSheet({
             </View>
           ) : null}
 
-          <View style={[styles.noteCard, { backgroundColor: colors.secondarySurface, borderColor: colors.border }]}>
+          <View
+            style={[
+              styles.noteCard,
+              { backgroundColor: colors.secondarySurface, borderColor: colors.border },
+            ]}
+          >
             <View style={styles.badgeRow}>
-              <View style={[styles.dot, { backgroundColor: noteColor }]} />
+              <LinkingSymbolBadge type={note.type} color={noteColor} />
               <ThemedText
                 variant="caption"
                 style={[
                   styles.badgeText,
                   { color: noteColor, textDecorationColor: noteColor },
-                  LINKING_TEXT_DECORATIONS[note.type],
+                  getLinkingTextDecoration(note.type, scheme),
                 ]}
               >
                 {LINKING_LABELS[note.type]}
@@ -87,10 +138,35 @@ export function LinkingNoteSheet({
             accessibilityRole="button"
             accessibilityLabel="この文をもう一度聞く"
           >
-            <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-              ▶ この文をもう一度聞く
-            </ThemedText>
+            <View style={styles.buttonInner}>
+              <SheetIcon name="play.fill" fallback="▶" color={colors.primaryText} />
+              <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
+                この文をもう一度聞く
+              </ThemedText>
+            </View>
           </Pressable>
+
+          {onPracticeSpeak ? (
+            <Pressable
+              onPress={() => {
+                onClose();
+                onPracticeSpeak();
+              }}
+              style={[
+                styles.secondaryOutlineButton,
+                { borderColor: colors.primary, backgroundColor: colors.surface },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="この文を話す練習（シャドーイング）へ進む"
+            >
+              <View style={styles.buttonInner}>
+                <SheetIcon name="mic.fill" fallback="🎙" color={colors.primary} />
+                <ThemedText color="primary" style={styles.secondaryOutlineLabel}>
+                  この文を話す（シャドーイング）
+                </ThemedText>
+              </View>
+            </Pressable>
+          ) : null}
 
           <Pressable
             onPress={onOpenLegend}
@@ -124,23 +200,20 @@ export function LegendSheet({
   return (
     <BottomSheet visible={visible} title="音の変化の凡例" onClose={onClose}>
       <ThemedText variant="caption" color="muted">
-        カラオケ風表示の色分けや下線の意味です。語句をタップすると詳しい解説を開きます。
+        カラオケ風表示の色分け・記号・下線の意味です。語句をタップすると詳しい解説を開きます。
       </ThemedText>
       <View style={styles.legendList}>
         {legendTypes.map((type) => {
           const typeColor = getLinkingColor(type, scheme);
           return (
-            <View
-              key={type}
-              style={[styles.legendRow, { borderBottomColor: colors.border }]}
-            >
+            <View key={type} style={[styles.legendRow, { borderBottomColor: colors.border }]}>
               <View style={styles.badgeRow}>
-                <View style={[styles.dot, { backgroundColor: typeColor }]} />
+                <LinkingSymbolBadge type={type} color={typeColor} />
                 <ThemedText
                   style={[
                     styles.legendLabel,
                     { color: typeColor, textDecorationColor: typeColor },
-                    LINKING_TEXT_DECORATIONS[type],
+                    getLinkingTextDecoration(type, scheme),
                   ]}
                 >
                   {LINKING_LABELS[type]}
@@ -256,6 +329,10 @@ export function CompletionSummaryModal({
   shadowingCount,
   weakCount,
   streak,
+  todayMinutes,
+  goalMinutes,
+  goalRatio,
+  goalAchieved,
   isPremium,
   hasNextLesson,
   onNextLesson,
@@ -267,6 +344,10 @@ export function CompletionSummaryModal({
   shadowingCount: number;
   weakCount: number;
   streak: number;
+  todayMinutes?: number;
+  goalMinutes?: number;
+  goalRatio?: number;
+  goalAchieved?: boolean;
   isPremium: boolean;
   hasNextLesson: boolean;
   onNextLesson: () => void;
@@ -275,9 +356,9 @@ export function CompletionSummaryModal({
 }) {
   const { colors } = useTheme();
   const timeLabel =
-    summarySeconds >= 90
-      ? `約 ${Math.round(summarySeconds / 60)}分`
-      : `${summarySeconds}秒`;
+    summarySeconds >= 90 ? `約 ${Math.round(summarySeconds / 60)}分` : `${summarySeconds}秒`;
+  const hasGoalInfo =
+    todayMinutes !== undefined && goalMinutes !== undefined && goalRatio !== undefined;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -321,6 +402,38 @@ export function CompletionSummaryModal({
               </ThemedText>
             </View>
           </View>
+
+          {hasGoalInfo ? (
+            <View style={[styles.goalBox, { backgroundColor: colors.secondarySurface }]}>
+              <View style={styles.goalBoxTop}>
+                <ThemedText variant="caption" color="muted">
+                  今日の目標
+                </ThemedText>
+                <ThemedText
+                  variant="caption"
+                  style={{
+                    color: goalAchieved ? colors.success : colors.primary,
+                    fontWeight: '700',
+                  }}
+                >
+                  {goalAchieved
+                    ? `✓ 目標達成 (${todayMinutes} / ${goalMinutes} 分)`
+                    : `${todayMinutes} / ${goalMinutes} 分`}
+                </ThemedText>
+              </View>
+              <View style={[styles.goalTrack, { backgroundColor: colors.border }]}>
+                <View
+                  style={[
+                    styles.goalFill,
+                    {
+                      width: `${Math.min(Math.max(goalRatio, 0), 1) * 100}%`,
+                      backgroundColor: goalAchieved ? colors.success : colors.primary,
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+          ) : null}
 
           <ThemedText variant="caption" color="muted" style={styles.summaryMeta}>
             苦手フレーズ登録: {weakCount} 件
@@ -394,13 +507,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  symbolBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  symbolText: {
+    fontWeight: '700',
+    lineHeight: 16,
   },
   badgeText: {
     fontWeight: '700',
+  },
+  buttonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   primaryButton: {
     borderRadius: 999,
@@ -409,6 +535,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
+  },
+  secondaryOutlineButton: {
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  secondaryOutlineLabel: {
+    fontWeight: '700',
   },
   ghostButton: {
     alignItems: 'center',
@@ -470,6 +608,25 @@ const styles = StyleSheet.create({
     padding: 12,
     alignItems: 'center',
     gap: 4,
+  },
+  goalBox: {
+    borderRadius: 10,
+    padding: 12,
+    gap: 6,
+  },
+  goalBoxTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  goalTrack: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  goalFill: {
+    height: 6,
+    borderRadius: 3,
   },
   summaryMeta: {
     textAlign: 'center',

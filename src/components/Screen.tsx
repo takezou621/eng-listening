@@ -9,6 +9,8 @@ interface ScreenProps {
   /** True のとき縦スクロール可能にする (デフォルト) */
   scroll?: boolean;
   padded?: boolean;
+  /** Stack ヘッダーが表示される画面では二重トップ余白を防ぐため上端セーフエリアを除外する */
+  hasHeader?: boolean;
   /** スクロールをプログラムで制御したい場合に渡す (深い位置の要素へのジャンプなど) */
   scrollRef?: RefObject<ComponentRef<typeof ScrollView> | null>;
   /** ユーザーが手でスクロールを始めたときに呼ばれる (自動スクロールとの干渉回避用) */
@@ -19,10 +21,26 @@ interface ScreenProps {
   footer?: ReactNode;
 }
 
-export function Screen({ children, scroll = true, padded = true, scrollRef, onScrollBeginDrag, onScroll, footer }: ScreenProps) {
+export function Screen({
+  children,
+  scroll = true,
+  padded = true,
+  hasHeader = false,
+  scrollRef,
+  onScrollBeginDrag,
+  onScroll,
+  footer,
+}: ScreenProps) {
   const { colors } = useTheme();
   // 背景色はコンテナとスクロール領域の両方に敷く (バウンス時の露出防止)
   const paddedStyle = [styles.content, { backgroundColor: colors.background }, padded && styles.padded];
+  const edges = hasHeader
+    ? footer
+      ? (['bottom', 'left', 'right'] as const)
+      : (['left', 'right'] as const)
+    : footer
+      ? (['top', 'bottom', 'left', 'right'] as const)
+      : (['top', 'left', 'right'] as const);
 
   return (
     <SafeAreaView
@@ -30,7 +48,7 @@ export function Screen({ children, scroll = true, padded = true, scrollRef, onSc
       // 左右のセーフエリアも適用する: iPhone Duo の外側ディスプレイでは右端に
       // センサーバーがあり、右インセット 84pt が報告される (Issue #60 で実測)。
       // 通常の iPhone (縦向き) では左右 0 のため見た目は変わらない。
-      edges={footer ? ['top', 'bottom', 'left', 'right'] : ['top', 'left', 'right']}
+      edges={edges}
     >
       {scroll ? (
         <ScrollView

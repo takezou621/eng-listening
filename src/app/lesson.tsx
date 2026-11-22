@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Fragment, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SymbolView, type SFSymbol } from 'expo-symbols';
 import {
   createAudioPlayer,
   RecordingPresets,
@@ -43,8 +44,8 @@ import {
 } from '@/features/lesson/components/ShadowingStage';
 import {
   LINKING_LABELS,
-  LINKING_TEXT_DECORATIONS,
   getLinkingColor,
+  getLinkingTextDecoration,
   wordLinkMap,
 } from '@/features/lesson/linkingViz';
 import { getLessonBundle, getLessonList, type LessonBundle } from '@/features/lesson/registry';
@@ -66,7 +67,9 @@ import { formatTime } from '@/features/player/shared';
 import {
   addShadowingRecord,
   addStudySeconds,
+  computeDailyGoalStatus,
   computeStreak,
+  computeTodaySeconds,
   localDateStr,
   markLessonCompleted,
   useProgressData,
@@ -92,6 +95,29 @@ function chunkWordRanges(sentence: LessonSentence): { from: number; to: number }
   return ranges;
 }
 
+function TransportIcon({
+  name,
+  fallback,
+  color,
+  size = 15,
+}: {
+  name: SFSymbol;
+  fallback: string;
+  color: string;
+  size?: number;
+}) {
+  return (
+    <SymbolView
+      name={name}
+      size={size}
+      tintColor={color}
+      type="monochrome"
+      resizeMode="scaleAspectFit"
+      fallback={<ThemedText style={{ color, fontSize: size }}>{fallback}</ThemedText>}
+    />
+  );
+}
+
 /**
  * 下部固定の再生バー (1段構成、P1/P3 準拠)。
  * 親の React Compiler メモ化分析と干渉しないよう独立コンポーネントにしている。
@@ -108,6 +134,7 @@ function TransportBar({
   abActive,
   onOpenTools,
   onPrev,
+  onRewind3s,
   onNext,
   onTogglePlay,
   onSeek,
@@ -123,6 +150,7 @@ function TransportBar({
   abActive: boolean;
   onOpenTools: () => void;
   onPrev: () => void;
+  onRewind3s: () => void;
   onNext: () => void;
   onTogglePlay: () => void;
   onSeek: (seconds: number) => void;
@@ -130,6 +158,7 @@ function TransportBar({
   const { colors } = useTheme();
   const trackWidthRef = useRef(0);
   const canPrev = !(sentenceIndex === 0 && currentTime <= firstStartSec + 0.3);
+  const canRewind = currentTime > 0.1;
   const canNext = sentenceIndex < sentenceCount - 1;
   const toolsModified = rate !== 1.0 || abActive;
   const toolsLabel = abActive ? 'AB' : `${rate}x`;
@@ -223,7 +252,25 @@ function TransportBar({
           accessibilityRole="button"
           accessibilityLabel="前の文"
         >
-          <ThemedText style={styles.transportSideText}>⏮</ThemedText>
+          <TransportIcon name="backward.end.fill" fallback="⏮" color={colors.text} />
+        </Pressable>
+        <Pressable
+          style={[
+            styles.transportRewind,
+            { backgroundColor: colors.secondarySurface },
+            !canRewind ? styles.transportDisabled : null,
+          ]}
+          disabled={!canRewind}
+          onPress={onRewind3s}
+          accessibilityRole="button"
+          accessibilityLabel="3秒戻る"
+        >
+          <View style={styles.rewindInner}>
+            <TransportIcon name="gobackward" fallback="↺" color={colors.text} size={13} />
+            <ThemedText variant="caption" style={styles.rewindText}>
+              3秒
+            </ThemedText>
+          </View>
         </Pressable>
         <Pressable
           style={[styles.transportPlay, { backgroundColor: colors.primary }]}
@@ -231,9 +278,17 @@ function TransportBar({
           accessibilityRole="button"
           accessibilityLabel={playing ? '一時停止' : '再生'}
         >
-          <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-            {playing ? '⏸ 一時停止' : '▶ 再生'}
-          </ThemedText>
+          <View style={styles.playInner}>
+            <TransportIcon
+              name={playing ? 'pause.fill' : 'play.fill'}
+              fallback={playing ? '⏸' : '▶'}
+              color={colors.primaryText}
+              size={14}
+            />
+            <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
+              {playing ? '一時停止' : '再生'}
+            </ThemedText>
+          </View>
         </Pressable>
         <Pressable
           style={[
@@ -246,7 +301,7 @@ function TransportBar({
           accessibilityRole="button"
           accessibilityLabel="次の文"
         >
-          <ThemedText style={styles.transportSideText}>⏭</ThemedText>
+          <TransportIcon name="forward.end.fill" fallback="⏭" color={colors.text} />
         </Pressable>
       </View>
       <ThemedText variant="caption" color="muted" style={styles.transportMeta}>
@@ -276,7 +331,7 @@ function LessonPlayerScreen({
   const lesson = bundle.data;
   const sentences = lesson.sentences;
   const { colors } = useTheme();
-  const { isSentenceWeak, toggleWeakSentence } = useUserData();
+  const { isSentenceWeak, toggleWeakSentence, dailyGoalMinutes } = useUserData();
   const router = useRouter();
   const progressDays = useProgressData();
   const { isPremium } = useEntitlement();
@@ -678,6 +733,13 @@ function LessonPlayerScreen({
     goToPosition(Math.min(sentences.length - 1, pos + 1));
   };
 
+  const rewind3s = () => {
+    cancelAsyncFlow();
+    const target = Math.max(0, statusRef.current.currentTime - 3);
+    logEvent('playback_control', { lessonId: lesson.id, action: 'jump' });
+    seekTo(target, '3秒戻る');
+  };
+
   const switchMode = (nextMode: LessonMode) => {
     if (nextMode === lessonMode) return;
     if (recordingSentence !== null) {
@@ -959,7 +1021,8 @@ function LessonPlayerScreen({
   useEffect(() => {
     // 文送り/文戻しは画面上のボタンと同じ関数を使う (2秒超で文頭に戻る挙動や、
     // 話すモードで一時停止したまま移動する挙動を Watch でも揃える)。
-    claimWatchPlayback(watchTokenRef.current);
+    const watchToken = watchTokenRef.current;
+    claimWatchPlayback(watchToken);
     const unregister = registerWatchCommandHandler((command) => {
       const controls = watchControlsRef.current;
       if (command.type === 'togglePlay') {
@@ -975,7 +1038,7 @@ function LessonPlayerScreen({
     });
     return () => {
       unregister();
-      pushWatchPlayback(null, watchTokenRef.current);
+      pushWatchPlayback(null, watchToken);
     };
   }, [sentences.length]);
 
@@ -1119,9 +1182,11 @@ function LessonPlayerScreen({
     : null;
 
   const isWeakCurrent = displaySentence ? isSentenceWeak(lesson.id, displaySentence.index) : false;
+  const goalStatus = computeDailyGoalStatus(computeTodaySeconds(progressDays), dailyGoalMinutes);
 
   return (
     <Screen
+      hasHeader
       scrollRef={scrollRef}
       footer={
         lessonMode === 'speak' && displaySentence ? (
@@ -1152,6 +1217,7 @@ function LessonPlayerScreen({
             abActive={ab !== null}
             onOpenTools={() => setShowToolsSheet(true)}
             onPrev={goPrevSentence}
+            onRewind3s={rewind3s}
             onNext={goNextSentence}
             onTogglePlay={togglePlay}
             onSeek={(sec) => seekTo(sec, 'シークバー')}
@@ -1508,6 +1574,12 @@ function LessonPlayerScreen({
             play();
           });
         }}
+        onPracticeSpeak={() => {
+          if (!sheetSentence) return;
+          const pos = sentences.findIndex((s) => s.index === sheetSentence.index);
+          if (pos >= 0) goToPosition(pos, false);
+          switchMode('speak');
+        }}
         onOpenLegend={() => {
           setLinkingSheetTarget(null);
           setShowLegendSheet(true);
@@ -1540,6 +1612,10 @@ function LessonPlayerScreen({
         shadowingCount={sessionShadowingCount}
         weakCount={sentences.filter((st) => isSentenceWeak(lesson.id, st.index)).length}
         streak={computeStreak(progressDays)}
+        todayMinutes={goalStatus.todayMinutes}
+        goalMinutes={goalStatus.goalMinutes}
+        goalRatio={goalStatus.ratio}
+        goalAchieved={goalStatus.achieved}
         isPremium={isPremium}
         hasNextLesson={nextLesson !== null}
         onNextLesson={() => {
@@ -1599,7 +1675,7 @@ function KaraokeLine({
           { color: textColor },
           isActive && styles.karaokeWordActive,
           linkColor !== null && !isActive && styles.karaokeWordLinked,
-          note ? [LINKING_TEXT_DECORATIONS[note.type], { textDecorationColor: textColor }] : null,
+          note ? [getLinkingTextDecoration(note.type, scheme), { textDecorationColor: textColor }] : null,
         ]}
       >
         {word.text}
@@ -1611,7 +1687,9 @@ function KaraokeLine({
     <View style={styles.karaokeLine}>
       {ranges.map((range, chunkIdx) => {
         // チャンク内を「同じノートに属する連続単語」「ノートのない連続単語」の
-        // セグメントに分割する (読み上げ単位の整理が目的で、描画は単語単位のまま)
+        // セグメントに分割する (読み上げ単位の整理が目的)。
+        // 二重 flexWrap による語句縦割れを防ぐため、チャンクは Fragment で展開し、
+        // ノートスパンは nowrap、プレーン語群はネスト Text として自然に折り返す。
         const segments: { noteIndex: number | null; from: number; to: number }[] = [];
         for (let wi = range.from; wi < range.to; wi++) {
           const ni = linkMap[wi] ?? null;
@@ -1623,34 +1701,60 @@ function KaraokeLine({
           }
         }
         return (
-          <View key={chunkIdx} style={styles.karaokeChunk}>
+          <Fragment key={chunkIdx}>
             {segments.map((seg) => {
               const segWords = sentence.words.slice(seg.from, seg.to);
-              const inner = segWords.map((word, i) => (
-                <View key={`${word.text}-${seg.from + i}`}>{renderWord(word, seg.from + i)}</View>
-              ));
               const note =
                 seg.noteIndex === null ? undefined : sentence.linking[seg.noteIndex];
-              return note && onWordPress ? (
-                <Pressable
-                  key={`note-${seg.from}`}
-                  hitSlop={{ top: 4, bottom: 4, left: 2, right: 2 }}
-                  onPress={() => onWordPress(seg.from)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`音の変化の解説: ${note.span}`}
-                  style={styles.karaokeSegment}
-                >
-                  {inner}
-                </Pressable>
-              ) : (
-                <View
+              if (note && onWordPress) {
+                return (
+                  <Pressable
+                    key={`note-${seg.from}`}
+                    hitSlop={{ top: 4, bottom: 4, left: 2, right: 2 }}
+                    onPress={() => onWordPress(seg.from)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`音の変化の解説: ${note.span}`}
+                    style={styles.karaokeSegment}
+                  >
+                    {segWords.map((word, i) => (
+                      <View key={`${word.text}-${seg.from + i}`}>
+                        {renderWord(word, seg.from + i)}
+                      </View>
+                    ))}
+                  </Pressable>
+                );
+              }
+              return (
+                <ThemedText
                   key={`plain-${seg.from}`}
                   accessible
                   accessibilityLabel={segWords.map((w) => w.text).join(' ')}
-                  style={styles.karaokeSegment}
+                  style={styles.karaokeWord}
                 >
-                  {inner}
-                </View>
+                  {segWords.map((word, i) => {
+                    const wi = seg.from + i;
+                    const isActive = wi === activeWordIndex;
+                    const isPast = wi < activeWordIndex;
+                    const textColor = isActive
+                      ? colors.primary
+                      : isPast
+                        ? colors.text
+                        : colors.textMuted;
+                    return (
+                      <Text
+                        key={`${word.text}-${wi}`}
+                        style={[
+                          styles.karaokeWord,
+                          { color: textColor },
+                          isActive && styles.karaokeWordActive,
+                        ]}
+                      >
+                        {i > 0 ? ' ' : ''}
+                        {word.text}
+                      </Text>
+                    );
+                  })}
+                </ThemedText>
               );
             })}
             {chunkIdx < ranges.length - 1 ? (
@@ -1661,7 +1765,7 @@ function KaraokeLine({
                 /
               </ThemedText>
             ) : null}
-          </View>
+          </Fragment>
         );
       })}
     </View>
@@ -1800,19 +1904,14 @@ const styles = StyleSheet.create({
   karaokeLine: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    alignItems: 'center',
-  },
-  karaokeChunk: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 6,
+    rowGap: 6,
+    columnGap: 6,
+    alignItems: 'baseline',
   },
   karaokeSegment: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
+    flexWrap: 'nowrap',
+    alignItems: 'baseline',
     gap: 6,
   },
   karaokeWord: {
@@ -1891,13 +1990,14 @@ const styles = StyleSheet.create({
   transportRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   transportTools: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     borderRadius: 999,
     borderWidth: 1,
     minHeight: 44,
+    minWidth: 42,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1905,14 +2005,27 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   transportSide: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    minHeight: 44,
+    minWidth: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  transportRewind: {
+    paddingHorizontal: 10,
     borderRadius: 999,
     minHeight: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  transportSideText: {
-    fontWeight: '600',
+  rewindInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  rewindText: {
+    fontWeight: '700',
   },
   transportPlay: {
     flex: 1,
@@ -1920,6 +2033,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 44,
     justifyContent: 'center',
+  },
+  playInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   transportDisabled: {
     opacity: 0.4,

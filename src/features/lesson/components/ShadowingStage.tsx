@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { SymbolView, type SFSymbol } from 'expo-symbols';
 
 import { ThemedText } from '@/components/ThemedText';
 import type { PlaybackRate } from '@/config/appConfig';
@@ -7,6 +8,29 @@ import type { LessonSentence } from '@/features/lesson/types';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 const STEPS = ['① お手本', '② 録音', '③ 聞き比べ'] as const;
+
+function StageIcon({
+  name,
+  fallback,
+  color,
+  size = 14,
+}: {
+  name: SFSymbol;
+  fallback: string;
+  color: string;
+  size?: number;
+}) {
+  return (
+    <SymbolView
+      name={name}
+      size={size}
+      tintColor={color}
+      type="monochrome"
+      resizeMode="scaleAspectFit"
+      fallback={<ThemedText style={{ color, fontSize: size }}>{fallback}</ThemedText>}
+    />
+  );
+}
 
 /**
  * 1文フォーカス形式のシャドーイングステージ (Issue #45 / E18)。
@@ -77,6 +101,8 @@ export function ShadowingStage({
         : 0;
 
   const showEnglish = !hideText || peekText;
+  const modelActive = comparingSource === 'model' && isCompareActive;
+  const userActive = comparingSource === 'user' && isCompareActive;
 
   return (
     <View style={styles.container}>
@@ -212,9 +238,12 @@ export function ShadowingStage({
           </View>
         ) : isPendingRecord ? (
           <View style={[styles.statusBanner, { borderColor: colors.primary }]}>
-            <ThemedText variant="caption" color="primary" style={styles.statusText}>
-              🔊 お手本を再生中… 終わると自動で録音が始まります
-            </ThemedText>
+            <View style={styles.recordingStatusRow}>
+              <StageIcon name="speaker.wave.2.fill" fallback="🔊" color={colors.primary} />
+              <ThemedText variant="caption" color="primary" style={styles.statusText}>
+                お手本を再生中… 終わると自動で録音が始まります
+              </ThemedText>
+            </View>
           </View>
         ) : micDenied ? (
           <ThemedText variant="caption" style={{ color: dangerColor }}>
@@ -234,25 +263,28 @@ export function ShadowingStage({
             style={[
               styles.secondaryButton,
               {
-                borderColor:
-                  comparingSource === 'model' && isCompareActive ? colors.primary : colors.border,
-                backgroundColor:
-                  comparingSource === 'model' && isCompareActive
-                    ? colors.secondarySurface
-                    : colors.surface,
+                borderColor: modelActive ? colors.primary : colors.border,
+                backgroundColor: modelActive ? colors.secondarySurface : colors.surface,
               },
               isRecording && styles.disabledButton,
             ]}
             accessibilityRole="button"
             accessibilityLabel="お手本を再生"
           >
-            <ThemedText
-              variant="caption"
-              color={comparingSource === 'model' && isCompareActive ? 'primary' : 'default'}
-              style={styles.secondaryLabel}
-            >
-              🔊 お手本
-            </ThemedText>
+            <View style={styles.buttonInner}>
+              <StageIcon
+                name="speaker.wave.2.fill"
+                fallback="🔊"
+                color={modelActive ? colors.primary : colors.text}
+              />
+              <ThemedText
+                variant="caption"
+                color={modelActive ? 'primary' : 'default'}
+                style={styles.secondaryLabel}
+              >
+                お手本
+              </ThemedText>
+            </View>
           </Pressable>
 
           {hasUserRecording ? (
@@ -264,27 +296,28 @@ export function ShadowingStage({
                 style={[
                   styles.secondaryButton,
                   {
-                    borderColor:
-                      comparingSource === 'user' && isCompareActive
-                        ? colors.primary
-                        : colors.border,
-                    backgroundColor:
-                      comparingSource === 'user' && isCompareActive
-                        ? colors.secondarySurface
-                        : colors.surface,
+                    borderColor: userActive ? colors.primary : colors.border,
+                    backgroundColor: userActive ? colors.secondarySurface : colors.surface,
                   },
                   (isRecording || isPendingRecord) && styles.disabledButton,
                 ]}
                 accessibilityRole="button"
                 accessibilityLabel="自分の録音を再生"
               >
-                <ThemedText
-                  variant="caption"
-                  color={comparingSource === 'user' && isCompareActive ? 'primary' : 'default'}
-                  style={styles.secondaryLabel}
-                >
-                  🎤 自分の声 ({userRecordingDurationSec.toFixed(1)}秒)
-                </ThemedText>
+                <View style={styles.buttonInner}>
+                  <StageIcon
+                    name="mic.fill"
+                    fallback="🎤"
+                    color={userActive ? colors.primary : colors.text}
+                  />
+                  <ThemedText
+                    variant="caption"
+                    color={userActive ? 'primary' : 'default'}
+                    style={styles.secondaryLabel}
+                  >
+                    自分の声 ({userRecordingDurationSec.toFixed(1)}秒)
+                  </ThemedText>
+                </View>
               </Pressable>
 
               <Pressable
@@ -299,9 +332,12 @@ export function ShadowingStage({
                 accessibilityRole="button"
                 accessibilityLabel="お手本と自分の声を連続で聞き比べ"
               >
-                <ThemedText variant="caption" color="primary" style={styles.secondaryLabel}>
-                  🔁 聞き比べ
-                </ThemedText>
+                <View style={styles.buttonInner}>
+                  <StageIcon name="arrow.triangle.2.circlepath" fallback="🔁" color={colors.primary} />
+                  <ThemedText variant="caption" color="primary" style={styles.secondaryLabel}>
+                    聞き比べ
+                  </ThemedText>
+                </View>
               </Pressable>
             </>
           ) : null}
@@ -395,7 +431,7 @@ export function ShadowingFooterBar({
           accessibilityRole="button"
           accessibilityLabel="前の文"
         >
-          <ThemedText style={styles.navLabel}>⏮</ThemedText>
+          <StageIcon name="backward.end.fill" fallback="⏮" color={colors.text} size={15} />
         </Pressable>
 
         {isRecording ? (
@@ -405,9 +441,12 @@ export function ShadowingFooterBar({
             accessibilityRole="button"
             accessibilityLabel="録音停止"
           >
-            <ThemedText style={{ color: '#FFFFFF', fontWeight: '700' }}>
-              ⏹ 録音停止 ({recordingElapsedSec.toFixed(1)}s)
-            </ThemedText>
+            <View style={styles.buttonInner}>
+              <StageIcon name="stop.fill" fallback="⏹" color="#FFFFFF" size={14} />
+              <ThemedText style={{ color: '#FFFFFF', fontWeight: '700' }}>
+                録音停止 ({recordingElapsedSec.toFixed(1)}秒)
+              </ThemedText>
+            </View>
           </Pressable>
         ) : (
           <Pressable
@@ -422,13 +461,21 @@ export function ShadowingFooterBar({
                   : '録音する'
             }
           >
-            <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-              {isPendingRecord
-                ? '🔊 お手本再生中（取消）'
-                : autoRecordAfterModel
-                  ? '🎙 お手本 → 録音'
-                  : '🎙 録音する'}
-            </ThemedText>
+            <View style={styles.buttonInner}>
+              <StageIcon
+                name={isPendingRecord ? 'speaker.wave.2.fill' : 'mic.fill'}
+                fallback={isPendingRecord ? '🔊' : '🎙'}
+                color={colors.primaryText}
+                size={15}
+              />
+              <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
+                {isPendingRecord
+                  ? 'お手本再生中（取消）'
+                  : autoRecordAfterModel
+                    ? 'お手本 → 録音'
+                    : '録音する'}
+              </ThemedText>
+            </View>
           </Pressable>
         )}
 
@@ -444,7 +491,7 @@ export function ShadowingFooterBar({
           accessibilityRole="button"
           accessibilityLabel="次の文"
         >
-          <ThemedText style={styles.navLabel}>⏭</ThemedText>
+          <StageIcon name="forward.end.fill" fallback="⏭" color={colors.text} size={15} />
         </Pressable>
       </View>
 
@@ -567,6 +614,12 @@ const styles = StyleSheet.create({
     minHeight: 40,
     justifyContent: 'center',
   },
+  buttonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
   secondaryLabel: {
     fontWeight: '600',
   },
@@ -600,11 +653,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 12,
     minHeight: 44,
+    minWidth: 44,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  navLabel: {
-    fontWeight: '600',
   },
   primaryAction: {
     flex: 1,
