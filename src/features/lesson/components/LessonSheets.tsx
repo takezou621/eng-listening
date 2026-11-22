@@ -94,6 +94,7 @@ export function LinkingNoteSheet({
 
           <Pressable
             onPress={onOpenLegend}
+            hitSlop={{ top: 8, bottom: 8 }}
             style={styles.ghostButton}
             accessibilityRole="button"
           >
@@ -326,7 +327,11 @@ export function CompletionSummaryModal({
           </ThemedText>
 
           {!isPremium ? (
-            <Pressable onPress={onOpenPaywall} hitSlop={8} accessibilityRole="button">
+            <Pressable
+              onPress={onOpenPaywall}
+              hitSlop={{ top: 14, bottom: 14 }}
+              accessibilityRole="button"
+            >
               <ThemedText variant="caption" color="primary" style={styles.paywallLink}>
                 プレミアムでは詳細な弱点分析が見られます ›
               </ThemedText>
@@ -351,6 +356,7 @@ export function CompletionSummaryModal({
                   ? styles.ghostButton
                   : [styles.primaryButton, { backgroundColor: colors.primary }]
               }
+              hitSlop={{ top: 6, bottom: 6 }}
               onPress={onClose}
               accessibilityRole="button"
             >

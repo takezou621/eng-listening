@@ -55,6 +55,7 @@ function LinkRow({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
       style={[styles.legalRow, { borderBottomColor: colors.border }, isLast && styles.rowLast]}
     >
       <ThemedText>{label}</ThemedText>
@@ -114,6 +115,8 @@ export default function SettingsScreen() {
         <Pressable
           onPress={handleRestore}
           disabled={!isAvailable || isLoading || restoring}
+          accessibilityRole="button"
+          accessibilityLabel="購入を復元"
           style={[styles.legalRow, styles.rowLast, { borderBottomColor: colors.border }]}
         >
           <ThemedText color="primary">購入を復元</ThemedText>

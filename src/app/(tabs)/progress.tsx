@@ -144,7 +144,7 @@ export default function ProgressScreen() {
           <ThemedText variant="heading">今日の目標</ThemedText>
           <Pressable
             onPress={() => setGoalSheetVisible(true)}
-            hitSlop={8}
+            hitSlop={{ top: 14, bottom: 14, left: 8, right: 8 }}
             accessibilityRole="button"
             accessibilityLabel="目標を変更"
           >
@@ -277,6 +277,7 @@ export default function ProgressScreen() {
           </ThemedText>
           <Pressable
             onPress={() => router.push('/(tabs)')}
+            accessibilityRole="button"
             style={[styles.primaryCta, { backgroundColor: colors.primary }]}
           >
             <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
@@ -298,6 +299,7 @@ export default function ProgressScreen() {
           {heatmap.map(({ date, seconds, frozen }) => (
             <Pressable
               key={date}
+              hitSlop={2}
               onPress={() => setSelectedDay({ date, seconds, frozen })}
               style={[
                 styles.heatCell,
@@ -313,7 +315,8 @@ export default function ProgressScreen() {
                   : null,
               ]}
               accessibilityRole="button"
-              accessibilityLabel={`${formatDayLabel(date)}の学習記録${frozen ? '（フリーズで保護）' : ''}`}
+              accessibilityState={{ selected: selectedDay?.date === date }}
+              accessibilityLabel={`${formatDayLabel(date)}の学習記録: ${frozen ? 'フリーズで保護' : seconds > 0 ? formatMinutes(seconds) : '記録なし'}`}
             />
           ))}
         </View>
@@ -393,6 +396,8 @@ export default function ProgressScreen() {
             </ThemedText>
             <Pressable
               onPress={() => router.push('/paywall?from=progress')}
+              hitSlop={6}
+              accessibilityRole="button"
               style={[styles.secondaryOutline, { borderColor: colors.primary }]}
             >
               <ThemedText variant="caption" color="primary" style={styles.secondaryLabel}>

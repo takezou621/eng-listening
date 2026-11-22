@@ -53,7 +53,7 @@ export function DailyGoalSheet({
             </ThemedText>
             <Pressable
               onPress={onClose}
-              hitSlop={8}
+              hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
               accessibilityRole="button"
               accessibilityLabel="閉じる"
             >

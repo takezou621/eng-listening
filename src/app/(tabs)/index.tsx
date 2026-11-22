@@ -142,6 +142,9 @@ export default function LibraryScreen() {
       {filterType === 'all' && filterLevel === 'all' && !showFavoritesOnly && todaysLesson ? (
         <Pressable
           onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
+          accessibilityRole="button"
+          accessibilityLabel={`${todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}: ${todaysLesson.item.bundle?.data.titleJa ?? todaysLesson.item.entry.title}。今日の目標は ${goalStatus.todayMinutes} 分 / ${goalStatus.goalMinutes} 分${goalStatus.achieved ? '、目標達成' : ''}`}
+          accessibilityHint="タップでレッスンをはじめる"
           style={[
             styles.todayCard,
             { backgroundColor: colors.secondarySurface, borderColor: colors.primary },
@@ -204,6 +207,7 @@ export default function LibraryScreen() {
                 setFilterLevel('all');
                 setShowFavoritesOnly(false);
               }}
+              hitSlop={8}
               style={[styles.emptyResetBtn, { borderColor: colors.primary }]}
               accessibilityRole="button"
             >
@@ -219,6 +223,9 @@ export default function LibraryScreen() {
             <Pressable
               disabled={bundle === null}
               onPress={() => router.push(`/lesson?lesson=${entry.id}`)}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: bundle === null }}
+              accessibilityLabel={`${entry.titleJa}（${CONTENT_TYPE_LABELS[entry.type]}・${entry.level === 'beginner' ? '初級' : '中級'}${completedLessonIds.has(entry.id) ? '・完了済み' : ''}）${bundle ? `、約 ${bundle.data.durationSec.toFixed(0)} 秒・${bundle.data.sentences.length} 文` : '、準備中'}`}
               style={[
                 styles.card,
                 {
@@ -247,9 +254,9 @@ export default function LibraryScreen() {
                   </View>
                 ) : null}
                 <Pressable
-                  hitSlop={8}
+                  hitSlop={12}
                   accessibilityRole="button"
-                  accessibilityLabel={`${entry.titleJa}をお気に入りに登録`}
+                  accessibilityLabel={isFav ? `${entry.titleJa}のお気に入りを解除` : `${entry.titleJa}をお気に入りに登録`}
                   accessibilityState={{ selected: isFav }}
                   onPress={() => toggleFavoriteLesson(entry.id)}
                   style={styles.favIcon}

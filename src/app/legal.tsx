@@ -39,6 +39,7 @@ export default function LegalScreen() {
       <View style={styles.langRow}>
         <Pressable
           onPress={() => setLang('ja')}
+          hitSlop={{ top: 6, bottom: 6 }}
           accessibilityRole="button"
           accessibilityState={{ selected: lang === 'ja' }}
           style={[styles.langChip, { backgroundColor: lang === 'ja' ? colors.primary : colors.secondarySurface }]}
@@ -49,6 +50,7 @@ export default function LegalScreen() {
         </Pressable>
         <Pressable
           onPress={() => setLang('en')}
+          hitSlop={{ top: 6, bottom: 6 }}
           accessibilityRole="button"
           accessibilityState={{ selected: lang === 'en' }}
           style={[styles.langChip, { backgroundColor: lang === 'en' ? colors.primary : colors.secondarySurface }]}

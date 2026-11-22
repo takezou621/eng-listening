@@ -39,6 +39,7 @@ export default function PhrasesScreen() {
             </ThemedText>
             <Pressable
               onPress={() => router.push('/(tabs)')}
+              hitSlop={8}
               style={[styles.emptyCta, { borderColor: colors.primary }]}
               accessibilityRole="button"
             >
@@ -61,6 +62,9 @@ export default function PhrasesScreen() {
               onPress={() =>
                 router.push(`/lesson?lesson=${item.lessonId}&sentence=${item.sentenceIndex + 1}`)
               }
+              accessibilityRole="button"
+              accessibilityLabel={`${sentence.text}（${bundle.data.titleJa}）`}
+              accessibilityHint="タップでこの文をレッスンで開く"
               style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
             >
               <ThemedText variant="heading">{sentence.text}</ThemedText>
@@ -76,7 +80,7 @@ export default function PhrasesScreen() {
                     {new Date(item.addedAtMs).toLocaleDateString('ja-JP')}
                   </ThemedText>
                   <Pressable
-                    hitSlop={8}
+                    hitSlop={{ top: 14, bottom: 14, left: 6, right: 6 }}
                     accessibilityRole="button"
                     accessibilityLabel="苦手フレーズから外す"
                     onPress={() => toggleWeakSentence(item.lessonId, item.sentenceIndex)}
