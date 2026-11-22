@@ -19,7 +19,7 @@ type FilterType = 'all' | ContentType;
 type FilterLevel = 'all' | 'beginner' | 'intermediate';
 
 export default function LibraryScreen() {
-  const { scheme, colors } = useTheme();
+  const { colors } = useTheme();
   const router = useRouter();
   const { favoriteLessons, toggleFavoriteLesson, onboardingDone, dailyGoalMinutes } = useUserData();
 
