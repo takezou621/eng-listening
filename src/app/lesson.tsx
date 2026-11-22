@@ -250,7 +250,7 @@ function LessonPlayerScreen({
 }) {
   const lesson = bundle.data;
   const sentences = lesson.sentences;
-  const { scheme, colors } = useTheme();
+  const { colors } = useTheme();
   const { isSentenceWeak, toggleWeakSentence } = useUserData();
   const router = useRouter();
   const progressDays = useProgressData();
@@ -1004,7 +1004,7 @@ function LessonPlayerScreen({
 
   const progress = status.duration > 0 ? Math.min(1, status.currentTime / status.duration) : 0;
   const sentenceRatio = (effectivePos + 1) / Math.max(sentences.length, 1);
-  const weakActiveColor = scheme === 'dark' ? '#FBBF24' : '#B45309';
+  const weakActiveColor = colors.warning;
 
   const sheetSentence = linkingSheetTarget
     ? (sentences.find((s) => s.index === linkingSheetTarget.sentenceIndex) ?? null)
