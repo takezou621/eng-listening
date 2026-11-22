@@ -13,10 +13,16 @@ import {
 } from '@/features/billing/billingStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, isLast = false }: { label: string; value: string; isLast?: boolean }) {
   const { colors } = useTheme();
   return (
-    <View style={[styles.row, { borderBottomColor: colors.border }]}>
+    <View
+      style={[
+        styles.row,
+        { borderBottomColor: colors.border },
+        isLast && styles.rowLast,
+      ]}
+    >
       <ThemedText style={styles.rowLabel} numberOfLines={2}>
         {label}
       </ThemedText>
@@ -27,12 +33,16 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
+function LinkRow({ label, onPress, isLast = false }: { label: string; onPress: () => void; isLast?: boolean }) {
   const { colors } = useTheme();
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.legalRow, { borderBottomColor: colors.border }]}
+      style={[
+        styles.legalRow,
+        { borderBottomColor: colors.border },
+        isLast && styles.rowLast,
+      ]}
     >
       <ThemedText>{label}</ThemedText>
       <ThemedText color="muted">›</ThemedText>
@@ -79,7 +89,7 @@ export default function SettingsScreen() {
         <Pressable
           onPress={handleRestore}
           disabled={!isAvailable || isLoading || restoring}
-          style={[styles.legalRow, { borderBottomColor: colors.border }]}
+          style={[styles.legalRow, styles.rowLast]}
         >
           <ThemedText color="primary">購入を復元</ThemedText>
           <ThemedText color="muted">{restoring ? '復元中…' : ''}</ThemedText>
@@ -95,10 +105,11 @@ export default function SettingsScreen() {
         <LinkRow
           label="聞き取り診断をもう一度行う"
           onPress={() => router.push('/onboarding')}
+          isLast
         />
       </View>
 
-      <ThemedText variant="heading" style={styles.sectionTitle}>
+      <ThemedText variant="caption" color="muted" style={styles.groupLabel}>
         サポート
       </ThemedText>
       <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -106,10 +117,10 @@ export default function SettingsScreen() {
           label="サポートページを開く"
           onPress={() => void Linking.openURL('https://33eigo.win/support')}
         />
-        <Row label="お問い合わせ" value="support@33eigo.win" />
+        <Row label="お問い合わせ" value="support@33eigo.win" isLast />
       </View>
 
-      <ThemedText variant="heading" style={styles.sectionTitle}>
+      <ThemedText variant="caption" color="muted" style={styles.groupLabel}>
         法的情報
       </ThemedText>
       <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -117,21 +128,28 @@ export default function SettingsScreen() {
           { doc: 'privacy', label: 'プライバシーポリシー' },
           { doc: 'terms', label: '利用規約' },
           { doc: 'tokushoho', label: '特定商取引法に基づく表記' },
-        ] as const).map((item) => (
+        ] as const).map((item, idx, arr) => (
           <LinkRow
             key={item.doc}
             label={item.label}
             onPress={() => router.push(`/legal?doc=${item.doc}`)}
+            isLast={idx === arr.length - 1}
           />
         ))}
       </View>
 
-      <ThemedText variant="heading" style={styles.sectionTitle}>
+      <ThemedText variant="caption" color="muted" style={styles.groupLabel}>
         アプリ情報
       </ThemedText>
-      <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View
+        style={[
+          styles.section,
+          styles.lastSection,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
+      >
         <Row label="テーマ" value={scheme === 'dark' ? 'ダーク (端末の設定に連動)' : 'ライト (端末の設定に連動)'} />
-        <Row label="バージョン" value={`v${APP_CONFIG.version}`} />
+        <Row label="バージョン" value={`v${APP_CONFIG.version}`} isLast />
       </View>
     </Screen>
   );
@@ -142,23 +160,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  rowLast: {
+    borderBottomWidth: 0,
   },
   rowLabel: { flexShrink: 1 },
   rowValue: { flexShrink: 1, textAlign: 'right' },
   section: {
-    marginTop: 12,
+    marginTop: 8,
     borderRadius: 12,
     borderWidth: 1,
+    overflow: 'hidden',
   },
-  sectionTitle: { marginTop: 20 },
+  lastSection: {
+    marginBottom: 24,
+  },
+  groupLabel: {
+    marginTop: 16,
+    marginLeft: 4,
+    fontWeight: '700',
+  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     gap: 12,

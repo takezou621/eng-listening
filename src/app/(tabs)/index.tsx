@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
@@ -18,6 +19,7 @@ type FilterLevel = 'all' | 'beginner' | 'intermediate';
 export default function LibraryScreen() {
   const { colors } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { favoriteLessons, toggleFavoriteLesson, onboardingDone } = useUserData();
 
   const [filterType, setFilterType] = useState<FilterType>('all');
@@ -110,6 +112,7 @@ export default function LibraryScreen() {
 
   return (
     <Screen scroll={false}>
+      <ThemedText>{`INSETS-PROBE t=${insets.top} r=${insets.right} b=${insets.bottom} l=${insets.left}`}</ThemedText>
       <ThemedText variant="title">ライブラリ</ThemedText>
       <ThemedText variant="caption" color="muted" style={styles.subtitle}>
         全 {lessonList.length} 本
@@ -144,7 +147,27 @@ export default function LibraryScreen() {
         data={filteredLessons}
         keyExtractor={({ entry }) => entry.id}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<ThemedText style={styles.empty}>条件に一致するレッスンがありません</ThemedText>}
+        ListEmptyComponent={
+          <View style={[styles.emptyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <ThemedText variant="heading">該当するレッスンがありません</ThemedText>
+            <ThemedText variant="caption" color="muted" numberOfLines={2} style={styles.emptyDesc}>
+              絞り込み条件に一致するレッスンが見つかりませんでした。
+            </ThemedText>
+            <Pressable
+              onPress={() => {
+                setFilterType('all');
+                setFilterLevel('all');
+                setShowFavoritesOnly(false);
+              }}
+              style={[styles.emptyResetBtn, { borderColor: colors.primary }]}
+              accessibilityRole="button"
+            >
+              <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>
+                絞り込みをリセット
+              </ThemedText>
+            </Pressable>
+          </View>
+        }
         renderItem={({ item: { entry, bundle } }) => {
           const isFav = favoriteLessons.includes(entry.id);
           return (
@@ -173,7 +196,7 @@ export default function LibraryScreen() {
                 </View>
                 {completedLessonIds.has(entry.id) ? (
                   <View style={[styles.badgeLevel, { backgroundColor: colors.secondarySurface }]}>
-                    <ThemedText variant="caption" style={{ color: '#16A34A', fontWeight: '700' }}>
+                    <ThemedText variant="caption" style={{ color: colors.success, fontWeight: '700' }}>
                       ✓ 完了
                     </ThemedText>
                   </View>
@@ -186,7 +209,7 @@ export default function LibraryScreen() {
                   onPress={() => toggleFavoriteLesson(entry.id)}
                   style={styles.favIcon}
                 >
-                  <ThemedText style={{ color: isFav ? '#F59E0B' : colors.textMuted, fontSize: 18 }}>
+                  <ThemedText style={{ color: isFav ? colors.favorite : colors.textMuted, fontSize: 18 }}>
                     {isFav ? '★' : '☆'}
                   </ThemedText>
                 </Pressable>
@@ -212,21 +235,36 @@ const styles = StyleSheet.create({
   todayCard: {
     borderWidth: 1,
     borderRadius: 12,
-    padding: 14,
-    gap: 4,
+    padding: 16,
+    gap: 8,
     marginBottom: 12,
   },
   subtitle: { marginTop: 4, marginBottom: 12 },
-  filterSection: { marginBottom: 16 },
+  filterSection: { marginBottom: 12 },
   chipScroll: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 8 },
   divider: { width: 1, height: 24, marginHorizontal: 4 },
-  list: { paddingBottom: 24, gap: 10 },
-  empty: { marginTop: 24, textAlign: 'center' },
+  list: { paddingBottom: 24, gap: 12 },
+  emptyCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+    gap: 8,
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  emptyDesc: { textAlign: 'center' },
+  emptyResetBtn: {
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginTop: 4,
+  },
   card: {
     borderRadius: 12,
     borderWidth: 1,
-    padding: 14,
-    gap: 6,
+    padding: 16,
+    gap: 8,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   badgeType: {
