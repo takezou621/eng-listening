@@ -19,11 +19,17 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import {
   PITCH_CORRECTION_QUALITY,
+  PLAYBACK_RATES,
   SEEK_TOLERANCE_MILLIS,
   STATUS_UPDATE_INTERVAL_MILLIS,
   type PlaybackRate,
 } from '@/config/appConfig';
 import { logEvent } from '@/features/analytics/analyticsStore';
+import {
+  claimWatchPlayback,
+  pushWatchPlayback,
+  registerWatchCommandHandler,
+} from '@/features/watch/watchSync';
 import { initBillingAsync, useEntitlement } from '@/features/billing/billingStore';
 import {
   CompletionSummaryModal,
@@ -889,6 +895,57 @@ function LessonPlayerScreen({
 
   const effectivePos = timePos >= 0 ? timePos : focusedPos;
   const displaySentence = sentences[effectivePos] ?? sentences[0];
+
+  // --- Apple Watch 連携 (Phase 1): 再生状態の送信と Watch からの操作の受付 ---
+  // ハンドラはマウント中だけ登録し、最新の操作関数一式は ref 経由で参照する
+  // (statusRef と同じパターン。Watch 側の操作で古いクロージャを掴まないため)。
+  const watchControlsRef = useRef({ togglePlay, goNextSentence, goPrevSentence, applyRate, rate });
+  useEffect(() => {
+    watchControlsRef.current = { togglePlay, goNextSentence, goPrevSentence, applyRate, rate };
+  });
+  // この画面インスタンスの所有者トークン (新旧共存時の誤消去防止は watchSync 側)
+  const watchTokenRef = useRef<object>({});
+
+  useEffect(() => {
+    // 文送り/文戻しは画面上のボタンと同じ関数を使う (2秒超で文頭に戻る挙動や、
+    // 話すモードで一時停止したまま移動する挙動を Watch でも揃える)。
+    claimWatchPlayback(watchTokenRef.current);
+    const unregister = registerWatchCommandHandler((command) => {
+      const controls = watchControlsRef.current;
+      if (command.type === 'togglePlay') {
+        controls.togglePlay();
+      } else if (command.type === 'nextSentence') {
+        controls.goNextSentence();
+      } else if (command.type === 'prevSentence') {
+        controls.goPrevSentence();
+      } else if (command.type === 'cycleRate') {
+        const index = PLAYBACK_RATES.indexOf(controls.rate);
+        controls.applyRate(PLAYBACK_RATES[(index + 1) % PLAYBACK_RATES.length]);
+      }
+    });
+    return () => {
+      unregister();
+      pushWatchPlayback(null, watchTokenRef.current);
+    };
+  }, [sentences.length]);
+
+  useEffect(() => {
+    const sentence = sentences[effectivePos];
+    if (!sentence) return;
+    pushWatchPlayback(
+      {
+        lessonTitle: lesson.titleJa || lesson.title,
+        sentenceIndex: effectivePos,
+        sentenceCount: sentences.length,
+        textEn: sentence.text,
+        textJa: sentence.translationJa,
+        isPlaying: status.playing,
+        rate,
+      },
+      watchTokenRef.current,
+    );
+  }, [effectivePos, status.playing, rate, lesson, sentences]);
+
 
   const activeWordIndex = useMemo(() => {
     if (activePos !== effectivePos || !displaySentence) return -1;

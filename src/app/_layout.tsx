@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { WatchLibrarySync } from '@/features/watch/WatchLibrarySync';
 import { AppThemeProvider } from '@/theme/AppThemeProvider';
 import { darkColors, lightColors } from '@/theme/colors';
 
@@ -41,6 +42,7 @@ export default function RootLayout() {
 
   return (
     <AppThemeProvider>
+      <WatchLibrarySync />
       <ThemeProvider value={navTheme}>
           <StatusBar style={isDark ? 'light' : 'dark'} />
           <Stack screenOptions={{ headerShown: false }}>
