@@ -14,7 +14,7 @@ import {
   computeCompletedLessonCount,
   computeDailyGoalStatus,
   computeShadowingTotal,
-  computeStreak,
+  computeStreakWithFreeze,
   computeTodaySeconds,
   computeTotalSeconds,
   computeWeekSeconds,
@@ -34,15 +34,15 @@ function todayStr(): string {
   return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, '0')}-${`${d.getDate()}`.padStart(2, '0')}`;
 }
 
-/** 学習進捗画面 (Issue #13 / #46: 1日の目標設定と §3 ダッシュボード化) */
+/** 学習進捗画面 (Issue #13 / #46: 1日の目標・ストリーク救済・§3 ダッシュボード) */
 export default function ProgressScreen() {
   const router = useRouter();
   const { scheme, colors } = useTheme();
   const days = useProgressData();
   const { isPremium } = useEntitlement();
   const { weakSentences, dailyGoalMinutes, setDailyGoalMinutes } = useUserData();
-  const lessonList = getLessonList();
   const [goalSheetVisible, setGoalSheetVisible] = useState(false);
+  const lessonList = getLessonList();
 
   const weakByType = useMemo(() => {
     if (!isPremium) return [] as [string, number][];
@@ -75,7 +75,7 @@ export default function ProgressScreen() {
   }, []);
 
   const refDate = new Date(today + 'T12:00:00');
-  const streak = computeStreak(days, refDate);
+  const streakInfo = computeStreakWithFreeze(days, refDate);
   const totalSeconds = computeTotalSeconds(days);
   const weekSeconds = computeWeekSeconds(days, refDate);
   const todaySeconds = computeTodaySeconds(days, refDate);
@@ -84,7 +84,11 @@ export default function ProgressScreen() {
   const shadowingTotal = computeShadowingTotal(days);
   const heatmap = buildHeatmap(days, refDate, 12);
   const hasData = totalSeconds > 0 || shadowingTotal > 0 || completedCount > 0;
-  const [selectedDay, setSelectedDay] = useState<{ date: string; seconds: number } | null>(null);
+  const [selectedDay, setSelectedDay] = useState<{
+    date: string;
+    seconds: number;
+    frozen: boolean;
+  } | null>(null);
 
   const todaysLesson = useMemo(() => {
     const set = new Set<string>();
@@ -100,6 +104,10 @@ export default function ProgressScreen() {
   };
 
   const successColor = scheme === 'dark' ? '#4ADE80' : '#16A34A';
+  const freezeBg = scheme === 'dark' ? '#0C4A6E' : '#E0F2FE';
+  const freezeColor = scheme === 'dark' ? '#38BDF8' : '#0369A1';
+  const freezeCellBg = scheme === 'dark' ? '#0EA5E9' : '#38BDF8';
+  const freezeCellBorder = scheme === 'dark' ? '#7DD3FC' : '#0284C7';
 
   const heatColor = (seconds: number): string => {
     const [lv0, lv1, lv2, lv3] = colors.heatLevels;
@@ -109,6 +117,14 @@ export default function ProgressScreen() {
     return lv3;
   };
 
+  const streakHint = streakInfo.rescuedYesterday
+    ? '❄ 昨日のお休みは自動で保護されました。今日の1本で記録を伸ばせます。'
+    : streakInfo.frozenDates.length > 0
+      ? '週1回のお休み保護が適用され、連続記録がつながっています。'
+      : streakInfo.streak > 0
+        ? '週1回まで、1日お休みしても連続記録を自動で守ります。'
+        : '1日1本からスタート。週1回の自動保護つきで続けられます。';
+
   return (
     <Screen>
       <ThemedText variant="title">学習進捗</ThemedText>
@@ -116,7 +132,7 @@ export default function ProgressScreen() {
         端末内にのみ記録を保存しています
       </ThemedText>
 
-      {/* ブロック 1: 今日の目標カード (ELSA / abceed 型) */}
+      {/* ブロック 1: 今日の目標カード (ELSA / abceed 型。主 CTA を内包し初期ブロック数を §3 の 5 以内に収める) */}
       <View
         style={[
           styles.card,
@@ -167,9 +183,53 @@ export default function ProgressScreen() {
             ]}
           />
         </View>
+
+        {hasData && todaysLesson ? (
+          <Pressable
+            onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
+            style={[styles.todayCta, { backgroundColor: colors.primary }]}
+            accessibilityRole="button"
+          >
+            <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
+              ▶ {todaysLesson.isReview ? '復習をはじめる' : '今日の1本をはじめる'}
+            </ThemedText>
+            <ThemedText variant="caption" style={{ color: colors.primaryText }}>
+              {todaysLesson.item.bundle?.data.titleJa ?? todaysLesson.item.entry.title}
+            </ThemedText>
+          </Pressable>
+        ) : null}
       </View>
 
-      {/* ブロック 2: 学習サマリ (1カード 2x2) */}
+      {/* ブロック 2: ストリーク & 自動保護カード (E16) */}
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
+      >
+        <View style={styles.streakTop}>
+          <View>
+            <ThemedText variant="caption" color="muted">
+              連続学習日数
+            </ThemedText>
+            <ThemedText variant="title" color="primary">
+              {streakInfo.streak} <ThemedText variant="caption" color="muted">日</ThemedText>
+            </ThemedText>
+          </View>
+          <View style={[styles.freezePill, { backgroundColor: freezeBg }]}>
+            <ThemedText variant="caption" style={{ color: freezeColor, fontWeight: '700' }}>
+              {streakInfo.freezeRemainingThisWeek > 0
+                ? '🛡 今週の保険 残り1回'
+                : '❄ 今週の保険 使用済み'}
+            </ThemedText>
+          </View>
+        </View>
+        <ThemedText variant="caption" color="muted" numberOfLines={2}>
+          {streakHint}
+        </ThemedText>
+      </View>
+
+      {/* ブロック 3: 学習サマリ (1カード 2x2) */}
       {hasData ? (
         <View
           style={[
@@ -180,19 +240,15 @@ export default function ProgressScreen() {
           <View style={styles.summaryGrid}>
             <View style={styles.summaryCell}>
               <ThemedText variant="caption" color="muted">
-                連続学習日数
+                今週の学習
               </ThemedText>
-              <ThemedText variant="heading" color="primary">
-                {streak} 日
-              </ThemedText>
+              <ThemedText variant="heading">{formatMinutes(weekSeconds)}</ThemedText>
             </View>
             <View style={styles.summaryCell}>
               <ThemedText variant="caption" color="muted">
-                今週 / 累計
+                累計の学習
               </ThemedText>
-              <ThemedText variant="heading">
-                {formatMinutes(weekSeconds)} / {formatMinutes(totalSeconds)}
-              </ThemedText>
+              <ThemedText variant="heading">{formatMinutes(totalSeconds)}</ThemedText>
             </View>
             <View style={styles.summaryCell}>
               <ThemedText variant="caption" color="muted">
@@ -217,7 +273,7 @@ export default function ProgressScreen() {
         >
           <ThemedText variant="heading">まだ記録がありません</ThemedText>
           <ThemedText variant="caption" color="muted" numberOfLines={2}>
-            レッスンを再生すると、学習時間や目標達成状況がここに表示されます。
+            レッスンを再生すると、学習時間やシャドーイングの記録がここに表示されます。
           </ThemedText>
           <Pressable
             onPress={() => router.push('/(tabs)')}
@@ -230,22 +286,7 @@ export default function ProgressScreen() {
         </View>
       )}
 
-      {/* ブロック 3: 唯一のプライマリ CTA */}
-      {hasData && todaysLesson ? (
-        <Pressable
-          onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
-          style={[styles.todayCta, { backgroundColor: colors.primary }]}
-        >
-          <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-            ▶ {todaysLesson.isReview ? '復習をはじめる' : '今日の1本をはじめる'}
-          </ThemedText>
-          <ThemedText variant="caption" style={{ color: colors.primaryText }}>
-            {todaysLesson.item.bundle?.data.titleJa ?? todaysLesson.item.entry.title}
-          </ThemedText>
-        </Pressable>
-      ) : null}
-
-      {/* ブロック 4: 学習カレンダー (カード内見出し) */}
+      {/* ブロック 4: 学習カレンダーカード (R6.2: カード内見出しに収める) */}
       <View
         style={[
           styles.card,
@@ -254,28 +295,38 @@ export default function ProgressScreen() {
       >
         <ThemedText variant="heading">学習カレンダー (直近 84 日)</ThemedText>
         <View style={styles.heatmap}>
-          {heatmap.map(({ date, seconds }) => (
+          {heatmap.map(({ date, seconds, frozen }) => (
             <Pressable
               key={date}
-              onPress={() => setSelectedDay({ date, seconds })}
+              onPress={() => setSelectedDay({ date, seconds, frozen })}
               style={[
                 styles.heatCell,
-                { backgroundColor: heatColor(seconds) },
+                frozen
+                  ? {
+                      backgroundColor: freezeCellBg,
+                      borderWidth: 1,
+                      borderColor: freezeCellBorder,
+                    }
+                  : { backgroundColor: heatColor(seconds) },
                 selectedDay?.date === date
                   ? { borderWidth: 2, borderColor: colors.primary }
                   : null,
               ]}
               accessibilityRole="button"
-              accessibilityLabel={`${formatDayLabel(date)}の学習記録`}
+              accessibilityLabel={`${formatDayLabel(date)}の学習記録${frozen ? '（フリーズで保護）' : ''}`}
             />
           ))}
         </View>
         <ThemedText variant="caption" color="muted">
           {selectedDay
             ? `${formatDayLabel(selectedDay.date)}: ${
-                selectedDay.seconds > 0 ? formatMinutes(selectedDay.seconds) : '記録なし'
+                selectedDay.frozen
+                  ? '❄ フリーズで連続記録を保護'
+                  : selectedDay.seconds > 0
+                    ? formatMinutes(selectedDay.seconds)
+                    : '記録なし'
               }`
-            : 'セルをタップすると、その日の学習時間が見られます'}
+            : 'セルをタップすると、その日の学習時間や保護状況が見られます'}
         </ThemedText>
         <View style={styles.heatLegend}>
           <ThemedText variant="caption" color="muted">
@@ -285,12 +336,27 @@ export default function ProgressScreen() {
             <View key={c} style={[styles.heatCell, styles.heatLegendCell, { backgroundColor: c }]} />
           ))}
           <ThemedText variant="caption" color="muted">
-            多 (1 日の学習時間)
+            多
+          </ThemedText>
+          <View
+            style={[
+              styles.heatCell,
+              styles.heatLegendCell,
+              styles.freezeLegendGap,
+              {
+                backgroundColor: freezeCellBg,
+                borderWidth: 1,
+                borderColor: freezeCellBorder,
+              },
+            ]}
+          />
+          <ThemedText variant="caption" color="muted">
+            保護
           </ThemedText>
         </View>
       </View>
 
-      {/* ブロック 5: 詳細な弱点分析 (セカンダリ枠線ボタンで P1 準拠) */}
+      {/* ブロック 5: 詳細な弱点分析カード (セカンダリ枠線ボタンで P1 準拠) */}
       <View
         style={[
           styles.card,
@@ -386,6 +452,17 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
   },
+  streakTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  freezePill: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
   summaryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -443,5 +520,8 @@ const styles = StyleSheet.create({
   heatLegendCell: {
     width: 12,
     height: 12,
+  },
+  freezeLegendGap: {
+    marginLeft: 10,
   },
 });

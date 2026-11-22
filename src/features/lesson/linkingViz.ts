@@ -1,11 +1,12 @@
 import type { LessonLinkingNote, LessonSentence } from '@/features/lesson/types';
+import type { AppColorScheme } from '@/theme/colors';
 
 /**
  * 音の変化 (リンキング等) の可視化: 種類ごとの色と凡例ラベル、
  * 文中のどの単語がどの注釈に重なるかのマッピング。
  */
 
-// 音の変化の色。UI のアクセント (青, colors.primary) と意味が衝突しないよう、
+// 音の変化の色 (ライトモード)。UI のアクセント (青, colors.primary) と意味が衝突しないよう、
 // 音変化カラーには青系を使わない (Issue #45 C1)。
 export const LINKING_COLORS: Record<LessonLinkingNote['type'], string> = {
   linking: '#6D28D9',
@@ -16,6 +17,33 @@ export const LINKING_COLORS: Record<LessonLinkingNote['type'], string> = {
   elision: '#4D7C0F',
   intrusion: '#B91C1C',
   'weak-form': '#475569',
+};
+
+// ダークモード用の高コントラスト色 (暗いカード背景上での視認性確保。W7)
+export const LINKING_COLORS_DARK: Record<LessonLinkingNote['type'], string> = {
+  linking: '#A78BFA',
+  reduction: '#FBBF24',
+  flapping: '#E879F9',
+  assimilation: '#2DD4BF',
+  palatalization: '#F472B6',
+  elision: '#A3E635',
+  intrusion: '#F87171',
+  'weak-form': '#94A3B8',
+};
+
+export function getLinkingColor(type: LessonLinkingNote['type'], scheme: AppColorScheme): string {
+  return scheme === 'dark' ? LINKING_COLORS_DARK[type] : LINKING_COLORS[type];
+}
+
+export const LINKING_DESCRIPTIONS: Record<LessonLinkingNote['type'], string> = {
+  linking: '前の語尾と次の語頭がつながって発音されます',
+  reduction: '一部の音が弱くなったり短く省略されたりします',
+  flapping: 't や d の音が軽く弾く「ラ行」に近い音になります',
+  assimilation: '前後の音が影響し合って別の音に変化します',
+  palatalization: 't/d/s/z と you 等が合わさり「チュ/ジュ」等に変わります',
+  elision: '会話の流れの中で特定の子音が抜け落ちます',
+  intrusion: '語と語のつなぎ目に滑らかにする音が入ります',
+  'weak-form': '代名詞や前置詞などが短く弱く発音されます',
 };
 
 /**

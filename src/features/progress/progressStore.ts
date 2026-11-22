@@ -249,20 +249,130 @@ export function addShadowingRecord(lessonId: string) {
 // 集計 (ローカル日ベースの純関数)
 // ---------------------------------------------------------------------------
 
-/** 連続学習日数。当日未学習でも前日まで継続していればカウントを維持する */
-export function computeStreak(days: ProgressData, today: Date = new Date()): number {
+/** 日付が属する暦週 (月曜始まり) の月曜日の YYYY-MM-DD を返す */
+export function isoWeekKey(date: Date): string {
+  const copy = new Date(date);
+  copy.setHours(12, 0, 0, 0);
+  const offset = (copy.getDay() + 6) % 7;
+  copy.setDate(copy.getDate() - offset);
+  return localDateStr(copy);
+}
+
+export interface StreakInfo {
+  /** 連続学習日数（週1回の自動フリーズで1日抜けを橋渡しした実学習日数） */
+  streak: number;
+  /** 今週（月〜日）の自動フリーズ残数（0 または 1） */
+  freezeRemainingThisWeek: number;
+  /** 現在の連続記録内でフリーズ保護が適用された日付一覧（YYYY-MM-DD） */
+  frozenDates: string[];
+  /** 昨日がフリーズ保護対象になったか */
+  rescuedYesterday: boolean;
+}
+
+function parseLocalDate(key: string): Date {
+  const [y, m, d] = key.split('-').map((v) => Number(v));
+  return new Date(y, (m ?? 1) - 1, d ?? 1, 12, 0, 0, 0);
+}
+
+/**
+ * 学習履歴全体を暦日順 (過去→現在) に走査し、自動フリーズで保護される日付の集合を返す。
+ * フリーズは「連続が生きている状態での1日だけの抜け」に対して、その日が属する
+ * 暦週 (月〜日) で未使用の場合に、暦日順で最初に現れた抜けへ適用される
+ * (後ろ向きに走査すると同一週の2回目の抜けを誤って保護してしまうため、
+ * 必ず前向きに判定する)。
+ */
+export function computeFrozenDates(days: ProgressData, through: Date = new Date()): Set<string> {
+  const frozen = new Set<string>();
+  const studiedKeys = Object.keys(days)
+    .filter((k) => (days[k]?.seconds ?? 0) > 0)
+    .sort();
+  if (studiedKeys.length === 0) return frozen;
+
+  const usedWeeks = new Set<string>();
+  const cursor = parseLocalDate(studiedKeys[0]);
+  const end = new Date(through);
+  end.setHours(12, 0, 0, 0);
+  let streakAlive = false;
+  let prevStudied = false;
+
+  while (cursor.getTime() <= end.getTime()) {
+    const key = localDateStr(cursor);
+    if ((days[key]?.seconds ?? 0) > 0) {
+      streakAlive = true;
+      prevStudied = true;
+    } else if (streakAlive && prevStudied) {
+      const weekKey = isoWeekKey(cursor);
+      if (!usedWeeks.has(weekKey)) {
+        usedWeeks.add(weekKey);
+        frozen.add(key);
+      } else {
+        streakAlive = false;
+      }
+      // 保護された日の直後は「学習日」扱いにしない (2日連続の抜けは保護しない)
+      prevStudied = false;
+    } else {
+      streakAlive = false;
+      prevStudied = false;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return frozen;
+}
+
+/**
+ * ストリーク救済付き連続学習日数 (E16)。
+ * 罰ではなく保険として、暦週（月〜日）ごとに1回まで「1日抜け」を自動フリーズで保護する。
+ * 連続日数のカウント自体は実際に学習した日数のみを数える（水増ししない）。
+ */
+export function computeStreakWithFreeze(
+  days: ProgressData,
+  today: Date = new Date()
+): StreakInfo {
+  const frozenAll = computeFrozenDates(days, today);
+  const base = new Date(today);
+  base.setHours(12, 0, 0, 0);
+
+  const todayKey = localDateStr(base);
+  const yesterday = new Date(base);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = localDateStr(yesterday);
+
+  const cursor = new Date(base);
+  // 当日が未学習でも「今日やる分」の猶予があるため前日から遡る
+  if (!((days[todayKey]?.seconds ?? 0) > 0)) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
   let streak = 0;
-  const cursor = new Date(today);
-  // 当日が未学習でも「今日やる分」として 1 日分の猶予があるため、
-  // 今日の記録がなければ前日から遡る
-  if (!(days[localDateStr(cursor)]?.seconds > 0)) {
-    cursor.setDate(cursor.getDate() - 1);
+  const frozenDates: string[] = [];
+  for (;;) {
+    const key = localDateStr(cursor);
+    if ((days[key]?.seconds ?? 0) > 0) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+      continue;
+    }
+    if (frozenAll.has(key)) {
+      frozenDates.push(key);
+      cursor.setDate(cursor.getDate() - 1);
+      continue;
+    }
+    break;
   }
-  while (days[localDateStr(cursor)]?.seconds > 0) {
-    streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
-  return streak;
+
+  const currentWeek = isoWeekKey(base);
+  const usedThisWeek = [...frozenAll].some((k) => isoWeekKey(parseLocalDate(k)) === currentWeek);
+  return {
+    streak,
+    freezeRemainingThisWeek: usedThisWeek ? 0 : 1,
+    frozenDates,
+    rescuedYesterday: frozenDates.includes(yesterdayKey),
+  };
+}
+
+/** 連続学習日数。週1回の自動フリーズによる救済を含む */
+export function computeStreak(days: ProgressData, today: Date = new Date()): number {
+  return computeStreakWithFreeze(days, today).streak;
 }
 
 /** 累計学習秒数 */
@@ -339,13 +449,14 @@ export function computeShadowingTotal(days: ProgressData): number {
   return Object.values(days).reduce((sum, day) => sum + day.shadowingCount, 0);
 }
 
-/** ヒートマップ用: start から end までの日ごとの秒数 (欠損日は 0) */
+/** ヒートマップ用: start から end までの日ごとの秒数とフリーズ保護有無 */
 export function buildHeatmap(
   days: ProgressData,
   endDate: Date,
   weeks: number
-): { date: string; seconds: number }[] {
-  const out: { date: string; seconds: number }[] = [];
+): { date: string; seconds: number; frozen: boolean }[] {
+  const frozenSet = computeFrozenDates(days, endDate);
+  const out: { date: string; seconds: number; frozen: boolean }[] = [];
   const end = new Date(endDate);
   const total = weeks * 7;
   const start = new Date(end);
@@ -354,7 +465,8 @@ export function buildHeatmap(
     const d = new Date(start);
     d.setDate(start.getDate() + i);
     const key = localDateStr(d);
-    out.push({ date: key, seconds: days[key]?.seconds ?? 0 });
+    const seconds = days[key]?.seconds ?? 0;
+    out.push({ date: key, seconds, frozen: seconds <= 0 && frozenSet.has(key) });
   }
   return out;
 }
