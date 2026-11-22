@@ -55,7 +55,6 @@ import {
 import {
   addShadowingCount,
   getShadowingCounts,
-  lessonShadowingTotal,
 } from '@/features/player/shadowingStore';
 import { formatTime } from '@/features/player/shared';
 import {

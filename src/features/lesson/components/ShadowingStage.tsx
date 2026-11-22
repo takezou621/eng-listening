@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -57,10 +57,13 @@ export function ShadowingStage({
   const [hideText, setHideText] = useState(false);
   const [peekText, setPeekText] = useState(false);
 
-  // 文が変わったら「一時表示」は解除する (次の文が最初から見えてしまうのを防ぐ)
-  useEffect(() => {
+  // 文が変わったら「一時表示」は解除する (次の文が最初から見えてしまうのを防ぐ)。
+  // props 変化に応じた state 調整パターン (レンダー中に前回値を比較する)
+  const [peekSentenceIndex, setPeekSentenceIndex] = useState(sentence.index);
+  if (peekSentenceIndex !== sentence.index) {
+    setPeekSentenceIndex(sentence.index);
     setPeekText(false);
-  }, [sentence.index]);
+  }
 
   const dangerColor = scheme === 'dark' ? '#F87171' : '#DC2626';
   const weakActiveColor = scheme === 'dark' ? '#FBBF24' : '#B45309';
