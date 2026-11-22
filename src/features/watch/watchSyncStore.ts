@@ -1,3 +1,4 @@
+import { recordError } from '@/features/analytics/crash';
 import {
   getAppliedWatchSessionIds,
   mergeWatchStudySessions,
@@ -26,6 +27,8 @@ export function applyWatchSessions(sessions: WatchSessionRecord[]): Promise<void
     .then(() => {
       mergeWatchStudySessions(sessions);
     })
-    .catch(() => undefined);
+    .catch((e) => {
+      recordError(e, 'watch_session_apply_failed');
+    });
   return chain;
 }

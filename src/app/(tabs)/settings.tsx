@@ -6,6 +6,7 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_CONFIG } from '@/config/appConfig';
 import { useRouter } from 'expo-router';
+import { logEvent } from '@/features/analytics/analyticsStore';
 import {
   initBillingAsync,
   restorePurchasesAsync,
@@ -81,6 +82,9 @@ export default function SettingsScreen() {
     setRestoring(true);
     const result: RestoreResult = await restorePurchasesAsync();
     setRestoring(false);
+    if (result.restored) {
+      logEvent('restore_completed', { result: result.premium ? 'restored' : 'nothing' });
+    }
     if (result.restored && result.premium) {
       setRestoreMessage('プレミアムが復元されました。');
     } else if (result.restored) {
@@ -99,7 +103,14 @@ export default function SettingsScreen() {
           label="現在のプラン"
           value={isLoading ? '確認中…' : isPremium ? 'プレミアム' : '無料プラン'}
         />
-        <LinkRow label="プレミアムについて" onPress={() => router.push('/paywall')} />
+        <LinkRow
+          label="プレミアムについて"
+          onPress={() => {
+            // 解約・プラン確認の導線タップ (解約意図のシグナルとして計測)
+            logEvent('subscription_manage_tapped');
+            router.push('/paywall');
+          }}
+        />
         <Pressable
           onPress={handleRestore}
           disabled={!isAvailable || isLoading || restoring}

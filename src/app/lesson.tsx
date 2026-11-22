@@ -265,6 +265,9 @@ function LessonPlayerScreen({
   const [showSummary, setShowSummary] = useState(false);
   const [summarySeconds, setSummarySeconds] = useState(0);
   const summaryShownRef = useRef(false);
+  // 計測用: 完了済みフラグ (lesson_abandoned を完了後に発火しない) と現在位置の ref
+  const completedRef = useRef(false);
+  const effectivePosRef = useRef(0);
 
   const nextLesson = useMemo(() => {
     const list = getLessonList();
@@ -459,6 +462,7 @@ function LessonPlayerScreen({
     setPlayerPrefsRate(nextRate);
     player.setPlaybackRate(nextRate, PITCH_CORRECTION_QUALITY);
     append(label ?? `setPlaybackRate(${nextRate}, ${PITCH_CORRECTION_QUALITY})`);
+    logEvent('playback_control', { lessonId: lesson.id, action: 'speed' });
   };
 
   const togglePlay = () => {
@@ -469,6 +473,7 @@ function LessonPlayerScreen({
       repeatSentence === null &&
       (status.didJustFinish || (status.duration > 0 && status.currentTime >= status.duration - 0.05))
     ) {
+      logEvent('playback_control', { lessonId: lesson.id, action: 'replay' });
       setFocusedPos(0);
       seekTo(0, 'seekTo(0) // 終端から先頭へ', () => play());
     } else {
@@ -597,6 +602,7 @@ function LessonPlayerScreen({
     const gen = recordGenRef.current;
     compareSeqRef.current = { sentenceIndex, gen };
     playModel(sentenceIndex, true);
+    logEvent('shadowing_compared', { lessonId: lesson.id });
     append(`連続聞き比べ開始: 文${sentenceIndex + 1}`);
   };
 
@@ -629,6 +635,7 @@ function LessonPlayerScreen({
   };
 
   const goPrevSentence = () => {
+    logEvent('playback_control', { lessonId: lesson.id, action: 'jump' });
     const pos = lastStartedPosition();
     if (lessonMode === 'speak') {
       goToPosition(Math.max(0, pos - 1), false);
@@ -643,6 +650,7 @@ function LessonPlayerScreen({
   };
 
   const goNextSentence = () => {
+    logEvent('playback_control', { lessonId: lesson.id, action: 'jump' });
     const pos = lastStartedPosition();
     if (lessonMode === 'speak') {
       goToPosition(Math.min(sentences.length - 1, pos + 1), false);
@@ -665,6 +673,7 @@ function LessonPlayerScreen({
     }
     setLessonModeState(nextMode);
     setPlayerPrefsLessonMode(nextMode);
+    logEvent('lesson_mode_changed', { lessonId: lesson.id, mode: nextMode });
   };
 
   const toggleRepeat = (sentenceIndex: number) => {
@@ -678,6 +687,7 @@ function LessonPlayerScreen({
   };
 
   const setAbPoint = (which: 'a' | 'b') => {
+    logEvent('playback_control', { lessonId: lesson.id, action: 'ab_repeat' });
     const now = statusRef.current.currentTime;
     const duration = statusRef.current.duration || lesson.durationSec;
     setAb((prev) => {
@@ -693,6 +703,7 @@ function LessonPlayerScreen({
   const clearAb = () => {
     setAb(null);
     append('AB リピート解除');
+    logEvent('playback_control', { lessonId: lesson.id, action: 'ab_repeat' });
   };
 
   // アンマウント時に録音と一時ファイルを破棄 (GM 決定)
@@ -781,6 +792,7 @@ function LessonPlayerScreen({
 
   useEffect(() => {
     if (status.didJustFinish) {
+      completedRef.current = true;
       markLessonCompleted(lesson.id);
       logEvent('lesson_completed', {
         lessonId: lesson.id,
@@ -895,6 +907,25 @@ function LessonPlayerScreen({
 
   const effectivePos = timePos >= 0 ? timePos : focusedPos;
   const displaySentence = sentences[effectivePos] ?? sentences[0];
+
+  // 計測用に現在位置を ref へミラーする (アンマウント時の判定で使う)
+  useEffect(() => {
+    effectivePosRef.current = effectivePos;
+  }, [effectivePos]);
+
+  // 未完了のままレッスンを離れたら lesson_abandoned を記録する (完了後は記録しない)。
+  // このコンポーネントはレッスン ID で key 付けされるため、アンマウント = 離脱とみなせる。
+  useEffect(() => {
+    return () => {
+      if (completedRef.current) return;
+      const total = sentences.length;
+      const ratio = total > 0 ? effectivePosRef.current / total : 0;
+      const progressBucket =
+        ratio < 0.25 ? '0-25' : ratio < 0.5 ? '25-50' : ratio < 0.75 ? '50-75' : '75-99';
+      logEvent('lesson_abandoned', { lessonId: lesson.id, progressBucket });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // --- Apple Watch 連携 (Phase 1): 再生状態の送信と Watch からの操作の受付 ---
   // ハンドラはマウント中だけ登録し、最新の操作関数一式は ref 経由で参照する
@@ -1056,6 +1087,7 @@ function LessonPlayerScreen({
     const note = sentence.linking[noteIndex];
     if (note) {
       append(`音の変化: ${note.span} (${LINKING_LABELS[note.type]})`);
+      logEvent('linking_note_opened', { lessonId: lesson.id, soundChangeType: note.type });
     }
   };
 
@@ -1236,9 +1268,16 @@ function LessonPlayerScreen({
 
           {displaySentence.linking.length > 0 ? (
             <Pressable
-              onPress={() =>
-                setLinkingSheetTarget({ sentenceIndex: displaySentence.index, noteIndex: 0 })
-              }
+              onPress={() => {
+                setLinkingSheetTarget({ sentenceIndex: displaySentence.index, noteIndex: 0 });
+                const firstNote = displaySentence.linking[0];
+                if (firstNote) {
+                  logEvent('linking_note_opened', {
+                    lessonId: lesson.id,
+                    soundChangeType: firstNote.type,
+                  });
+                }
+              }}
               style={[styles.hintRow, { borderTopColor: colors.border }]}
               accessibilityRole="button"
               accessibilityLabel="音の変化の解説を開く"
@@ -1416,9 +1455,16 @@ function LessonPlayerScreen({
         visible={linkingSheetTarget !== null}
         sentence={sheetSentence}
         noteIndex={linkingSheetTarget?.noteIndex ?? 0}
-        onSelectNote={(noteIndex) =>
-          setLinkingSheetTarget((prev) => (prev ? { ...prev, noteIndex } : null))
-        }
+        onSelectNote={(noteIndex) => {
+          setLinkingSheetTarget((prev) => (prev ? { ...prev, noteIndex } : null));
+          const selectedNote = sheetSentence?.linking[noteIndex];
+          if (selectedNote) {
+            logEvent('linking_note_opened', {
+              lessonId: lesson.id,
+              soundChangeType: selectedNote.type,
+            });
+          }
+        }}
         onReplaySentence={() => {
           if (!sheetSentence) return;
           seekTo(sheetSentence.startSec, `解説文再生: 文${sheetSentence.index + 1}`, () => {

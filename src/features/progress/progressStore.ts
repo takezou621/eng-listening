@@ -1,6 +1,9 @@
 import { Paths, File } from 'expo-file-system';
 import { useEffect, useState } from 'react';
 
+import { logEvent } from '../analytics/analyticsStore';
+import { setGa4UserProperties } from '../analytics/ga4';
+
 /**
  * 学習進捗の永続化ストア (Issue #13)。
  * 端末内 (expo-file-system の Document ディレクトリ) の JSON に保存し、
@@ -105,9 +108,25 @@ function flushToDisk() {
   });
 }
 
+let lastLessonsBucket: string | null = null;
+
+/**
+ * 累計完了レッスン数を GA4 のユーザープロパティ
+ * (lessons_completed_bucket: '0' | '1-3' | '4-8' | '9-12') に同期する。
+ * 値が変わったときだけ送信する。
+ */
+function syncLessonsCompletedBucket() {
+  const count = computeCompletedLessonCount(cachedData);
+  const bucket = count === 0 ? '0' : count <= 3 ? '1-3' : count <= 8 ? '4-8' : '9-12';
+  if (bucket === lastLessonsBucket) return;
+  lastLessonsBucket = bucket;
+  setGa4UserProperties({ lessons_completed_bucket: bucket });
+}
+
 function updateData(mutate: (current: ProgressData) => ProgressData) {
   cachedData = mutate(cachedData);
   notify();
+  syncLessonsCompletedBucket();
   if (canPersist) {
     flushToDisk();
   }
@@ -178,6 +197,7 @@ export function loadProgressDataAsync(): Promise<void> {
     }
     // 新しいオブジェクト参照を代入済みのため React の再描画が確実に走る
     notify();
+    syncLessonsCompletedBucket();
     flushToDisk();
   })();
   return loadPromise;
@@ -340,6 +360,9 @@ export function mergeWatchStudySessions(sessions: WatchStudySessionInput[]): str
   if (canPersist) {
     flushToDisk();
   }
+  // 計測: Watch 単体学習が iPhone に取り込まれたことを記録する
+  logEvent('watch_session_synced', { sessionsCount: fresh.length });
+  setGa4UserProperties({ watch_user: 'true' });
   return fresh.map((s) => s.id);
 }
 

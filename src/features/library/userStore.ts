@@ -1,6 +1,8 @@
 import { Paths, File } from 'expo-file-system';
 import { useEffect, useState } from 'react';
 
+import { logEvent } from '../analytics/analyticsStore';
+
 /**
  * お気に入りレッスン・苦手フレーズ(文単位)・1日の学習目標の永続化ストア。
  * 端末内 (expo-file-system の Document ディレクトリ) に JSON で保存し、
@@ -205,19 +207,24 @@ export function useUserData() {
     },
     isLessonFavorite: (lessonId: string) => data.favoriteLessons.includes(lessonId),
     toggleWeakSentence: (lessonId: string, sentenceIndex: number) => {
+      // 追加か削除かは現在の状態で判定し、計測イベントを分ける
+      const isWeak = data.weakSentences.some(
+        (s) => s.lessonId === lessonId && s.sentenceIndex === sentenceIndex
+      );
       updateUserData((current) => {
-        const isWeak = current.weakSentences.some(
+        const exists = current.weakSentences.some(
           (s) => s.lessonId === lessonId && s.sentenceIndex === sentenceIndex
         );
         return {
           ...current,
-          weakSentences: isWeak
+          weakSentences: exists
             ? current.weakSentences.filter(
                 (s) => !(s.lessonId === lessonId && s.sentenceIndex === sentenceIndex)
               )
             : [{ lessonId, sentenceIndex, addedAtMs: Date.now() }, ...current.weakSentences],
         };
       });
+      logEvent(isWeak ? 'weak_phrase_removed' : 'weak_phrase_added', { lessonId });
     },
     isSentenceWeak: (lessonId: string, sentenceIndex: number) =>
       data.weakSentences.some(

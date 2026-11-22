@@ -16,6 +16,7 @@ import {
 import { getLessonList } from '@/features/lesson/registry';
 import { useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
+import { setGa4UserProperties } from '@/features/analytics/ga4';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -97,6 +98,8 @@ export default function OnboardingScreen() {
         onFinish={() => {
           // 検証用 deep link (?step=result) の架空の結果は分析ログに記録しない
           if (stepParam !== 'result') {
+            const score = results.filter((r) => r.correct).length;
+            const level = score >= 3 ? 'advanced' : score === 2 ? 'intermediate' : 'beginner';
             logEvent('onboarding_completed', {
             linking_correct: results.filter((r) => r.type === 'linking' && r.correct).length,
             linking_missed: results.filter((r) => r.type === 'linking' && !r.correct).length,
@@ -104,7 +107,10 @@ export default function OnboardingScreen() {
             reduction_missed: results.filter((r) => r.type === 'reduction' && !r.correct).length,
             flapping_correct: results.filter((r) => r.type === 'flapping' && r.correct).length,
             flapping_missed: results.filter((r) => r.type === 'flapping' && !r.correct).length,
+            score,
+            level,
             });
+            setGa4UserProperties({ diagnostic_level: level });
           }
           finish();
         }}
@@ -208,12 +214,18 @@ function QuestionPhase({
   const answer = (choiceIndex: number) => {
     if (answered !== null) return;
     setAnswered(choiceIndex);
+    const isCorrect = shuffledChoices[choiceIndex]?.correct ?? false;
+    logEvent('diagnostic_answered', {
+      questionIndex,
+      correct: isCorrect,
+      soundChangeType: question.type,
+    });
     setResults([
       ...results,
       {
         type: question.type,
         span: question.span,
-        correct: shuffledChoices[choiceIndex]?.correct ?? false,
+        correct: isCorrect,
       },
     ]);
   };
