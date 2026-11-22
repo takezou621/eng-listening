@@ -69,7 +69,7 @@ export default function PhrasesScreen() {
               </ThemedText>
               <View style={styles.cardFooter}>
                 <ThemedText variant="caption" color="primary">
-                  {bundle.data.title}
+                  {bundle.data.titleJa}
                 </ThemedText>
                 <View style={styles.footerRight}>
                   <ThemedText variant="caption" color="muted">

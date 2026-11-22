@@ -14,6 +14,12 @@ if existing
     config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.takezou.englistening.uitests'
     config.build_settings['TEST_TARGET_NAME'] = 'app'
   end
+  # fix the file reference path if an earlier injector version doubled it
+  project.files.each do |f|
+    if f.path && f.path.include?('appUITests/DuoSmokeTests.swift')
+      f.path = 'DuoSmokeTests.swift'
+    end
+  end
   project.save
   puts 'appUITests target already exists (settings refreshed)'
 else

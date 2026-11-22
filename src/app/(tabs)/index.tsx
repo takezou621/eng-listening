@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, View, AppState } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Chip } from '@/components/Chip';
@@ -10,15 +10,18 @@ import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
 import { isOnboardingDone, loadUserDataAsync, useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
-import { useProgressData } from '@/features/progress/progressStore';
+import {
+  computeDailyGoalStatus,
+  computeTodaySeconds,
+  useProgressData, localDateStr } from '@/features/progress/progressStore';
 
 type FilterType = 'all' | ContentType;
 type FilterLevel = 'all' | 'beginner' | 'intermediate';
 
 export default function LibraryScreen() {
-  const { colors } = useTheme();
+  const { scheme, colors } = useTheme();
   const router = useRouter();
-  const { favoriteLessons, toggleFavoriteLesson, onboardingDone } = useUserData();
+  const { favoriteLessons, toggleFavoriteLesson, onboardingDone, dailyGoalMinutes } = useUserData();
 
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [filterLevel, setFilterLevel] = useState<FilterLevel>('all');
@@ -38,6 +41,27 @@ export default function LibraryScreen() {
     () => getTodaysLesson(completedLessonIds),
     [completedLessonIds]
   );
+  // 日付をまたいでも「今日」が古くならないよう、復帰時と1分間隔で日付を更新する
+  const [todayKey, setTodayKey] = useState(() => localDateStr());
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        setTodayKey(localDateStr());
+      }
+    });
+    const interval = setInterval(() => {
+      setTodayKey(localDateStr());
+    }, 60_000);
+    return () => {
+      sub.remove();
+      clearInterval(interval);
+    };
+  }, []);
+  const goalStatus = computeDailyGoalStatus(
+    computeTodaySeconds(progressDays, new Date(todayKey + 'T12:00:00')),
+    dailyGoalMinutes
+  );
+  const successColor = colors.success;
 
   // 初回起動時のみオンボーディング診断へ誘導する (完了状態は端末内に永続化)
   const redirectedRef = useRef(false);
@@ -123,15 +147,39 @@ export default function LibraryScreen() {
             { backgroundColor: colors.secondarySurface, borderColor: colors.primary },
           ]}
         >
-          <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>
-            {todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}
-          </ThemedText>
+          <View style={styles.todayTopRow}>
+            <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>
+              {todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}
+            </ThemedText>
+            <ThemedText
+              variant="caption"
+              style={{
+                color: goalStatus.achieved ? successColor : colors.textMuted,
+                fontWeight: '600',
+              }}
+            >
+              {goalStatus.achieved
+                ? `✓ 目標達成 (${goalStatus.todayMinutes}分)`
+                : `今日 ${goalStatus.todayMinutes} / ${goalStatus.goalMinutes} 分`}
+            </ThemedText>
+          </View>
           <ThemedText variant="heading">{todaysLesson.item.bundle?.data.titleJa}</ThemedText>
           <ThemedText variant="caption" color="muted">
             {todaysLesson.item.entry.title} ・ 約{' '}
-            {Math.round(todaysLesson.item.bundle?.data.durationSec ?? 0)} 秒 /{' '}
+            {Math.round(todaysLesson.item.bundle?.data.durationSec ?? 0)} 秒 ・{' '}
             {todaysLesson.item.bundle?.data.sentences.length ?? 0} 文
           </ThemedText>
+          <View style={[styles.goalTrack, { backgroundColor: colors.border }]}>
+            <View
+              style={[
+                styles.goalFill,
+                {
+                  width: `${goalStatus.ratio * 100}%`,
+                  backgroundColor: goalStatus.achieved ? successColor : colors.primary,
+                },
+              ]}
+            />
+          </View>
           <ThemedText color="primary" style={{ fontWeight: '700' }}>
             ▶ はじめる
           </ThemedText>
@@ -147,7 +195,7 @@ export default function LibraryScreen() {
         ListEmptyComponent={
           <View style={[styles.emptyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <ThemedText variant="heading">該当するレッスンがありません</ThemedText>
-            <ThemedText variant="caption" color="muted" numberOfLines={2} style={styles.emptyDesc}>
+            <ThemedText variant="caption" color="muted" style={styles.emptyDesc}>
               絞り込み条件に一致するレッスンが見つかりませんでした。
             </ThemedText>
             <Pressable
@@ -201,7 +249,7 @@ export default function LibraryScreen() {
                 <Pressable
                   hitSlop={8}
                   accessibilityRole="button"
-                  accessibilityLabel={`${entry.title}をお気に入りに登録`}
+                  accessibilityLabel={`${entry.titleJa}をお気に入りに登録`}
                   accessibilityState={{ selected: isFav }}
                   onPress={() => toggleFavoriteLesson(entry.id)}
                   style={styles.favIcon}
@@ -211,9 +259,9 @@ export default function LibraryScreen() {
                   </ThemedText>
                 </Pressable>
               </View>
-              <ThemedText variant="heading">{entry.title}</ThemedText>
+              <ThemedText variant="heading">{entry.titleJa}</ThemedText>
               <ThemedText variant="caption" color="muted" numberOfLines={1}>
-                {entry.titleJa}
+                {entry.title}
               </ThemedText>
               <ThemedText variant="caption" color="muted">
                 {bundle
@@ -232,9 +280,25 @@ const styles = StyleSheet.create({
   todayCard: {
     borderWidth: 1,
     borderRadius: 12,
-    padding: 16,
-    gap: 8,
+    padding: 14,
+    gap: 6,
     marginBottom: 12,
+  },
+  todayTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  goalTrack: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginTop: 2,
+  },
+  goalFill: {
+    height: 6,
+    borderRadius: 3,
   },
   subtitle: { marginTop: 4, marginBottom: 12 },
   filterSection: { marginBottom: 12 },
@@ -246,22 +310,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 16,
     gap: 8,
-    marginTop: 8,
-    alignItems: 'center',
+    marginTop: 24,
+    alignItems: 'flex-start',
   },
-  emptyDesc: { textAlign: 'center' },
+  emptyDesc: {},
   emptyResetBtn: {
-    borderRadius: 10,
     borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginTop: 4,
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
   },
   card: {
     borderRadius: 12,
     borderWidth: 1,
-    padding: 16,
-    gap: 8,
+    padding: 14,
+    gap: 6,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   badgeType: {

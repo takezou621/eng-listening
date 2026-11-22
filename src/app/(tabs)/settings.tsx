@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
+import { DailyGoalSheet } from '@/components/DailyGoalSheet';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_CONFIG } from '@/config/appConfig';
@@ -11,17 +12,22 @@ import {
   useEntitlement,
   type RestoreResult,
 } from '@/features/billing/billingStore';
+import { useUserData } from '@/features/library/userStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
-function Row({ label, value, isLast = false }: { label: string; value: string; isLast?: boolean }) {
+function Row({
+  label,
+  value,
+  isLast = false,
+}: {
+  label: string;
+  value: string;
+  isLast?: boolean;
+}) {
   const { colors } = useTheme();
   return (
     <View
-      style={[
-        styles.row,
-        { borderBottomColor: colors.border },
-        isLast && styles.rowLast,
-      ]}
+      style={[styles.row, { borderBottomColor: colors.border }, isLast && styles.rowLast]}
     >
       <ThemedText style={styles.rowLabel} numberOfLines={2}>
         {label}
@@ -33,19 +39,25 @@ function Row({ label, value, isLast = false }: { label: string; value: string; i
   );
 }
 
-function LinkRow({ label, onPress, isLast = false }: { label: string; onPress: () => void; isLast?: boolean }) {
+function LinkRow({
+  label,
+  value,
+  onPress,
+  isLast = false,
+}: {
+  label: string;
+  value?: string;
+  onPress: () => void;
+  isLast?: boolean;
+}) {
   const { colors } = useTheme();
   return (
     <Pressable
       onPress={onPress}
-      style={[
-        styles.legalRow,
-        { borderBottomColor: colors.border },
-        isLast && styles.rowLast,
-      ]}
+      style={[styles.legalRow, { borderBottomColor: colors.border }, isLast && styles.rowLast]}
     >
       <ThemedText>{label}</ThemedText>
-      <ThemedText color="muted">›</ThemedText>
+      <ThemedText color="muted">{value ? `${value} ›` : '›'}</ThemedText>
     </Pressable>
   );
 }
@@ -54,6 +66,8 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { scheme, colors } = useTheme();
   const { isPremium, isLoading, isAvailable } = useEntitlement();
+  const { dailyGoalMinutes, setDailyGoalMinutes } = useUserData();
+  const [goalSheetVisible, setGoalSheetVisible] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [restoreMessage, setRestoreMessage] = useState('');
 
@@ -89,7 +103,7 @@ export default function SettingsScreen() {
         <Pressable
           onPress={handleRestore}
           disabled={!isAvailable || isLoading || restoring}
-          style={[styles.legalRow, styles.rowLast]}
+          style={[styles.legalRow, styles.rowLast, { borderBottomColor: colors.border }]}
         >
           <ThemedText color="primary">購入を復元</ThemedText>
           <ThemedText color="muted">{restoring ? '復元中…' : ''}</ThemedText>
@@ -102,6 +116,11 @@ export default function SettingsScreen() {
       ) : null}
 
       <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <LinkRow
+          label="1日の学習目標"
+          value={`${dailyGoalMinutes} 分 / 日`}
+          onPress={() => setGoalSheetVisible(true)}
+        />
         <LinkRow
           label="聞き取り診断をもう一度行う"
           onPress={() => router.push('/onboarding')}
@@ -151,6 +170,13 @@ export default function SettingsScreen() {
         <Row label="テーマ" value={scheme === 'dark' ? 'ダーク (端末の設定に連動)' : 'ライト (端末の設定に連動)'} />
         <Row label="バージョン" value={`v${APP_CONFIG.version}`} isLast />
       </View>
+
+      <DailyGoalSheet
+        visible={goalSheetVisible}
+        currentMinutes={dailyGoalMinutes}
+        onSelectGoal={setDailyGoalMinutes}
+        onClose={() => setGoalSheetVisible(false)}
+      />
     </Screen>
   );
 }
@@ -160,34 +186,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  rowLast: {
-    borderBottomWidth: 0,
   },
   rowLabel: { flexShrink: 1 },
   rowValue: { flexShrink: 1, textAlign: 'right' },
   section: {
-    marginTop: 8,
+    marginTop: 12,
     borderRadius: 12,
     borderWidth: 1,
-    overflow: 'hidden',
   },
-  lastSection: {
-    marginBottom: 24,
-  },
-  groupLabel: {
-    marginTop: 16,
-    marginLeft: 4,
-    fontWeight: '700',
-  },
+  sectionTitle: { marginTop: 20 },
+  groupLabel: { marginTop: 20, marginBottom: 6, marginLeft: 4 },
+  rowLast: { borderBottomWidth: 0 },
+  lastSection: { marginBottom: 8 },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     gap: 12,
