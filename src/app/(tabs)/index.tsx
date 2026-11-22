@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, View, AppState } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Chip } from '@/components/Chip';
@@ -13,8 +13,7 @@ import { useTheme } from '@/theme/AppThemeProvider';
 import {
   computeDailyGoalStatus,
   computeTodaySeconds,
-  useProgressData,
-} from '@/features/progress/progressStore';
+  useProgressData, localDateStr } from '@/features/progress/progressStore';
 
 type FilterType = 'all' | ContentType;
 type FilterLevel = 'all' | 'beginner' | 'intermediate';
@@ -42,8 +41,24 @@ export default function LibraryScreen() {
     () => getTodaysLesson(completedLessonIds),
     [completedLessonIds]
   );
+  // 日付をまたいでも「今日」が古くならないよう、復帰時と1分間隔で日付を更新する
+  const [todayKey, setTodayKey] = useState(() => localDateStr());
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        setTodayKey(localDateStr());
+      }
+    });
+    const interval = setInterval(() => {
+      setTodayKey(localDateStr());
+    }, 60_000);
+    return () => {
+      sub.remove();
+      clearInterval(interval);
+    };
+  }, []);
   const goalStatus = computeDailyGoalStatus(
-    computeTodaySeconds(progressDays),
+    computeTodaySeconds(progressDays, new Date(todayKey + 'T12:00:00')),
     dailyGoalMinutes
   );
   const successColor = scheme === 'dark' ? '#4ADE80' : '#16A34A';

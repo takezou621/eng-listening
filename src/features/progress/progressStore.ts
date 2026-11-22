@@ -291,11 +291,11 @@ export function computeDailyGoalStatus(
   const safeGoal = Math.max(goalMinutes, 1);
   const targetSeconds = safeGoal * 60;
   const achieved = todaySeconds >= targetSeconds;
+  // 表示分数は切り捨てを基本とし、達成前に目標分数へ到達して見えないようにする。
+  // 「表示 + 残り = 目標」が常に成り立つよう、残りは目標から表示を引いて求める
   const todayMinutes =
-    todaySeconds > 0 && todaySeconds < 60 ? 1 : Math.round(todaySeconds / 60);
-  const remainingMinutes = achieved
-    ? 0
-    : Math.max(1, Math.ceil((targetSeconds - todaySeconds) / 60));
+    todaySeconds <= 0 ? 0 : Math.max(1, Math.floor(todaySeconds / 60));
+  const remainingMinutes = achieved ? 0 : safeGoal - Math.min(todayMinutes, safeGoal - 1);
   const ratio = Math.min(Math.max(todaySeconds / targetSeconds, 0), 1);
   return {
     todayMinutes,
