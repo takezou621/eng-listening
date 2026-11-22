@@ -1,0 +1,1015 @@
+{
+ "id": "introducing-my-hometown",
+ "title": "Introducing My Hometown",
+ "titleJa": "故郷の紹介",
+ "type": "monologue",
+ "level": "intermediate",
+ "category": "culture",
+ "audio": "audio.m4a",
+ "durationSec": 42.635,
+ "speakerNames": {
+  "narrator": "Speaker"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T10:08:14Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "narrator",
+   "startSec": 0.0,
+   "endSec": 3.317,
+   "text": "Today, I'd like to tell you a bit about my hometown.",
+   "translationJa": "今日は、私の故郷について少しお話ししたいと思います。",
+   "chunks": [
+    {
+     "text": "Today,",
+     "startSec": 0.0,
+     "endSec": 0.26
+    },
+    {
+     "text": "I'd like to tell you",
+     "startSec": 0.58,
+     "endSec": 1.36
+    },
+    {
+     "text": "a bit about",
+     "startSec": 1.36,
+     "endSec": 1.86
+    },
+    {
+     "text": "my hometown.",
+     "startSec": 1.86,
+     "endSec": 2.32
+    }
+   ],
+   "words": [
+    {
+     "text": "Today,",
+     "startSec": 0.0,
+     "endSec": 0.26
+    },
+    {
+     "text": "I'd",
+     "startSec": 0.58,
+     "endSec": 0.74
+    },
+    {
+     "text": "like",
+     "startSec": 0.74,
+     "endSec": 0.86
+    },
+    {
+     "text": "to",
+     "startSec": 0.86,
+     "endSec": 1.02
+    },
+    {
+     "text": "tell",
+     "startSec": 1.02,
+     "endSec": 1.2
+    },
+    {
+     "text": "you",
+     "startSec": 1.2,
+     "endSec": 1.36
+    },
+    {
+     "text": "a",
+     "startSec": 1.36,
+     "endSec": 1.46
+    },
+    {
+     "text": "bit",
+     "startSec": 1.46,
+     "endSec": 1.62
+    },
+    {
+     "text": "about",
+     "startSec": 1.62,
+     "endSec": 1.86
+    },
+    {
+     "text": "my",
+     "startSec": 1.86,
+     "endSec": 2.02
+    },
+    {
+     "text": "hometown.",
+     "startSec": 2.02,
+     "endSec": 2.32
+    }
+   ],
+   "linking": [
+    {
+     "span": "tell you",
+     "type": "palatalization",
+     "ipa": "/ˈtɛl.juː/",
+     "noteJa": "tellの末尾とyouが滑らかにつながり、「テリュ」のように1語のように発音されます。"
+    },
+    {
+     "span": "bit about",
+     "type": "flapping",
+     "ipa": "/ˈbɪɾ.ə.baʊt/",
+     "noteJa": "bitの語尾のtが母音に挟まれて日本語のラ行のような軽い音（フラップT）になり、「ビラバウト」と聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "startSec": 3.817,
+   "endSec": 6.642,
+   "text": "It is located in the northern part of the country.",
+   "translationJa": "そこはこの国の北部に位置しています。",
+   "chunks": [
+    {
+     "text": "It is located",
+     "startSec": 3.817,
+     "endSec": 4.457
+    },
+    {
+     "text": "in the northern part",
+     "startSec": 4.457,
+     "endSec": 5.477
+    },
+    {
+     "text": "of the country.",
+     "startSec": 5.477,
+     "endSec": 6.077
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 3.817,
+     "endSec": 3.897
+    },
+    {
+     "text": "is",
+     "startSec": 3.897,
+     "endSec": 4.017
+    },
+    {
+     "text": "located",
+     "startSec": 4.017,
+     "endSec": 4.457
+    },
+    {
+     "text": "in",
+     "startSec": 4.457,
+     "endSec": 4.757
+    },
+    {
+     "text": "the",
+     "startSec": 4.757,
+     "endSec": 4.857
+    },
+    {
+     "text": "northern",
+     "startSec": 4.857,
+     "endSec": 5.097
+    },
+    {
+     "text": "part",
+     "startSec": 5.097,
+     "endSec": 5.477
+    },
+    {
+     "text": "of",
+     "startSec": 5.477,
+     "endSec": 5.657
+    },
+    {
+     "text": "the",
+     "startSec": 5.657,
+     "endSec": 5.757
+    },
+    {
+     "text": "country.",
+     "startSec": 5.757,
+     "endSec": 6.077
+    }
+   ],
+   "linking": [
+    {
+     "span": "part of",
+     "type": "linking",
+     "ipa": "/ˈpɑːrt.əv/",
+     "noteJa": "partのtとofのoがつながり、「パーラヴ」または「パーツォヴ」のように流れるように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "startSec": 7.142,
+   "endSec": 10.128,
+   "text": "Most people think it gets too cold in the winter.",
+   "translationJa": "多くの人は冬になると寒すぎると考えています。",
+   "chunks": [
+    {
+     "text": "Most people think",
+     "startSec": 7.142,
+     "endSec": 8.042
+    },
+    {
+     "text": "it gets too cold",
+     "startSec": 8.042,
+     "endSec": 9.022
+    },
+    {
+     "text": "in the winter.",
+     "startSec": 9.022,
+     "endSec": 9.522
+    }
+   ],
+   "words": [
+    {
+     "text": "Most",
+     "startSec": 7.142,
+     "endSec": 7.322
+    },
+    {
+     "text": "people",
+     "startSec": 7.322,
+     "endSec": 7.622
+    },
+    {
+     "text": "think",
+     "startSec": 7.622,
+     "endSec": 8.042
+    },
+    {
+     "text": "it",
+     "startSec": 8.042,
+     "endSec": 8.202
+    },
+    {
+     "text": "gets",
+     "startSec": 8.202,
+     "endSec": 8.382
+    },
+    {
+     "text": "too",
+     "startSec": 8.382,
+     "endSec": 8.662
+    },
+    {
+     "text": "cold",
+     "startSec": 8.662,
+     "endSec": 9.022
+    },
+    {
+     "text": "in",
+     "startSec": 9.022,
+     "endSec": 9.202
+    },
+    {
+     "text": "the",
+     "startSec": 9.202,
+     "endSec": 9.302
+    },
+    {
+     "text": "winter.",
+     "startSec": 9.302,
+     "endSec": 9.522
+    }
+   ],
+   "linking": [
+    {
+     "span": "cold in",
+     "type": "linking",
+     "ipa": "/ˈkoʊld.ɪn/",
+     "noteJa": "coldのdとinのiがつながって「コルディン」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "startSec": 10.628,
+   "endSec": 13.976,
+   "text": "Actually, the snow makes the whole city look magical.",
+   "translationJa": "実は、雪のおかげで街全体が幻想的に見えるんですよ。",
+   "chunks": [
+    {
+     "text": "Actually,",
+     "startSec": 10.628,
+     "endSec": 10.988
+    },
+    {
+     "text": "the snow makes",
+     "startSec": 11.308,
+     "endSec": 11.968
+    },
+    {
+     "text": "the whole city",
+     "startSec": 11.968,
+     "endSec": 12.668
+    },
+    {
+     "text": "look magical.",
+     "startSec": 12.668,
+     "endSec": 13.368
+    }
+   ],
+   "words": [
+    {
+     "text": "Actually,",
+     "startSec": 10.628,
+     "endSec": 10.988
+    },
+    {
+     "text": "the",
+     "startSec": 11.308,
+     "endSec": 11.368
+    },
+    {
+     "text": "snow",
+     "startSec": 11.368,
+     "endSec": 11.648
+    },
+    {
+     "text": "makes",
+     "startSec": 11.648,
+     "endSec": 11.968
+    },
+    {
+     "text": "the",
+     "startSec": 11.968,
+     "endSec": 12.168
+    },
+    {
+     "text": "whole",
+     "startSec": 12.168,
+     "endSec": 12.348
+    },
+    {
+     "text": "city",
+     "startSec": 12.348,
+     "endSec": 12.668
+    },
+    {
+     "text": "look",
+     "startSec": 12.668,
+     "endSec": 12.928
+    },
+    {
+     "text": "magical.",
+     "startSec": 12.928,
+     "endSec": 13.368
+    }
+   ],
+   "linking": [
+    {
+     "span": "city",
+     "type": "flapping",
+     "ipa": "/ˈsɪɾi/",
+     "noteJa": "cityのtが母音に挟まれて「シリー」に近いラ行の音で発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "startSec": 14.476,
+   "endSec": 18.111,
+   "text": "Our town is famous for fresh seafood and warm noodle soup.",
+   "translationJa": "私たちの町は新鮮な海鮮と温かい麺料理で有名です。",
+   "chunks": [
+    {
+     "text": "Our town is famous",
+     "startSec": 14.476,
+     "endSec": 15.376
+    },
+    {
+     "text": "for fresh seafood",
+     "startSec": 15.376,
+     "endSec": 16.336
+    },
+    {
+     "text": "and warm noodle soup.",
+     "startSec": 16.336,
+     "endSec": 17.576
+    }
+   ],
+   "words": [
+    {
+     "text": "Our",
+     "startSec": 14.476,
+     "endSec": 14.596
+    },
+    {
+     "text": "town",
+     "startSec": 14.596,
+     "endSec": 14.856
+    },
+    {
+     "text": "is",
+     "startSec": 14.856,
+     "endSec": 15.076
+    },
+    {
+     "text": "famous",
+     "startSec": 15.076,
+     "endSec": 15.376
+    },
+    {
+     "text": "for",
+     "startSec": 15.376,
+     "endSec": 15.696
+    },
+    {
+     "text": "fresh",
+     "startSec": 15.696,
+     "endSec": 15.956
+    },
+    {
+     "text": "seafood",
+     "startSec": 15.956,
+     "endSec": 16.336
+    },
+    {
+     "text": "and",
+     "startSec": 16.336,
+     "endSec": 16.696
+    },
+    {
+     "text": "warm",
+     "startSec": 16.696,
+     "endSec": 16.936
+    },
+    {
+     "text": "noodle",
+     "startSec": 16.936,
+     "endSec": 17.356
+    },
+    {
+     "text": "soup.",
+     "startSec": 17.356,
+     "endSec": 17.576
+    }
+   ],
+   "linking": [
+    {
+     "span": "town is",
+     "type": "linking",
+     "ipa": "/ˈtaʊn.ɪz/",
+     "noteJa": "townの末尾のnとisが結びつき、「タウニズ」と一気に発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "startSec": 18.611,
+   "endSec": 22.625,
+   "text": "You can find a great bowl of ramen on almost every corner.",
+   "translationJa": "ほぼどの通りを曲がっても、おいしいラーメンの店を見つけることができます。",
+   "chunks": [
+    {
+     "text": "You can find",
+     "startSec": 18.611,
+     "endSec": 19.131
+    },
+    {
+     "text": "a great bowl of ramen",
+     "startSec": 19.131,
+     "endSec": 20.491
+    },
+    {
+     "text": "on almost every corner.",
+     "startSec": 20.491,
+     "endSec": 21.711
+    }
+   ],
+   "words": [
+    {
+     "text": "You",
+     "startSec": 18.611,
+     "endSec": 18.731
+    },
+    {
+     "text": "can",
+     "startSec": 18.731,
+     "endSec": 18.851
+    },
+    {
+     "text": "find",
+     "startSec": 18.851,
+     "endSec": 19.131
+    },
+    {
+     "text": "a",
+     "startSec": 19.131,
+     "endSec": 19.331
+    },
+    {
+     "text": "great",
+     "startSec": 19.331,
+     "endSec": 19.571
+    },
+    {
+     "text": "bowl",
+     "startSec": 19.571,
+     "endSec": 19.851
+    },
+    {
+     "text": "of",
+     "startSec": 19.851,
+     "endSec": 20.091
+    },
+    {
+     "text": "ramen",
+     "startSec": 20.091,
+     "endSec": 20.491
+    },
+    {
+     "text": "on",
+     "startSec": 20.491,
+     "endSec": 20.671
+    },
+    {
+     "text": "almost",
+     "startSec": 20.671,
+     "endSec": 21.011
+    },
+    {
+     "text": "every",
+     "startSec": 21.011,
+     "endSec": 21.311
+    },
+    {
+     "text": "corner.",
+     "startSec": 21.311,
+     "endSec": 21.711
+    }
+   ],
+   "linking": [
+    {
+     "span": "bowl of",
+     "type": "linking",
+     "ipa": "/ˈboʊl.əv/",
+     "noteJa": "bowlの末尾lとofがつながり、「ボウラヴ」のように滑らかに聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "startSec": 23.125,
+   "endSec": 27.057,
+   "text": "If you visit, you must stop at the historic central park.",
+   "translationJa": "もし訪れるなら、歴史ある中央公園に絶対に立ち寄るべきです。",
+   "chunks": [
+    {
+     "text": "If you visit,",
+     "startSec": 23.125,
+     "endSec": 23.705
+    },
+    {
+     "text": "you must stop at",
+     "startSec": 23.985,
+     "endSec": 24.865
+    },
+    {
+     "text": "the historic central park.",
+     "startSec": 24.865,
+     "endSec": 26.105
+    }
+   ],
+   "words": [
+    {
+     "text": "If",
+     "startSec": 23.125,
+     "endSec": 23.265
+    },
+    {
+     "text": "you",
+     "startSec": 23.265,
+     "endSec": 23.385
+    },
+    {
+     "text": "visit,",
+     "startSec": 23.385,
+     "endSec": 23.705
+    },
+    {
+     "text": "you",
+     "startSec": 23.985,
+     "endSec": 24.085
+    },
+    {
+     "text": "must",
+     "startSec": 24.085,
+     "endSec": 24.265
+    },
+    {
+     "text": "stop",
+     "startSec": 24.265,
+     "endSec": 24.685
+    },
+    {
+     "text": "at",
+     "startSec": 24.685,
+     "endSec": 24.865
+    },
+    {
+     "text": "the",
+     "startSec": 24.865,
+     "endSec": 24.965
+    },
+    {
+     "text": "historic",
+     "startSec": 24.965,
+     "endSec": 25.285
+    },
+    {
+     "text": "central",
+     "startSec": 25.285,
+     "endSec": 25.785
+    },
+    {
+     "text": "park.",
+     "startSec": 25.785,
+     "endSec": 26.105
+    }
+   ],
+   "linking": [
+    {
+     "span": "stop at",
+     "type": "linking",
+     "ipa": "/ˈstɑːp.ət/",
+     "noteJa": "stopのpとatがつながって「スタッパッ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "startSec": 27.557,
+   "endSec": 30.836,
+   "text": "You can rent a bicycle and ride around the peaceful lake.",
+   "translationJa": "自転車を借りて、穏やかな湖のまわりを走ることができます。",
+   "chunks": [
+    {
+     "text": "You can rent a bicycle",
+     "startSec": 27.557,
+     "endSec": 28.577
+    },
+    {
+     "text": "and ride around",
+     "startSec": 28.577,
+     "endSec": 29.437
+    },
+    {
+     "text": "the peaceful lake.",
+     "startSec": 29.437,
+     "endSec": 30.297
+    }
+   ],
+   "words": [
+    {
+     "text": "You",
+     "startSec": 27.557,
+     "endSec": 27.677
+    },
+    {
+     "text": "can",
+     "startSec": 27.677,
+     "endSec": 27.817
+    },
+    {
+     "text": "rent",
+     "startSec": 27.817,
+     "endSec": 28.037
+    },
+    {
+     "text": "a",
+     "startSec": 28.037,
+     "endSec": 28.217
+    },
+    {
+     "text": "bicycle",
+     "startSec": 28.217,
+     "endSec": 28.577
+    },
+    {
+     "text": "and",
+     "startSec": 28.577,
+     "endSec": 28.917
+    },
+    {
+     "text": "ride",
+     "startSec": 28.917,
+     "endSec": 29.097
+    },
+    {
+     "text": "around",
+     "startSec": 29.097,
+     "endSec": 29.437
+    },
+    {
+     "text": "the",
+     "startSec": 29.437,
+     "endSec": 29.637
+    },
+    {
+     "text": "peaceful",
+     "startSec": 29.637,
+     "endSec": 29.877
+    },
+    {
+     "text": "lake.",
+     "startSec": 29.877,
+     "endSec": 30.297
+    }
+   ],
+   "linking": [
+    {
+     "span": "rent a",
+     "type": "linking",
+     "ipa": "/ˈrɛnt.ə/",
+     "noteJa": "rentのtとaがつながって「レンタ」のように聞こえます。"
+    },
+    {
+     "span": "ride around",
+     "type": "linking",
+     "ipa": "/ˌraɪd.əˈraʊnd/",
+     "noteJa": "rideのdとaroundのaがつながり、「ライダラウンド」のように1語のように流れます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "startSec": 31.336,
+   "endSec": 34.885,
+   "text": "The local people are kind and always willing to help visitors.",
+   "translationJa": "地元の人々は親切で、観光客をいつでも喜んで手助けしてくれます。",
+   "chunks": [
+    {
+     "text": "The local people are kind",
+     "startSec": 31.336,
+     "endSec": 32.556
+    },
+    {
+     "text": "and always willing",
+     "startSec": 32.556,
+     "endSec": 33.456
+    },
+    {
+     "text": "to help visitors.",
+     "startSec": 33.456,
+     "endSec": 34.156
+    }
+   ],
+   "words": [
+    {
+     "text": "The",
+     "startSec": 31.336,
+     "endSec": 31.436
+    },
+    {
+     "text": "local",
+     "startSec": 31.436,
+     "endSec": 31.656
+    },
+    {
+     "text": "people",
+     "startSec": 31.656,
+     "endSec": 32.016
+    },
+    {
+     "text": "are",
+     "startSec": 32.016,
+     "endSec": 32.316
+    },
+    {
+     "text": "kind",
+     "startSec": 32.316,
+     "endSec": 32.556
+    },
+    {
+     "text": "and",
+     "startSec": 32.556,
+     "endSec": 32.856
+    },
+    {
+     "text": "always",
+     "startSec": 32.856,
+     "endSec": 33.056
+    },
+    {
+     "text": "willing",
+     "startSec": 33.056,
+     "endSec": 33.456
+    },
+    {
+     "text": "to",
+     "startSec": 33.456,
+     "endSec": 33.656
+    },
+    {
+     "text": "help",
+     "startSec": 33.656,
+     "endSec": 33.836
+    },
+    {
+     "text": "visitors.",
+     "startSec": 33.836,
+     "endSec": 34.156
+    }
+   ],
+   "linking": [
+    {
+     "span": "kind and",
+     "type": "linking",
+     "ipa": "/ˈkaɪnd.ənd/",
+     "noteJa": "kindのdとandの先頭母音が連結して「カインダン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "startSec": 35.385,
+   "endSec": 39.038,
+   "text": "Life moves at a relaxed pace compared to big cities.",
+   "translationJa": "大都市と比べると、生活はとてもゆったりとしたペースで流れています。",
+   "chunks": [
+    {
+     "text": "Life moves",
+     "startSec": 35.385,
+     "endSec": 35.945
+    },
+    {
+     "text": "at a relaxed pace",
+     "startSec": 35.945,
+     "endSec": 37.065
+    },
+    {
+     "text": "compared to big cities.",
+     "startSec": 37.065,
+     "endSec": 38.405
+    }
+   ],
+   "words": [
+    {
+     "text": "Life",
+     "startSec": 35.385,
+     "endSec": 35.625
+    },
+    {
+     "text": "moves",
+     "startSec": 35.625,
+     "endSec": 35.945
+    },
+    {
+     "text": "at",
+     "startSec": 35.945,
+     "endSec": 36.185
+    },
+    {
+     "text": "a",
+     "startSec": 36.185,
+     "endSec": 36.285
+    },
+    {
+     "text": "relaxed",
+     "startSec": 36.285,
+     "endSec": 36.645
+    },
+    {
+     "text": "pace",
+     "startSec": 36.645,
+     "endSec": 37.065
+    },
+    {
+     "text": "compared",
+     "startSec": 37.065,
+     "endSec": 37.545
+    },
+    {
+     "text": "to",
+     "startSec": 37.545,
+     "endSec": 37.865
+    },
+    {
+     "text": "big",
+     "startSec": 37.865,
+     "endSec": 38.065
+    },
+    {
+     "text": "cities.",
+     "startSec": 38.065,
+     "endSec": 38.405
+    }
+   ],
+   "linking": [
+    {
+     "span": "at a",
+     "type": "flapping",
+     "ipa": "/ˈæɾ.ə/",
+     "noteJa": "atのtが母音に挟まれて「アラ」のようにラ行化して聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "narrator",
+   "startSec": 39.538,
+   "endSec": 42.635,
+   "text": "I hope you will take the chance to visit someday soon.",
+   "translationJa": "いつか近いうちに、ぜひ訪れる機会を持っていただけたら嬉しいです。",
+   "chunks": [
+    {
+     "text": "I hope you will",
+     "startSec": 39.538,
+     "endSec": 40.158
+    },
+    {
+     "text": "take the chance",
+     "startSec": 40.158,
+     "endSec": 40.718
+    },
+    {
+     "text": "to visit someday soon.",
+     "startSec": 40.718,
+     "endSec": 42.138
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 39.538,
+     "endSec": 39.618
+    },
+    {
+     "text": "hope",
+     "startSec": 39.618,
+     "endSec": 39.838
+    },
+    {
+     "text": "you",
+     "startSec": 39.838,
+     "endSec": 40.018
+    },
+    {
+     "text": "will",
+     "startSec": 40.018,
+     "endSec": 40.158
+    },
+    {
+     "text": "take",
+     "startSec": 40.158,
+     "endSec": 40.378
+    },
+    {
+     "text": "the",
+     "startSec": 40.378,
+     "endSec": 40.538
+    },
+    {
+     "text": "chance",
+     "startSec": 40.538,
+     "endSec": 40.718
+    },
+    {
+     "text": "to",
+     "startSec": 40.718,
+     "endSec": 41.058
+    },
+    {
+     "text": "visit",
+     "startSec": 41.058,
+     "endSec": 41.218
+    },
+    {
+     "text": "someday",
+     "startSec": 41.218,
+     "endSec": 41.618
+    },
+    {
+     "text": "soon.",
+     "startSec": 41.618,
+     "endSec": 42.138
+    }
+   ],
+   "linking": [
+    {
+     "span": "hope you",
+     "type": "linking",
+     "ipa": "/ˈhoʊp.juː/",
+     "noteJa": "hopeの語尾とyouがつながり、「ホウピュ」のようにスムーズに発音されます。"
+    }
+   ]
+  }
+ ]
+}

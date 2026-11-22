@@ -1,0 +1,871 @@
+{
+ "id": "asking-directions",
+ "title": "Asking for Directions",
+ "titleJa": "道を聞く",
+ "type": "conversation",
+ "level": "beginner",
+ "category": "street",
+ "audio": "audio.m4a",
+ "durationSec": 32.423,
+ "speakerNames": {
+  "female": "Tourist",
+  "male": "Local Resident"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T10:03:18Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "female",
+   "startSec": 0.0,
+   "endSec": 3.877,
+   "text": "Excuse me, could you tell me how to get to the central station?",
+   "translationJa": "すみません、中央駅への行き方を教えていただけますか？",
+   "chunks": [
+    {
+     "text": "Excuse me,",
+     "startSec": 0.0,
+     "endSec": 0.66
+    },
+    {
+     "text": "could you tell me",
+     "startSec": 0.96,
+     "endSec": 1.56
+    },
+    {
+     "text": "how to get to",
+     "startSec": 1.56,
+     "endSec": 2.1
+    },
+    {
+     "text": "the central station?",
+     "startSec": 2.1,
+     "endSec": 2.84
+    }
+   ],
+   "words": [
+    {
+     "text": "Excuse",
+     "startSec": 0.0,
+     "endSec": 0.44
+    },
+    {
+     "text": "me,",
+     "startSec": 0.44,
+     "endSec": 0.66
+    },
+    {
+     "text": "could",
+     "startSec": 0.96,
+     "endSec": 1.1
+    },
+    {
+     "text": "you",
+     "startSec": 1.1,
+     "endSec": 1.22
+    },
+    {
+     "text": "tell",
+     "startSec": 1.22,
+     "endSec": 1.44
+    },
+    {
+     "text": "me",
+     "startSec": 1.44,
+     "endSec": 1.56
+    },
+    {
+     "text": "how",
+     "startSec": 1.56,
+     "endSec": 1.72
+    },
+    {
+     "text": "to",
+     "startSec": 1.72,
+     "endSec": 1.82
+    },
+    {
+     "text": "get",
+     "startSec": 1.82,
+     "endSec": 1.96
+    },
+    {
+     "text": "to",
+     "startSec": 1.96,
+     "endSec": 2.1
+    },
+    {
+     "text": "the",
+     "startSec": 2.1,
+     "endSec": 2.2
+    },
+    {
+     "text": "central",
+     "startSec": 2.2,
+     "endSec": 2.44
+    },
+    {
+     "text": "station?",
+     "startSec": 2.44,
+     "endSec": 2.84
+    }
+   ],
+   "linking": [
+    {
+     "span": "could you",
+     "type": "palatalization",
+     "ipa": "/kʊdʒuː/",
+     "noteJa": "could の d と you の y が同化して「クッジュ」のように聞こえます。"
+    },
+    {
+     "span": "get to",
+     "type": "flapping",
+     "ipa": "/ˈɡɛɾə/",
+     "noteJa": "get の t が母音に挟まれて日本語のラ行に近い軽い「ゲラ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "male",
+   "startSec": 4.377,
+   "endSec": 6.774,
+   "text": "Sure, it is not far from here at all.",
+   "translationJa": "もちろんですよ、ここからは全く遠くありません。",
+   "chunks": [
+    {
+     "text": "Sure,",
+     "startSec": 4.377,
+     "endSec": 4.617
+    },
+    {
+     "text": "it is not far",
+     "startSec": 4.917,
+     "endSec": 5.477
+    },
+    {
+     "text": "from here",
+     "startSec": 5.477,
+     "endSec": 5.877
+    },
+    {
+     "text": "at all.",
+     "startSec": 5.877,
+     "endSec": 6.217
+    }
+   ],
+   "words": [
+    {
+     "text": "Sure,",
+     "startSec": 4.377,
+     "endSec": 4.617
+    },
+    {
+     "text": "it",
+     "startSec": 4.917,
+     "endSec": 4.957
+    },
+    {
+     "text": "is",
+     "startSec": 4.957,
+     "endSec": 5.057
+    },
+    {
+     "text": "not",
+     "startSec": 5.057,
+     "endSec": 5.257
+    },
+    {
+     "text": "far",
+     "startSec": 5.257,
+     "endSec": 5.477
+    },
+    {
+     "text": "from",
+     "startSec": 5.477,
+     "endSec": 5.737
+    },
+    {
+     "text": "here",
+     "startSec": 5.737,
+     "endSec": 5.877
+    },
+    {
+     "text": "at",
+     "startSec": 5.877,
+     "endSec": 6.037
+    },
+    {
+     "text": "all.",
+     "startSec": 6.037,
+     "endSec": 6.217
+    }
+   ],
+   "linking": [
+    {
+     "span": "it is",
+     "type": "flapping",
+     "ipa": "/ɪɾɪz/",
+     "noteJa": "it の t が次の母音とつながり、フラップ化して「イリズ」のように聞こえます。"
+    },
+    {
+     "span": "at all",
+     "type": "linking",
+     "ipa": "/əˈtɔːl/",
+     "noteJa": "at の t と all の母音が連結して「アトール」または「アラール」とつながります。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "startSec": 7.274,
+   "endSec": 10.303,
+   "text": "Just walk straight down this street for two blocks.",
+   "translationJa": "この通りをまっすぐ2ブロック歩いてください。",
+   "chunks": [
+    {
+     "text": "Just walk straight",
+     "startSec": 7.274,
+     "endSec": 8.074
+    },
+    {
+     "text": "down this street",
+     "startSec": 8.074,
+     "endSec": 8.854
+    },
+    {
+     "text": "for two blocks.",
+     "startSec": 8.854,
+     "endSec": 9.594
+    }
+   ],
+   "words": [
+    {
+     "text": "Just",
+     "startSec": 7.274,
+     "endSec": 7.514
+    },
+    {
+     "text": "walk",
+     "startSec": 7.514,
+     "endSec": 7.734
+    },
+    {
+     "text": "straight",
+     "startSec": 7.734,
+     "endSec": 8.074
+    },
+    {
+     "text": "down",
+     "startSec": 8.074,
+     "endSec": 8.374
+    },
+    {
+     "text": "this",
+     "startSec": 8.374,
+     "endSec": 8.574
+    },
+    {
+     "text": "street",
+     "startSec": 8.574,
+     "endSec": 8.854
+    },
+    {
+     "text": "for",
+     "startSec": 8.854,
+     "endSec": 9.094
+    },
+    {
+     "text": "two",
+     "startSec": 9.094,
+     "endSec": 9.274
+    },
+    {
+     "text": "blocks.",
+     "startSec": 9.274,
+     "endSec": 9.594
+    }
+   ],
+   "linking": [
+    {
+     "span": "for",
+     "type": "weak-form",
+     "ipa": "/fər/",
+     "noteJa": "前置詞の for は弱形になり、あいまい母音で「ファー」より「ファ」と短く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "startSec": 10.803,
+   "endSec": 13.352,
+   "text": "Okay, and what should I do after that?",
+   "translationJa": "わかりました、その後はどうすればいいですか？",
+   "chunks": [
+    {
+     "text": "Okay,",
+     "startSec": 10.803,
+     "endSec": 11.103
+    },
+    {
+     "text": "and what should I do",
+     "startSec": 11.463,
+     "endSec": 12.263
+    },
+    {
+     "text": "after that?",
+     "startSec": 12.263,
+     "endSec": 12.843
+    }
+   ],
+   "words": [
+    {
+     "text": "Okay,",
+     "startSec": 10.803,
+     "endSec": 11.103
+    },
+    {
+     "text": "and",
+     "startSec": 11.463,
+     "endSec": 11.663
+    },
+    {
+     "text": "what",
+     "startSec": 11.663,
+     "endSec": 11.823
+    },
+    {
+     "text": "should",
+     "startSec": 11.823,
+     "endSec": 12.003
+    },
+    {
+     "text": "I",
+     "startSec": 12.003,
+     "endSec": 12.123
+    },
+    {
+     "text": "do",
+     "startSec": 12.123,
+     "endSec": 12.263
+    },
+    {
+     "text": "after",
+     "startSec": 12.263,
+     "endSec": 12.563
+    },
+    {
+     "text": "that?",
+     "startSec": 12.563,
+     "endSec": 12.843
+    }
+   ],
+   "linking": [
+    {
+     "span": "should I",
+     "type": "linking",
+     "ipa": "/ˈʃʊdaɪ/",
+     "noteJa": "should の d と I の母音がつながって「シュダイ」のようにひと続きになります。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "male",
+   "startSec": 13.852,
+   "endSec": 16.727,
+   "text": "Turn right at the big convenience store on the corner.",
+   "translationJa": "角にある大きなコンビニのところで右に曲がってください。",
+   "chunks": [
+    {
+     "text": "Turn right",
+     "startSec": 13.852,
+     "endSec": 14.312
+    },
+    {
+     "text": "at the big",
+     "startSec": 14.312,
+     "endSec": 14.772
+    },
+    {
+     "text": "convenience store",
+     "startSec": 14.772,
+     "endSec": 15.572
+    },
+    {
+     "text": "on the corner.",
+     "startSec": 15.572,
+     "endSec": 16.112
+    }
+   ],
+   "words": [
+    {
+     "text": "Turn",
+     "startSec": 13.852,
+     "endSec": 14.032
+    },
+    {
+     "text": "right",
+     "startSec": 14.032,
+     "endSec": 14.312
+    },
+    {
+     "text": "at",
+     "startSec": 14.312,
+     "endSec": 14.472
+    },
+    {
+     "text": "the",
+     "startSec": 14.472,
+     "endSec": 14.592
+    },
+    {
+     "text": "big",
+     "startSec": 14.592,
+     "endSec": 14.772
+    },
+    {
+     "text": "convenience",
+     "startSec": 14.772,
+     "endSec": 15.112
+    },
+    {
+     "text": "store",
+     "startSec": 15.112,
+     "endSec": 15.572
+    },
+    {
+     "text": "on",
+     "startSec": 15.572,
+     "endSec": 15.752
+    },
+    {
+     "text": "the",
+     "startSec": 15.752,
+     "endSec": 15.852
+    },
+    {
+     "text": "corner.",
+     "startSec": 15.852,
+     "endSec": 16.112
+    }
+   ],
+   "linking": [
+    {
+     "span": "right at",
+     "type": "flapping",
+     "ipa": "/ˈraɪɾət/",
+     "noteJa": "right の t が脱落またはフラップ化し、at とつながって「ライラッ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "female",
+   "startSec": 17.227,
+   "endSec": 19.521,
+   "text": "Turn right at the store, got it.",
+   "translationJa": "お店のところで右に曲がるのですね、了解しました。",
+   "chunks": [
+    {
+     "text": "Turn right",
+     "startSec": 17.227,
+     "endSec": 17.647
+    },
+    {
+     "text": "at the store,",
+     "startSec": 17.647,
+     "endSec": 18.207
+    },
+    {
+     "text": "got it.",
+     "startSec": 18.567,
+     "endSec": 19.047
+    }
+   ],
+   "words": [
+    {
+     "text": "Turn",
+     "startSec": 17.227,
+     "endSec": 17.407
+    },
+    {
+     "text": "right",
+     "startSec": 17.407,
+     "endSec": 17.647
+    },
+    {
+     "text": "at",
+     "startSec": 17.647,
+     "endSec": 17.807
+    },
+    {
+     "text": "the",
+     "startSec": 17.807,
+     "endSec": 17.927
+    },
+    {
+     "text": "store,",
+     "startSec": 17.927,
+     "endSec": 18.207
+    },
+    {
+     "text": "got",
+     "startSec": 18.567,
+     "endSec": 18.787
+    },
+    {
+     "text": "it.",
+     "startSec": 18.787,
+     "endSec": 19.047
+    }
+   ],
+   "linking": [
+    {
+     "span": "got it",
+     "type": "linking",
+     "ipa": "/ˈɡɑːtɪt/",
+     "noteJa": "got の t と it がつながって「ガリッ」のように素早く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "male",
+   "startSec": 20.021,
+   "endSec": 22.867,
+   "text": "You will see a large glass building in front of you.",
+   "translationJa": "目の前に大きなガラス張りの建物が見えますよ。",
+   "chunks": [
+    {
+     "text": "You will see",
+     "startSec": 20.021,
+     "endSec": 20.441
+    },
+    {
+     "text": "a large glass building",
+     "startSec": 20.441,
+     "endSec": 21.601
+    },
+    {
+     "text": "in front of you.",
+     "startSec": 21.601,
+     "endSec": 22.401
+    }
+   ],
+   "words": [
+    {
+     "text": "You",
+     "startSec": 20.021,
+     "endSec": 20.141
+    },
+    {
+     "text": "will",
+     "startSec": 20.141,
+     "endSec": 20.261
+    },
+    {
+     "text": "see",
+     "startSec": 20.261,
+     "endSec": 20.441
+    },
+    {
+     "text": "a",
+     "startSec": 20.441,
+     "endSec": 20.561
+    },
+    {
+     "text": "large",
+     "startSec": 20.561,
+     "endSec": 20.841
+    },
+    {
+     "text": "glass",
+     "startSec": 20.841,
+     "endSec": 21.161
+    },
+    {
+     "text": "building",
+     "startSec": 21.161,
+     "endSec": 21.601
+    },
+    {
+     "text": "in",
+     "startSec": 21.601,
+     "endSec": 21.841
+    },
+    {
+     "text": "front",
+     "startSec": 21.841,
+     "endSec": 22.041
+    },
+    {
+     "text": "of",
+     "startSec": 22.041,
+     "endSec": 22.221
+    },
+    {
+     "text": "you.",
+     "startSec": 22.221,
+     "endSec": 22.401
+    }
+   ],
+   "linking": [
+    {
+     "span": "front of",
+     "type": "reduction",
+     "ipa": "/ˈfrʌnəv/",
+     "noteJa": "front の t が脱落し、of と連結して「フラナヴ」のように弱く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "female",
+   "startSec": 23.367,
+   "endSec": 25.242,
+   "text": "How long will it take on foot?",
+   "translationJa": "歩いてどのくらい時間がかかりますか？",
+   "chunks": [
+    {
+     "text": "How long",
+     "startSec": 23.367,
+     "endSec": 23.747
+    },
+    {
+     "text": "will it take",
+     "startSec": 23.747,
+     "endSec": 24.227
+    },
+    {
+     "text": "on foot?",
+     "startSec": 24.227,
+     "endSec": 24.687
+    }
+   ],
+   "words": [
+    {
+     "text": "How",
+     "startSec": 23.367,
+     "endSec": 23.567
+    },
+    {
+     "text": "long",
+     "startSec": 23.567,
+     "endSec": 23.747
+    },
+    {
+     "text": "will",
+     "startSec": 23.747,
+     "endSec": 23.947
+    },
+    {
+     "text": "it",
+     "startSec": 23.947,
+     "endSec": 24.047
+    },
+    {
+     "text": "take",
+     "startSec": 24.047,
+     "endSec": 24.227
+    },
+    {
+     "text": "on",
+     "startSec": 24.227,
+     "endSec": 24.427
+    },
+    {
+     "text": "foot?",
+     "startSec": 24.427,
+     "endSec": 24.687
+    }
+   ],
+   "linking": [
+    {
+     "span": "will it",
+     "type": "linking",
+     "ipa": "/ˈwɪlɪt/",
+     "noteJa": "will の l と it が滑らかにつながり「ウィリット」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "male",
+   "startSec": 25.742,
+   "endSec": 28.097,
+   "text": "It will take about ten minutes to walk there.",
+   "translationJa": "そこまで歩いて10分ほどかかります。",
+   "chunks": [
+    {
+     "text": "It will take",
+     "startSec": 25.742,
+     "endSec": 26.122
+    },
+    {
+     "text": "about ten minutes",
+     "startSec": 26.122,
+     "endSec": 26.942
+    },
+    {
+     "text": "to walk there.",
+     "startSec": 26.942,
+     "endSec": 27.622
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 25.742,
+     "endSec": 25.842
+    },
+    {
+     "text": "will",
+     "startSec": 25.842,
+     "endSec": 25.942
+    },
+    {
+     "text": "take",
+     "startSec": 25.942,
+     "endSec": 26.122
+    },
+    {
+     "text": "about",
+     "startSec": 26.122,
+     "endSec": 26.342
+    },
+    {
+     "text": "ten",
+     "startSec": 26.342,
+     "endSec": 26.662
+    },
+    {
+     "text": "minutes",
+     "startSec": 26.662,
+     "endSec": 26.942
+    },
+    {
+     "text": "to",
+     "startSec": 26.942,
+     "endSec": 27.142
+    },
+    {
+     "text": "walk",
+     "startSec": 27.142,
+     "endSec": 27.322
+    },
+    {
+     "text": "there.",
+     "startSec": 27.322,
+     "endSec": 27.622
+    }
+   ],
+   "linking": [
+    {
+     "span": "take about",
+     "type": "linking",
+     "ipa": "/teɪk‿əˈbaʊt/",
+     "noteJa": "take の語尾の k 音が about の先頭の母音とつながって「テイカバウト」と聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "female",
+   "startSec": 28.597,
+   "endSec": 32.423,
+   "text": "That sounds easy enough, thank you so much for your help!",
+   "translationJa": "それなら簡単そうですね、助けてくれて本当にありがとうございました！",
+   "chunks": [
+    {
+     "text": "That sounds easy enough,",
+     "startSec": 28.597,
+     "endSec": 29.717
+    },
+    {
+     "text": "thank you so much",
+     "startSec": 30.117,
+     "endSec": 30.957
+    },
+    {
+     "text": "for your help!",
+     "startSec": 30.957,
+     "endSec": 31.537
+    }
+   ],
+   "words": [
+    {
+     "text": "That",
+     "startSec": 28.597,
+     "endSec": 28.777
+    },
+    {
+     "text": "sounds",
+     "startSec": 28.777,
+     "endSec": 28.997
+    },
+    {
+     "text": "easy",
+     "startSec": 28.997,
+     "endSec": 29.317
+    },
+    {
+     "text": "enough,",
+     "startSec": 29.317,
+     "endSec": 29.717
+    },
+    {
+     "text": "thank",
+     "startSec": 30.117,
+     "endSec": 30.317
+    },
+    {
+     "text": "you",
+     "startSec": 30.317,
+     "endSec": 30.537
+    },
+    {
+     "text": "so",
+     "startSec": 30.537,
+     "endSec": 30.737
+    },
+    {
+     "text": "much",
+     "startSec": 30.737,
+     "endSec": 30.957
+    },
+    {
+     "text": "for",
+     "startSec": 30.957,
+     "endSec": 31.177
+    },
+    {
+     "text": "your",
+     "startSec": 31.177,
+     "endSec": 31.277
+    },
+    {
+     "text": "help!",
+     "startSec": 31.277,
+     "endSec": 31.537
+    }
+   ],
+   "linking": [
+    {
+     "span": "easy enough",
+     "type": "intrusion",
+     "ipa": "/ˈiːzi‿jɪˈnʌf/",
+     "noteJa": "easy の終わりの母音 /iː/ から enough の母音へ移る際に軽い /j/ 音が挟まります。"
+    }
+   ]
+  }
+ ]
+}

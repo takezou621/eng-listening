@@ -1,0 +1,734 @@
+{
+ "id": "shopping-clothes",
+ "title": "Buying Clothes",
+ "titleJa": "服を買う",
+ "type": "conversation",
+ "level": "beginner",
+ "category": "shop",
+ "audio": "audio.m4a",
+ "durationSec": 25.882,
+ "speakerNames": {
+  "female": "Store Clerk",
+  "male": "Customer"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T10:03:50Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "female",
+   "startSec": 0.0,
+   "endSec": 3.039,
+   "text": "Excuse me, do you need any help with that jacket?",
+   "translationJa": "すみません、そちらのジャケットでお困りのことはございますか？",
+   "chunks": [
+    {
+     "text": "Excuse me,",
+     "startSec": 0.0,
+     "endSec": 0.66
+    },
+    {
+     "text": "do you need any help",
+     "startSec": 0.94,
+     "endSec": 1.76
+    },
+    {
+     "text": "with that jacket?",
+     "startSec": 1.76,
+     "endSec": 2.38
+    }
+   ],
+   "words": [
+    {
+     "text": "Excuse",
+     "startSec": 0.0,
+     "endSec": 0.46
+    },
+    {
+     "text": "me,",
+     "startSec": 0.46,
+     "endSec": 0.66
+    },
+    {
+     "text": "do",
+     "startSec": 0.94,
+     "endSec": 1.1
+    },
+    {
+     "text": "you",
+     "startSec": 1.1,
+     "endSec": 1.2
+    },
+    {
+     "text": "need",
+     "startSec": 1.2,
+     "endSec": 1.34
+    },
+    {
+     "text": "any",
+     "startSec": 1.34,
+     "endSec": 1.54
+    },
+    {
+     "text": "help",
+     "startSec": 1.54,
+     "endSec": 1.76
+    },
+    {
+     "text": "with",
+     "startSec": 1.76,
+     "endSec": 1.94
+    },
+    {
+     "text": "that",
+     "startSec": 1.94,
+     "endSec": 2.12
+    },
+    {
+     "text": "jacket?",
+     "startSec": 2.12,
+     "endSec": 2.38
+    }
+   ],
+   "linking": [
+    {
+     "span": "need any",
+     "type": "linking",
+     "ipa": "/niːd‿ɛni/",
+     "noteJa": "need の d と any の a が連結して「ニーデニ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "male",
+   "startSec": 3.539,
+   "endSec": 5.967,
+   "text": "Yes, do you have this in a medium size?",
+   "translationJa": "はい、これの M サイズはありますか？",
+   "chunks": [
+    {
+     "text": "Yes,",
+     "startSec": 3.539,
+     "endSec": 3.759
+    },
+    {
+     "text": "do you have this",
+     "startSec": 4.039,
+     "endSec": 4.519
+    },
+    {
+     "text": "in a medium size?",
+     "startSec": 4.519,
+     "endSec": 5.339
+    }
+   ],
+   "words": [
+    {
+     "text": "Yes,",
+     "startSec": 3.539,
+     "endSec": 3.759
+    },
+    {
+     "text": "do",
+     "startSec": 4.039,
+     "endSec": 4.139
+    },
+    {
+     "text": "you",
+     "startSec": 4.139,
+     "endSec": 4.239
+    },
+    {
+     "text": "have",
+     "startSec": 4.239,
+     "endSec": 4.379
+    },
+    {
+     "text": "this",
+     "startSec": 4.379,
+     "endSec": 4.519
+    },
+    {
+     "text": "in",
+     "startSec": 4.519,
+     "endSec": 4.679
+    },
+    {
+     "text": "a",
+     "startSec": 4.679,
+     "endSec": 4.759
+    },
+    {
+     "text": "medium",
+     "startSec": 4.759,
+     "endSec": 4.999
+    },
+    {
+     "text": "size?",
+     "startSec": 4.999,
+     "endSec": 5.339
+    }
+   ],
+   "linking": [
+    {
+     "span": "in a",
+     "type": "linking",
+     "ipa": "/ɪn‿ə/",
+     "noteJa": "in の n と a がつながって「イナ」のように弱く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "female",
+   "startSec": 6.467,
+   "endSec": 8.81,
+   "text": "Let me check our stock in the back room.",
+   "translationJa": "バックヤードの在庫を確認してまいります。",
+   "chunks": [
+    {
+     "text": "Let me check",
+     "startSec": 6.467,
+     "endSec": 6.987
+    },
+    {
+     "text": "our stock",
+     "startSec": 6.987,
+     "endSec": 7.467
+    },
+    {
+     "text": "in the back room.",
+     "startSec": 7.467,
+     "endSec": 8.307
+    }
+   ],
+   "words": [
+    {
+     "text": "Let",
+     "startSec": 6.467,
+     "endSec": 6.627
+    },
+    {
+     "text": "me",
+     "startSec": 6.627,
+     "endSec": 6.747
+    },
+    {
+     "text": "check",
+     "startSec": 6.747,
+     "endSec": 6.987
+    },
+    {
+     "text": "our",
+     "startSec": 6.987,
+     "endSec": 7.167
+    },
+    {
+     "text": "stock",
+     "startSec": 7.167,
+     "endSec": 7.467
+    },
+    {
+     "text": "in",
+     "startSec": 7.467,
+     "endSec": 7.727
+    },
+    {
+     "text": "the",
+     "startSec": 7.727,
+     "endSec": 7.827
+    },
+    {
+     "text": "back",
+     "startSec": 7.827,
+     "endSec": 8.04
+    },
+    {
+     "text": "room.",
+     "startSec": 8.04,
+     "endSec": 8.307
+    }
+   ],
+   "linking": [
+    {
+     "span": "Let me",
+     "type": "elision",
+     "ipa": "/lɛmi/",
+     "noteJa": "Let の t が脱落して、日本語の「レミ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "startSec": 9.31,
+   "endSec": 11.947,
+   "text": "Here it is. Would you like to try it on?",
+   "translationJa": "こちらにございます。ご試着なさいますか？",
+   "chunks": [
+    {
+     "text": "Here it is.",
+     "startSec": 9.31,
+     "endSec": 9.91
+    },
+    {
+     "text": "Would you like",
+     "startSec": 10.31,
+     "endSec": 10.69
+    },
+    {
+     "text": "to try it on?",
+     "startSec": 10.69,
+     "endSec": 11.37
+    }
+   ],
+   "words": [
+    {
+     "text": "Here",
+     "startSec": 9.31,
+     "endSec": 9.49
+    },
+    {
+     "text": "it",
+     "startSec": 9.49,
+     "endSec": 9.67
+    },
+    {
+     "text": "is.",
+     "startSec": 9.67,
+     "endSec": 9.91
+    },
+    {
+     "text": "Would",
+     "startSec": 10.31,
+     "endSec": 10.43
+    },
+    {
+     "text": "you",
+     "startSec": 10.43,
+     "endSec": 10.55
+    },
+    {
+     "text": "like",
+     "startSec": 10.55,
+     "endSec": 10.69
+    },
+    {
+     "text": "to",
+     "startSec": 10.69,
+     "endSec": 10.85
+    },
+    {
+     "text": "try",
+     "startSec": 10.85,
+     "endSec": 11.05
+    },
+    {
+     "text": "it",
+     "startSec": 11.05,
+     "endSec": 11.19
+    },
+    {
+     "text": "on?",
+     "startSec": 11.19,
+     "endSec": 11.37
+    }
+   ],
+   "linking": [
+    {
+     "span": "Would you",
+     "type": "palatalization",
+     "ipa": "/wʊdʒuː/",
+     "noteJa": "Would の d と you の y が同化して「ウドゥジュー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "male",
+   "startSec": 12.447,
+   "endSec": 14.529,
+   "text": "Thank you. Where is the fitting room?",
+   "translationJa": "ありがとうございます。試着室はどこですか？",
+   "chunks": [
+    {
+     "text": "Thank you.",
+     "startSec": 12.447,
+     "endSec": 12.827
+    },
+    {
+     "text": "Where is",
+     "startSec": 13.147,
+     "endSec": 13.427
+    },
+    {
+     "text": "the fitting room?",
+     "startSec": 13.427,
+     "endSec": 14.047
+    }
+   ],
+   "words": [
+    {
+     "text": "Thank",
+     "startSec": 12.447,
+     "endSec": 12.587
+    },
+    {
+     "text": "you.",
+     "startSec": 12.587,
+     "endSec": 12.827
+    },
+    {
+     "text": "Where",
+     "startSec": 13.147,
+     "endSec": 13.267
+    },
+    {
+     "text": "is",
+     "startSec": 13.267,
+     "endSec": 13.427
+    },
+    {
+     "text": "the",
+     "startSec": 13.427,
+     "endSec": 13.547
+    },
+    {
+     "text": "fitting",
+     "startSec": 13.547,
+     "endSec": 13.767
+    },
+    {
+     "text": "room?",
+     "startSec": 13.767,
+     "endSec": 14.047
+    }
+   ],
+   "linking": [
+    {
+     "span": "fitting",
+     "type": "flapping",
+     "ipa": "/ˈfɪɾɪŋ/",
+     "noteJa": "tt の音が母音に挟まれてラ行化し、「フィリング」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "female",
+   "startSec": 15.029,
+   "endSec": 17.352,
+   "text": "It is right over there next to the mirror.",
+   "translationJa": "あちらの鏡のすぐ隣にございます。",
+   "chunks": [
+    {
+     "text": "It is",
+     "startSec": 15.029,
+     "endSec": 15.249
+    },
+    {
+     "text": "right over there",
+     "startSec": 15.249,
+     "endSec": 15.929
+    },
+    {
+     "text": "next to the mirror.",
+     "startSec": 15.929,
+     "endSec": 16.749
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 15.029,
+     "endSec": 15.149
+    },
+    {
+     "text": "is",
+     "startSec": 15.149,
+     "endSec": 15.249
+    },
+    {
+     "text": "right",
+     "startSec": 15.249,
+     "endSec": 15.449
+    },
+    {
+     "text": "over",
+     "startSec": 15.449,
+     "endSec": 15.729
+    },
+    {
+     "text": "there",
+     "startSec": 15.729,
+     "endSec": 15.929
+    },
+    {
+     "text": "next",
+     "startSec": 15.929,
+     "endSec": 16.209
+    },
+    {
+     "text": "to",
+     "startSec": 16.209,
+     "endSec": 16.449
+    },
+    {
+     "text": "the",
+     "startSec": 16.449,
+     "endSec": 16.529
+    },
+    {
+     "text": "mirror.",
+     "startSec": 16.529,
+     "endSec": 16.749
+    }
+   ],
+   "linking": [
+    {
+     "span": "right over",
+     "type": "flapping",
+     "ipa": "/raɪɾ‿oʊvər/",
+     "noteJa": "right の t がラ行化して over と連結し、「ライロウヴァー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "male",
+   "startSec": 17.852,
+   "endSec": 19.922,
+   "text": "It fits well, so I will take it.",
+   "translationJa": "サイズがぴったりなので、これにします。",
+   "chunks": [
+    {
+     "text": "It fits well,",
+     "startSec": 17.852,
+     "endSec": 18.432
+    },
+    {
+     "text": "so I will",
+     "startSec": 18.712,
+     "endSec": 19.072
+    },
+    {
+     "text": "take it.",
+     "startSec": 19.072,
+     "endSec": 19.492
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 17.852,
+     "endSec": 17.952
+    },
+    {
+     "text": "fits",
+     "startSec": 17.952,
+     "endSec": 18.132
+    },
+    {
+     "text": "well,",
+     "startSec": 18.132,
+     "endSec": 18.432
+    },
+    {
+     "text": "so",
+     "startSec": 18.712,
+     "endSec": 18.832
+    },
+    {
+     "text": "I",
+     "startSec": 18.832,
+     "endSec": 18.952
+    },
+    {
+     "text": "will",
+     "startSec": 18.952,
+     "endSec": 19.072
+    },
+    {
+     "text": "take",
+     "startSec": 19.072,
+     "endSec": 19.292
+    },
+    {
+     "text": "it.",
+     "startSec": 19.292,
+     "endSec": 19.492
+    }
+   ],
+   "linking": [
+    {
+     "span": "take it",
+     "type": "linking",
+     "ipa": "/teɪk‿ɪt/",
+     "noteJa": "take の k の音と it が連結して「テイキット」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "female",
+   "startSec": 20.422,
+   "endSec": 23.34,
+   "text": "Great! Will you pay with cash or credit card?",
+   "translationJa": "ありがとうございます！お支払いは現金ですか、それともクレジットカードですか？",
+   "chunks": [
+    {
+     "text": "Great!",
+     "startSec": 20.422,
+     "endSec": 20.702
+    },
+    {
+     "text": "Will you pay",
+     "startSec": 21.082,
+     "endSec": 21.602
+    },
+    {
+     "text": "with cash",
+     "startSec": 21.602,
+     "endSec": 22.002
+    },
+    {
+     "text": "or credit card?",
+     "startSec": 22.002,
+     "endSec": 22.802
+    }
+   ],
+   "words": [
+    {
+     "text": "Great!",
+     "startSec": 20.422,
+     "endSec": 20.702
+    },
+    {
+     "text": "Will",
+     "startSec": 21.082,
+     "endSec": 21.262
+    },
+    {
+     "text": "you",
+     "startSec": 21.262,
+     "endSec": 21.402
+    },
+    {
+     "text": "pay",
+     "startSec": 21.402,
+     "endSec": 21.602
+    },
+    {
+     "text": "with",
+     "startSec": 21.602,
+     "endSec": 21.762
+    },
+    {
+     "text": "cash",
+     "startSec": 21.762,
+     "endSec": 22.002
+    },
+    {
+     "text": "or",
+     "startSec": 22.002,
+     "endSec": 22.242
+    },
+    {
+     "text": "credit",
+     "startSec": 22.242,
+     "endSec": 22.542
+    },
+    {
+     "text": "card?",
+     "startSec": 22.542,
+     "endSec": 22.802
+    }
+   ],
+   "linking": [
+    {
+     "span": "cash or",
+     "type": "linking",
+     "ipa": "/kæʃ‿ər/",
+     "noteJa": "cash の語尾の音と or が連結して「キャッシャー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "male",
+   "startSec": 23.84,
+   "endSec": 25.882,
+   "text": "Can I pay by credit card, please?",
+   "translationJa": "クレジットカードでお願いします。",
+   "chunks": [
+    {
+     "text": "Can I",
+     "startSec": 23.84,
+     "endSec": 24.04
+    },
+    {
+     "text": "pay by credit card,",
+     "startSec": 24.04,
+     "endSec": 24.94
+    },
+    {
+     "text": "please?",
+     "startSec": 25.14,
+     "endSec": 25.3
+    }
+   ],
+   "words": [
+    {
+     "text": "Can",
+     "startSec": 23.84,
+     "endSec": 23.94
+    },
+    {
+     "text": "I",
+     "startSec": 23.94,
+     "endSec": 24.04
+    },
+    {
+     "text": "pay",
+     "startSec": 24.04,
+     "endSec": 24.2
+    },
+    {
+     "text": "by",
+     "startSec": 24.2,
+     "endSec": 24.38
+    },
+    {
+     "text": "credit",
+     "startSec": 24.38,
+     "endSec": 24.68
+    },
+    {
+     "text": "card,",
+     "startSec": 24.68,
+     "endSec": 24.94
+    },
+    {
+     "text": "please?",
+     "startSec": 25.14,
+     "endSec": 25.3
+    }
+   ],
+   "linking": [
+    {
+     "span": "Can I",
+     "type": "linking",
+     "ipa": "/kæn‿aɪ/",
+     "noteJa": "Can の n と I がつながって「キャナイ」のように発音されます。"
+    }
+   ]
+  }
+ ]
+}

@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { WatchLibrarySync } from '@/features/watch/WatchLibrarySync';
+import { WatchSessionSync } from '@/features/watch/WatchSessionSync';
 import { AppThemeProvider } from '@/theme/AppThemeProvider';
 import { darkColors, lightColors } from '@/theme/colors';
 
@@ -43,6 +44,7 @@ export default function RootLayout() {
   return (
     <AppThemeProvider>
       <WatchLibrarySync />
+      <WatchSessionSync />
       <ThemeProvider value={navTheme}>
           <StatusBar style={isDark ? 'light' : 'dark'} />
           <Stack screenOptions={{ headerShown: false }}>

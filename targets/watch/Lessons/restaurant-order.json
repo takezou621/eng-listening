@@ -1,0 +1,992 @@
+{
+ "id": "restaurant-order",
+ "title": "Ordering at a Restaurant",
+ "titleJa": "レストランで注文する",
+ "type": "conversation",
+ "level": "intermediate",
+ "category": "restaurant",
+ "audio": "audio.m4a",
+ "durationSec": 41.348,
+ "speakerNames": {
+  "female": "Server",
+  "male": "Customer"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T10:05:27Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "female",
+   "startSec": 0.0,
+   "endSec": 4.526,
+   "text": "Good evening! Are you ready to order, or do you need a few more minutes?",
+   "translationJa": "こんばんは！ご注文はお決まりですか、それとももう少しお時間が必要ですか？",
+   "chunks": [
+    {
+     "text": "Good evening!",
+     "startSec": 0.0,
+     "endSec": 0.52
+    },
+    {
+     "text": "Are you ready to order,",
+     "startSec": 0.98,
+     "endSec": 1.84
+    },
+    {
+     "text": "or do you need",
+     "startSec": 2.22,
+     "endSec": 2.74
+    },
+    {
+     "text": "a few more minutes?",
+     "startSec": 2.74,
+     "endSec": 3.48
+    }
+   ],
+   "words": [
+    {
+     "text": "Good",
+     "startSec": 0.0,
+     "endSec": 0.18
+    },
+    {
+     "text": "evening!",
+     "startSec": 0.18,
+     "endSec": 0.52
+    },
+    {
+     "text": "Are",
+     "startSec": 0.98,
+     "endSec": 1.08
+    },
+    {
+     "text": "you",
+     "startSec": 1.08,
+     "endSec": 1.2
+    },
+    {
+     "text": "ready",
+     "startSec": 1.2,
+     "endSec": 1.4
+    },
+    {
+     "text": "to",
+     "startSec": 1.4,
+     "endSec": 1.6
+    },
+    {
+     "text": "order,",
+     "startSec": 1.6,
+     "endSec": 1.84
+    },
+    {
+     "text": "or",
+     "startSec": 2.22,
+     "endSec": 2.34
+    },
+    {
+     "text": "do",
+     "startSec": 2.34,
+     "endSec": 2.46
+    },
+    {
+     "text": "you",
+     "startSec": 2.46,
+     "endSec": 2.58
+    },
+    {
+     "text": "need",
+     "startSec": 2.58,
+     "endSec": 2.74
+    },
+    {
+     "text": "a",
+     "startSec": 2.74,
+     "endSec": 2.84
+    },
+    {
+     "text": "few",
+     "startSec": 2.84,
+     "endSec": 3.0
+    },
+    {
+     "text": "more",
+     "startSec": 3.0,
+     "endSec": 3.22
+    },
+    {
+     "text": "minutes?",
+     "startSec": 3.22,
+     "endSec": 3.48
+    }
+   ],
+   "linking": [
+    {
+     "span": "ready to order,",
+     "type": "linking",
+     "ipa": "/ˈrɛdi tuː ˈɔːrdər/",
+     "noteJa": "ready の語尾と to order が滑らかにつながり、特に to と order の母音同士が連結して「レディトゥオウダー」のように流れるように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "male",
+   "startSec": 5.026,
+   "endSec": 7.41,
+   "text": "Could you recommend something good for dinner tonight?",
+   "translationJa": "今夜のおすすめのディナーを教えていただけますか？",
+   "chunks": [
+    {
+     "text": "Could you",
+     "startSec": 5.026,
+     "endSec": 5.246
+    },
+    {
+     "text": "recommend something good",
+     "startSec": 5.246,
+     "endSec": 6.246
+    },
+    {
+     "text": "for dinner tonight?",
+     "startSec": 6.246,
+     "endSec": 6.906
+    }
+   ],
+   "words": [
+    {
+     "text": "Could",
+     "startSec": 5.026,
+     "endSec": 5.126
+    },
+    {
+     "text": "you",
+     "startSec": 5.126,
+     "endSec": 5.246
+    },
+    {
+     "text": "recommend",
+     "startSec": 5.246,
+     "endSec": 5.486
+    },
+    {
+     "text": "something",
+     "startSec": 5.486,
+     "endSec": 5.926
+    },
+    {
+     "text": "good",
+     "startSec": 5.926,
+     "endSec": 6.246
+    },
+    {
+     "text": "for",
+     "startSec": 6.246,
+     "endSec": 6.426
+    },
+    {
+     "text": "dinner",
+     "startSec": 6.426,
+     "endSec": 6.566
+    },
+    {
+     "text": "tonight?",
+     "startSec": 6.566,
+     "endSec": 6.906
+    }
+   ],
+   "linking": [
+    {
+     "span": "Could you",
+     "type": "palatalization",
+     "ipa": "/kʊdʒuː/",
+     "noteJa": "Could の末尾の /d/ と you の /j/ が合体し、「クッジュ」のように発音されます。"
+    },
+    {
+     "span": "Could you",
+     "type": "palatalization",
+     "ipa": "/kənaɪ/",
+     "noteJa": "Could の語尾 /d/ と you の /j/ が融けて「クッジュ」のようにひと続きになります。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "female",
+   "startSec": 7.91,
+   "endSec": 13.197,
+   "text": "Our grilled salmon is very popular, and it comes with fresh seasonal vegetables.",
+   "translationJa": "サーモンのグリルがとても人気で、新鮮な旬の野菜がついてきますよ。",
+   "chunks": [
+    {
+     "text": "Our grilled salmon",
+     "startSec": 7.91,
+     "endSec": 8.65
+    },
+    {
+     "text": "is very popular,",
+     "startSec": 8.65,
+     "endSec": 9.73
+    },
+    {
+     "text": "and it comes with",
+     "startSec": 10.13,
+     "endSec": 10.81
+    },
+    {
+     "text": "fresh seasonal vegetables.",
+     "startSec": 10.81,
+     "endSec": 11.97
+    }
+   ],
+   "words": [
+    {
+     "text": "Our",
+     "startSec": 7.91,
+     "endSec": 8.05
+    },
+    {
+     "text": "grilled",
+     "startSec": 8.05,
+     "endSec": 8.29
+    },
+    {
+     "text": "salmon",
+     "startSec": 8.29,
+     "endSec": 8.65
+    },
+    {
+     "text": "is",
+     "startSec": 8.65,
+     "endSec": 8.95
+    },
+    {
+     "text": "very",
+     "startSec": 8.95,
+     "endSec": 9.13
+    },
+    {
+     "text": "popular,",
+     "startSec": 9.13,
+     "endSec": 9.73
+    },
+    {
+     "text": "and",
+     "startSec": 10.13,
+     "endSec": 10.25
+    },
+    {
+     "text": "it",
+     "startSec": 10.25,
+     "endSec": 10.35
+    },
+    {
+     "text": "comes",
+     "startSec": 10.35,
+     "endSec": 10.57
+    },
+    {
+     "text": "with",
+     "startSec": 10.57,
+     "endSec": 10.81
+    },
+    {
+     "text": "fresh",
+     "startSec": 10.81,
+     "endSec": 11.07
+    },
+    {
+     "text": "seasonal",
+     "startSec": 11.07,
+     "endSec": 11.55
+    },
+    {
+     "text": "vegetables.",
+     "startSec": 11.55,
+     "endSec": 11.97
+    }
+   ],
+   "linking": [
+    {
+     "span": "and it",
+     "type": "reduction",
+     "ipa": "/ən ɪt/",
+     "noteJa": "and の d が脱落して弱い an になり、直後の it とつながって「アニット」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "male",
+   "startSec": 13.697,
+   "endSec": 17.967,
+   "text": "That sounds delicious, but I should let you know that I have a nut allergy.",
+   "translationJa": "美味しそうですね。ただ、ナッツアレルギーがあることをお伝えしておかなければなりません。",
+   "chunks": [
+    {
+     "text": "That sounds delicious,",
+     "startSec": 13.697,
+     "endSec": 14.697
+    },
+    {
+     "text": "but I should let you know",
+     "startSec": 15.057,
+     "endSec": 15.877
+    },
+    {
+     "text": "that I have a nut allergy.",
+     "startSec": 15.877,
+     "endSec": 16.937
+    }
+   ],
+   "words": [
+    {
+     "text": "That",
+     "startSec": 13.697,
+     "endSec": 13.837
+    },
+    {
+     "text": "sounds",
+     "startSec": 13.837,
+     "endSec": 14.077
+    },
+    {
+     "text": "delicious,",
+     "startSec": 14.077,
+     "endSec": 14.697
+    },
+    {
+     "text": "but",
+     "startSec": 15.057,
+     "endSec": 15.177
+    },
+    {
+     "text": "I",
+     "startSec": 15.177,
+     "endSec": 15.277
+    },
+    {
+     "text": "should",
+     "startSec": 15.277,
+     "endSec": 15.437
+    },
+    {
+     "text": "let",
+     "startSec": 15.437,
+     "endSec": 15.577
+    },
+    {
+     "text": "you",
+     "startSec": 15.577,
+     "endSec": 15.717
+    },
+    {
+     "text": "know",
+     "startSec": 15.717,
+     "endSec": 15.877
+    },
+    {
+     "text": "that",
+     "startSec": 15.877,
+     "endSec": 16.037
+    },
+    {
+     "text": "I",
+     "startSec": 16.037,
+     "endSec": 16.137
+    },
+    {
+     "text": "have",
+     "startSec": 16.137,
+     "endSec": 16.277
+    },
+    {
+     "text": "a",
+     "startSec": 16.277,
+     "endSec": 16.357
+    },
+    {
+     "text": "nut",
+     "startSec": 16.357,
+     "endSec": 16.537
+    },
+    {
+     "text": "allergy.",
+     "startSec": 16.537,
+     "endSec": 16.937
+    }
+   ],
+   "linking": [
+    {
+     "span": "but I",
+     "type": "flapping",
+     "ipa": "/bʌɾaɪ/",
+     "noteJa": "but の /t/ が母音に挟まれて日本語のラ行のような軽い音（フラップ音）になり、「バライ」と聞こえます。"
+    },
+    {
+     "span": "have a",
+     "type": "linking",
+     "ipa": "/hævə/",
+     "noteJa": "have の末尾子音 /v/ と不定冠詞 a がつながって「ハヴァ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "female",
+   "startSec": 18.467,
+   "endSec": 23.236,
+   "text": "Thank you for letting us know; we can make sure your dish is completely nut-free.",
+   "translationJa": "教えてくださりありがとうございます。お料理にナッツが一切入らないように確認いたしますね。",
+   "chunks": [
+    {
+     "text": "Thank you for letting us know;",
+     "startSec": 18.467,
+     "endSec": 19.607
+    },
+    {
+     "text": "we can make sure",
+     "startSec": 20.007,
+     "endSec": 20.707
+    },
+    {
+     "text": "your dish is",
+     "startSec": 20.707,
+     "endSec": 21.287
+    },
+    {
+     "text": "completely nut-free.",
+     "startSec": 21.287,
+     "endSec": 22.347
+    }
+   ],
+   "words": [
+    {
+     "text": "Thank",
+     "startSec": 18.467,
+     "endSec": 18.607
+    },
+    {
+     "text": "you",
+     "startSec": 18.607,
+     "endSec": 18.827
+    },
+    {
+     "text": "for",
+     "startSec": 18.827,
+     "endSec": 18.967
+    },
+    {
+     "text": "letting",
+     "startSec": 18.967,
+     "endSec": 19.147
+    },
+    {
+     "text": "us",
+     "startSec": 19.147,
+     "endSec": 19.387
+    },
+    {
+     "text": "know;",
+     "startSec": 19.387,
+     "endSec": 19.607
+    },
+    {
+     "text": "we",
+     "startSec": 20.007,
+     "endSec": 20.147
+    },
+    {
+     "text": "can",
+     "startSec": 20.147,
+     "endSec": 20.287
+    },
+    {
+     "text": "make",
+     "startSec": 20.287,
+     "endSec": 20.467
+    },
+    {
+     "text": "sure",
+     "startSec": 20.467,
+     "endSec": 20.707
+    },
+    {
+     "text": "your",
+     "startSec": 20.707,
+     "endSec": 20.867
+    },
+    {
+     "text": "dish",
+     "startSec": 20.867,
+     "endSec": 21.087
+    },
+    {
+     "text": "is",
+     "startSec": 21.087,
+     "endSec": 21.287
+    },
+    {
+     "text": "completely",
+     "startSec": 21.287,
+     "endSec": 21.647
+    },
+    {
+     "text": "nut-free.",
+     "startSec": 21.647,
+     "endSec": 22.347
+    }
+   ],
+   "linking": [
+    {
+     "span": "letting us",
+     "type": "flapping",
+     "ipa": "/ˈlɛɾɪŋ ʌs/",
+     "noteJa": "letting の tt がフラップ化し、さらに us につながって「レリンガス」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "male",
+   "startSec": 23.736,
+   "endSec": 27.621,
+   "text": "Great, then I will have the salmon dish with a glass of white wine.",
+   "translationJa": "素晴らしい、ではそのサーモンの料理と白ワインをグラスで一杯お願いします。",
+   "chunks": [
+    {
+     "text": "Great,",
+     "startSec": 23.736,
+     "endSec": 23.996
+    },
+    {
+     "text": "then I will have",
+     "startSec": 24.276,
+     "endSec": 24.776
+    },
+    {
+     "text": "the salmon dish",
+     "startSec": 24.776,
+     "endSec": 25.496
+    },
+    {
+     "text": "with a glass of white wine.",
+     "startSec": 25.496,
+     "endSec": 26.756
+    }
+   ],
+   "words": [
+    {
+     "text": "Great,",
+     "startSec": 23.736,
+     "endSec": 23.996
+    },
+    {
+     "text": "then",
+     "startSec": 24.276,
+     "endSec": 24.356
+    },
+    {
+     "text": "I",
+     "startSec": 24.356,
+     "endSec": 24.496
+    },
+    {
+     "text": "will",
+     "startSec": 24.496,
+     "endSec": 24.636
+    },
+    {
+     "text": "have",
+     "startSec": 24.636,
+     "endSec": 24.776
+    },
+    {
+     "text": "the",
+     "startSec": 24.776,
+     "endSec": 24.916
+    },
+    {
+     "text": "salmon",
+     "startSec": 24.916,
+     "endSec": 25.176
+    },
+    {
+     "text": "dish",
+     "startSec": 25.176,
+     "endSec": 25.496
+    },
+    {
+     "text": "with",
+     "startSec": 25.496,
+     "endSec": 25.696
+    },
+    {
+     "text": "a",
+     "startSec": 25.696,
+     "endSec": 25.816
+    },
+    {
+     "text": "glass",
+     "startSec": 25.816,
+     "endSec": 26.016
+    },
+    {
+     "text": "of",
+     "startSec": 26.016,
+     "endSec": 26.256
+    },
+    {
+     "text": "white",
+     "startSec": 26.256,
+     "endSec": 26.416
+    },
+    {
+     "text": "wine.",
+     "startSec": 26.416,
+     "endSec": 26.756
+    }
+   ],
+   "linking": [
+    {
+     "span": "glass of",
+     "type": "linking",
+     "ipa": "/ˈɡlæsəv/",
+     "noteJa": "glass の /s/ と of の /əv/ がつながり、「グラサヴ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "female",
+   "startSec": 28.121,
+   "endSec": 32.177,
+   "text": "Excellent choice. Would you like to see our dessert menu after your meal?",
+   "translationJa": "素晴らしい選択です。食後にデザートメニューをご覧になりますか？",
+   "chunks": [
+    {
+     "text": "Excellent choice.",
+     "startSec": 28.121,
+     "endSec": 28.921
+    },
+    {
+     "text": "Would you like",
+     "startSec": 29.561,
+     "endSec": 29.881
+    },
+    {
+     "text": "to see our dessert menu",
+     "startSec": 29.881,
+     "endSec": 30.881
+    },
+    {
+     "text": "after your meal?",
+     "startSec": 30.881,
+     "endSec": 31.621
+    }
+   ],
+   "words": [
+    {
+     "text": "Excellent",
+     "startSec": 28.121,
+     "endSec": 28.501
+    },
+    {
+     "text": "choice.",
+     "startSec": 28.501,
+     "endSec": 28.921
+    },
+    {
+     "text": "Would",
+     "startSec": 29.561,
+     "endSec": 29.601
+    },
+    {
+     "text": "you",
+     "startSec": 29.601,
+     "endSec": 29.721
+    },
+    {
+     "text": "like",
+     "startSec": 29.721,
+     "endSec": 29.881
+    },
+    {
+     "text": "to",
+     "startSec": 29.881,
+     "endSec": 30.021
+    },
+    {
+     "text": "see",
+     "startSec": 30.021,
+     "endSec": 30.201
+    },
+    {
+     "text": "our",
+     "startSec": 30.201,
+     "endSec": 30.341
+    },
+    {
+     "text": "dessert",
+     "startSec": 30.341,
+     "endSec": 30.521
+    },
+    {
+     "text": "menu",
+     "startSec": 30.521,
+     "endSec": 30.881
+    },
+    {
+     "text": "after",
+     "startSec": 30.881,
+     "endSec": 31.241
+    },
+    {
+     "text": "your",
+     "startSec": 31.241,
+     "endSec": 31.441
+    },
+    {
+     "text": "meal?",
+     "startSec": 31.441,
+     "endSec": 31.621
+    }
+   ],
+   "linking": [
+    {
+     "span": "Would you",
+     "type": "palatalization",
+     "ipa": "/wʊdʒuː/",
+     "noteJa": "Would の /d/ と you の /j/ が融合して「ウッジュ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "male",
+   "startSec": 32.677,
+   "endSec": 36.584,
+   "text": "Actually, I might be full, so could we just get the check later?",
+   "translationJa": "実はお腹いっぱいになりそうなので、後でお会計だけいただくことはできますか？",
+   "chunks": [
+    {
+     "text": "Actually,",
+     "startSec": 32.677,
+     "endSec": 33.017
+    },
+    {
+     "text": "I might be full,",
+     "startSec": 33.337,
+     "endSec": 34.017
+    },
+    {
+     "text": "so could we just get",
+     "startSec": 34.377,
+     "endSec": 35.097
+    },
+    {
+     "text": "the check later?",
+     "startSec": 35.097,
+     "endSec": 35.717
+    }
+   ],
+   "words": [
+    {
+     "text": "Actually,",
+     "startSec": 32.677,
+     "endSec": 33.017
+    },
+    {
+     "text": "I",
+     "startSec": 33.337,
+     "endSec": 33.397
+    },
+    {
+     "text": "might",
+     "startSec": 33.397,
+     "endSec": 33.557
+    },
+    {
+     "text": "be",
+     "startSec": 33.557,
+     "endSec": 33.737
+    },
+    {
+     "text": "full,",
+     "startSec": 33.737,
+     "endSec": 34.017
+    },
+    {
+     "text": "so",
+     "startSec": 34.377,
+     "endSec": 34.497
+    },
+    {
+     "text": "could",
+     "startSec": 34.497,
+     "endSec": 34.637
+    },
+    {
+     "text": "we",
+     "startSec": 34.637,
+     "endSec": 34.757
+    },
+    {
+     "text": "just",
+     "startSec": 34.757,
+     "endSec": 34.917
+    },
+    {
+     "text": "get",
+     "startSec": 34.917,
+     "endSec": 35.097
+    },
+    {
+     "text": "the",
+     "startSec": 35.097,
+     "endSec": 35.237
+    },
+    {
+     "text": "check",
+     "startSec": 35.237,
+     "endSec": 35.377
+    },
+    {
+     "text": "later?",
+     "startSec": 35.377,
+     "endSec": 35.717
+    }
+   ],
+   "linking": [
+    {
+     "span": "get the",
+     "type": "elision",
+     "ipa": "/ɡɛt ðə/",
+     "noteJa": "get の末尾 /t/ が破裂せずに飲み込まれ、息が詰まるような「ゲッザ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "female",
+   "startSec": 37.084,
+   "endSec": 41.348,
+   "text": "Of course! I will put your order in and bring your wine right away.",
+   "translationJa": "かしこまりました！すぐにご注文を通し、ワインをお持ちいたしますね。",
+   "chunks": [
+    {
+     "text": "Of course!",
+     "startSec": 37.084,
+     "endSec": 37.444
+    },
+    {
+     "text": "I will put your order in",
+     "startSec": 37.984,
+     "endSec": 39.204
+    },
+    {
+     "text": "and bring your wine",
+     "startSec": 39.204,
+     "endSec": 39.924
+    },
+    {
+     "text": "right away.",
+     "startSec": 39.924,
+     "endSec": 40.424
+    }
+   ],
+   "words": [
+    {
+     "text": "Of",
+     "startSec": 37.084,
+     "endSec": 37.244
+    },
+    {
+     "text": "course!",
+     "startSec": 37.244,
+     "endSec": 37.444
+    },
+    {
+     "text": "I",
+     "startSec": 37.984,
+     "endSec": 38.164
+    },
+    {
+     "text": "will",
+     "startSec": 38.164,
+     "endSec": 38.304
+    },
+    {
+     "text": "put",
+     "startSec": 38.304,
+     "endSec": 38.504
+    },
+    {
+     "text": "your",
+     "startSec": 38.504,
+     "endSec": 38.664
+    },
+    {
+     "text": "order",
+     "startSec": 38.664,
+     "endSec": 38.944
+    },
+    {
+     "text": "in",
+     "startSec": 38.944,
+     "endSec": 39.204
+    },
+    {
+     "text": "and",
+     "startSec": 39.204,
+     "endSec": 39.364
+    },
+    {
+     "text": "bring",
+     "startSec": 39.364,
+     "endSec": 39.544
+    },
+    {
+     "text": "your",
+     "startSec": 39.544,
+     "endSec": 39.724
+    },
+    {
+     "text": "wine",
+     "startSec": 39.724,
+     "endSec": 39.924
+    },
+    {
+     "text": "right",
+     "startSec": 39.924,
+     "endSec": 40.184
+    },
+    {
+     "text": "away.",
+     "startSec": 40.184,
+     "endSec": 40.424
+    }
+   ],
+   "linking": [
+    {
+     "span": "put your",
+     "type": "palatalization",
+     "ipa": "/pʊtʃər/",
+     "noteJa": "put の /t/ と your の /j/ が融合し、「プッチャー」のように発音されます。"
+    },
+    {
+     "span": "right away.",
+     "type": "flapping",
+     "ipa": "/ˌraɪɾəˈweɪ/",
+     "noteJa": "right の /t/ が母音に挟まれてフラップ化し、「ライラウェイ」のように聞こえます。"
+    }
+   ]
+  }
+ ]
+}

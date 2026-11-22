@@ -66,3 +66,18 @@ xcodebuild test -workspace ios/app.xcworkspace -scheme duo-smoke -configuration 
 - GitHub Actions のホステッドランナーは使わない（クォータ制約）。CI が必要な作業はローカルで実行する。
 - ASC のアプリレコード作成は API 不可で Web UI が必要（作成済み: アプリ ID 6837503600、SKU mimitore-ios）。
 - `docs/store/eas-production-checklist.md` は EAS 経路の旧資料。現在の正規経路は本書 §1。
+
+
+### Apple Watch 同梱レッスンの再同期
+
+Watch アプリは `targets/watch/Lessons/<id>.{json,m4a}` にレッスンのコピーを持つ
+(フォルダ同期でバンドルへ取り込まれる)。コンテンツパイプラインで
+`assets/lessons/` を再生成したら、次で再同期して結果をコミットすること。
+
+```sh
+zsh tools/watch-assets/sync_watch_assets.sh
+```
+
+Watch 単体学習の進捗は applicationContext で iPhone に同期される
+(未適用セッション一覧 → 適用 → 適用済みIDの ack)。transferUserInfo /
+sendMessage は即時配送の補助で、どちらも iPhone 側の ID 重複排除が前提。

@@ -1,0 +1,911 @@
+{
+ "id": "phone-appointment",
+ "title": "Making an Appointment by Phone",
+ "titleJa": "電話で予約を入れる",
+ "type": "conversation",
+ "level": "intermediate",
+ "category": "phone",
+ "audio": "audio.m4a",
+ "durationSec": 36.215,
+ "speakerNames": {
+  "female": "Receptionist",
+  "male": "Patient"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-20T10:05:34Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "female",
+   "startSec": 0.0,
+   "endSec": 3.017,
+   "text": "Bright Dental Clinic, how can I help you today?",
+   "translationJa": "ブライト歯科医院です。本日はどのようなご用件でしょうか？",
+   "chunks": [
+    {
+     "text": "Bright Dental Clinic,",
+     "startSec": 0.0,
+     "endSec": 0.96
+    },
+    {
+     "text": "how can I",
+     "startSec": 1.36,
+     "endSec": 1.84
+    },
+    {
+     "text": "help you today?",
+     "startSec": 1.84,
+     "endSec": 2.48
+    }
+   ],
+   "words": [
+    {
+     "text": "Bright",
+     "startSec": 0.0,
+     "endSec": 0.22
+    },
+    {
+     "text": "Dental",
+     "startSec": 0.22,
+     "endSec": 0.5
+    },
+    {
+     "text": "Clinic,",
+     "startSec": 0.5,
+     "endSec": 0.96
+    },
+    {
+     "text": "how",
+     "startSec": 1.36,
+     "endSec": 1.58
+    },
+    {
+     "text": "can",
+     "startSec": 1.58,
+     "endSec": 1.74
+    },
+    {
+     "text": "I",
+     "startSec": 1.74,
+     "endSec": 1.84
+    },
+    {
+     "text": "help",
+     "startSec": 1.84,
+     "endSec": 2.02
+    },
+    {
+     "text": "you",
+     "startSec": 2.02,
+     "endSec": 2.22
+    },
+    {
+     "text": "today?",
+     "startSec": 2.22,
+     "endSec": 2.48
+    }
+   ],
+   "linking": [
+    {
+     "span": "can I",
+     "type": "linking",
+     "ipa": "/kənaɪ/",
+     "noteJa": "can の語尾の /n/ と I の /aɪ/ がつながり「キャナイ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "male",
+   "startSec": 3.517,
+   "endSec": 6.322,
+   "text": "Hi, I'd like to make an appointment for a checkup.",
+   "translationJa": "こんにちは、定期検診の予約を取りたいのですが。",
+   "chunks": [
+    {
+     "text": "Hi,",
+     "startSec": 3.517,
+     "endSec": 3.797
+    },
+    {
+     "text": "I'd like to",
+     "startSec": 4.037,
+     "endSec": 4.417
+    },
+    {
+     "text": "make an appointment",
+     "startSec": 4.417,
+     "endSec": 4.877
+    },
+    {
+     "text": "for a checkup.",
+     "startSec": 4.877,
+     "endSec": 5.857
+    }
+   ],
+   "words": [
+    {
+     "text": "Hi,",
+     "startSec": 3.517,
+     "endSec": 3.797
+    },
+    {
+     "text": "I'd",
+     "startSec": 4.037,
+     "endSec": 4.157
+    },
+    {
+     "text": "like",
+     "startSec": 4.157,
+     "endSec": 4.297
+    },
+    {
+     "text": "to",
+     "startSec": 4.297,
+     "endSec": 4.417
+    },
+    {
+     "text": "make",
+     "startSec": 4.417,
+     "endSec": 4.557
+    },
+    {
+     "text": "an",
+     "startSec": 4.557,
+     "endSec": 4.677
+    },
+    {
+     "text": "appointment",
+     "startSec": 4.677,
+     "endSec": 4.877
+    },
+    {
+     "text": "for",
+     "startSec": 4.877,
+     "endSec": 5.357
+    },
+    {
+     "text": "a",
+     "startSec": 5.357,
+     "endSec": 5.437
+    },
+    {
+     "text": "checkup.",
+     "startSec": 5.437,
+     "endSec": 5.857
+    }
+   ],
+   "linking": [
+    {
+     "span": "make an appointment",
+     "type": "linking",
+     "ipa": "/meɪkənəˈpɔɪntmənt/",
+     "noteJa": "make と an、さらに appointment が連結して「メイカナポイントマント」のように滑らかに続きます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "female",
+   "startSec": 6.822,
+   "endSec": 9.88,
+   "text": "Sure, would next Tuesday at three work for you?",
+   "translationJa": "かしこまりました。来週火曜日の3時はいかがでしょうか？",
+   "chunks": [
+    {
+     "text": "Sure,",
+     "startSec": 6.822,
+     "endSec": 7.082
+    },
+    {
+     "text": "would next Tuesday",
+     "startSec": 7.422,
+     "endSec": 8.182
+    },
+    {
+     "text": "at three",
+     "startSec": 8.182,
+     "endSec": 8.722
+    },
+    {
+     "text": "work for you?",
+     "startSec": 8.722,
+     "endSec": 9.422
+    }
+   ],
+   "words": [
+    {
+     "text": "Sure,",
+     "startSec": 6.822,
+     "endSec": 7.082
+    },
+    {
+     "text": "would",
+     "startSec": 7.422,
+     "endSec": 7.602
+    },
+    {
+     "text": "next",
+     "startSec": 7.602,
+     "endSec": 7.802
+    },
+    {
+     "text": "Tuesday",
+     "startSec": 7.802,
+     "endSec": 8.182
+    },
+    {
+     "text": "at",
+     "startSec": 8.182,
+     "endSec": 8.542
+    },
+    {
+     "text": "three",
+     "startSec": 8.542,
+     "endSec": 8.722
+    },
+    {
+     "text": "work",
+     "startSec": 8.722,
+     "endSec": 9.022
+    },
+    {
+     "text": "for",
+     "startSec": 9.022,
+     "endSec": 9.222
+    },
+    {
+     "text": "you?",
+     "startSec": 9.222,
+     "endSec": 9.422
+    }
+   ],
+   "linking": [
+    {
+     "span": "next Tuesday",
+     "type": "elision",
+     "ipa": "/nɛksˈtjuːzdeɪ/",
+     "noteJa": "next の語尾の /t/ が脱落し、「ネクス・チューズデイ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "male",
+   "startSec": 10.38,
+   "endSec": 12.711,
+   "text": "I'm afraid I'm tied up at work at that time.",
+   "translationJa": "あいにくその時間は仕事で手が離せそうにありません。",
+   "chunks": [
+    {
+     "text": "I'm afraid",
+     "startSec": 10.38,
+     "endSec": 10.72
+    },
+    {
+     "text": "I'm tied up",
+     "startSec": 10.72,
+     "endSec": 11.32
+    },
+    {
+     "text": "at work",
+     "startSec": 11.32,
+     "endSec": 11.6
+    },
+    {
+     "text": "at that time.",
+     "startSec": 11.6,
+     "endSec": 12.28
+    }
+   ],
+   "words": [
+    {
+     "text": "I'm",
+     "startSec": 10.38,
+     "endSec": 10.46
+    },
+    {
+     "text": "afraid",
+     "startSec": 10.46,
+     "endSec": 10.72
+    },
+    {
+     "text": "I'm",
+     "startSec": 10.72,
+     "endSec": 10.94
+    },
+    {
+     "text": "tied",
+     "startSec": 10.94,
+     "endSec": 11.14
+    },
+    {
+     "text": "up",
+     "startSec": 11.14,
+     "endSec": 11.32
+    },
+    {
+     "text": "at",
+     "startSec": 11.32,
+     "endSec": 11.44
+    },
+    {
+     "text": "work",
+     "startSec": 11.44,
+     "endSec": 11.6
+    },
+    {
+     "text": "at",
+     "startSec": 11.6,
+     "endSec": 11.8
+    },
+    {
+     "text": "that",
+     "startSec": 11.8,
+     "endSec": 11.94
+    },
+    {
+     "text": "time.",
+     "startSec": 11.94,
+     "endSec": 12.28
+    }
+   ],
+   "linking": [
+    {
+     "span": "tied up",
+     "type": "linking",
+     "ipa": "/taɪdʌp/",
+     "noteJa": "tied の語尾の /d/ と up の /ʌ/ がつながり「タイダップ」と発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "female",
+   "startSec": 13.211,
+   "endSec": 16.799,
+   "text": "How about Wednesday afternoon instead, around four thirty?",
+   "translationJa": "では代わりに水曜日の午後、4時半ごろはいかがですか？",
+   "chunks": [
+    {
+     "text": "How about",
+     "startSec": 13.211,
+     "endSec": 13.571
+    },
+    {
+     "text": "Wednesday afternoon instead,",
+     "startSec": 13.571,
+     "endSec": 15.011
+    },
+    {
+     "text": "around four thirty?",
+     "startSec": 15.371,
+     "endSec": 16.231
+    }
+   ],
+   "words": [
+    {
+     "text": "How",
+     "startSec": 13.211,
+     "endSec": 13.391
+    },
+    {
+     "text": "about",
+     "startSec": 13.391,
+     "endSec": 13.571
+    },
+    {
+     "text": "Wednesday",
+     "startSec": 13.571,
+     "endSec": 13.971
+    },
+    {
+     "text": "afternoon",
+     "startSec": 13.971,
+     "endSec": 14.511
+    },
+    {
+     "text": "instead,",
+     "startSec": 14.511,
+     "endSec": 15.011
+    },
+    {
+     "text": "around",
+     "startSec": 15.371,
+     "endSec": 15.531
+    },
+    {
+     "text": "four",
+     "startSec": 15.531,
+     "endSec": 15.786
+    },
+    {
+     "text": "thirty?",
+     "startSec": 15.786,
+     "endSec": 16.231
+    }
+   ],
+   "linking": [
+    {
+     "span": "How about",
+     "type": "linking",
+     "ipa": "/haʊəˈbaʊt/",
+     "noteJa": "about の語頭が前の語と滑らかにつながり、自然なリズムで一体化して聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "male",
+   "startSec": 17.299,
+   "endSec": 19.863,
+   "text": "That sounds much better, could you fit me in then?",
+   "translationJa": "そちらの方が都合がいいです。その時間に入れていただけますか？",
+   "chunks": [
+    {
+     "text": "That sounds much better,",
+     "startSec": 17.299,
+     "endSec": 18.319
+    },
+    {
+     "text": "could you",
+     "startSec": 18.599,
+     "endSec": 18.759
+    },
+    {
+     "text": "fit me in then?",
+     "startSec": 18.759,
+     "endSec": 19.379
+    }
+   ],
+   "words": [
+    {
+     "text": "That",
+     "startSec": 17.299,
+     "endSec": 17.419
+    },
+    {
+     "text": "sounds",
+     "startSec": 17.419,
+     "endSec": 17.679
+    },
+    {
+     "text": "much",
+     "startSec": 17.679,
+     "endSec": 17.959
+    },
+    {
+     "text": "better,",
+     "startSec": 17.959,
+     "endSec": 18.319
+    },
+    {
+     "text": "could",
+     "startSec": 18.599,
+     "endSec": 18.679
+    },
+    {
+     "text": "you",
+     "startSec": 18.679,
+     "endSec": 18.759
+    },
+    {
+     "text": "fit",
+     "startSec": 18.759,
+     "endSec": 18.919
+    },
+    {
+     "text": "me",
+     "startSec": 18.919,
+     "endSec": 19.079
+    },
+    {
+     "text": "in",
+     "startSec": 19.079,
+     "endSec": 19.219
+    },
+    {
+     "text": "then?",
+     "startSec": 19.219,
+     "endSec": 19.379
+    }
+   ],
+   "linking": [
+    {
+     "span": "could you",
+     "type": "palatalization",
+     "ipa": "/kʊdʒuː/",
+     "noteJa": "could の /d/ と you の /j/ が融合して「クッジュ」のように聞こえます。"
+    },
+    {
+     "span": "fit me in",
+     "type": "linking",
+     "ipa": "/fɪt miː ɪn/",
+     "noteJa": "me と in の母音が滑らかにつながって発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "female",
+   "startSec": 20.363,
+   "endSec": 23.791,
+   "text": "Yes, we have an opening with Doctor Miller right then.",
+   "translationJa": "はい、ちょうどその時間にミラー先生の空きがございます。",
+   "chunks": [
+    {
+     "text": "Yes,",
+     "startSec": 20.363,
+     "endSec": 20.643
+    },
+    {
+     "text": "we have an opening",
+     "startSec": 21.023,
+     "endSec": 21.723
+    },
+    {
+     "text": "with Doctor Miller",
+     "startSec": 21.723,
+     "endSec": 22.623
+    },
+    {
+     "text": "right then.",
+     "startSec": 22.623,
+     "endSec": 23.283
+    }
+   ],
+   "words": [
+    {
+     "text": "Yes,",
+     "startSec": 20.363,
+     "endSec": 20.643
+    },
+    {
+     "text": "we",
+     "startSec": 21.023,
+     "endSec": 21.183
+    },
+    {
+     "text": "have",
+     "startSec": 21.183,
+     "endSec": 21.343
+    },
+    {
+     "text": "an",
+     "startSec": 21.343,
+     "endSec": 21.483
+    },
+    {
+     "text": "opening",
+     "startSec": 21.483,
+     "endSec": 21.723
+    },
+    {
+     "text": "with",
+     "startSec": 21.723,
+     "endSec": 22.023
+    },
+    {
+     "text": "Doctor",
+     "startSec": 22.023,
+     "endSec": 22.283
+    },
+    {
+     "text": "Miller",
+     "startSec": 22.563,
+     "endSec": 22.623
+    },
+    {
+     "text": "right",
+     "startSec": 22.623,
+     "endSec": 23.003
+    },
+    {
+     "text": "then.",
+     "startSec": 23.003,
+     "endSec": 23.283
+    }
+   ],
+   "linking": [
+    {
+     "span": "have an",
+     "type": "linking",
+     "ipa": "/hævən/",
+     "noteJa": "have の /v/ と an の /ə/ がつながり「ハヴァン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "male",
+   "startSec": 24.291,
+   "endSec": 26.777,
+   "text": "Perfect, please put me down for that slot.",
+   "translationJa": "完璧です。その枠で予約をお願いします。",
+   "chunks": [
+    {
+     "text": "Perfect,",
+     "startSec": 24.291,
+     "endSec": 24.571
+    },
+    {
+     "text": "please put me down",
+     "startSec": 24.911,
+     "endSec": 25.571
+    },
+    {
+     "text": "for that slot.",
+     "startSec": 25.571,
+     "endSec": 26.211
+    }
+   ],
+   "words": [
+    {
+     "text": "Perfect,",
+     "startSec": 24.291,
+     "endSec": 24.571
+    },
+    {
+     "text": "please",
+     "startSec": 24.911,
+     "endSec": 25.031
+    },
+    {
+     "text": "put",
+     "startSec": 25.031,
+     "endSec": 25.231
+    },
+    {
+     "text": "me",
+     "startSec": 25.231,
+     "endSec": 25.371
+    },
+    {
+     "text": "down",
+     "startSec": 25.371,
+     "endSec": 25.571
+    },
+    {
+     "text": "for",
+     "startSec": 25.571,
+     "endSec": 25.751
+    },
+    {
+     "text": "that",
+     "startSec": 25.751,
+     "endSec": 25.931
+    },
+    {
+     "text": "slot.",
+     "startSec": 25.931,
+     "endSec": 26.211
+    }
+   ],
+   "linking": [
+    {
+     "span": "put me down",
+     "type": "reduction",
+     "ipa": "/pʊt mi daʊn/",
+     "noteJa": "put の語尾の /t/ が破裂せずに詰まる音になり、「プッミーダウン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "female",
+   "startSec": 27.277,
+   "endSec": 30.186,
+   "text": "All set, could I get your name and phone number?",
+   "translationJa": "手配いたしました。お名前とお電話番号をいただけますか？",
+   "chunks": [
+    {
+     "text": "All set,",
+     "startSec": 27.277,
+     "endSec": 27.757
+    },
+    {
+     "text": "could I",
+     "startSec": 28.137,
+     "endSec": 28.417
+    },
+    {
+     "text": "get your name",
+     "startSec": 28.417,
+     "endSec": 28.937
+    },
+    {
+     "text": "and phone number?",
+     "startSec": 28.937,
+     "endSec": 29.657
+    }
+   ],
+   "words": [
+    {
+     "text": "All",
+     "startSec": 27.277,
+     "endSec": 27.457
+    },
+    {
+     "text": "set,",
+     "startSec": 27.457,
+     "endSec": 27.757
+    },
+    {
+     "text": "could",
+     "startSec": 28.137,
+     "endSec": 28.317
+    },
+    {
+     "text": "I",
+     "startSec": 28.317,
+     "endSec": 28.417
+    },
+    {
+     "text": "get",
+     "startSec": 28.417,
+     "endSec": 28.557
+    },
+    {
+     "text": "your",
+     "startSec": 28.557,
+     "endSec": 28.697
+    },
+    {
+     "text": "name",
+     "startSec": 28.697,
+     "endSec": 28.937
+    },
+    {
+     "text": "and",
+     "startSec": 28.937,
+     "endSec": 29.137
+    },
+    {
+     "text": "phone",
+     "startSec": 29.137,
+     "endSec": 29.337
+    },
+    {
+     "text": "number?",
+     "startSec": 29.337,
+     "endSec": 29.657
+    }
+   ],
+   "linking": [
+    {
+     "span": "could I",
+     "type": "linking",
+     "ipa": "/kʊdaɪ/",
+     "noteJa": "could の /d/ と I の /aɪ/ がつながり「クダイ」のように聞こえます。"
+    },
+    {
+     "span": "get your",
+     "type": "palatalization",
+     "ipa": "/ɡɛtʃər/",
+     "noteJa": "get の /t/ と your の /j/ が融合して「ゲッチャー」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "male",
+   "startSec": 30.686,
+   "endSec": 36.215,
+   "text": "Sure, it is Kenji Sato, and my number is five five five, one two three.",
+   "translationJa": "はい、佐藤ケンジで、番号は555-1234です。",
+   "chunks": [
+    {
+     "text": "Sure, it is Kenji Sato,",
+     "startSec": 30.686,
+     "endSec": 32.226
+    },
+    {
+     "text": "and my number is",
+     "startSec": 32.626,
+     "endSec": 33.306
+    },
+    {
+     "text": "five five five,",
+     "startSec": 33.306,
+     "endSec": 34.211
+    },
+    {
+     "text": "one two three.",
+     "startSec": 34.211,
+     "endSec": 35.046
+    }
+   ],
+   "words": [
+    {
+     "text": "Sure,",
+     "startSec": 30.686,
+     "endSec": 30.946
+    },
+    {
+     "text": "it",
+     "startSec": 31.266,
+     "endSec": 31.366
+    },
+    {
+     "text": "is",
+     "startSec": 31.366,
+     "endSec": 31.466
+    },
+    {
+     "text": "Kenji",
+     "startSec": 31.466,
+     "endSec": 31.866
+    },
+    {
+     "text": "Sato,",
+     "startSec": 31.866,
+     "endSec": 32.226
+    },
+    {
+     "text": "and",
+     "startSec": 32.626,
+     "endSec": 32.666
+    },
+    {
+     "text": "my",
+     "startSec": 32.666,
+     "endSec": 32.786
+    },
+    {
+     "text": "number",
+     "startSec": 32.786,
+     "endSec": 33.066
+    },
+    {
+     "text": "is",
+     "startSec": 33.066,
+     "endSec": 33.306
+    },
+    {
+     "text": "five",
+     "startSec": 33.306,
+     "endSec": 33.584
+    },
+    {
+     "text": "five",
+     "startSec": 33.584,
+     "endSec": 33.863
+    },
+    {
+     "text": "five,",
+     "startSec": 33.863,
+     "endSec": 34.211
+    },
+    {
+     "text": "one",
+     "startSec": 34.211,
+     "endSec": 34.42
+    },
+    {
+     "text": "two",
+     "startSec": 34.42,
+     "endSec": 34.628
+    },
+    {
+     "text": "three.",
+     "startSec": 34.628,
+     "endSec": 35.046
+    }
+   ],
+   "linking": [
+    {
+     "span": "it is",
+     "type": "flapping",
+     "ipa": "/ɪɾɪz/",
+     "noteJa": "it の /t/ が母音に挟まれて日本語のラ行のような軽い音（フラップT）に変化します。"
+    }
+   ]
+  }
+ ]
+}

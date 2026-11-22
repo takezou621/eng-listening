@@ -7,6 +7,7 @@ import WatchConnectivity
 final class WatchSessionDelegate: NSObject, WCSessionDelegate {
   var onCommand: (([String: Any]) -> Void)?
   var onActivated: (() -> Void)?
+  var onStudySession: (([String: Any]) -> Void)?
 
   func session(
     _ session: WCSession,
@@ -25,11 +26,25 @@ final class WatchSessionDelegate: NSObject, WCSessionDelegate {
     session.activate()
   }
 
+  /// replyHandler なしで送られたメッセージ (Watch の即時送信はこちらに届く)。
+  func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+    handleMessage(message)
+  }
+
   func session(
     _ session: WCSession,
     didReceiveMessage message: [String: Any],
     replyHandler: @escaping ([String: Any]) -> Void
   ) {
+    handleMessage(message)
+    replyHandler(["ack": true])
+  }
+
+  private func handleMessage(_ message: [String: Any]) {
+    // 学習セッションの即時送信 (sendMessage) も同じ受け口で処理する。
+    if let studySession = message["session"] as? [String: Any] {
+      onStudySession?(studySession)
+    }
     var payload: [String: Any] = [:]
     if let type = message["command"] as? String {
       payload["type"] = type
@@ -40,7 +55,25 @@ final class WatchSessionDelegate: NSObject, WCSessionDelegate {
     if payload["type"] != nil {
       onCommand?(payload)
     }
-    replyHandler(["ack": true])
+  }
+
+  /// Watch 単体学習のセッション記録 (transferUserInfo で届く)。
+  /// Watch が applicationContext で公開した未適用セッションの受け口。
+  func session(
+    _ session: WCSession,
+    didReceiveApplicationContext applicationContext: [String: Any]
+  ) {
+    if let sessions = applicationContext["pendingSessions"] as? [[String: Any]] {
+      for studySession in sessions {
+        onStudySession?(studySession)
+      }
+    }
+  }
+
+  func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+    if let studySession = userInfo["session"] as? [String: Any] {
+      onStudySession?(studySession)
+    }
   }
 }
 
@@ -55,6 +88,8 @@ public class WatchBridgeModule: Module {
   private var session: WCSession?
   /// 活性化前に届いた最新状態。活性化が完了した時点で再送する。
   private var lastState: [String: Any]?
+  /// JS の購読が始まる前に届いた学習セッション。getPendingStudySessions で回収される。
+  private var pendingStudySessions: [[String: Any]] = []
   /// lastState の読み書きと送信を直列化する (JS 側と WCSession の
   /// コールバックが別スレッドから触るため)。
   private let stateQueue = DispatchQueue(label: "com.takezou.englistening.watchbridge.state")
@@ -62,7 +97,7 @@ public class WatchBridgeModule: Module {
   public func definition() -> ModuleDefinition {
     Name("WatchBridge")
 
-    Events("onWatchCommand")
+    Events("onWatchCommand", "onWatchSessions")
 
     OnCreate {
       self.setupSession()
@@ -76,6 +111,15 @@ public class WatchBridgeModule: Module {
       self.stateQueue.sync {
         self.lastState = context
         return self.sendLastStateLocked()
+      }
+    }
+
+    /// 購読開始前に届いていた学習セッションを返し、バッファを空にする。
+    Function("getPendingStudySessions") { () -> [[String: Any]] in
+      self.stateQueue.sync {
+        let out = self.pendingStudySessions
+        self.pendingStudySessions = []
+        return out
       }
     }
 
@@ -118,6 +162,19 @@ public class WatchBridgeModule: Module {
     guard WCSession.isSupported() else { return }
     sessionDelegate.onCommand = { [weak self] payload in
       self?.sendEvent("onWatchCommand", payload)
+    }
+    sessionDelegate.onStudySession = { [weak self] studySession in
+      guard let self = self else { return }
+      self.stateQueue.sync {
+        // Watch は未適用一覧を丸ごと再送するため、同じIDはバッファに重ねない。
+        let id = studySession["id"] as? String
+        let alreadyBuffered = id != nil
+          && self.pendingStudySessions.contains { ($0["id"] as? String) == id }
+        if !alreadyBuffered {
+          self.pendingStudySessions.append(studySession)
+        }
+      }
+      self.sendEvent("onWatchSessions", ["sessions": [studySession]])
     }
     sessionDelegate.onActivated = { [weak self] in
       guard let self = self else { return }
