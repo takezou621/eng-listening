@@ -43,6 +43,7 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'automatic',
   ios: {
     bundleIdentifier: APP_CONFIG.iosBundleIdentifier,
+    googleServicesFile: './GoogleService-Info.plist',
     icon: './assets/images/icon.png',
     infoPlist: {
       // バックグラウンド再生 (ロック画面コントロールとセットで利用)
@@ -51,6 +52,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: APP_CONFIG.androidPackageName,
+    googleServicesFile: './google-services.json',
     adaptiveIcon: {
       backgroundColor: '#E6F4FE',
       foregroundImage: './assets/images/android-icon-foreground.png',
@@ -75,6 +77,18 @@ const config: ExpoConfig = {
       },
     ],
     'expo-audio',
+    '@react-native-firebase/app',
+    '@react-native-firebase/analytics',
+    [
+      'expo-build-properties',
+      {
+        ios: {
+          // Firebase Apple SDK 13+ は SPM 配布のみのため dynamic frameworks が必須
+          // (@react-native-firebase/app v27 の指定。docs: https://rnfirebase.io/ios-spm)
+          useFrameworks: 'dynamic',
+        },
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

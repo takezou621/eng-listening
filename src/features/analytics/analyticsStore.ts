@@ -1,12 +1,17 @@
 import { Paths, File } from 'expo-file-system';
 import { useEffect, useState } from 'react';
 
+import { forwardEventToGa4 } from './ga4';
+
 /**
- * 分析イベントの端末内ログ (Issue #21 最小実装)。
+ * 分析イベントの記録 (Issue #21 最小実装 + v1.1 GA4 送信)。
  *
- * - イベントは端末内の JSON ファイルにのみ記録し、外部送信は一切しない (v1.0 方針)。
- * - 個人を特定する情報は記録しない。イベントには端末内連番 (seq) とローカル時刻のみ。
- * - 送信基盤 (外部サービス) は GM が別途判断する。現状はデバッグ用途のログ。
+ * - イベントは端末内の JSON ファイルに記録し (端末内確認・デバッグ用)、
+ *   v1.1 からは GA4 (Firebase Analytics) にも送信する。送信は ga4.ts が担当し、
+ *   ネイティブモジュールが使えない環境では no-op になる。
+ * - 個人を特定する情報は記録・送信しない。端末内ログのイベントには端末内連番
+ *   (seq) とローカル時刻のみ。GA4 側の集計は Firebase の自動収集識別子による。
+ * - 計測設計の正は docs/metrics.md。
  */
 
 const STORAGE_FILE = new File(Paths.document, 'analytics-log.json');
@@ -124,8 +129,9 @@ export function loadAnalyticsLogAsync(): Promise<void> {
 }
 
 /**
- * 分析イベントを端末内ログに記録する。
- * 外部送信はしない。個人を特定する情報は payload に含めないこと。
+ * 分析イベントを記録する。端末内ログへの追記に加えて GA4 にも送信する
+ * (送信失敗は ga4.ts 側で吸収され、この関数の動作には影響しない)。
+ * 個人を特定する情報は payload に含めないこと。
  *
  * 課金関連 (paywall_viewed / purchase_completed) は課金実装 (#17〜#19) の
  * 発火箇所から呼ばれる前提のフック。現状は呼び出し箇所が存在しないため
@@ -150,6 +156,7 @@ export function logEvent(
   }
   const maxSeq = cachedLog.length > 0 ? cachedLog[cachedLog.length - 1].seq : 0;
   appendEvent({ seq: maxSeq + 1, type, timestamp: localIsoTime(), payload });
+  forwardEventToGa4(type, payload);
 }
 
 export function useAnalyticsLog() {
