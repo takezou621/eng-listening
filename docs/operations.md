@@ -19,6 +19,23 @@ EAS クラウドビルドは使いません（Expo アカウントを持たな�
 7. ASC API で builds を照会し、対象ビルドが `VALID` になることを確認する。
 8. ASC でメタデータ（`docs/store/listing-ja-final.md` が正）とスクリーンショット（`docs/store/screenshots/`）をそろえ、ビルドをバージョンにひも付けて審査提出する。審査提出アイテムはサブスクリプション本体ではなく **subscriptionVersion**、グループは **subscriptionGroupVersion** を `reviewSubmissionItems` に追加する（本体 ID で POST すると 409 unknown relationship になる）。バージョン ID は各リソースの `versions` 関係から取得する。提出後はバージョン・両サブスクリプション・グループの全てが `WAITING_FOR_REVIEW` であることを API で確認する（バージョンだけ提出された状態にしない）。
 
+### 1.1 iPhone Duo 検証（リリース前ゲート）
+
+折りたたみ iPhone Duo の外側ディスプレイは右端にセンサーバーがあり、右セーフエリア 84pt が報告される。`Screen` は左右のセーフエリアを適用済み（Issue #60）。リリース前に XCUITest で崩れがないことを確認する（この Mac は Simulator の GUI がなく通常のスクリーンショットが真っ黒になるため、検証はアクセシビリティ階層と要素フレームで行う）。
+
+```bash
+# ios/ は生成物なので、検証のたびに UI テストターゲットを注入する
+export GEM_PATH=/opt/homebrew/Cellar/cocoapods/1.17.0_1/libexec:/opt/homebrew/lib/ruby/gems/4.0.0:/opt/homebrew/Cellar/ruby/4.0.10/lib/ruby/gems/4.0.0:$HOME/.local/share/gem/ruby/4.0.0
+ruby tools/duo/inject_uitest.rb
+cp tools/duo/DuoSmokeTests.swift ios/appUITests/DuoSmokeTests.swift
+xcodebuild test -workspace ios/app.xcworkspace -scheme duo-smoke -configuration Release \
+  -destination "platform=iOS Simulator,id=355C05F4-08AE-45D9-9D72-FB45403D0F7C" \
+  -derivedDataPath /tmp/el-fixdd
+```
+
+- 合格条件: 2 テスト成功 + ログの DUO-EVIDENCE で、カードと再生バーの右端が 366pt（466 − 84 − 16）以内に収まること
+- 内側ディスプレイ（開いた状態）はシミュレータではシーンが移らず直接検証できない。レイアウトは同じセーフエリア機構で追従する
+
 ## 2. コンテンツ（レッスン）の追加
 
 1. `tools/content/` のパイプラインでスクリプト生成→ TTS 生成を行う（詳細は `docs/content-pipeline.md`）。

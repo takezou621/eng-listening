@@ -27,7 +27,10 @@ export function Screen({ children, scroll = true, padded = true, scrollRef, onSc
   return (
     <SafeAreaView
       style={[styles.safe, { backgroundColor: colors.background }]}
-      edges={footer ? ['top', 'bottom'] : ['top']}
+      // 左右のセーフエリアも適用する: iPhone Duo の外側ディスプレイでは右端に
+      // センサーバーがあり、右インセット 84pt が報告される (Issue #60 で実測)。
+      // 通常の iPhone (縦向き) では左右 0 のため見た目は変わらない。
+      edges={footer ? ['top', 'bottom', 'left', 'right'] : ['top', 'left', 'right']}
     >
       {scroll ? (
         <ScrollView
