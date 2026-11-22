@@ -147,6 +147,11 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
         DispatchQueue.main.async {
             self.connectionText = activationState == .activated ? "接続済み" : "未接続"
         }
+        if activationState == .activated {
+            // 再起動時は新しい context が届くまで表示が空になるため、
+            // 受信済みの最新 context をそのまま反映する。
+            self.session(session, didReceiveApplicationContext: session.receivedApplicationContext)
+        }
     }
 
     func session(
