@@ -176,22 +176,66 @@ def get_access_token(account: str) -> str:
     """gcloud の既存ユーザー認証からアクセストークンを取得する。
 
     トークンの値を一切出力しないこと (秘密情報はログ・PR・コミット禁止)。
+
+    Colab のように gcloud CLI が無い環境では、環境変数
+    EL_TTS_AUTH_FALLBACK=adc が設定されている場合に限り、gcloud 呼び出しの
+    失敗 (バイナリ不在・非ゼロ終了) 時に Application Default Credentials
+    (ADC) へフォールバックする。環境変数が無い場合の動作は従来どおり
+    (gcloud のみを使い、失敗したら TTSError)。
     """
-    result = subprocess.run(
-        ["gcloud", "auth", "print-access-token", f"--account={account}"],
-        capture_output=True,
-        text=True,
-        timeout=30,
-        check=False,
-    )
-    token = result.stdout.strip()
-    if result.returncode != 0 or not token:
-        raise TTSError(
-            "gcloud アクセストークンの取得に失敗しました "
-            f"(account={account}, rc={result.returncode})。"
-            "`gcloud auth list` で認証状態を確認してください。"
+    rc = -1
+    token = ""
+    try:
+        result = subprocess.run(
+            ["gcloud", "auth", "print-access-token", f"--account={account}"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
         )
+        rc = result.returncode
+        token = (result.stdout or "").strip()
+    except OSError:
+        rc = -1
+    if rc == 0 and token:
+        return token
+    if os.environ.get("EL_TTS_AUTH_FALLBACK") == "adc":
+        return _get_access_token_adc()
+    raise TTSError(
+        "gcloud アクセストークンの取得に失敗しました "
+        f"(account={account}, rc={rc})。"
+        "`gcloud auth list` で認証状態を確認してください。"
+    )
+
+
+def _get_access_token_adc() -> str:
+    """Application Default Credentials (ADC) からアクセストークンを取得する。
+
+    Colab の google.colab.auth.authenticate_user() 実行後のように、gcloud CLI
+    は無いが ADC が設定されている環境向け。EL_TTS_AUTH_FALLBACK=adc のとき
+    だけ get_access_token から呼ばれる。トークンの値は出力しない。
+    クォータプロジェクトは呼び出し側が voice_config の quotaProject を
+    X-Goog-User-Project ヘッダで付ける (従来どおり)。
+    """
+    try:
+        import google.auth
+        import google.auth.transport.requests
+
+        credentials, _project = google.auth.default(
+            scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+        credentials.refresh(google.auth.transport.requests.Request())
+    except Exception as exc:
+        raise TTSError(
+            "ADC からのアクセストークン取得に失敗しました "
+            f"({type(exc).__name__})。Colab では takezou621@gmail.com で"
+            "サインインし、auth.authenticate_user() を実行済みか確認してください。"
+        ) from exc
+    token = (getattr(credentials, "token", None) or "").strip()
+    if not token:
+        raise TTSError("ADC から空のアクセストークンが返りました。")
     return token
+
 
 
 # ---------------------------------------------------------------------------

@@ -10,6 +10,7 @@ dependencies = [
   "faster-whisper>=1.1,<2",
   "av>=15,<16",
   "google-genai>=1,<2",
+  "google-auth>=2,<3",
 ]
 
 [tool.uv]
