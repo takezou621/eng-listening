@@ -268,18 +268,28 @@ function QuestionPhase({
       </ThemedText>
       <ThemedText variant="heading">音声を聞いて、何と聞こえたか答えてください</ThemedText>
 
-      <Pressable style={[styles.playButton, { backgroundColor: colors.primary }]} onPress={playSegment}>
-        <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-          {playing ? '▶ 再生中…' : '▶ 音声を再生する'}
+      <Pressable
+        style={[
+          styles.playButton,
+          answered === null
+            ? { backgroundColor: colors.primary }
+            : {
+                backgroundColor: colors.surface,
+                borderColor: colors.primary,
+                borderWidth: 1,
+              },
+        ]}
+        onPress={playSegment}
+      >
+        <ThemedText
+          style={{
+            color: answered === null ? colors.primaryText : colors.primary,
+            fontWeight: '700',
+          }}
+        >
+          {playing ? '▶ 再生中…' : answered === null ? '▶ 音声を再生する' : '↻ もう一度再生する'}
         </ThemedText>
       </Pressable>
-      {answered !== null ? (
-        <Pressable onPress={playSegment}>
-          <ThemedText variant="caption" color="primary">
-            ↻ もう一度再生する
-          </ThemedText>
-        </Pressable>
-      ) : null}
 
       {maskedSentence ? (
         <ThemedText style={styles.maskedSentence}>
@@ -304,11 +314,19 @@ function QuestionPhase({
             style={[
               styles.choiceButton,
               { backgroundColor: colors.surface, borderColor: colors.border },
-              showState && isCorrect && { borderColor: '#16A34A', borderWidth: 2 },
-              showState && isSelected && !isCorrect && { borderColor: '#DC2626', borderWidth: 2 },
+              showState && isCorrect && { borderColor: colors.success, borderWidth: 2 },
+              showState && isSelected && !isCorrect && { borderColor: colors.danger, borderWidth: 2 },
             ]}
           >
-            <ThemedText style={showState && isCorrect ? { color: '#16A34A' } : undefined}>
+            <ThemedText
+              style={
+                showState && isCorrect
+                  ? { color: colors.success, fontWeight: '700' }
+                  : showState && isSelected && !isCorrect
+                    ? { color: colors.danger, fontWeight: '600' }
+                    : undefined
+              }
+            >
               {showState && isCorrect ? '✓ ' : showState && isSelected ? '✗ ' : ''}
               {choice}
             </ThemedText>
@@ -325,11 +343,6 @@ function QuestionPhase({
           <ThemedText variant="caption" color="muted">
             {resolved.note.span} {resolved.note.ipa} — {resolved.note.noteJa}
           </ThemedText>
-          <Pressable onPress={playSegment}>
-            <ThemedText variant="caption" color="primary">
-              ↻ もう一度再生する
-            </ThemedText>
-          </Pressable>
         </View>
       ) : null}
       <Pressable onPress={onSkip} style={styles.skipButton}>
@@ -433,8 +446,8 @@ const styles = StyleSheet.create({
   footerBar: {
     borderTopWidth: 1,
     paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   footerButton: { marginTop: 0 },
   playButton: {
@@ -443,7 +456,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  questionTitle: { marginTop: 8 },
+  questionTitle: { marginTop: 12 },
   maskedSentence: { marginTop: 16, lineHeight: 24 },
   choiceButton: {
     borderRadius: 10,
@@ -455,14 +468,14 @@ const styles = StyleSheet.create({
   explainCard: {
     borderRadius: 12,
     borderWidth: 1,
-    padding: 14,
-    gap: 6,
+    padding: 16,
+    gap: 8,
     marginTop: 12,
   },
   card: {
     borderRadius: 12,
     borderWidth: 1,
-    padding: 14,
+    padding: 16,
     gap: 8,
     marginTop: 12,
   },
