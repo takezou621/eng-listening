@@ -6,11 +6,17 @@ import { DailyGoalSheet } from '@/components/DailyGoalSheet';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { useEntitlement } from '@/features/billing/billingStore';
-import { LINKING_LABELS } from '@/features/lesson/linkingViz';
+import {
+  LINKING_LABELS,
+  LINKING_TEXT_DECORATIONS,
+  getLinkingColor,
+} from '@/features/lesson/linkingViz';
+import type { LessonLinkingNote } from '@/features/lesson/types';
 import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
 import { useUserData } from '@/features/library/userStore';
 import {
-  buildHeatmap,
+  buildCurrentWeekStrip,
+  buildWeeklyHeatmap,
   computeCompletedLessonCount,
   computeDailyGoalStatus,
   computeShadowingTotal,
@@ -23,6 +29,7 @@ import {
 import { useTheme } from '@/theme/AppThemeProvider';
 
 const HEAT_MINUTES = [0, 15, 30];
+const WEEKDAY_ROW_LABELS = ['月', '火', '水', '木', '金', '土', '日'] as const;
 
 function formatMinutes(seconds: number): string {
   const m = Math.round(seconds / 60);
@@ -34,7 +41,7 @@ function todayStr(): string {
   return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, '0')}-${`${d.getDate()}`.padStart(2, '0')}`;
 }
 
-/** 学習進捗画面 (Issue #13 / #46: 1日の目標・ストリーク救済・§3 ダッシュボード) */
+/** 学習進捗画面 (Issue #13 / #46: 週次カレンダー・今週ドット・目標・弱点グラフ可視化) */
 export default function ProgressScreen() {
   const router = useRouter();
   const { scheme, colors } = useTheme();
@@ -45,18 +52,21 @@ export default function ProgressScreen() {
   const lessonList = getLessonList();
 
   const weakByType = useMemo(() => {
-    if (!isPremium) return [] as [string, number][];
-    const counts: Record<string, number> = {};
+    if (!isPremium) return [] as [LessonLinkingNote['type'], number][];
+    const counts: Partial<Record<LessonLinkingNote['type'], number>> = {};
     for (const w of weakSentences) {
       const bundle = lessonList.find((l) => l.entry.id === w.lessonId)?.bundle;
       const sentence = bundle?.data.sentences.find((st) => st.index === w.sentenceIndex);
       for (const note of sentence?.linking ?? []) {
-        const t = note.type;
-        counts[t] = (counts[t] ?? 0) + 1;
+        counts[note.type] = (counts[note.type] ?? 0) + 1;
       }
     }
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  }, [weakSentences, lessonList, isPremium]) as [string, number][];
+    return (Object.entries(counts) as [LessonLinkingNote['type'], number][]).sort(
+      (a, b) => b[1] - a[1]
+    );
+  }, [weakSentences, lessonList, isPremium]);
+
+  const maxWeakCount = weakByType[0]?.[1] ?? 1;
 
   const [today, setToday] = useState(todayStr());
   useEffect(() => {
@@ -76,13 +86,14 @@ export default function ProgressScreen() {
 
   const refDate = new Date(today + 'T12:00:00');
   const streakInfo = computeStreakWithFreeze(days, refDate);
+  const weekStrip = buildCurrentWeekStrip(days, refDate);
   const totalSeconds = computeTotalSeconds(days);
   const weekSeconds = computeWeekSeconds(days, refDate);
   const todaySeconds = computeTodaySeconds(days, refDate);
   const goalStatus = computeDailyGoalStatus(todaySeconds, dailyGoalMinutes);
   const completedCount = computeCompletedLessonCount(days);
   const shadowingTotal = computeShadowingTotal(days);
-  const heatmap = buildHeatmap(days, refDate, 12);
+  const weeklyGrid = buildWeeklyHeatmap(days, refDate, 12);
   const hasData = totalSeconds > 0 || shadowingTotal > 0 || completedCount > 0;
   const [selectedDay, setSelectedDay] = useState<{
     date: string;
@@ -103,7 +114,8 @@ export default function ProgressScreen() {
     return parts.length === 3 ? `${parts[1]}月${parts[2]}日` : date;
   };
 
-  const successColor = scheme === 'dark' ? '#4ADE80' : '#16A34A';
+  // WCAG AA (5.02:1) 準拠のテーマセマンティック色を使用
+  const successColor = colors.success;
   const freezeBg = scheme === 'dark' ? '#0C4A6E' : '#E0F2FE';
   const freezeColor = scheme === 'dark' ? '#38BDF8' : '#0369A1';
   const freezeCellBg = scheme === 'dark' ? '#0EA5E9' : '#38BDF8';
@@ -118,12 +130,10 @@ export default function ProgressScreen() {
   };
 
   const streakHint = streakInfo.rescuedYesterday
-    ? '❄ 昨日のお休みは自動で保護されました。今日の1本で記録を伸ばせます。'
+    ? '❄ 昨日のお休みを自動保護しました。今日も 1 本で記録を伸ばせます。'
     : streakInfo.frozenDates.length > 0
-      ? '週1回のお休み保護が適用され、連続記録がつながっています。'
-      : streakInfo.streak > 0
-        ? '週1回まで、1日お休みしても連続記録を自動で守ります。'
-        : '1日1本からスタート。週1回の自動保護つきで続けられます。';
+      ? '週 1 回のお休み保護により連続記録がつながっています。'
+      : '週 1 回まで 1 日お休みしても連続記録を自動で守ります。';
 
   return (
     <Screen>
@@ -132,7 +142,7 @@ export default function ProgressScreen() {
         端末内にのみ記録を保存しています
       </ThemedText>
 
-      {/* ブロック 1: 今日の目標カード (ELSA / abceed 型。主 CTA を内包し初期ブロック数を §3 の 5 以内に収める) */}
+      {/* ブロック 1: 今日の目標カード (主 CTA を内包し P1 / P2 を維持) */}
       <View
         style={[
           styles.card,
@@ -200,7 +210,7 @@ export default function ProgressScreen() {
         ) : null}
       </View>
 
-      {/* ブロック 2: ストリーク & 自動保護カード (E16) */}
+      {/* ブロック 2: ストリーク & 今週 7 日間の視覚ドット */}
       <View
         style={[
           styles.card,
@@ -224,6 +234,63 @@ export default function ProgressScreen() {
             </ThemedText>
           </View>
         </View>
+
+        <View style={styles.weekStripRow}>
+          {weekStrip.map((day) => {
+            const studied = day.seconds > 0;
+            return (
+              <View
+                key={day.date}
+                style={styles.weekStripItem}
+                accessible
+                accessibilityLabel={`${day.weekdayLabel}曜日: ${
+                  day.isFuture
+                    ? '予定'
+                    : studied
+                      ? `${formatMinutes(day.seconds)}学習済み`
+                      : day.frozen
+                        ? 'フリーズで保護'
+                        : '未学習'
+                }`}
+              >
+                <View
+                  style={[
+                    styles.weekDot,
+                    studied
+                      ? { backgroundColor: colors.primary, borderColor: colors.primary }
+                      : day.frozen
+                        ? { backgroundColor: freezeCellBg, borderColor: freezeCellBorder }
+                        : {
+                            backgroundColor: 'transparent',
+                            borderColor: day.isToday ? colors.primary : colors.border,
+                            borderWidth: day.isToday ? 2 : 1,
+                            opacity: day.isFuture ? 0.4 : 1,
+                          },
+                  ]}
+                >
+                  <ThemedText
+                    variant="caption"
+                    style={{
+                      color: studied ? colors.primaryText : day.frozen ? colors.primaryText : colors.textMuted,
+                      fontWeight: '700',
+                      fontSize: 11,
+                    }}
+                  >
+                    {studied ? '✓' : day.frozen ? '❄' : day.isToday ? '・' : ''}
+                  </ThemedText>
+                </View>
+                <ThemedText
+                  variant="caption"
+                  color={day.isToday ? 'primary' : 'muted'}
+                  style={day.isToday ? styles.todayLabel : undefined}
+                >
+                  {day.weekdayLabel}
+                </ThemedText>
+              </View>
+            );
+          })}
+        </View>
+
         <ThemedText variant="caption" color="muted">
           {streakHint}
         </ThemedText>
@@ -287,39 +354,92 @@ export default function ProgressScreen() {
         </View>
       )}
 
-      {/* ブロック 4: 学習カレンダーカード (R6.2: カード内見出しに収める) */}
+      {/* ブロック 4: 学習カレンダー (7行=月〜日 × 12週列の整列グリッド) */}
       <View
         style={[
           styles.card,
           { backgroundColor: colors.surface, borderColor: colors.border },
         ]}
       >
-        <ThemedText variant="heading">学習カレンダー (直近 84 日)</ThemedText>
-        <View style={styles.heatmap}>
-          {heatmap.map(({ date, seconds, frozen }) => (
-            <Pressable
-              key={date}
-              hitSlop={2}
-              onPress={() => setSelectedDay({ date, seconds, frozen })}
-              style={[
-                styles.heatCell,
-                frozen
-                  ? {
-                      backgroundColor: freezeCellBg,
-                      borderWidth: 1,
-                      borderColor: freezeCellBorder,
-                    }
-                  : { backgroundColor: heatColor(seconds) },
-                selectedDay?.date === date
-                  ? { borderWidth: 2, borderColor: colors.primary }
-                  : null,
-              ]}
-              accessibilityRole="button"
-              accessibilityState={{ selected: selectedDay?.date === date }}
-              accessibilityLabel={`${formatDayLabel(date)}の学習記録: ${frozen ? 'フリーズで保護' : seconds > 0 ? formatMinutes(seconds) : '記録なし'}`}
-            />
-          ))}
+        <ThemedText variant="heading">学習カレンダー (直近 12 週)</ThemedText>
+
+        <View style={styles.calendarMonthRow}>
+          <View style={styles.weekdayAxisSpacer} />
+          <View style={styles.calendarWeekCols}>
+            {weeklyGrid.map((col) => (
+              <View key={col.weekStart} style={styles.monthLabelCell}>
+                {col.monthLabel ? (
+                  <ThemedText variant="caption" color="muted" style={styles.monthLabelText}>
+                    {col.monthLabel}
+                  </ThemedText>
+                ) : null}
+              </View>
+            ))}
+          </View>
         </View>
+
+        <View style={styles.calendarBodyRow}>
+          <View style={styles.weekdayAxisCol}>
+            {WEEKDAY_ROW_LABELS.map((label, idx) => (
+              <View key={label} style={styles.weekdayAxisCell}>
+                {idx % 2 === 0 ? (
+                  <ThemedText variant="caption" color="muted" style={styles.weekdayAxisText}>
+                    {label}
+                  </ThemedText>
+                ) : null}
+              </View>
+            ))}
+          </View>
+          <View style={styles.calendarWeekCols}>
+            {weeklyGrid.map((col) => (
+              <View key={col.weekStart} style={styles.calendarWeekCol}>
+                {col.days.map((cell) => {
+                  if (cell.isFuture) {
+                    return <View key={cell.date} style={[styles.heatCell, styles.futureCell]} />;
+                  }
+                  const isSelected = selectedDay?.date === cell.date;
+                  return (
+                    <Pressable
+                      key={cell.date}
+                      hitSlop={2}
+                      onPress={() =>
+                        setSelectedDay({
+                          date: cell.date,
+                          seconds: cell.seconds,
+                          frozen: cell.frozen,
+                        })
+                      }
+                      style={[
+                        styles.heatCell,
+                        cell.frozen
+                          ? {
+                              backgroundColor: freezeCellBg,
+                              borderWidth: 1,
+                              borderColor: freezeCellBorder,
+                            }
+                          : { backgroundColor: heatColor(cell.seconds) },
+                        cell.isToday && !isSelected
+                          ? { borderWidth: 1.5, borderColor: colors.primary }
+                          : null,
+                        isSelected ? { borderWidth: 2, borderColor: colors.primary } : null,
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: isSelected }}
+                      accessibilityLabel={`${formatDayLabel(cell.date)}の学習記録: ${
+                        cell.frozen
+                          ? 'フリーズで保護'
+                          : cell.seconds > 0
+                            ? formatMinutes(cell.seconds)
+                            : '記録なし'
+                      }`}
+                    />
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        </View>
+
         <ThemedText variant="caption" color="muted">
           {selectedDay
             ? `${formatDayLabel(selectedDay.date)}: ${
@@ -335,7 +455,7 @@ export default function ProgressScreen() {
           <ThemedText variant="caption" color="muted">
             少
           </ThemedText>
-          {colors.heatLevels.slice(1).map((c) => (
+          {colors.heatLevels.map((c) => (
             <View key={c} style={[styles.heatCell, styles.heatLegendCell, { backgroundColor: c }]} />
           ))}
           <ThemedText variant="caption" color="muted">
@@ -359,10 +479,11 @@ export default function ProgressScreen() {
         </View>
       </View>
 
-      {/* ブロック 5: 詳細な弱点分析カード (セカンダリ枠線ボタンで P1 準拠) */}
+      {/* ブロック 5: 詳細な弱点分析カード (P4 水平ゲージ可視化 / セカンダリ枠線 CTA で P1 準拠) */}
       <View
         style={[
           styles.card,
+          styles.lastCard,
           { backgroundColor: colors.surface, borderColor: colors.border },
         ]}
       >
@@ -370,19 +491,40 @@ export default function ProgressScreen() {
         {isPremium ? (
           <>
             {weakByType.length > 0 ? (
-              weakByType.map(([type, count]) => (
-                <View key={type} style={styles.missedRow}>
-                  <ThemedText variant="caption">
-                    {LINKING_LABELS[type as keyof typeof LINKING_LABELS] ?? type}
-                  </ThemedText>
-                  <ThemedText variant="caption" color="muted">
-                    {count} 件
-                  </ThemedText>
-                </View>
-              ))
+              weakByType.map(([type, count]) => {
+                const typeColor = getLinkingColor(type, scheme);
+                const ratio = count / maxWeakCount;
+                return (
+                  <View key={type} style={styles.weakBarBlock}>
+                    <View style={styles.missedRow}>
+                      <ThemedText
+                        variant="caption"
+                        style={[
+                          styles.weakLabel,
+                          { color: typeColor, textDecorationColor: typeColor },
+                          LINKING_TEXT_DECORATIONS[type],
+                        ]}
+                      >
+                        {LINKING_LABELS[type] ?? type}
+                      </ThemedText>
+                      <ThemedText variant="caption" color="muted">
+                        {count} 件
+                      </ThemedText>
+                    </View>
+                    <View style={[styles.weakTrack, { backgroundColor: colors.border }]}>
+                      <View
+                        style={[
+                          styles.weakFill,
+                          { width: `${ratio * 100}%`, backgroundColor: typeColor },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                );
+              })
             ) : (
               <ThemedText variant="caption" color="muted">
-                苦手フレーズを登録すると、音の変化のタイプ別に集計して表示されます。
+                苦手フレーズを登録すると、音の変化のタイプ別にグラフで集計されます。
               </ThemedText>
             )}
             <ThemedText variant="caption" color="muted">
@@ -392,7 +534,9 @@ export default function ProgressScreen() {
         ) : (
           <>
             <ThemedText variant="caption" color="muted">
-              プレミアムでは、苦手フレーズと学習履歴に基づいた詳細な種類別分析が利用できます。
+              {weakSentences.length > 0
+                ? `現在 ${weakSentences.length} 件の苦手フレーズを記録中。プレミアムでは種類別の傾向グラフを確認できます。`
+                : 'プレミアムでは、苦手フレーズと学習履歴に基づいた詳細な種類別分析が利用できます。'}
             </ThemedText>
             <Pressable
               onPress={() => router.push('/paywall?from=progress')}
@@ -425,6 +569,9 @@ const styles = StyleSheet.create({
   },
   firstCard: {
     marginTop: 0,
+  },
+  lastCard: {
+    marginBottom: 16,
   },
   card: {
     borderRadius: 12,
@@ -468,6 +615,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
+  weekStripRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  weekStripItem: {
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+  },
+  weekDot: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  todayLabel: {
+    fontWeight: '700',
+  },
   summaryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -486,11 +654,11 @@ const styles = StyleSheet.create({
   },
   todayCta: {
     borderRadius: 12,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     alignItems: 'center',
     gap: 2,
-    marginTop: 12,
+    marginTop: 8,
   },
   secondaryOutline: {
     borderRadius: 10,
@@ -502,19 +670,57 @@ const styles = StyleSheet.create({
   secondaryLabel: {
     fontWeight: '700',
   },
-  missedRow: {
+  calendarMonthRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  weekdayAxisSpacer: {
+    width: 16,
+  },
+  calendarBodyRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: 6,
+  },
+  weekdayAxisCol: {
+    width: 16,
+    gap: 4,
+  },
+  weekdayAxisCell: {
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  weekdayAxisText: {
+    fontSize: 10,
+    lineHeight: 14,
+  },
+  calendarWeekCols: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  heatmap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 3,
+  monthLabelCell: {
+    width: 16,
+    height: 16,
+    overflow: 'visible',
+  },
+  monthLabelText: {
+    fontSize: 10,
+    lineHeight: 14,
+    width: 28,
+  },
+  calendarWeekCol: {
+    gap: 4,
   },
   heatCell: {
     width: 16,
     height: 16,
     borderRadius: 3,
+  },
+  futureCell: {
+    opacity: 0,
   },
   heatLegend: {
     flexDirection: 'row',
@@ -528,5 +734,25 @@ const styles = StyleSheet.create({
   },
   freezeLegendGap: {
     marginLeft: 10,
+  },
+  weakBarBlock: {
+    gap: 4,
+    marginTop: 2,
+  },
+  missedRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  weakLabel: {
+    fontWeight: '700',
+  },
+  weakTrack: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  weakFill: {
+    height: 6,
+    borderRadius: 3,
   },
 });
