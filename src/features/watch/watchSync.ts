@@ -49,9 +49,17 @@ function pushMerged(): void {
  *  token は画面インスタンスの所有者確認用: 画面遷移で新旧のレッスン画面が
  *  一時的に共存するとき、古い画面のクリーンアップ (null) が新しい画面の
  *  再生状態を消さないようにする。 */
+/** 再生状態の所有権を画面マウント時に取得する。所有権は push より先に
+ *  宣言する (登録 effect は push effect より先に走る)。 */
+export function claimWatchPlayback(token: object): void {
+  playbackToken = token;
+}
+
 export function pushWatchPlayback(next: WatchPlaybackState | null, token?: object): void {
+  // 所有者以外からの push は受け付けない (遷移中に古い画面の effect が
+  // 再生状態を送っても、所有権と表示が新しい画面から離れないように)。
+  if (token !== undefined && playbackToken !== null && playbackToken !== token) return;
   if (next === null) {
-    if (token !== undefined && playbackToken !== null && playbackToken !== token) return;
     playback = null;
     playbackToken = null;
   } else {

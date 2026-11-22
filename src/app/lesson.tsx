@@ -26,6 +26,7 @@ import {
 } from '@/config/appConfig';
 import { logEvent } from '@/features/analytics/analyticsStore';
 import {
+  claimWatchPlayback,
   pushWatchPlayback,
   registerWatchCommandHandler,
 } from '@/features/watch/watchSync';
@@ -908,6 +909,7 @@ function LessonPlayerScreen({
   useEffect(() => {
     // 文送り/文戻しは画面上のボタンと同じ関数を使う (2秒超で文頭に戻る挙動や、
     // 話すモードで一時停止したまま移動する挙動を Watch でも揃える)。
+    claimWatchPlayback(watchTokenRef.current);
     const unregister = registerWatchCommandHandler((command) => {
       const controls = watchControlsRef.current;
       if (command.type === 'togglePlay') {

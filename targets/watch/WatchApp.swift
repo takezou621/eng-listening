@@ -92,6 +92,10 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
 
     private static let rates: [Double] = [0.7, 0.85, 1.0, 1.15, 1.3]
 
+    /// 送信ごとの世代。失敗時の巻き戻しは、その送信が最新のときだけ行う
+    /// (楽観更新が短時間に重なると、古い失敗で新しい状態を巻き戻してしまうため)。
+    private var sendGeneration = 0
+
     override init() {
         super.init()
         if WCSession.isSupported() {
@@ -109,6 +113,8 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
             connectionText = "iPhoneに接続できません"
             return
         }
+        sendGeneration += 1
+        let generation = sendGeneration
         let previous = playback
         var optimistic: PlaybackState?
         if command == "togglePlay", var current = playback {
@@ -131,8 +137,8 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
             DispatchQueue.main.async {
                 self.connectionText = "送信に失敗しました"
                 // 楽観的に変えた表示が残り続けないよう、失敗時は元の状態に戻す
-                // (その後に新しい状態が届いていた場合はそちらを優先する)。
-                if self.playback == optimistic {
+                // (この送信より後の操作や新しい状態が優先される)。
+                if generation == self.sendGeneration, self.playback == optimistic {
                     self.playback = previous
                 }
             }

@@ -55,6 +55,9 @@ public class WatchBridgeModule: Module {
   private var session: WCSession?
   /// 活性化前に届いた最新状態。活性化が完了した時点で再送する。
   private var lastState: [String: Any]?
+  /// lastState の読み書きと送信を直列化する (JS 側と WCSession の
+  /// コールバックが別スレッドから触るため)。
+  private let stateQueue = DispatchQueue(label: "com.takezou.englistening.watchbridge.state")
 
   public func definition() -> ModuleDefinition {
     Name("WatchBridge")
@@ -70,8 +73,10 @@ public class WatchBridgeModule: Module {
     Function("updateContext") { (context: [String: Any]) -> Bool in
       // 状態は常に保持しておき、未活性化なら活性化完了後に再送する
       // (初回の進捗・再生状態が届かないままにならないように)。
-      self.lastState = context
-      return self.sendLastState()
+      self.stateQueue.sync {
+        self.lastState = context
+        return self.sendLastStateLocked()
+      }
     }
 
     Function("getConnectionState") { () -> [String: Any] in
@@ -94,7 +99,8 @@ public class WatchBridgeModule: Module {
     }
   }
 
-  private func sendLastState() -> Bool {
+  /// stateQueue の内側でだけ呼ぶ。
+  private func sendLastStateLocked() -> Bool {
     guard let session = self.session, session.activationState == .activated,
       let lastState = self.lastState
     else {
@@ -114,7 +120,8 @@ public class WatchBridgeModule: Module {
       self?.sendEvent("onWatchCommand", payload)
     }
     sessionDelegate.onActivated = { [weak self] in
-      _ = self?.sendLastState()
+      guard let self = self else { return }
+      _ = self.stateQueue.sync { self.sendLastStateLocked() }
     }
     let session = WCSession.default
     session.delegate = sessionDelegate
