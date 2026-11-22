@@ -18,7 +18,7 @@
   "male": "en-US-Neural2-D",
   "narrator": "en-US-Neural2-A"
  },
- "generatedAtUtc": "2026-11-20T10:05:34Z",
+ "generatedAtUtc": "2026-11-22T13:24:31Z",
  "sentences": [
   {
    "index": 0,
@@ -31,11 +31,11 @@
     {
      "text": "Bright Dental Clinic,",
      "startSec": 0.0,
-     "endSec": 0.96
+     "endSec": 0.94
     },
     {
      "text": "how can I",
-     "startSec": 1.36,
+     "startSec": 1.34,
      "endSec": 1.84
     },
     {
@@ -58,11 +58,11 @@
     {
      "text": "Clinic,",
      "startSec": 0.5,
-     "endSec": 0.96
+     "endSec": 0.94
     },
     {
      "text": "how",
-     "startSec": 1.36,
+     "startSec": 1.34,
      "endSec": 1.58
     },
     {
@@ -78,11 +78,11 @@
     {
      "text": "help",
      "startSec": 1.84,
-     "endSec": 2.02
+     "endSec": 2.0
     },
     {
      "text": "you",
-     "startSec": 2.02,
+     "startSec": 2.0,
      "endSec": 2.22
     },
     {
@@ -403,11 +403,11 @@
     {
      "text": "Wednesday",
      "startSec": 13.571,
-     "endSec": 13.971
+     "endSec": 13.951
     },
     {
      "text": "afternoon",
-     "startSec": 13.971,
+     "startSec": 13.951,
      "endSec": 14.511
     },
     {
@@ -418,16 +418,16 @@
     {
      "text": "around",
      "startSec": 15.371,
-     "endSec": 15.531
+     "endSec": 15.551
     },
     {
      "text": "four",
-     "startSec": 15.531,
-     "endSec": 15.786
+     "startSec": 15.551,
+     "endSec": 15.798
     },
     {
      "text": "thirty?",
-     "startSec": 15.786,
+     "startSec": 15.798,
      "endSec": 16.231
     }
    ],
@@ -455,7 +455,7 @@
     },
     {
      "text": "could you",
-     "startSec": 18.599,
+     "startSec": 18.579,
      "endSec": 18.759
     },
     {
@@ -487,7 +487,7 @@
     },
     {
      "text": "could",
-     "startSec": 18.599,
+     "startSec": 18.579,
      "endSec": 18.679
     },
     {
@@ -546,18 +546,18 @@
     },
     {
      "text": "we have an opening",
-     "startSec": 21.023,
-     "endSec": 21.723
+     "startSec": 21.003,
+     "endSec": 21.823
     },
     {
      "text": "with Doctor Miller",
-     "startSec": 21.723,
+     "startSec": 21.823,
      "endSec": 22.623
     },
     {
      "text": "right then.",
      "startSec": 22.623,
-     "endSec": 23.283
+     "endSec": 23.303
     }
    ],
    "words": [
@@ -568,27 +568,27 @@
     },
     {
      "text": "we",
-     "startSec": 21.023,
+     "startSec": 21.003,
      "endSec": 21.183
     },
     {
      "text": "have",
      "startSec": 21.183,
-     "endSec": 21.343
+     "endSec": 21.383
     },
     {
      "text": "an",
-     "startSec": 21.343,
+     "startSec": 21.383,
      "endSec": 21.483
     },
     {
      "text": "opening",
      "startSec": 21.483,
-     "endSec": 21.723
+     "endSec": 21.823
     },
     {
      "text": "with",
-     "startSec": 21.723,
+     "startSec": 21.823,
      "endSec": 22.023
     },
     {
@@ -598,18 +598,18 @@
     },
     {
      "text": "Miller",
-     "startSec": 22.563,
+     "startSec": 22.283,
      "endSec": 22.623
     },
     {
      "text": "right",
      "startSec": 22.623,
-     "endSec": 23.003
+     "endSec": 22.983
     },
     {
      "text": "then.",
-     "startSec": 23.003,
-     "endSec": 23.283
+     "startSec": 22.983,
+     "endSec": 23.303
     }
    ],
    "linking": [
@@ -636,7 +636,7 @@
     },
     {
      "text": "please put me down",
-     "startSec": 24.911,
+     "startSec": 24.931,
      "endSec": 25.571
     },
     {
@@ -653,7 +653,7 @@
     },
     {
      "text": "please",
-     "startSec": 24.911,
+     "startSec": 24.931,
      "endSec": 25.031
     },
     {
@@ -807,7 +807,7 @@
     },
     {
      "text": "and my number is",
-     "startSec": 32.626,
+     "startSec": 32.226,
      "endSec": 33.306
     },
     {
@@ -849,7 +849,7 @@
     },
     {
      "text": "and",
-     "startSec": 32.626,
+     "startSec": 32.226,
      "endSec": 32.666
     },
     {

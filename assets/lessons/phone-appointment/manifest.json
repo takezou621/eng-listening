@@ -100,10 +100,10 @@
   }
  },
  "totals": {
-  "lessonChars": 71,
-  "lessonRequests": 1,
-  "monthChars": 4274,
-  "monthRequests": 81,
+  "lessonChars": 511,
+  "lessonRequests": 10,
+  "monthChars": 8473,
+  "monthRequests": 155,
   "monthlyStopChars": 900000
  }
 }
