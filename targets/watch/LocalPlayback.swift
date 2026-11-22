@@ -86,10 +86,8 @@ final class WatchSessionStore {
     func append(_ session: WatchStudySession) {
         var all = pending()
         all.append(session)
-        // iPhone と長期間つながらない場合に備え、古いものから間引く。
-        if all.count > 200 {
-            all = Array(all.suffix(200))
-        }
+        // 削除は iPhone の ack (removeApplied) だけが根拠。件数上限で
+        // 未確認のセッションを落とすことはしない。
         defaults.set(all.map { $0.asDictionary }, forKey: key)
         publishContext()
         transferOne(session)
@@ -148,7 +146,11 @@ final class WatchSessionStore {
         // ここではローカル一覧を消さない。適用済みの確定は iPhone からの
         // ack (removeApplied) だけが根拠で、転送キューの都合で消すと
         // オフライン分の記録が失われる。
-        for item in items {
+        // 既に転送キューに載っている分は再投入しない。
+        let outstandingIds = Set(session.outstandingUserInfoTransfers.compactMap { transfer in
+            ((transfer.userInfo["session"] as? [String: Any])?["id"] as? String)
+        })
+        for item in items where !outstandingIds.contains(item.id) {
             // 届く保証のあるキューに載せつつ、近くに iPhone があれば即時送信も試す
             // (iPhone 側はセッションIDで重複排除するため二重計上しない)。
             session.transferUserInfo(["session": item.asDictionary])
@@ -169,9 +171,14 @@ final class LocalPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     private var player: AVAudioPlayer?
     private var timer: Timer?
-    /// 今のレッスンで実際に再生が進んだ秒数 (一時停止中は数えない)。
-    private var sessionSeconds: Double = 0
+    /// 再生していた実時間の計測 (Timer の通知回数ではなく壁時計で測る)。
+    private var elapsedBase: Double = 0
+    private var playStartedAt: Date?
     private var sessionCompleted = false
+
+    private var currentElapsed: Double {
+        elapsedBase + (playStartedAt.map { Date().timeIntervalSince($0) } ?? 0)
+    }
 
     static let rates: [Double] = [0.7, 0.85, 1.0, 1.15, 1.3]
 
@@ -192,7 +199,8 @@ final class LocalPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
             player = p
             lesson = target
             sentenceIndex = 0
-            sessionSeconds = 0
+            elapsedBase = 0
+            playStartedAt = nil
             sessionCompleted = false
             play()
         } catch {
@@ -216,13 +224,22 @@ final class LocalPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
         try? AVAudioSession.sharedInstance().setCategory(.playback)
         try? AVAudioSession.sharedInstance().setActive(true)
         player.rate = Float(rate)
-        player.play()
-        isPlaying = true
-        startTimer()
+        // 開始に失敗したら再生中にはせず、停止状態のまま再試行できるようにする。
+        if player.play() {
+            isPlaying = true
+            playStartedAt = Date()
+            startTimer()
+        } else {
+            isPlaying = false
+        }
     }
 
     func pause() {
         player?.pause()
+        if let started = playStartedAt {
+            elapsedBase += Date().timeIntervalSince(started)
+            playStartedAt = nil
+        }
         isPlaying = false
         stopTimer()
         flushSession()
@@ -274,7 +291,6 @@ final class LocalPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
 
     private func tick() {
         guard let player = player, let lesson = lesson, player.isPlaying else { return }
-        sessionSeconds += 0.1
         let t = player.currentTime
         if let idx = lesson.sentences.firstIndex(where: { t >= $0.startSec && t < $0.endSec }) {
             if idx != sentenceIndex {
@@ -288,6 +304,10 @@ final class LocalPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     /// 再生し終えたら記録して次のレッスンを自動で続ける (ハンズフリー前提)。
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         guard flag, let lesson = lesson else { return }
+        if let started = playStartedAt {
+            elapsedBase += Date().timeIntervalSince(started)
+            playStartedAt = nil
+        }
         sessionCompleted = true
         isPlaying = false
         stopTimer()
@@ -304,7 +324,7 @@ final class LocalPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
     /// (レッスン切替時は start() が明示的にゼロへ戻す)。
     private func flushSession() {
         guard let lesson = lesson else { return }
-        let seconds = Int(sessionSeconds)
+        let seconds = Int(currentElapsed)
         if seconds >= 5 || sessionCompleted {
             let formatter = DateFormatter()
             formatter.calendar = Calendar(identifier: .gregorian)
@@ -317,7 +337,7 @@ final class LocalPlayer: NSObject, ObservableObject, AVAudioPlayerDelegate {
                 seconds: max(seconds, 0),
                 completed: sessionCompleted
             ))
-            sessionSeconds = 0
+            elapsedBase = 0
             sessionCompleted = false
         }
     }

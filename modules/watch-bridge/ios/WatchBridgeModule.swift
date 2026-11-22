@@ -26,11 +26,21 @@ final class WatchSessionDelegate: NSObject, WCSessionDelegate {
     session.activate()
   }
 
+  /// replyHandler なしで送られたメッセージ (Watch の即時送信はこちらに届く)。
+  func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+    handleMessage(message)
+  }
+
   func session(
     _ session: WCSession,
     didReceiveMessage message: [String: Any],
     replyHandler: @escaping ([String: Any]) -> Void
   ) {
+    handleMessage(message)
+    replyHandler(["ack": true])
+  }
+
+  private func handleMessage(_ message: [String: Any]) {
     // 学習セッションの即時送信 (sendMessage) も同じ受け口で処理する。
     if let studySession = message["session"] as? [String: Any] {
       onStudySession?(studySession)
@@ -45,7 +55,6 @@ final class WatchSessionDelegate: NSObject, WCSessionDelegate {
     if payload["type"] != nil {
       onCommand?(payload)
     }
-    replyHandler(["ack": true])
   }
 
   /// Watch 単体学習のセッション記録 (transferUserInfo で届く)。

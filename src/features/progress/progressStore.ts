@@ -16,6 +16,11 @@ import { useEffect, useState } from 'react';
 
 const STORAGE_FILE = new File(Paths.document, 'progress-data.json');
 
+/** 進捗ファイル内の予約キー: Watch 学習セッションの適用済みID。
+ *  進捗本体と同じ書き込みで保存し、進捗と適用記録が食い違わないようにする。 */
+const WATCH_IDS_KEY = '__watchSessionIds';
+let appliedWatchIds: string[] = [];
+
 /** 1 日分の学習記録 (ローカル日ベース) */
 export interface DayRecord {
   /** YYYY-MM-DD (ローカルタイムゾーン) */
@@ -89,7 +94,11 @@ function notify() {
 function flushToDisk() {
   saveQueue = saveQueue.then(async () => {
     try {
-      await STORAGE_FILE.write(JSON.stringify(cachedData));
+      const payload: Record<string, unknown> = { ...cachedData };
+      if (appliedWatchIds.length > 0) {
+        payload[WATCH_IDS_KEY] = appliedWatchIds;
+      }
+      await STORAGE_FILE.write(JSON.stringify(payload));
     } catch (e) {
       console.error('Failed to save progress data:', e);
     }
@@ -121,7 +130,19 @@ export function loadProgressDataAsync(): Promise<void> {
     let parsed: ProgressData | null = null;
     try {
       if (STORAGE_FILE.exists) {
-        parsed = parseProgress(await STORAGE_FILE.text());
+        const text = await STORAGE_FILE.text();
+        parsed = parseProgress(text);
+        // 適用済みIDはファイルとメモリの和集合にする (読み込み前に届いた分を失わない)。
+        try {
+          const raw: unknown = JSON.parse(text);
+          const ids = (raw as Record<string, unknown>)?.[WATCH_IDS_KEY];
+          if (Array.isArray(ids)) {
+            const fileIds = ids.filter((id): id is string => typeof id === 'string');
+            appliedWatchIds = [...new Set([...fileIds, ...appliedWatchIds])].slice(-1000);
+          }
+        } catch {
+          // IDの復元に失敗しても進捗の読み込みは続行する (重複は再送側の再適用で吸収される)。
+        }
       }
     } catch (e) {
       console.error('Failed to load progress data:', e);
@@ -227,11 +248,6 @@ export function markLessonCompleted(lessonId: string) {
   });
 }
 
-/** キューに入っている永続化書き込みがすべて試行されるまで待つ。 */
-export function flushProgressData(): Promise<void> {
-  return saveQueue;
-}
-
 /** 外部デバイス (Apple Watch 単体学習) から届く学習記録1件。 */
 export interface ExternalStudyRecord {
   /** 学習した日 (yyyy-MM-dd、そのデバイスのローカル日) */
@@ -281,6 +297,57 @@ export function mergeExternalStudyRecords(records: ExternalStudyRecord[]): void 
 }
 
 /** シャドーイング (録音完了) 1 回を記録する */
+export interface WatchStudySessionInput {
+  id: string;
+  date: string;
+  lessonId: string;
+  seconds: number;
+  completed: boolean;
+}
+
+/**
+ * Watch 学習セッションを取り込む。適用済みIDは進捗と同じファイルに
+ * 同じ書き込みで保存されるため、進捗だけ・IDだけが残る食い違いが起きない。
+ * 戻り値は今回新たに適用したセッションID。
+ */
+export function mergeWatchStudySessions(sessions: WatchStudySessionInput[]): string[] {
+  const seen = new Set(appliedWatchIds);
+  const fresh = sessions.filter((s) => {
+    if (
+      s === null ||
+      typeof s !== 'object' ||
+      typeof s.id !== 'string' ||
+      s.id.length === 0 ||
+      seen.has(s.id)
+    ) {
+      return false;
+    }
+    seen.add(s.id);
+    return true;
+  });
+  if (fresh.length === 0) return [];
+  mergeExternalStudyRecords(
+    fresh.map((s) => ({
+      date: s.date,
+      lessonId: s.lessonId,
+      seconds: s.seconds,
+      completed: s.completed === true,
+    })),
+  );
+  appliedWatchIds = [...appliedWatchIds, ...fresh.map((s) => s.id)].slice(-1000);
+  // merge 側の updateData がキューした書き込みの後にもう一度書き、
+  // ID を含む最終形を確実にディスクへ出す。
+  if (canPersist) {
+    flushToDisk();
+  }
+  return fresh.map((s) => s.id);
+}
+
+/** Watch 学習セッションの適用済みID (Watch への ack 用)。 */
+export function getAppliedWatchSessionIds(): string[] {
+  return appliedWatchIds;
+}
+
 export function addShadowingRecord(lessonId: string) {
   const date = localDateStr();
   updateData((current) => {
