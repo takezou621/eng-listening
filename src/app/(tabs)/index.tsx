@@ -10,15 +10,19 @@ import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
 import { isOnboardingDone, loadUserDataAsync, useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
-import { useProgressData } from '@/features/progress/progressStore';
+import {
+  computeDailyGoalStatus,
+  computeTodaySeconds,
+  useProgressData,
+} from '@/features/progress/progressStore';
 
 type FilterType = 'all' | ContentType;
 type FilterLevel = 'all' | 'beginner' | 'intermediate';
 
 export default function LibraryScreen() {
-  const { colors } = useTheme();
+  const { scheme, colors } = useTheme();
   const router = useRouter();
-  const { favoriteLessons, toggleFavoriteLesson, onboardingDone } = useUserData();
+  const { favoriteLessons, toggleFavoriteLesson, onboardingDone, dailyGoalMinutes } = useUserData();
 
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [filterLevel, setFilterLevel] = useState<FilterLevel>('all');
@@ -38,6 +42,11 @@ export default function LibraryScreen() {
     () => getTodaysLesson(completedLessonIds),
     [completedLessonIds]
   );
+  const goalStatus = computeDailyGoalStatus(
+    computeTodaySeconds(progressDays),
+    dailyGoalMinutes
+  );
+  const successColor = scheme === 'dark' ? '#4ADE80' : '#16A34A';
 
   // 初回起動時のみオンボーディング診断へ誘導する (完了状態は端末内に永続化)
   const redirectedRef = useRef(false);
@@ -123,15 +132,39 @@ export default function LibraryScreen() {
             { backgroundColor: colors.secondarySurface, borderColor: colors.primary },
           ]}
         >
-          <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>
-            {todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}
-          </ThemedText>
+          <View style={styles.todayTopRow}>
+            <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>
+              {todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}
+            </ThemedText>
+            <ThemedText
+              variant="caption"
+              style={{
+                color: goalStatus.achieved ? successColor : colors.textMuted,
+                fontWeight: '600',
+              }}
+            >
+              {goalStatus.achieved
+                ? `✓ 目標達成 (${goalStatus.todayMinutes}分)`
+                : `今日 ${goalStatus.todayMinutes} / ${goalStatus.goalMinutes} 分`}
+            </ThemedText>
+          </View>
           <ThemedText variant="heading">{todaysLesson.item.bundle?.data.titleJa}</ThemedText>
           <ThemedText variant="caption" color="muted">
             {todaysLesson.item.entry.title} ・ 約{' '}
             {Math.round(todaysLesson.item.bundle?.data.durationSec ?? 0)} 秒 /{' '}
             {todaysLesson.item.bundle?.data.sentences.length ?? 0} 文
           </ThemedText>
+          <View style={[styles.goalTrack, { backgroundColor: colors.border }]}>
+            <View
+              style={[
+                styles.goalFill,
+                {
+                  width: `${goalStatus.ratio * 100}%`,
+                  backgroundColor: goalStatus.achieved ? successColor : colors.primary,
+                },
+              ]}
+            />
+          </View>
           <ThemedText color="primary" style={{ fontWeight: '700' }}>
             ▶ はじめる
           </ThemedText>
@@ -213,8 +246,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     padding: 14,
-    gap: 4,
+    gap: 6,
     marginBottom: 12,
+  },
+  todayTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  goalTrack: {
+    height: 6,
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginTop: 2,
+  },
+  goalFill: {
+    height: 6,
+    borderRadius: 3,
   },
   subtitle: { marginTop: 4, marginBottom: 12 },
   filterSection: { marginBottom: 16 },

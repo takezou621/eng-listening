@@ -270,6 +270,42 @@ export function computeTotalSeconds(days: ProgressData): number {
   return Object.values(days).reduce((sum, day) => sum + day.seconds, 0);
 }
 
+/** 当日の学習秒数 */
+export function computeTodaySeconds(days: ProgressData, today: Date = new Date()): number {
+  return days[localDateStr(today)]?.seconds ?? 0;
+}
+
+export interface DailyGoalStatus {
+  todayMinutes: number;
+  goalMinutes: number;
+  ratio: number;
+  remainingMinutes: number;
+  achieved: boolean;
+}
+
+/** 1日の学習目標に対する本日の進捗を返す (ELSA / abceed 型) */
+export function computeDailyGoalStatus(
+  todaySeconds: number,
+  goalMinutes: number
+): DailyGoalStatus {
+  const safeGoal = Math.max(goalMinutes, 1);
+  const targetSeconds = safeGoal * 60;
+  const achieved = todaySeconds >= targetSeconds;
+  const todayMinutes =
+    todaySeconds > 0 && todaySeconds < 60 ? 1 : Math.round(todaySeconds / 60);
+  const remainingMinutes = achieved
+    ? 0
+    : Math.max(1, Math.ceil((targetSeconds - todaySeconds) / 60));
+  const ratio = Math.min(Math.max(todaySeconds / targetSeconds, 0), 1);
+  return {
+    todayMinutes,
+    goalMinutes: safeGoal,
+    ratio,
+    remainingMinutes,
+    achieved,
+  };
+}
+
 /** 今週 (月曜開始の暦週) の学習秒数。未来日付 (翌月曜以降) は含めない */
 export function computeWeekSeconds(days: ProgressData, today: Date = new Date()): number {
   const start = new Date(today);

@@ -1,23 +1,26 @@
-import { AppState, Pressable, StyleSheet, View } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
+import { AppState, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
+import { DailyGoalSheet } from '@/components/DailyGoalSheet';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
+import { useEntitlement } from '@/features/billing/billingStore';
+import { LINKING_LABELS } from '@/features/lesson/linkingViz';
+import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
+import { useUserData } from '@/features/library/userStore';
 import {
   buildHeatmap,
   computeCompletedLessonCount,
+  computeDailyGoalStatus,
   computeShadowingTotal,
   computeStreak,
+  computeTodaySeconds,
   computeTotalSeconds,
   computeWeekSeconds,
   useProgressData,
 } from '@/features/progress/progressStore';
 import { useTheme } from '@/theme/AppThemeProvider';
-import { useEntitlement } from '@/features/billing/billingStore';
-import { useUserData } from '@/features/library/userStore';
-import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
-import { LINKING_LABELS } from '@/features/lesson/linkingViz';
 
 const HEAT_MINUTES = [0, 15, 30];
 
@@ -26,28 +29,26 @@ function formatMinutes(seconds: number): string {
   return `${m} 分`;
 }
 
-/** 学習進捗画面 (Issue #13) */
 function todayStr(): string {
   const d = new Date();
   return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, '0')}-${`${d.getDate()}`.padStart(2, '0')}`;
 }
 
+/** 学習進捗画面 (Issue #13 / #46: 1日の目標設定と §3 ダッシュボード化) */
 export default function ProgressScreen() {
   const router = useRouter();
-  const { colors } = useTheme();
+  const { scheme, colors } = useTheme();
   const days = useProgressData();
   const { isPremium } = useEntitlement();
-  const { weakSentences } = useUserData();
+  const { weakSentences, dailyGoalMinutes, setDailyGoalMinutes } = useUserData();
   const lessonList = getLessonList();
+  const [goalSheetVisible, setGoalSheetVisible] = useState(false);
 
-  // 苦手フレーズの音の変化タイプ別集計 (プレミアムの詳細分析)。
-  // 非プレミアムでは表示しないため集計も行わない
   const weakByType = useMemo(() => {
     if (!isPremium) return [] as [string, number][];
     const counts: Record<string, number> = {};
     for (const w of weakSentences) {
       const bundle = lessonList.find((l) => l.entry.id === w.lessonId)?.bundle;
-      // sentenceIndex は文の index 値 (配列位置ではない) のため find で解決する
       const sentence = bundle?.data.sentences.find((st) => st.index === w.sentenceIndex);
       for (const note of sentence?.linking ?? []) {
         const t = note.type;
@@ -56,8 +57,7 @@ export default function ProgressScreen() {
     }
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
   }, [weakSentences, lessonList, isPremium]) as [string, number][];
-  // ローカル日を状態として保持し、AppState 復帰時に更新する
-  // (進捗画面を開いたまま日付をまたいでも表示が正しく更新されるように)
+
   const [today, setToday] = useState(todayStr());
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
@@ -65,7 +65,6 @@ export default function ProgressScreen() {
         setToday(todayStr());
       }
     });
-    // 前景のまま日付を跨ぐケースにも対応する (60 秒間隔で再評価)
     const interval = setInterval(() => {
       setToday(todayStr());
     }, 60_000);
@@ -75,14 +74,18 @@ export default function ProgressScreen() {
     };
   }, []);
 
-  const streak = computeStreak(days, new Date(today + 'T12:00:00'));
+  const refDate = new Date(today + 'T12:00:00');
+  const streak = computeStreak(days, refDate);
   const totalSeconds = computeTotalSeconds(days);
-  const weekSeconds = computeWeekSeconds(days, new Date(today + 'T12:00:00'));
+  const weekSeconds = computeWeekSeconds(days, refDate);
+  const todaySeconds = computeTodaySeconds(days, refDate);
+  const goalStatus = computeDailyGoalStatus(todaySeconds, dailyGoalMinutes);
   const completedCount = computeCompletedLessonCount(days);
   const shadowingTotal = computeShadowingTotal(days);
-  const heatmap = buildHeatmap(days, new Date(today + 'T12:00:00'), 12);
+  const heatmap = buildHeatmap(days, refDate, 12);
   const hasData = totalSeconds > 0 || shadowingTotal > 0 || completedCount > 0;
   const [selectedDay, setSelectedDay] = useState<{ date: string; seconds: number } | null>(null);
+
   const todaysLesson = useMemo(() => {
     const set = new Set<string>();
     for (const day of Object.values(days)) {
@@ -90,12 +93,14 @@ export default function ProgressScreen() {
     }
     return getTodaysLesson(set);
   }, [days]);
+
   const formatDayLabel = (date: string): string => {
     const parts = date.split('-').map(Number);
     return parts.length === 3 ? `${parts[1]}月${parts[2]}日` : date;
   };
 
-  // ヒートマップの色段 (0 / 〜15分 / 〜30分 / 30分超)。濃淡はテーマ側で定義
+  const successColor = scheme === 'dark' ? '#4ADE80' : '#16A34A';
+
   const heatColor = (seconds: number): string => {
     const [lv0, lv1, lv2, lv3] = colors.heatLevels;
     if (seconds <= 0) return lv0;
@@ -111,61 +116,121 @@ export default function ProgressScreen() {
         端末内にのみ記録を保存しています
       </ThemedText>
 
-      {!hasData ? (
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      {/* ブロック 1: 今日の目標カード (ELSA / abceed 型) */}
+      <View
+        style={[
+          styles.card,
+          styles.firstCard,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
+      >
+        <View style={styles.goalHeader}>
+          <ThemedText variant="heading">今日の目標</ThemedText>
+          <Pressable
+            onPress={() => setGoalSheetVisible(true)}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="目標を変更"
+          >
+            <ThemedText variant="caption" color="primary" style={styles.changeText}>
+              目標を変更
+            </ThemedText>
+          </Pressable>
+        </View>
+
+        <View style={styles.goalMetricRow}>
+          <ThemedText variant="title" color="primary">
+            {goalStatus.todayMinutes}{' '}
+            <ThemedText variant="caption" color="muted">
+              / {goalStatus.goalMinutes} 分
+            </ThemedText>
+          </ThemedText>
+          <ThemedText
+            variant="caption"
+            style={{
+              color: goalStatus.achieved ? successColor : colors.textMuted,
+              fontWeight: '700',
+            }}
+          >
+            {goalStatus.achieved ? '✓ 目標達成！' : `あと ${goalStatus.remainingMinutes} 分`}
+          </ThemedText>
+        </View>
+
+        <View style={[styles.goalTrack, { backgroundColor: colors.border }]}>
+          <View
+            style={[
+              styles.goalFill,
+              {
+                width: `${goalStatus.ratio * 100}%`,
+                backgroundColor: goalStatus.achieved ? successColor : colors.primary,
+              },
+            ]}
+          />
+        </View>
+      </View>
+
+      {/* ブロック 2: 学習サマリ (1カード 2x2) */}
+      {hasData ? (
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.summaryGrid}>
+            <View style={styles.summaryCell}>
+              <ThemedText variant="caption" color="muted">
+                連続学習日数
+              </ThemedText>
+              <ThemedText variant="heading" color="primary">
+                {streak} 日
+              </ThemedText>
+            </View>
+            <View style={styles.summaryCell}>
+              <ThemedText variant="caption" color="muted">
+                今週 / 累計
+              </ThemedText>
+              <ThemedText variant="heading">
+                {formatMinutes(weekSeconds)} / {formatMinutes(totalSeconds)}
+              </ThemedText>
+            </View>
+            <View style={styles.summaryCell}>
+              <ThemedText variant="caption" color="muted">
+                完了レッスン
+              </ThemedText>
+              <ThemedText variant="heading">{completedCount} 本</ThemedText>
+            </View>
+            <View style={styles.summaryCell}>
+              <ThemedText variant="caption" color="muted">
+                シャドーイング
+              </ThemedText>
+              <ThemedText variant="heading">{shadowingTotal} 回</ThemedText>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
           <ThemedText variant="heading">まだ記録がありません</ThemedText>
-          <ThemedText variant="caption" color="muted" style={styles.gap}>
-            ライブラリからレッスンを再生すると、学習時間やシャドーイングの記録がここに表示されます。
+          <ThemedText variant="caption" color="muted" numberOfLines={2}>
+            レッスンを再生すると、学習時間や目標達成状況がここに表示されます。
           </ThemedText>
           <Pressable
             onPress={() => router.push('/(tabs)')}
-            style={[styles.emptyLink, { backgroundColor: colors.secondarySurface }]}
+            style={[styles.primaryCta, { backgroundColor: colors.primary }]}
           >
-            <ThemedText variant="caption" color="primary" style={{ fontWeight: '600' }}>
+            <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
               ライブラリを開く
             </ThemedText>
           </Pressable>
         </View>
-      ) : null}
+      )}
 
-      <View style={styles.statsRow}>
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ThemedText variant="caption" color="muted">
-            連続学習日数
-          </ThemedText>
-          <ThemedText variant="title" color="primary">
-            {streak} <ThemedText variant="caption" color="muted">日</ThemedText>
-          </ThemedText>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ThemedText variant="caption" color="muted">
-            今週の学習
-          </ThemedText>
-          <ThemedText variant="heading">{formatMinutes(weekSeconds)}</ThemedText>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ThemedText variant="caption" color="muted">
-            累計の学習
-          </ThemedText>
-          <ThemedText variant="heading">{formatMinutes(totalSeconds)}</ThemedText>
-        </View>
-      </View>
-
-      <View style={styles.statsRow}>
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ThemedText variant="caption" color="muted">
-            完了レッスン
-          </ThemedText>
-          <ThemedText variant="heading">{completedCount} 本</ThemedText>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ThemedText variant="caption" color="muted">
-            シャドーイング
-          </ThemedText>
-          <ThemedText variant="heading">{shadowingTotal} 回</ThemedText>
-        </View>
-      </View>
-
+      {/* ブロック 3: 唯一のプライマリ CTA */}
       {hasData && todaysLesson ? (
         <Pressable
           onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
@@ -180,10 +245,14 @@ export default function ProgressScreen() {
         </Pressable>
       ) : null}
 
-      <ThemedText variant="heading" style={styles.sectionTitle}>
-        学習カレンダー (直近 84 日)
-      </ThemedText>
-      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      {/* ブロック 4: 学習カレンダー (カード内見出し) */}
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
+      >
+        <ThemedText variant="heading">学習カレンダー (直近 84 日)</ThemedText>
         <View style={styles.heatmap}>
           {heatmap.map(({ date, seconds }) => (
             <Pressable
@@ -201,7 +270,7 @@ export default function ProgressScreen() {
             />
           ))}
         </View>
-        <ThemedText variant="caption" color="muted" style={styles.gap}>
+        <ThemedText variant="caption" color="muted">
           {selectedDay
             ? `${formatDayLabel(selectedDay.date)}: ${
                 selectedDay.seconds > 0 ? formatMinutes(selectedDay.seconds) : '記録なし'
@@ -221,18 +290,22 @@ export default function ProgressScreen() {
         </View>
       </View>
 
-      {/* プレミアムゲート (Issue #19): 詳細な弱点分析。既存機能は無料のまま */}
-      <ThemedText variant="heading" style={styles.sectionTitle}>
-        詳細な弱点分析 (プレミアム)
-      </ThemedText>
-      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      {/* ブロック 5: 詳細な弱点分析 (セカンダリ枠線ボタンで P1 準拠) */}
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
+      >
+        <ThemedText variant="heading">詳細な弱点分析 (プレミアム)</ThemedText>
         {isPremium ? (
           <>
-            <ThemedText variant="heading">苦手フレーズの音の変化 内訳</ThemedText>
             {weakByType.length > 0 ? (
               weakByType.map(([type, count]) => (
                 <View key={type} style={styles.missedRow}>
-                  <ThemedText variant="caption">{LINKING_LABELS[type as keyof typeof LINKING_LABELS] ?? type}</ThemedText>
+                  <ThemedText variant="caption">
+                    {LINKING_LABELS[type as keyof typeof LINKING_LABELS] ?? type}
+                  </ThemedText>
                   <ThemedText variant="caption" color="muted">
                     {count} 件
                   </ThemedText>
@@ -243,61 +316,132 @@ export default function ProgressScreen() {
                 苦手フレーズを登録すると、音の変化のタイプ別に集計して表示されます。
               </ThemedText>
             )}
-            <ThemedText variant="caption" color="muted" style={styles.gap}>
-              苦手フレーズ帳 (合計 {weakSentences.length} 件) と学習履歴に基づく分析です。
+            <ThemedText variant="caption" color="muted">
+              苦手フレーズ帳 ({weakSentences.length} 件) に基づく分析です。
             </ThemedText>
           </>
         ) : (
           <>
-            <ThemedText variant="caption" color="muted">
+            <ThemedText variant="caption" color="muted" numberOfLines={2}>
               プレミアムでは、苦手フレーズと学習履歴に基づいた詳細な種類別分析が利用できます。
             </ThemedText>
             <Pressable
               onPress={() => router.push('/paywall?from=progress')}
-              style={[styles.premiumLink, { backgroundColor: colors.primary }]}
+              style={[styles.secondaryOutline, { borderColor: colors.primary }]}
             >
-              <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
+              <ThemedText variant="caption" color="primary" style={styles.secondaryLabel}>
                 プレミアムについて見る
               </ThemedText>
             </Pressable>
           </>
         )}
       </View>
+
+      <DailyGoalSheet
+        visible={goalSheetVisible}
+        currentMinutes={dailyGoalMinutes}
+        onSelectGoal={setDailyGoalMinutes}
+        onClose={() => setGoalSheetVisible(false)}
+      />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  subtitle: { marginTop: 4, marginBottom: 12 },
+  subtitle: {
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  firstCard: {
+    marginTop: 0,
+  },
   card: {
     borderRadius: 12,
     borderWidth: 1,
-    padding: 14,
+    padding: 16,
+    gap: 8,
+    marginTop: 12,
+  },
+  goalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
   },
-  gap: { marginTop: 4 },
-  statsRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
-  statCard: {
-    flex: 1,
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 14,
-    gap: 4,
+  changeText: {
+    fontWeight: '700',
   },
-  sectionTitle: { marginTop: 20, marginBottom: 8 },
-  emptyLink: { borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 8 },
-  premiumLink: { borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 8 },
+  goalMetricRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  goalTrack: {
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  goalFill: {
+    height: 8,
+    borderRadius: 4,
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    rowGap: 12,
+    columnGap: 12,
+  },
+  summaryCell: {
+    width: '46%',
+    gap: 2,
+  },
+  primaryCta: {
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 4,
+  },
   todayCta: {
     borderRadius: 12,
     paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     alignItems: 'center',
     gap: 2,
-    marginTop: 16,
+    marginTop: 12,
   },
-  missedRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  heatmap: { flexDirection: 'row', flexWrap: 'wrap', gap: 3 },
-  heatCell: { width: 16, height: 16, borderRadius: 3 },
-  heatLegend: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10 },
-  heatLegendCell: { width: 12, height: 12 },
+  secondaryOutline: {
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  secondaryLabel: {
+    fontWeight: '700',
+  },
+  missedRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  heatmap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 3,
+  },
+  heatCell: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+  },
+  heatLegend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  heatLegendCell: {
+    width: 12,
+    height: 12,
+  },
 });
