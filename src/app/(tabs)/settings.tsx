@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
+import { DailyGoalSheet } from '@/components/DailyGoalSheet';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { APP_CONFIG } from '@/config/appConfig';
@@ -11,6 +12,7 @@ import {
   useEntitlement,
   type RestoreResult,
 } from '@/features/billing/billingStore';
+import { useUserData } from '@/features/library/userStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -27,7 +29,7 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
+function LinkRow({ label, value, onPress }: { label: string; value?: string; onPress: () => void }) {
   const { colors } = useTheme();
   return (
     <Pressable
@@ -35,7 +37,7 @@ function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
       style={[styles.legalRow, { borderBottomColor: colors.border }]}
     >
       <ThemedText>{label}</ThemedText>
-      <ThemedText color="muted">›</ThemedText>
+      <ThemedText color="muted">{value ? `${value} ›` : '›'}</ThemedText>
     </Pressable>
   );
 }
@@ -44,6 +46,8 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { scheme, colors } = useTheme();
   const { isPremium, isLoading, isAvailable } = useEntitlement();
+  const { dailyGoalMinutes, setDailyGoalMinutes } = useUserData();
+  const [goalSheetVisible, setGoalSheetVisible] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [restoreMessage, setRestoreMessage] = useState('');
 
@@ -93,6 +97,11 @@ export default function SettingsScreen() {
 
       <View style={[styles.section, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <LinkRow
+          label="1日の学習目標"
+          value={`${dailyGoalMinutes} 分 / 日`}
+          onPress={() => setGoalSheetVisible(true)}
+        />
+        <LinkRow
           label="聞き取り診断をもう一度行う"
           onPress={() => router.push('/onboarding')}
         />
@@ -133,6 +142,13 @@ export default function SettingsScreen() {
         <Row label="テーマ" value={scheme === 'dark' ? 'ダーク (端末の設定に連動)' : 'ライト (端末の設定に連動)'} />
         <Row label="バージョン" value={`v${APP_CONFIG.version}`} />
       </View>
+
+      <DailyGoalSheet
+        visible={goalSheetVisible}
+        currentMinutes={dailyGoalMinutes}
+        onSelectGoal={setDailyGoalMinutes}
+        onClose={() => setGoalSheetVisible(false)}
+      />
     </Screen>
   );
 }

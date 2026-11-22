@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AppState, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
+import { DailyGoalSheet } from '@/components/DailyGoalSheet';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { useEntitlement } from '@/features/billing/billingStore';
@@ -11,8 +12,10 @@ import { useUserData } from '@/features/library/userStore';
 import {
   buildHeatmap,
   computeCompletedLessonCount,
+  computeDailyGoalStatus,
   computeShadowingTotal,
   computeStreakWithFreeze,
+  computeTodaySeconds,
   computeTotalSeconds,
   computeWeekSeconds,
   useProgressData,
@@ -31,13 +34,14 @@ function todayStr(): string {
   return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, '0')}-${`${d.getDate()}`.padStart(2, '0')}`;
 }
 
-/** 学習進捗画面 (Issue #13 / #46: D8・E16 ストリーク救済対応) */
+/** 学習進捗画面 (Issue #13 / #46: 1日の目標・ストリーク救済・§3 ダッシュボード) */
 export default function ProgressScreen() {
   const router = useRouter();
   const { scheme, colors } = useTheme();
   const days = useProgressData();
   const { isPremium } = useEntitlement();
-  const { weakSentences } = useUserData();
+  const { weakSentences, dailyGoalMinutes, setDailyGoalMinutes } = useUserData();
+  const [goalSheetVisible, setGoalSheetVisible] = useState(false);
   const lessonList = getLessonList();
 
   const weakByType = useMemo(() => {
@@ -74,6 +78,8 @@ export default function ProgressScreen() {
   const streakInfo = computeStreakWithFreeze(days, refDate);
   const totalSeconds = computeTotalSeconds(days);
   const weekSeconds = computeWeekSeconds(days, refDate);
+  const todaySeconds = computeTodaySeconds(days, refDate);
+  const goalStatus = computeDailyGoalStatus(todaySeconds, dailyGoalMinutes);
   const completedCount = computeCompletedLessonCount(days);
   const shadowingTotal = computeShadowingTotal(days);
   const heatmap = buildHeatmap(days, refDate, 12);
@@ -97,6 +103,7 @@ export default function ProgressScreen() {
     return parts.length === 3 ? `${parts[1]}月${parts[2]}日` : date;
   };
 
+  const successColor = scheme === 'dark' ? '#4ADE80' : '#16A34A';
   const freezeBg = scheme === 'dark' ? '#0C4A6E' : '#E0F2FE';
   const freezeColor = scheme === 'dark' ? '#38BDF8' : '#0369A1';
   const freezeCellBg = scheme === 'dark' ? '#0EA5E9' : '#38BDF8';
@@ -125,11 +132,78 @@ export default function ProgressScreen() {
         端末内にのみ記録を保存しています
       </ThemedText>
 
-      {/* ブロック 1: ストリーク & 自動保護カード (E16) */}
+      {/* ブロック 1: 今日の目標カード (ELSA / abceed 型。主 CTA を内包し初期ブロック数を §3 の 5 以内に収める) */}
       <View
         style={[
           styles.card,
           styles.firstCard,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
+      >
+        <View style={styles.goalHeader}>
+          <ThemedText variant="heading">今日の目標</ThemedText>
+          <Pressable
+            onPress={() => setGoalSheetVisible(true)}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="目標を変更"
+          >
+            <ThemedText variant="caption" color="primary" style={styles.changeText}>
+              目標を変更
+            </ThemedText>
+          </Pressable>
+        </View>
+
+        <View style={styles.goalMetricRow}>
+          <ThemedText variant="title" color="primary">
+            {goalStatus.todayMinutes}{' '}
+            <ThemedText variant="caption" color="muted">
+              / {goalStatus.goalMinutes} 分
+            </ThemedText>
+          </ThemedText>
+          <ThemedText
+            variant="caption"
+            style={{
+              color: goalStatus.achieved ? successColor : colors.textMuted,
+              fontWeight: '700',
+            }}
+          >
+            {goalStatus.achieved ? '✓ 目標達成！' : `あと ${goalStatus.remainingMinutes} 分`}
+          </ThemedText>
+        </View>
+
+        <View style={[styles.goalTrack, { backgroundColor: colors.border }]}>
+          <View
+            style={[
+              styles.goalFill,
+              {
+                width: `${goalStatus.ratio * 100}%`,
+                backgroundColor: goalStatus.achieved ? successColor : colors.primary,
+              },
+            ]}
+          />
+        </View>
+
+        {hasData && todaysLesson ? (
+          <Pressable
+            onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
+            style={[styles.todayCta, { backgroundColor: colors.primary }]}
+            accessibilityRole="button"
+          >
+            <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
+              ▶ {todaysLesson.isReview ? '復習をはじめる' : '今日の1本をはじめる'}
+            </ThemedText>
+            <ThemedText variant="caption" style={{ color: colors.primaryText }}>
+              {todaysLesson.item.bundle?.data.titleJa ?? todaysLesson.item.entry.title}
+            </ThemedText>
+          </Pressable>
+        ) : null}
+      </View>
+
+      {/* ブロック 2: ストリーク & 自動保護カード (E16) */}
+      <View
+        style={[
+          styles.card,
           { backgroundColor: colors.surface, borderColor: colors.border },
         ]}
       >
@@ -155,7 +229,7 @@ export default function ProgressScreen() {
         </ThemedText>
       </View>
 
-      {/* ブロック 2: 学習サマリ (1カード 2x2) */}
+      {/* ブロック 3: 学習サマリ (1カード 2x2) */}
       {hasData ? (
         <View
           style={[
@@ -211,21 +285,6 @@ export default function ProgressScreen() {
           </Pressable>
         </View>
       )}
-
-      {/* ブロック 3: 唯一のプライマリ CTA */}
-      {hasData && todaysLesson ? (
-        <Pressable
-          onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
-          style={[styles.todayCta, { backgroundColor: colors.primary }]}
-        >
-          <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-            ▶ {todaysLesson.isReview ? '復習をはじめる' : '今日の1本をはじめる'}
-          </ThemedText>
-          <ThemedText variant="caption" style={{ color: colors.primaryText }}>
-            {todaysLesson.item.bundle?.data.titleJa ?? todaysLesson.item.entry.title}
-          </ThemedText>
-        </Pressable>
-      ) : null}
 
       {/* ブロック 4: 学習カレンダーカード (R6.2: カード内見出しに収める) */}
       <View
@@ -343,6 +402,13 @@ export default function ProgressScreen() {
           </>
         )}
       </View>
+
+      <DailyGoalSheet
+        visible={goalSheetVisible}
+        currentMinutes={dailyGoalMinutes}
+        onSelectGoal={setDailyGoalMinutes}
+        onClose={() => setGoalSheetVisible(false)}
+      />
     </Screen>
   );
 }
@@ -361,6 +427,30 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 8,
     marginTop: 12,
+  },
+  goalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  changeText: {
+    fontWeight: '700',
+  },
+  goalMetricRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  goalTrack: {
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  goalFill: {
+    height: 8,
+    borderRadius: 4,
   },
   streakTop: {
     flexDirection: 'row',
