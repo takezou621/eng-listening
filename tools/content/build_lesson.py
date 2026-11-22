@@ -76,12 +76,27 @@ def concat_lines(line_wavs: list[Path], master_path: Path, gap_sec: float) -> li
     return spans
 
 
+def whisper_device_config(cfg: dict) -> tuple[str, str]:
+    """whisper の device / compute_type を解決する。
+
+    voice_config.json の whisper.device / whisper.computeType が正。
+    Colab GPU 等では環境変数 EL_WHISPER_DEVICE / EL_WHISPER_COMPUTE_TYPE で
+    上書きできる (例: EL_WHISPER_DEVICE=cuda, EL_WHISPER_COMPUTE_TYPE=float16)。
+    未設定なら設定ファイルの値をそのまま返す。
+    """
+    wcfg = cfg["whisper"]
+    device = os.environ.get("EL_WHISPER_DEVICE") or wcfg["device"]
+    compute_type = os.environ.get("EL_WHISPER_COMPUTE_TYPE") or wcfg["computeType"]
+    return device, compute_type
+
+
 def load_whisper_model(cfg: dict):
     """faster-whisper モデルを 1 回だけロードする (行ごとの再読み込みを避ける)。"""
     from faster_whisper import WhisperModel  # uv 環境でのみ利用可能
 
     wcfg = cfg["whisper"]
-    return WhisperModel(wcfg["model"], device=wcfg["device"], compute_type=wcfg["computeType"])
+    device, compute_type = whisper_device_config(cfg)
+    return WhisperModel(wcfg["model"], device=device, compute_type=compute_type)
 
 
 def whisper_words(model, wav_path: Path, language: str) -> list[dict]:
