@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
@@ -19,7 +18,6 @@ type FilterLevel = 'all' | 'beginner' | 'intermediate';
 export default function LibraryScreen() {
   const { colors } = useTheme();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { favoriteLessons, toggleFavoriteLesson, onboardingDone } = useUserData();
 
   const [filterType, setFilterType] = useState<FilterType>('all');
@@ -112,7 +110,6 @@ export default function LibraryScreen() {
 
   return (
     <Screen scroll={false}>
-      <ThemedText>{`INSETS-PROBE t=${insets.top} r=${insets.right} b=${insets.bottom} l=${insets.left}`}</ThemedText>
       <ThemedText variant="title">ライブラリ</ThemedText>
       <ThemedText variant="caption" color="muted" style={styles.subtitle}>
         全 {lessonList.length} 本

@@ -34,7 +34,7 @@ export default function PhrasesScreen() {
             ]}
           >
             <ThemedText variant="heading">登録された苦手フレーズはありません</ThemedText>
-            <ThemedText variant="caption" color="muted" numberOfLines={2} style={styles.emptyHint}>
+            <ThemedText variant="caption" color="muted" style={styles.emptyHint}>
               レッスンの各文にある「☆ 苦手」をタップすると、聞き取れなかった文をここに集められます。
             </ThemedText>
             <Pressable

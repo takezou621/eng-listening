@@ -36,7 +36,7 @@ export const lightColors: ThemeColors = {
   tabIconActive: '#2563EB',
   tabIconInactive: '#9CA3AF',
   heatLevels: ['#E2E5EA', '#93C5FD', '#3B82F6', '#1D4ED8'],
-  success: '#16A34A',
+  success: '#15803D',
   danger: '#DC2626',
   warning: '#B45309',
   favorite: '#D97706',

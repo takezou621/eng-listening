@@ -157,7 +157,7 @@ export default function ProgressScreen() {
       ) : (
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <ThemedText variant="heading">まだ記録がありません</ThemedText>
-          <ThemedText variant="caption" color="muted" numberOfLines={2}>
+          <ThemedText variant="caption" color="muted">
             レッスンを再生すると、学習時間やシャドーイングの記録がここに表示されます。
           </ThemedText>
           <Pressable
@@ -259,7 +259,7 @@ export default function ProgressScreen() {
           </>
         ) : (
           <>
-            <ThemedText variant="caption" color="muted" numberOfLines={2}>
+            <ThemedText variant="caption" color="muted">
               プレミアムでは、苦手フレーズと学習履歴に基づいた詳細な種類別分析が利用できます。
             </ThemedText>
             <Pressable
