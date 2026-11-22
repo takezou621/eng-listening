@@ -129,7 +129,7 @@ export default function LibraryScreen() {
           <ThemedText variant="heading">{todaysLesson.item.bundle?.data.titleJa}</ThemedText>
           <ThemedText variant="caption" color="muted">
             {todaysLesson.item.entry.title} ・ 約{' '}
-            {Math.round(todaysLesson.item.bundle?.data.durationSec ?? 0)} 秒 /{' '}
+            {Math.round(todaysLesson.item.bundle?.data.durationSec ?? 0)} 秒 ・{' '}
             {todaysLesson.item.bundle?.data.sentences.length ?? 0} 文
           </ThemedText>
           <ThemedText color="primary" style={{ fontWeight: '700' }}>
@@ -181,7 +181,7 @@ export default function LibraryScreen() {
                 <Pressable
                   hitSlop={8}
                   accessibilityRole="button"
-                  accessibilityLabel={`${entry.title}をお気に入りに登録`}
+                  accessibilityLabel={`${entry.titleJa}をお気に入りに登録`}
                   accessibilityState={{ selected: isFav }}
                   onPress={() => toggleFavoriteLesson(entry.id)}
                   style={styles.favIcon}
@@ -191,9 +191,9 @@ export default function LibraryScreen() {
                   </ThemedText>
                 </Pressable>
               </View>
-              <ThemedText variant="heading">{entry.title}</ThemedText>
+              <ThemedText variant="heading">{entry.titleJa}</ThemedText>
               <ThemedText variant="caption" color="muted" numberOfLines={1}>
-                {entry.titleJa}
+                {entry.title}
               </ThemedText>
               <ThemedText variant="caption" color="muted">
                 {bundle

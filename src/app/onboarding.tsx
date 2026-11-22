@@ -391,9 +391,9 @@ function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFi
           <ThemedText variant="caption" color="muted">
             あなたにおすすめのレッスン
           </ThemedText>
-          <ThemedText variant="heading">{recommendation.title}</ThemedText>
+          <ThemedText variant="heading">{recommendation.titleJa}</ThemedText>
           <ThemedText variant="caption" color="muted">
-            {recommendation.titleJa}
+            {recommendation.title}
           </ThemedText>
           <ThemedText variant="caption" color="muted" style={styles.gap}>
             {recommendation.reason}
