@@ -26,6 +26,8 @@ export function ControlButton({
   return (
     <Pressable
       onPress={onPress}
+      hitSlop={4}
+      accessibilityRole="button"
       style={[
         styles.controlButton,
         primary ? { backgroundColor: colors.primary } : { backgroundColor: colors.secondarySurface },

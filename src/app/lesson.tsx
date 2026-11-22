@@ -48,7 +48,7 @@ import {
   wordLinkMap,
 } from '@/features/lesson/linkingViz';
 import { getLessonBundle, getLessonList, type LessonBundle } from '@/features/lesson/registry';
-import type { LessonLinkingNote, LessonSentence } from '@/features/lesson/types';
+import type { LessonLinkingNote, LessonSentence, LessonWord } from '@/features/lesson/types';
 import { useUserData } from '@/features/library/userStore';
 import {
   getPlayerPrefs,
@@ -146,6 +146,7 @@ function TransportBar({
           {formatTime(currentTime)}
         </ThemedText>
         <Pressable
+          hitSlop={{ top: 16, bottom: 6 }}
           style={styles.seekTrackTouch}
           onLayout={(e) => {
             trackWidthRef.current = e.nativeEvent.layout.width;
@@ -158,6 +159,24 @@ function TransportBar({
           }}
           accessibilityRole="adjustable"
           accessibilityLabel="再生位置"
+          accessibilityValue={{
+            min: 0,
+            max: Math.round(duration),
+            now: Math.round(currentTime),
+            text: `${formatTime(currentTime)} / ${formatTime(duration)}`,
+          }}
+          accessibilityActions={[
+            { name: 'increment', label: '10秒進める' },
+            { name: 'decrement', label: '10秒戻す' },
+          ]}
+          onAccessibilityAction={(e) => {
+            if (!duration) return;
+            if (e.nativeEvent.actionName === 'increment') {
+              onSeek(Math.min(currentTime + 10, duration));
+            } else if (e.nativeEvent.actionName === 'decrement') {
+              onSeek(Math.max(currentTime - 10, 0));
+            }
+          }}
         >
           <View style={[styles.seekTrack, { backgroundColor: colors.border }]}>
             <View
@@ -183,7 +202,7 @@ function TransportBar({
           ]}
           onPress={onOpenTools}
           accessibilityRole="button"
-          accessibilityLabel="再生速度と区間リピート"
+          accessibilityLabel={`再生速度と区間リピート（現在: ${toolsLabel}）`}
         >
           <ThemedText
             variant="caption"
@@ -1167,6 +1186,7 @@ function LessonPlayerScreen({
             <Pressable
               key={m.key}
               onPress={() => switchMode(m.key)}
+              hitSlop={{ top: 6, bottom: 6 }}
               style={[
                 styles.modeSegmentItem,
                 active && {
@@ -1202,7 +1222,12 @@ function LessonPlayerScreen({
           <ThemedText variant="caption" color="primary" style={styles.abBannerText} numberOfLines={1}>
             🔁 {abPhrase ? `「${abPhrase}」` : `${formatTime(ab.a)} – ${formatTime(ab.b)}`}
           </ThemedText>
-          <Pressable onPress={clearAb} hitSlop={8} accessibilityRole="button">
+          <Pressable
+            onPress={clearAb}
+            hitSlop={{ top: 14, bottom: 14, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="区間リピートを解除"
+          >
             <ThemedText variant="caption" color="primary" style={styles.abClearText}>
               解除
             </ThemedText>
@@ -1226,7 +1251,7 @@ function LessonPlayerScreen({
               {legendTypes.length > 0 ? (
                 <Pressable
                   onPress={() => setShowLegendSheet(true)}
-                  hitSlop={8}
+                  hitSlop={{ top: 14, bottom: 14, left: 6, right: 6 }}
                   accessibilityRole="button"
                   accessibilityLabel="音変化の凡例を開く"
                 >
@@ -1237,9 +1262,10 @@ function LessonPlayerScreen({
               ) : null}
               <Pressable
                 onPress={() => toggleWeakSentence(lesson.id, displaySentence.index)}
-                hitSlop={8}
+                hitSlop={{ top: 14, bottom: 14, left: 6, right: 6 }}
                 accessibilityRole="button"
                 accessibilityLabel={isWeakCurrent ? '苦手フレーズから外す' : '苦手フレーズに登録'}
+                accessibilityState={{ selected: isWeakCurrent }}
               >
                 <ThemedText
                   variant="caption"
@@ -1278,6 +1304,7 @@ function LessonPlayerScreen({
                   });
                 }
               }}
+              hitSlop={{ top: 8, bottom: 8 }}
               style={[styles.hintRow, { borderTopColor: colors.border }]}
               accessibilityRole="button"
               accessibilityLabel="音の変化の解説を開く"
@@ -1316,9 +1343,10 @@ function LessonPlayerScreen({
               />
               <Pressable
                 onPress={() => toggleWeakSentence(lesson.id, displaySentence.index)}
-                hitSlop={8}
+                hitSlop={{ top: 14, bottom: 14, left: 6, right: 6 }}
                 accessibilityRole="button"
                 accessibilityLabel={isWeakCurrent ? '苦手フレーズから外す' : '苦手フレーズに登録'}
+                accessibilityState={{ selected: isWeakCurrent }}
               >
                 <ThemedText
                   variant="caption"
@@ -1412,6 +1440,14 @@ function LessonPlayerScreen({
                   seekTo(sentence.startSec, `文${pos + 1} 冒頭へ移動`);
                 }}
                 onLongPress={() => toggleRepeat(sentence.index)}
+                accessibilityRole="button"
+                accessibilityLabel={`文${pos + 1}: ${sentence.text}${isRepeat ? '（リピート中）' : ''}`}
+                accessibilityHint="長押しで1文リピートを設定・解除できます"
+                accessibilityState={{ selected: isActive }}
+                accessibilityActions={[{ name: 'repeat', label: '1文リピートを切り替え' }]}
+                onAccessibilityAction={(e) => {
+                  if (e.nativeEvent.actionName === 'repeat') toggleRepeat(sentence.index);
+                }}
                 style={[
                   styles.scriptCard,
                   { backgroundColor: colors.surface, borderColor: colors.border },
@@ -1424,10 +1460,11 @@ function LessonPlayerScreen({
                     {isRepeat ? ' ・リピート中' : ''}
                   </ThemedText>
                   <Pressable
-                    hitSlop={8}
+                    hitSlop={{ top: 14, bottom: 14, left: 6, right: 6 }}
                     onPress={() => toggleWeakSentence(lesson.id, sentence.index)}
                     accessibilityRole="button"
                     accessibilityLabel={weak ? '苦手フレーズから外す' : '苦手フレーズに登録'}
+                    accessibilityState={{ selected: weak }}
                   >
                     <ThemedText
                       variant="caption"
@@ -1525,6 +1562,10 @@ function LessonPlayerScreen({
 
 /**
  * カラオケ風表示の現在文。単語ベースラインが揃うよう単一ラップ構造にしている。
+ * アクセシビリティ (E11): 単語を1つずつ読ませず、同じ音変化ノートに属する連続単語と
+ * ノートのない連続単語をそれぞれ1セグメントにまとめて読ませる。ノートのセグメントは
+ * 「音の変化の解説: <span>」のボタンとして残し、区切り記号「/」は読み上げから外す。
+ * 見た目の並び (単語ごとの色・太字・下線) は従来どおり単語単位で維持する。
  */
 function KaraokeLine({
   sentence,
@@ -1539,57 +1580,90 @@ function KaraokeLine({
   const ranges = chunkWordRanges(sentence);
   const linkMap = useMemo(() => wordLinkMap(sentence), [sentence]);
 
+  const renderWord = (word: LessonWord, wordIndex: number) => {
+    const isActive = wordIndex === activeWordIndex;
+    const isPast = wordIndex < activeWordIndex;
+    const noteIndex = linkMap[wordIndex];
+    const note =
+      noteIndex === null || noteIndex === undefined
+        ? undefined
+        : sentence.linking[noteIndex];
+    const linkColor = note ? getLinkingColor(note.type, scheme) : null;
+    const textColor = isActive
+      ? colors.primary
+      : (linkColor ?? (isPast ? colors.text : colors.textMuted));
+    return (
+      <ThemedText
+        style={[
+          styles.karaokeWord,
+          { color: textColor },
+          isActive && styles.karaokeWordActive,
+          linkColor !== null && !isActive && styles.karaokeWordLinked,
+          note ? [LINKING_TEXT_DECORATIONS[note.type], { textDecorationColor: textColor }] : null,
+        ]}
+      >
+        {word.text}
+      </ThemedText>
+    );
+  };
+
   return (
     <View style={styles.karaokeLine}>
-      {ranges.map((range, chunkIdx) => (
-        <View key={chunkIdx} style={styles.karaokeChunk}>
-          {sentence.words.slice(range.from, range.to).map((word, i) => {
-            const wordIndex = range.from + i;
-            const isActive = wordIndex === activeWordIndex;
-            const isPast = wordIndex < activeWordIndex;
-            const noteIndex = linkMap[wordIndex];
-            const note =
-              noteIndex === null || noteIndex === undefined
-                ? undefined
-                : sentence.linking[noteIndex];
-            const linkColor = note ? getLinkingColor(note.type, scheme) : null;
-            const textColor = isActive
-              ? colors.primary
-              : (linkColor ?? (isPast ? colors.text : colors.textMuted));
-
-            const wordText = (
+      {ranges.map((range, chunkIdx) => {
+        // チャンク内を「同じノートに属する連続単語」「ノートのない連続単語」の
+        // セグメントに分割する (読み上げ単位の整理が目的で、描画は単語単位のまま)
+        const segments: { noteIndex: number | null; from: number; to: number }[] = [];
+        for (let wi = range.from; wi < range.to; wi++) {
+          const ni = linkMap[wi] ?? null;
+          const last = segments[segments.length - 1];
+          if (last && last.noteIndex === ni) {
+            last.to = wi + 1;
+          } else {
+            segments.push({ noteIndex: ni, from: wi, to: wi + 1 });
+          }
+        }
+        return (
+          <View key={chunkIdx} style={styles.karaokeChunk}>
+            {segments.map((seg) => {
+              const segWords = sentence.words.slice(seg.from, seg.to);
+              const inner = segWords.map((word, i) => (
+                <View key={`${word.text}-${seg.from + i}`}>{renderWord(word, seg.from + i)}</View>
+              ));
+              const note =
+                seg.noteIndex === null ? undefined : sentence.linking[seg.noteIndex];
+              return note && onWordPress ? (
+                <Pressable
+                  key={`note-${seg.from}`}
+                  hitSlop={{ top: 4, bottom: 4, left: 2, right: 2 }}
+                  onPress={() => onWordPress(seg.from)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`音の変化の解説: ${note.span}`}
+                  style={styles.karaokeSegment}
+                >
+                  {inner}
+                </Pressable>
+              ) : (
+                <View
+                  key={`plain-${seg.from}`}
+                  accessible
+                  accessibilityLabel={segWords.map((w) => w.text).join(' ')}
+                  style={styles.karaokeSegment}
+                >
+                  {inner}
+                </View>
+              );
+            })}
+            {chunkIdx < ranges.length - 1 ? (
               <ThemedText
-                style={[
-                  styles.karaokeWord,
-                  { color: textColor },
-                  isActive && styles.karaokeWordActive,
-                  linkColor !== null && !isActive && styles.karaokeWordLinked,
-                  note ? [LINKING_TEXT_DECORATIONS[note.type], { textDecorationColor: textColor }] : null,
-                ]}
+                accessibilityElementsHidden
+                style={[styles.karaokeWord, { color: colors.textMuted }]}
               >
-                {word.text}
+                /
               </ThemedText>
-            );
-
-            return note && onWordPress ? (
-              <Pressable
-                key={`${word.text}-${wordIndex}`}
-                hitSlop={4}
-                onPress={() => onWordPress(wordIndex)}
-                accessibilityRole="button"
-                accessibilityLabel={`${word.text}の音変化解説を開く`}
-              >
-                {wordText}
-              </Pressable>
-            ) : (
-              <View key={`${word.text}-${wordIndex}`}>{wordText}</View>
-            );
-          })}
-          {chunkIdx < ranges.length - 1 ? (
-            <ThemedText style={[styles.karaokeWord, { color: colors.textMuted }]}>/</ThemedText>
-          ) : null}
-        </View>
-      ))}
+            ) : null}
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -1613,6 +1687,11 @@ function ChunkLine({
           <Pressable
             key={`${chunk.text}-${i}`}
             onPress={() => onChunkPress(chunk)}
+            hitSlop={{ top: 4, bottom: 4 }}
+            accessibilityRole="button"
+            accessibilityLabel={chunk.text}
+            accessibilityHint="タップでここから再生"
+            accessibilityState={{ selected: isActive }}
             style={[
               styles.chunkBox,
               {
@@ -1725,6 +1804,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   karaokeChunk: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 6,
+  },
+  karaokeSegment: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',

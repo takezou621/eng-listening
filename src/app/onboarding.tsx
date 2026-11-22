@@ -73,6 +73,7 @@ export default function OnboardingScreen() {
         </ThemedText>
         <Pressable
           style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+          accessibilityRole="button"
           onPress={() => {
             logEvent('onboarding_started');
             setPhase('question');
@@ -82,7 +83,12 @@ export default function OnboardingScreen() {
             診断をはじめる (約 60 秒)
           </ThemedText>
         </Pressable>
-        <Pressable onPress={skip} style={styles.skipButton}>
+        <Pressable
+        onPress={skip}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityRole="button"
+        style={styles.skipButton}
+      >
           <ThemedText variant="caption" color="muted">
             スキップしてライブラリへ
           </ThemedText>
@@ -265,6 +271,7 @@ function QuestionPhase({
                 styles.footerButton,
                 { backgroundColor: colors.primary },
               ]}
+              accessibilityRole="button"
               onPress={next}
             >
               <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
@@ -281,6 +288,9 @@ function QuestionPhase({
       <ThemedText variant="heading">音声を聞いて、何と聞こえたか答えてください</ThemedText>
 
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={playing ? '音声を再生中' : answered === null ? '音声を再生する' : 'もう一度再生する'}
+        accessibilityState={{ busy: playing }}
         style={[
           styles.playButton,
           answered === null
@@ -323,6 +333,17 @@ function QuestionPhase({
             key={choice}
             onPress={() => answer(i)}
             disabled={answered !== null}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isSelected, disabled: answered !== null }}
+            accessibilityLabel={
+              showState
+                ? isCorrect
+                  ? `${choice}（正解）`
+                  : isSelected
+                    ? `${choice}（不正解）`
+                    : choice
+                : choice
+            }
             style={[
               styles.choiceButton,
               { backgroundColor: colors.surface, borderColor: colors.border },
@@ -357,7 +378,12 @@ function QuestionPhase({
           </ThemedText>
         </View>
       ) : null}
-      <Pressable onPress={onSkip} style={styles.skipButton}>
+      <Pressable
+        onPress={onSkip}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityRole="button"
+        style={styles.skipButton}
+      >
         <ThemedText variant="caption" color="muted">
           スキップしてライブラリへ
         </ThemedText>
@@ -425,6 +451,7 @@ function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFi
           </ThemedText>
           <Pressable
             style={[styles.primaryButton, { backgroundColor: colors.primary }]}
+            accessibilityRole="button"
             onPress={() => {
               onFinish(); // 診断完了を記録してからレッスンへ遷移する (再表示防止)
               router.push(`/lesson?lesson=${recommendation.lessonId}`);
@@ -437,7 +464,12 @@ function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFi
         </View>
       ) : null}
 
-      <Pressable onPress={onFinish} style={styles.skipButton}>
+      <Pressable
+        onPress={onFinish}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        accessibilityRole="button"
+        style={styles.skipButton}
+      >
         <ThemedText variant="caption" color="muted">
           ライブラリへ進む
         </ThemedText>

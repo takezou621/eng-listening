@@ -222,7 +222,7 @@ export default function PaywallScreen() {
           onPress={() => selectPlan('monthly')}
           disabled={!monthlyProductId}
           accessibilityRole="button"
-          accessibilityState={{ selected: selectedPlan === 'monthly' }}
+          accessibilityState={{ selected: selectedPlan === 'monthly', disabled: !monthlyProductId }}
           style={[
             styles.planButton,
             { borderColor: colors.border },
@@ -241,7 +241,7 @@ export default function PaywallScreen() {
           onPress={() => selectPlan('annual')}
           disabled={!annualProductId}
           accessibilityRole="button"
-          accessibilityState={{ selected: selectedPlan === 'annual' }}
+          accessibilityState={{ selected: selectedPlan === 'annual', disabled: !annualProductId }}
           style={[
             styles.planButton,
             { borderColor: colors.border },
@@ -264,6 +264,8 @@ export default function PaywallScreen() {
       <Pressable
         onPress={handlePurchase}
         disabled={!canPurchase}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !canPurchase }}
         style={[
           styles.purchaseButton,
           { backgroundColor: colors.primary },
@@ -291,6 +293,9 @@ export default function PaywallScreen() {
       <Pressable
         onPress={handleRestore}
         disabled={!isAvailable || isLoading || purchasing || restoring}
+        hitSlop={{ top: 8, bottom: 8 }}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !isAvailable || isLoading || purchasing || restoring }}
         style={styles.restoreButton}
       >
         <ThemedText variant="caption" color="primary">
@@ -312,17 +317,29 @@ export default function PaywallScreen() {
       </View>
 
       <View style={styles.legalRow}>
-        <Pressable onPress={() => router.push('/legal?doc=terms')}>
+        <Pressable
+          onPress={() => router.push('/legal?doc=terms')}
+          hitSlop={{ top: 14, bottom: 14, left: 4, right: 4 }}
+          accessibilityRole="button"
+        >
           <ThemedText variant="caption" color="primary">
             利用規約
           </ThemedText>
         </Pressable>
-        <Pressable onPress={() => router.push('/legal?doc=privacy')}>
+        <Pressable
+          onPress={() => router.push('/legal?doc=privacy')}
+          hitSlop={{ top: 14, bottom: 14, left: 4, right: 4 }}
+          accessibilityRole="button"
+        >
           <ThemedText variant="caption" color="primary">
             プライバシーポリシー
           </ThemedText>
         </Pressable>
-        <Pressable onPress={() => router.push('/legal?doc=tokushoho')}>
+        <Pressable
+          onPress={() => router.push('/legal?doc=tokushoho')}
+          hitSlop={{ top: 14, bottom: 14, left: 4, right: 4 }}
+          accessibilityRole="button"
+        >
           <ThemedText variant="caption" color="primary">
             特定商取引法に基づく表記
           </ThemedText>

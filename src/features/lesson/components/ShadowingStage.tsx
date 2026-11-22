@@ -82,6 +82,8 @@ export function ShadowingStage({
     <View style={styles.container}>
       {/* ブロック 1: 3ステップ手順固定バー */}
       <View
+        accessible
+        accessibilityLabel={`シャドーイングの手順: 1 お手本、2 録音、3 聞き比べ。現在は ${currentStep + 1} 番目「${STEPS[currentStep].replace(/^[①②③] /, '')}」です`}
         style={[
           styles.stepBar,
           { backgroundColor: colors.surface, borderColor: colors.border },
@@ -144,7 +146,7 @@ export function ShadowingStage({
                 setHideText((prev) => !prev);
                 setPeekText(false);
               }}
-              hitSlop={8}
+              hitSlop={{ top: 14, bottom: 14, left: 6, right: 6 }}
               accessibilityRole="button"
               accessibilityLabel={hideText ? '英文を表示' : '英文を隠す'}
             >
@@ -154,9 +156,10 @@ export function ShadowingStage({
             </Pressable>
             <Pressable
               onPress={onToggleWeak}
-              hitSlop={8}
+              hitSlop={{ top: 14, bottom: 14, left: 6, right: 6 }}
               accessibilityRole="button"
               accessibilityLabel={isWeak ? '苦手フレーズから外す' : '苦手フレーズに登録'}
+              accessibilityState={{ selected: isWeak }}
             >
               <ThemedText
                 variant="caption"
@@ -172,6 +175,8 @@ export function ShadowingStage({
           <Pressable
             disabled={!hideText}
             onPress={() => setPeekText(false)}
+            accessibilityRole={hideText ? 'button' : undefined}
+            accessibilityHint={hideText ? 'ダブルタップで英文を隠す' : undefined}
             style={styles.sentenceBox}
           >
             <ThemedText style={styles.sentenceEnglish}>{sentence.text}</ThemedText>
@@ -225,6 +230,7 @@ export function ShadowingStage({
           <Pressable
             onPress={onPlayModel}
             disabled={isRecording}
+            hitSlop={4}
             style={[
               styles.secondaryButton,
               {
@@ -254,6 +260,7 @@ export function ShadowingStage({
               <Pressable
                 onPress={onPlayUser}
                 disabled={isRecording || isPendingRecord}
+                hitSlop={4}
                 style={[
                   styles.secondaryButton,
                   {
@@ -283,6 +290,7 @@ export function ShadowingStage({
               <Pressable
                 onPress={onCompareSequential}
                 disabled={isRecording || isPendingRecord}
+                hitSlop={4}
                 style={[
                   styles.secondaryButton,
                   { borderColor: colors.primary, backgroundColor: colors.secondarySurface },
@@ -378,6 +386,7 @@ export function ShadowingFooterBar({
         <Pressable
           onPress={onPrev}
           disabled={!canPrev}
+          hitSlop={4}
           style={[
             styles.navButton,
             { backgroundColor: colors.secondarySurface },
@@ -426,6 +435,7 @@ export function ShadowingFooterBar({
         <Pressable
           onPress={onNext}
           disabled={!canNext}
+          hitSlop={4}
           style={[
             styles.navButton,
             { backgroundColor: colors.secondarySurface },
