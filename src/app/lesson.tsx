@@ -898,43 +898,50 @@ function LessonPlayerScreen({
   // --- Apple Watch 連携 (Phase 1): 再生状態の送信と Watch からの操作の受付 ---
   // ハンドラはマウント中だけ登録し、最新の操作関数一式は ref 経由で参照する
   // (statusRef と同じパターン。Watch 側の操作で古いクロージャを掴まないため)。
-  const watchControlsRef = useRef({ togglePlay, goToPosition, applyRate, effectivePos, rate });
+  const watchControlsRef = useRef({ togglePlay, goNextSentence, goPrevSentence, applyRate, rate });
   useEffect(() => {
-    watchControlsRef.current = { togglePlay, goToPosition, applyRate, effectivePos, rate };
+    watchControlsRef.current = { togglePlay, goNextSentence, goPrevSentence, applyRate, rate };
   });
+  // この画面インスタンスの所有者トークン (新旧共存時の誤消去防止は watchSync 側)
+  const watchTokenRef = useRef<object>({});
 
   useEffect(() => {
-    registerWatchCommandHandler((command) => {
+    // 文送り/文戻しは画面上のボタンと同じ関数を使う (2秒超で文頭に戻る挙動や、
+    // 話すモードで一時停止したまま移動する挙動を Watch でも揃える)。
+    const unregister = registerWatchCommandHandler((command) => {
       const controls = watchControlsRef.current;
       if (command.type === 'togglePlay') {
         controls.togglePlay();
       } else if (command.type === 'nextSentence') {
-        controls.goToPosition(Math.min(controls.effectivePos + 1, sentences.length - 1));
+        controls.goNextSentence();
       } else if (command.type === 'prevSentence') {
-        controls.goToPosition(Math.max(controls.effectivePos - 1, 0));
+        controls.goPrevSentence();
       } else if (command.type === 'cycleRate') {
         const index = PLAYBACK_RATES.indexOf(controls.rate);
         controls.applyRate(PLAYBACK_RATES[(index + 1) % PLAYBACK_RATES.length]);
       }
     });
     return () => {
-      registerWatchCommandHandler(null);
-      pushWatchPlayback(null);
+      unregister();
+      pushWatchPlayback(null, watchTokenRef.current);
     };
   }, [sentences.length]);
 
   useEffect(() => {
     const sentence = sentences[effectivePos];
     if (!sentence) return;
-    pushWatchPlayback({
-      lessonTitle: lesson.titleJa || lesson.title,
-      sentenceIndex: effectivePos,
-      sentenceCount: sentences.length,
-      textEn: sentence.text,
-      textJa: sentence.translationJa,
-      isPlaying: status.playing,
-      rate,
-    });
+    pushWatchPlayback(
+      {
+        lessonTitle: lesson.titleJa || lesson.title,
+        sentenceIndex: effectivePos,
+        sentenceCount: sentences.length,
+        textEn: sentence.text,
+        textJa: sentence.translationJa,
+        isPlaying: status.playing,
+        rate,
+      },
+      watchTokenRef.current,
+    );
   }, [effectivePos, status.playing, rate, lesson, sentences]);
 
 

@@ -36,6 +36,7 @@ export interface WatchLibraryState {
 
 let playback: WatchPlaybackState | null = null;
 let library: WatchLibraryState | null = null;
+let playbackToken: object | null = null;
 
 function pushMerged(): void {
   const state: Record<string, unknown> = { updatedAtMs: Date.now() };
@@ -44,9 +45,19 @@ function pushMerged(): void {
   updateWatchContext(state);
 }
 
-/** レッスン画面が再生状態を送る。null は「レッスンを開いていない」。 */
-export function pushWatchPlayback(next: WatchPlaybackState | null): void {
-  playback = next;
+/** レッスン画面が再生状態を送る。null は「レッスンを開いていない」。
+ *  token は画面インスタンスの所有者確認用: 画面遷移で新旧のレッスン画面が
+ *  一時的に共存するとき、古い画面のクリーンアップ (null) が新しい画面の
+ *  再生状態を消さないようにする。 */
+export function pushWatchPlayback(next: WatchPlaybackState | null, token?: object): void {
+  if (next === null) {
+    if (token !== undefined && playbackToken !== null && playbackToken !== token) return;
+    playback = null;
+    playbackToken = null;
+  } else {
+    playback = next;
+    if (token !== undefined) playbackToken = token;
+  }
   pushMerged();
 }
 
@@ -65,12 +76,15 @@ let subscribed = false;
  * Watch からの操作コマンドの受け手を登録する (レッスン画面のマウント中だけ有効)。
  * ネイティブ側の購読は一度だけ張り、受け手の差し替えはここで吸収する。
  */
-export function registerWatchCommandHandler(next: WatchCommandHandler | null): void {
+export function registerWatchCommandHandler(next: WatchCommandHandler): () => void {
   handler = next;
-  if (next && !subscribed) {
+  if (!subscribed) {
     subscribed = true;
     addWatchCommandListener((command) => {
       handler?.(command);
     });
   }
+  return () => {
+    if (handler === next) handler = null;
+  };
 }

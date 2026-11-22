@@ -15,7 +15,7 @@ struct MimitoreWatchApp: App {
 
 // MARK: - iPhone から受け取る状態
 
-struct PlaybackState {
+struct PlaybackState: Equatable {
     var lessonTitle: String
     var sentenceIndex: Int
     var sentenceCount: Int
@@ -109,6 +109,20 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
             connectionText = "iPhoneに接続できません"
             return
         }
+        let previous = playback
+        var optimistic: PlaybackState?
+        if command == "togglePlay", var current = playback {
+            current.isPlaying.toggle()
+            optimistic = current
+        }
+        if command == "cycleRate", var current = playback,
+           let index = Self.rates.firstIndex(of: current.rate) {
+            current.rate = Self.rates[(index + 1) % Self.rates.count]
+            optimistic = current
+        }
+        if let optimistic {
+            playback = optimistic
+        }
         session.sendMessage(["command": command], replyHandler: { _ in
             DispatchQueue.main.async {
                 self.connectionText = "接続済み"
@@ -116,17 +130,13 @@ final class WatchConnectivityManager: NSObject, ObservableObject, WCSessionDeleg
         }, errorHandler: { _ in
             DispatchQueue.main.async {
                 self.connectionText = "送信に失敗しました"
+                // 楽観的に変えた表示が残り続けないよう、失敗時は元の状態に戻す
+                // (その後に新しい状態が届いていた場合はそちらを優先する)。
+                if self.playback == optimistic {
+                    self.playback = previous
+                }
             }
         })
-        if command == "togglePlay", var current = playback {
-            current.isPlaying.toggle()
-            playback = current
-        }
-        if command == "cycleRate", var current = playback,
-           let index = Self.rates.firstIndex(of: current.rate) {
-            current.rate = Self.rates[(index + 1) % Self.rates.count]
-            playback = current
-        }
     }
 
     func session(
@@ -217,6 +227,12 @@ struct NowPlayingView: View {
                             .font(.caption)
                     }
                     .accessibilityLabel("再生速度")
+                    if connectivity.connectionText != "接続済み" {
+                        // 送信失敗などの理由を、レッスン表示中でも見える場所に出す
+                        Text(connectivity.connectionText)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             } else {
@@ -235,7 +251,8 @@ struct NowPlayingView: View {
     }
 
     private func rateLabel(_ rate: Double) -> String {
-        let trimmed = String(format: "%.2g", rate)
+        // %g: 1.15 や 0.85 はそのまま、1.0 は "1" と表示する (%.2g では 1.15 が化ける)
+        let trimmed = String(format: "%g", rate)
         return "\(trimmed)x"
     }
 }
