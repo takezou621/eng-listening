@@ -254,7 +254,7 @@ export default function ProgressScreen() {
                   : null,
               ]}
               accessibilityRole="button"
-              accessibilityLabel={`${formatDayLabel(date)}の学習記録`}
+              accessibilityLabel={`${formatDayLabel(date)}の学習記録${frozen ? '（フリーズで保護）' : ''}`}
             />
           ))}
         </View>

@@ -269,6 +269,56 @@ export interface StreakInfo {
   rescuedYesterday: boolean;
 }
 
+function parseLocalDate(key: string): Date {
+  const [y, m, d] = key.split('-').map((v) => Number(v));
+  return new Date(y, (m ?? 1) - 1, d ?? 1, 12, 0, 0, 0);
+}
+
+/**
+ * 学習履歴全体を暦日順 (過去→現在) に走査し、自動フリーズで保護される日付の集合を返す。
+ * フリーズは「連続が生きている状態での1日だけの抜け」に対して、その日が属する
+ * 暦週 (月〜日) で未使用の場合に、暦日順で最初に現れた抜けへ適用される
+ * (後ろ向きに走査すると同一週の2回目の抜けを誤って保護してしまうため、
+ * 必ず前向きに判定する)。
+ */
+export function computeFrozenDates(days: ProgressData, through: Date = new Date()): Set<string> {
+  const frozen = new Set<string>();
+  const studiedKeys = Object.keys(days)
+    .filter((k) => (days[k]?.seconds ?? 0) > 0)
+    .sort();
+  if (studiedKeys.length === 0) return frozen;
+
+  const usedWeeks = new Set<string>();
+  const cursor = parseLocalDate(studiedKeys[0]);
+  const end = new Date(through);
+  end.setHours(12, 0, 0, 0);
+  let streakAlive = false;
+  let prevStudied = false;
+
+  while (cursor.getTime() <= end.getTime()) {
+    const key = localDateStr(cursor);
+    if ((days[key]?.seconds ?? 0) > 0) {
+      streakAlive = true;
+      prevStudied = true;
+    } else if (streakAlive && prevStudied) {
+      const weekKey = isoWeekKey(cursor);
+      if (!usedWeeks.has(weekKey)) {
+        usedWeeks.add(weekKey);
+        frozen.add(key);
+      } else {
+        streakAlive = false;
+      }
+      // 保護された日の直後は「学習日」扱いにしない (2日連続の抜けは保護しない)
+      prevStudied = false;
+    } else {
+      streakAlive = false;
+      prevStudied = false;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return frozen;
+}
+
 /**
  * ストリーク救済付き連続学習日数 (E16)。
  * 罰ではなく保険として、暦週（月〜日）ごとに1回まで「1日抜け」を自動フリーズで保護する。
@@ -278,6 +328,7 @@ export function computeStreakWithFreeze(
   days: ProgressData,
   today: Date = new Date()
 ): StreakInfo {
+  const frozenAll = computeFrozenDates(days, today);
   const base = new Date(today);
   base.setHours(12, 0, 0, 0);
 
@@ -293,24 +344,15 @@ export function computeStreakWithFreeze(
   }
 
   let streak = 0;
-  const usedWeeks = new Set<string>();
   const frozenDates: string[] = [];
-
-  for (let i = 0; i < 3650; i++) {
+  for (;;) {
     const key = localDateStr(cursor);
     if ((days[key]?.seconds ?? 0) > 0) {
       streak += 1;
       cursor.setDate(cursor.getDate() - 1);
       continue;
     }
-
-    // 未学習の日: 前日に学習があり、かつその日が属する週にまだフリーズを使っていなければ1日抜けを保護する
-    const prev = new Date(cursor);
-    prev.setDate(prev.getDate() - 1);
-    const prevKey = localDateStr(prev);
-    const weekKey = isoWeekKey(cursor);
-    if ((days[prevKey]?.seconds ?? 0) > 0 && !usedWeeks.has(weekKey)) {
-      usedWeeks.add(weekKey);
+    if (frozenAll.has(key)) {
       frozenDates.push(key);
       cursor.setDate(cursor.getDate() - 1);
       continue;
@@ -319,9 +361,10 @@ export function computeStreakWithFreeze(
   }
 
   const currentWeek = isoWeekKey(base);
+  const usedThisWeek = [...frozenAll].some((k) => isoWeekKey(parseLocalDate(k)) === currentWeek);
   return {
     streak,
-    freezeRemainingThisWeek: usedWeeks.has(currentWeek) ? 0 : 1,
+    freezeRemainingThisWeek: usedThisWeek ? 0 : 1,
     frozenDates,
     rescuedYesterday: frozenDates.includes(yesterdayKey),
   };
@@ -376,7 +419,7 @@ export function buildHeatmap(
   endDate: Date,
   weeks: number
 ): { date: string; seconds: number; frozen: boolean }[] {
-  const frozenSet = new Set(computeStreakWithFreeze(days, endDate).frozenDates);
+  const frozenSet = computeFrozenDates(days, endDate);
   const out: { date: string; seconds: number; frozen: boolean }[] = [];
   const end = new Date(endDate);
   const total = weeks * 7;
