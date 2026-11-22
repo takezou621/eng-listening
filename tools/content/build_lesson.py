@@ -175,6 +175,36 @@ def align_words(line_text: str, wwords: list[dict], default_start: float = 0.0) 
             for w in out if w is not None]
 
 
+def fill_alignment_gaps(words: list[dict], context: str = "") -> list[dict]:
+    """faster-whisper の DTW が作る「スリバー潰れ」を補正する。
+
+    欠陥クラス: faster-whisper の単語アライメント (DTW) は、短い固有名詞などを
+    実際の発話スパンの末尾に潰して割り当てることがある。実例: phone-appointment の
+    "Miller" は 0.06 秒のスリバー (22.563-22.623) になり、直前に 0.28 秒の
+    無割当ギャップが残った (本来の発話は "Doctor" の直後 22.283 から始まる)。
+    ローカル CPU/int8 でも Colab GPU/float16 でも同じ潰れ方をするため、
+    環境差ではなく DTW の挙動である。
+
+    このパイプラインの単語は通常すべて連続している (各単語の開始 == 直前単語の
+    終了) ため、「単語の長さ < 0.08 秒」かつ「直前のギャップ > 0.15 秒」という
+    組み合わせはこの欠陥でのみ現れる。閾値はその前提に基づく安全な値であり、
+    通常の単語には発火しない。該当単語は開始時刻を直前単語の終了時刻まで
+    前に広げてギャップを埋める (終了時刻は whisper の割当をそのまま使う)。
+    補正箇所はすべてログに出力する。
+    """
+    for i in range(1, len(words)):
+        prev, word = words[i - 1], words[i]
+        gap = word["startSec"] - prev["endSec"]
+        dur = word["endSec"] - word["startSec"]
+        if dur < 0.08 and gap > 0.15:
+            old_start = word["startSec"]
+            word["startSec"] = prev["endSec"]
+            print(f"[gap-fill] {context} word={word['text']!r} "
+                  f"start {old_start:.3f} -> {word['startSec']:.3f} "
+                  f"(gap {gap:.3f}s, dur {dur:.3f}s)", flush=True)
+    return words
+
+
 def chunks_from_words(chunk_texts: list[str], words: list[dict]) -> list[dict]:
     """台本チャンクごとに整約済み単語を消費し、スラッシュ表示用の区間を作る。"""
     out: list[dict] = []
@@ -293,6 +323,7 @@ def main() -> int:
             w["startSec"] = round(span["startSec"] + w["startSec"], 3)
             w["endSec"] = round(min(span["startSec"] + w["endSec"], span["endSec"]), 3)
         words = align_words(line["text"], raw, span["startSec"])
+        words = fill_alignment_gaps(words, f"{args.lesson} line {line.get('index')}")
         sentences.append({
             "index": int(line["index"]) - 1,
             "speaker": line["speaker"],
