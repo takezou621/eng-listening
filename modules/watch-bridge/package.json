@@ -1,0 +1,8 @@
+{
+  "name": "mimitore-watch-bridge",
+  "version": "1.0.0",
+  "description": "WatchConnectivity bridge between the Mimitore iPhone app and its Apple Watch companion (local Expo module).",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true
+}
