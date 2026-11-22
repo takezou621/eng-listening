@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, View, AppState } from 'react-native';
 import { useRouter } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 
 import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
@@ -12,11 +13,21 @@ import { logEvent } from '@/features/analytics/analyticsStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 import {
   computeDailyGoalStatus,
+  computeStreakWithFreeze,
   computeTodaySeconds,
-  useProgressData, localDateStr } from '@/features/progress/progressStore';
+  localDateStr,
+  useProgressData,
+} from '@/features/progress/progressStore';
 
 type FilterType = 'all' | ContentType;
 type FilterLevel = 'all' | 'beginner' | 'intermediate';
+
+function countLinkingNotes(
+  bundle: { data: { sentences: { linking: unknown[] }[] } } | null | undefined
+): number {
+  if (!bundle) return 0;
+  return bundle.data.sentences.reduce((sum, s) => sum + s.linking.length, 0);
+}
 
 export default function LibraryScreen() {
   const { colors } = useTheme();
@@ -57,11 +68,15 @@ export default function LibraryScreen() {
       clearInterval(interval);
     };
   }, []);
+  const refDate = new Date(todayKey + 'T12:00:00');
+  const streakInfo = computeStreakWithFreeze(progressDays, refDate);
   const goalStatus = computeDailyGoalStatus(
-    computeTodaySeconds(progressDays, new Date(todayKey + 'T12:00:00')),
+    computeTodaySeconds(progressDays, refDate),
     dailyGoalMinutes
   );
   const successColor = colors.success;
+  const todayBundle = todaysLesson?.item.bundle ?? null;
+  const todayNoteCount = countLinkingNotes(todayBundle);
 
   // 初回起動時のみオンボーディング診断へ誘導する (完了状態は端末内に永続化)
   const redirectedRef = useRef(false);
@@ -88,45 +103,61 @@ export default function LibraryScreen() {
     });
   }, [lessonList, filterType, filterLevel, showFavoritesOnly, favoriteLessons]);
 
+  const isFilterDefault = filterType === 'all' && filterLevel === 'all' && !showFavoritesOnly;
+
   const renderFilterChips = () => (
     <View style={styles.filterSection}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipScroll}>
         <Chip
-          label="★ お気に入り"
-          active={showFavoritesOnly}
-          onPress={() => setShowFavoritesOnly(!showFavoritesOnly)}
+          label="すべて"
+          variant="outlined"
+          active={isFilterDefault}
+          onPress={() => {
+            setFilterType('all');
+            setFilterLevel('all');
+            setShowFavoritesOnly(false);
+          }}
         />
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
         <Chip
-          label="すべて"
-          active={filterType === 'all'}
-          onPress={() => setFilterType('all')}
+          label="★ お気に入り"
+          variant="outlined"
+          active={showFavoritesOnly}
+          onPress={() => setShowFavoritesOnly((prev) => !prev)}
         />
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
         <Chip
           label="会話"
+          variant="outlined"
           active={filterType === 'conversation'}
-          onPress={() => setFilterType('conversation')}
+          onPress={() =>
+            setFilterType((prev) => (prev === 'conversation' ? 'all' : 'conversation'))
+          }
         />
         <Chip
           label="モノローグ"
+          variant="outlined"
           active={filterType === 'monologue'}
-          onPress={() => setFilterType('monologue')}
+          onPress={() =>
+            setFilterType((prev) => (prev === 'monologue' ? 'all' : 'monologue'))
+          }
         />
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
         <Chip
           label="初級"
+          variant="outlined"
           active={filterLevel === 'beginner'}
-          onPress={() => setFilterLevel('beginner')}
+          onPress={() =>
+            setFilterLevel((prev) => (prev === 'beginner' ? 'all' : 'beginner'))
+          }
         />
         <Chip
           label="中級"
+          variant="outlined"
           active={filterLevel === 'intermediate'}
-          onPress={() => setFilterLevel('intermediate')}
-        />
-        <Chip
-          label="レベルすべて"
-          active={filterLevel === 'all'}
-          onPress={() => setFilterLevel('all')}
+          onPress={() =>
+            setFilterLevel((prev) => (prev === 'intermediate' ? 'all' : 'intermediate'))
+          }
         />
       </ScrollView>
     </View>
@@ -134,16 +165,57 @@ export default function LibraryScreen() {
 
   return (
     <Screen scroll={false}>
-      <ThemedText variant="title">ライブラリ</ThemedText>
-      <ThemedText variant="caption" color="muted" style={styles.subtitle}>
-        全 {lessonList.length} 本
-      </ThemedText>
+      <View style={styles.headerRow}>
+        <View style={styles.headerTextGroup}>
+          <ThemedText variant="title">ライブラリ</ThemedText>
+          <ThemedText variant="caption" color="muted" style={styles.subtitle}>
+            全 {lessonList.length} 本 ・ 完了 {completedLessonIds.size} 本
+          </ThemedText>
+        </View>
+        <Pressable
+          onPress={() => router.push('/(tabs)/progress')}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={`連続学習 ${streakInfo.streak} 日、進捗画面を開く`}
+          accessibilityHint="タップで進捗タブへ移動"
+          style={[
+            styles.streakPill,
+            { backgroundColor: colors.secondarySurface, borderColor: colors.border },
+          ]}
+        >
+          <SymbolView
+            name="flame.fill"
+            size={14}
+            tintColor={streakInfo.streak > 0 ? colors.warning : colors.textMuted}
+            fallback={
+              <ThemedText
+                variant="caption"
+                style={{
+                  color: streakInfo.streak > 0 ? colors.warning : colors.textMuted,
+                  fontWeight: '700',
+                }}
+              >
+                ●
+              </ThemedText>
+            }
+          />
+          <ThemedText
+            variant="caption"
+            style={[
+              styles.streakText,
+              { color: streakInfo.streak > 0 ? colors.text : colors.textMuted },
+            ]}
+          >
+            {streakInfo.streak}日
+          </ThemedText>
+        </Pressable>
+      </View>
 
-      {filterType === 'all' && filterLevel === 'all' && !showFavoritesOnly && todaysLesson ? (
+      {isFilterDefault && todaysLesson ? (
         <Pressable
           onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
           accessibilityRole="button"
-          accessibilityLabel={`${todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}: ${todaysLesson.item.bundle?.data.titleJa ?? todaysLesson.item.entry.title}。今日の目標は ${goalStatus.todayMinutes} 分 / ${goalStatus.goalMinutes} 分${goalStatus.achieved ? '、目標達成' : ''}`}
+          accessibilityLabel={`${todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}: ${todayBundle?.data.titleJa ?? todaysLesson.item.entry.title}。今日の目標は ${goalStatus.todayMinutes} 分 / ${goalStatus.goalMinutes} 分${goalStatus.achieved ? '、目標達成' : ''}`}
           accessibilityHint="タップでレッスンをはじめる"
           style={[
             styles.todayCard,
@@ -154,23 +226,36 @@ export default function LibraryScreen() {
             <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>
               {todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}
             </ThemedText>
-            <ThemedText
-              variant="caption"
-              style={{
-                color: goalStatus.achieved ? successColor : colors.textMuted,
-                fontWeight: '600',
-              }}
-            >
-              {goalStatus.achieved
-                ? `✓ 目標達成 (${goalStatus.todayMinutes}分)`
-                : `今日 ${goalStatus.todayMinutes} / ${goalStatus.goalMinutes} 分`}
-            </ThemedText>
+            {goalStatus.achieved ? (
+              <View style={styles.goalStatusRow}>
+                <SymbolView
+                  name="checkmark.circle.fill"
+                  size={13}
+                  tintColor={successColor}
+                  fallback={
+                    <ThemedText variant="caption" style={{ color: successColor, fontWeight: '700' }}>
+                      ✓
+                    </ThemedText>
+                  }
+                />
+                <ThemedText variant="caption" style={{ color: successColor, fontWeight: '600' }}>
+                  目標達成 ({goalStatus.todayMinutes}分)
+                </ThemedText>
+              </View>
+            ) : (
+              <ThemedText variant="caption" style={{ color: colors.textMuted, fontWeight: '600' }}>
+                今日 {goalStatus.todayMinutes} / {goalStatus.goalMinutes} 分
+              </ThemedText>
+            )}
           </View>
-          <ThemedText variant="heading">{todaysLesson.item.bundle?.data.titleJa}</ThemedText>
+          <ThemedText variant="heading">{todayBundle?.data.titleJa}</ThemedText>
+          <ThemedText variant="caption" color="muted" numberOfLines={1}>
+            {todaysLesson.item.entry.title}
+          </ThemedText>
           <ThemedText variant="caption" color="muted">
-            {todaysLesson.item.entry.title} ・ 約{' '}
-            {Math.round(todaysLesson.item.bundle?.data.durationSec ?? 0)} 秒 ・{' '}
-            {todaysLesson.item.bundle?.data.sentences.length ?? 0} 文
+            約 {Math.round(todayBundle?.data.durationSec ?? 0)} 秒 ・{' '}
+            {todayBundle?.data.sentences.length ?? 0} 文
+            {todayNoteCount > 0 ? ` ・ 音変化 ${todayNoteCount} 箇所` : ''}
           </ThemedText>
           <View style={[styles.goalTrack, { backgroundColor: colors.border }]}>
             <View
@@ -183,9 +268,21 @@ export default function LibraryScreen() {
               ]}
             />
           </View>
-          <ThemedText color="primary" style={{ fontWeight: '700' }}>
-            ▶ はじめる
-          </ThemedText>
+          <View style={[styles.todayPrimaryCta, { backgroundColor: colors.primary }]}>
+            <SymbolView
+              name="play.fill"
+              size={13}
+              tintColor={colors.primaryText}
+              fallback={
+                <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
+                  ▶
+                </ThemedText>
+              }
+            />
+            <ThemedText style={[styles.todayPrimaryCtaText, { color: colors.primaryText }]}>
+              はじめる
+            </ThemedText>
+          </View>
         </Pressable>
       ) : null}
 
@@ -219,6 +316,7 @@ export default function LibraryScreen() {
         }
         renderItem={({ item: { entry, bundle } }) => {
           const isFav = favoriteLessons.includes(entry.id);
+          const noteCount = countLinkingNotes(bundle);
           return (
             <Pressable
               disabled={bundle === null}
@@ -247,9 +345,19 @@ export default function LibraryScreen() {
                   </ThemedText>
                 </View>
                 {completedLessonIds.has(entry.id) ? (
-                  <View style={[styles.badgeLevel, { backgroundColor: colors.secondarySurface }]}>
+                  <View style={[styles.badgeCompleted, { backgroundColor: colors.secondarySurface }]}>
+                    <SymbolView
+                      name="checkmark.circle.fill"
+                      size={12}
+                      tintColor={colors.success}
+                      fallback={
+                        <ThemedText variant="caption" style={{ color: colors.success, fontWeight: '700' }}>
+                          ✓
+                        </ThemedText>
+                      }
+                    />
                     <ThemedText variant="caption" style={{ color: colors.success, fontWeight: '700' }}>
-                      ✓ 完了
+                      完了
                     </ThemedText>
                   </View>
                 ) : null}
@@ -261,9 +369,16 @@ export default function LibraryScreen() {
                   onPress={() => toggleFavoriteLesson(entry.id)}
                   style={styles.favIcon}
                 >
-                  <ThemedText style={{ color: isFav ? colors.favorite : colors.textMuted, fontSize: 18 }}>
-                    {isFav ? '★' : '☆'}
-                  </ThemedText>
+                  <SymbolView
+                    name={isFav ? 'star.fill' : 'star'}
+                    size={18}
+                    tintColor={isFav ? colors.favorite : colors.textMuted}
+                    fallback={
+                      <ThemedText style={{ color: isFav ? colors.favorite : colors.textMuted, fontSize: 18 }}>
+                        {isFav ? '★' : '☆'}
+                      </ThemedText>
+                    }
+                  />
                 </Pressable>
               </View>
               <ThemedText variant="heading">{entry.titleJa}</ThemedText>
@@ -272,7 +387,7 @@ export default function LibraryScreen() {
               </ThemedText>
               <ThemedText variant="caption" color="muted">
                 {bundle
-                  ? `約 ${bundle.data.durationSec.toFixed(0)} 秒 ・ ${bundle.data.sentences.length} 文`
+                  ? `約 ${bundle.data.durationSec.toFixed(0)} 秒 ・ ${bundle.data.sentences.length} 文${noteCount > 0 ? ` ・ 音変化 ${noteCount} 箇所` : ''}`
                   : '準備中'}
               </ThemedText>
             </Pressable>
@@ -284,11 +399,35 @@ export default function LibraryScreen() {
 }
 
 const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 12,
+  },
+  headerTextGroup: {
+    flex: 1,
+    minWidth: 0,
+  },
+  streakPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderWidth: 1,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    minHeight: 36,
+  },
+  streakText: {
+    fontWeight: '700',
+  },
   todayCard: {
     borderWidth: 1,
     borderRadius: 12,
     padding: 16,
-    gap: 8,
+    gap: 6,
     marginBottom: 12,
   },
   todayTopRow: {
@@ -296,6 +435,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
+  },
+  goalStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   goalTrack: {
     height: 6,
@@ -307,10 +451,25 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
   },
-  subtitle: { marginTop: 4, marginBottom: 12 },
-  filterSection: { marginBottom: 12 },
-  chipScroll: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 8 },
-  divider: { width: 1, height: 24, marginHorizontal: 4 },
+  todayPrimaryCta: {
+    marginTop: 4,
+    minHeight: 44,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  todayPrimaryCtaText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  subtitle: { marginTop: 2 },
+  filterSection: { marginBottom: 10 },
+  chipScroll: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingBottom: 6 },
+  divider: { width: 1, height: 24, marginHorizontal: 2 },
   list: { paddingBottom: 24, gap: 12 },
   emptyCard: {
     borderRadius: 12,
@@ -324,8 +483,10 @@ const styles = StyleSheet.create({
   emptyResetBtn: {
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 12,
+    minHeight: 36,
+    justifyContent: 'center',
   },
   card: {
     borderRadius: 12,
@@ -341,6 +502,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   badgeLevel: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  badgeCompleted: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
