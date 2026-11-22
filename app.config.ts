@@ -48,6 +48,10 @@ const config: ExpoConfig = {
     infoPlist: {
       // バックグラウンド再生 (ロック画面コントロールとセットで利用)
       UIBackgroundModes: ['audio'],
+      // マイク用途 (シャドーイング録音)。審査でデフォルトのプレースホルダ文が
+      // 用途説明として不十分とされたため、具体的な用途を明記する
+      NSMicrophoneUsageDescription:
+        'シャドーイング練習であなたの発音を録音し、この端末の中でお手本の音声と聞き比べるために使用します。録音した音声が外部に送信されることはありません。',
     },
   },
   android: {
@@ -76,7 +80,15 @@ const config: ExpoConfig = {
         imageWidth: 76,
       },
     ],
-    'expo-audio',
+    [
+      'expo-audio',
+      {
+        // マイク権限の用途説明 (NSMicrophoneUsageDescription)。デフォルト文は
+        // プレースホルダのため、審査対応として具体的な用途を明記する
+        microphonePermission:
+          'シャドーイング練習であなたの発音を録音し、この端末の中でお手本の音声と聞き比べるために使用します。録音した音声が外部に送信されることはありません。',
+      },
+    ],
     '@react-native-firebase/app',
     '@react-native-firebase/analytics',
     '@react-native-firebase/crashlytics',
