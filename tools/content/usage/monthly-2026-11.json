@@ -1,7 +1,7 @@
 {
  "month": "2026-11",
- "chars": 7962,
- "requests": 145,
+ "chars": 8473,
+ "requests": 155,
  "lessons": {
   "_manual_connectivity_check": {
    "chars": 3,
@@ -39,8 +39,8 @@
    "pendingChars": 0
   },
   "phone-appointment": {
-   "chars": 572,
-   "requests": 11,
+   "chars": 1083,
+   "requests": 21,
    "pendingChars": 0
   },
   "at-the-airport": {
