@@ -392,6 +392,7 @@ function LessonPlayerScreen({
   const [lastRecordings, setLastRecordings] = useState<
     Record<number, { uri: string; durationSec: number }>
   >({});
+  const [sessionShadowingCount, setSessionShadowingCount] = useState(0);
   const [shadowingCounts, setShadowingCounts] = useState<Record<number, number>>(() =>
     getShadowingCounts(lesson.id)
   );
@@ -406,6 +407,7 @@ function LessonPlayerScreen({
   const recordGenRef = useRef(0);
   const seekTokenRef = useRef(0);
   const userAudioRef = useRef<AudioPlayer | null>(null);
+  const userPlayTokenRef = useRef(0);
   const lastRecordingsRef = useRef(lastRecordings);
   useEffect(() => {
     lastRecordingsRef.current = lastRecordings;
@@ -471,9 +473,13 @@ function LessonPlayerScreen({
 
   const startRecording = async (sentenceIndex: number) => {
     if (recordingSentence !== null) return;
+    // 非同期の権限・音声モード設定の待機中にモード切替やキャンセルが入ったら
+    // 録音を開始しない (世代トークンで検証する)
+    const gen = recordGenRef.current;
     player.pause();
     userAudioRef.current?.pause();
     const permission = await requestRecordingPermissionsAsync();
+    if (recordGenRef.current !== gen) return;
     if (!permission.granted) {
       setMicDenied(true);
       append('マイク権限が拒否されています');
@@ -482,6 +488,7 @@ function LessonPlayerScreen({
     setMicDenied(false);
     try {
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      if (recordGenRef.current !== gen) return;
       recorder.record();
       setRecordingSentence(sentenceIndex);
       append(`録音開始: 文${sentenceIndex + 1}`);
@@ -508,6 +515,7 @@ function LessonPlayerScreen({
     }
     setLastRecordings((prev) => ({ ...prev, [sentenceIndex]: { uri, durationSec: duration } }));
     setShadowingCounts(addShadowingCount(lesson.id, sentenceIndex));
+    setSessionShadowingCount((c) => c + 1);
     addShadowingRecord(lesson.id);
     logEvent('shadowing_recorded', { lessonId: lesson.id });
     append(`録音完了: 文${sentenceIndex + 1} ${duration.toFixed(1)} 秒`);
@@ -518,6 +526,16 @@ function LessonPlayerScreen({
     if (!sentence) return;
     if (!keepCompareSeq) {
       compareSeqRef.current = null;
+      // 手動のお手本再生を優先し、予約済みの聞き比べ/録音開始タイマーを取り消す
+      if (compareTimerRef.current) {
+        clearTimeout(compareTimerRef.current);
+        compareTimerRef.current = null;
+      }
+      if (recordStartTimerRef.current) {
+        clearTimeout(recordStartTimerRef.current);
+        recordStartTimerRef.current = null;
+      }
+      recordGenRef.current += 1;
     }
     if (pendingRecordRef.current !== null && pendingRecordRef.current !== sentenceIndex) {
       setPendingRecordBoth(null);
@@ -535,8 +553,15 @@ function LessonPlayerScreen({
     if (!rec) return;
     player.pause();
     userAudioRef.current?.release();
-    userAudioRef.current = createAudioPlayer(rec.uri);
-    userAudioRef.current.play();
+    const userPlayer = createAudioPlayer(rec.uri);
+    userAudioRef.current = userPlayer;
+    const token = ++userPlayTokenRef.current;
+    userPlayer.addListener('playbackStatusUpdate', (st) => {
+      if (st.didJustFinish && userPlayTokenRef.current === token) {
+        setComparing(null);
+      }
+    });
+    userPlayer.play();
     setComparing({ index: sentenceIndex, source: 'user' });
     append(`自分の録音を再生: 文${sentenceIndex + 1} (${rec.durationSec.toFixed(1)} 秒)`);
   };
@@ -579,6 +604,9 @@ function LessonPlayerScreen({
     setFocusedPos(clamped);
     setRepeatSentence(null);
     setAb(null);
+    if (!keepPlaying && statusRef.current.playing) {
+      pause('文移動のため一時停止');
+    }
     const shouldResume = keepPlaying && statusRef.current.playing;
     seekTo(target.startSec, `文${clamped + 1} へ移動`, () => {
       if (shouldResume) play();
@@ -624,6 +652,9 @@ function LessonPlayerScreen({
       void stopRecording(recordingSentence);
     }
     cancelAsyncFlow();
+    // リピート状態はモードをまたいで持ち込まない (話すモードのお手本再生への干渉防止)
+    setRepeatSentence(null);
+    setAb(null);
     if (nextMode === 'speak' && statusRef.current.playing) {
       pause('話すモードへ切替');
     }
@@ -1367,7 +1398,7 @@ function LessonPlayerScreen({
       <CompletionSummaryModal
         visible={showSummary}
         summarySeconds={summarySeconds}
-        shadowingCount={lessonShadowingTotal(lesson.id)}
+        shadowingCount={sessionShadowingCount}
         weakCount={sentences.filter((st) => isSentenceWeak(lesson.id, st.index)).length}
         streak={computeStreak(progressDays)}
         isPremium={isPremium}

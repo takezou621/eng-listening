@@ -326,7 +326,7 @@ export function CompletionSummaryModal({
           </ThemedText>
 
           {!isPremium ? (
-            <Pressable onPress={onOpenPaywall} hitSlop={8}>
+            <Pressable onPress={onOpenPaywall} hitSlop={8} accessibilityRole="button">
               <ThemedText variant="caption" color="primary" style={styles.paywallLink}>
                 プレミアムでは詳細な弱点分析が見られます ›
               </ThemedText>
@@ -338,6 +338,7 @@ export function CompletionSummaryModal({
               <Pressable
                 style={[styles.primaryButton, { backgroundColor: colors.primary }]}
                 onPress={onNextLesson}
+                accessibilityRole="button"
               >
                 <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
                   次のレッスンへ
@@ -351,6 +352,7 @@ export function CompletionSummaryModal({
                   : [styles.primaryButton, { backgroundColor: colors.primary }]
               }
               onPress={onClose}
+              accessibilityRole="button"
             >
               <ThemedText
                 style={

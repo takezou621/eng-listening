@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -56,6 +56,11 @@ export function ShadowingStage({
   const { scheme, colors } = useTheme();
   const [hideText, setHideText] = useState(false);
   const [peekText, setPeekText] = useState(false);
+
+  // 文が変わったら「一時表示」は解除する (次の文が最初から見えてしまうのを防ぐ)
+  useEffect(() => {
+    setPeekText(false);
+  }, [sentence.index]);
 
   const dangerColor = scheme === 'dark' ? '#F87171' : '#DC2626';
   const weakActiveColor = scheme === 'dark' ? '#FBBF24' : '#B45309';
@@ -245,7 +250,7 @@ export function ShadowingStage({
             <>
               <Pressable
                 onPress={onPlayUser}
-                disabled={isRecording}
+                disabled={isRecording || isPendingRecord}
                 style={[
                   styles.secondaryButton,
                   {
@@ -258,7 +263,7 @@ export function ShadowingStage({
                         ? colors.secondarySurface
                         : colors.surface,
                   },
-                  isRecording && styles.disabledButton,
+                  (isRecording || isPendingRecord) && styles.disabledButton,
                 ]}
                 accessibilityRole="button"
                 accessibilityLabel="自分の録音を再生"
@@ -274,11 +279,11 @@ export function ShadowingStage({
 
               <Pressable
                 onPress={onCompareSequential}
-                disabled={isRecording}
+                disabled={isRecording || isPendingRecord}
                 style={[
                   styles.secondaryButton,
                   { borderColor: colors.primary, backgroundColor: colors.secondarySurface },
-                  isRecording && styles.disabledButton,
+                  (isRecording || isPendingRecord) && styles.disabledButton,
                 ]}
                 accessibilityRole="button"
                 accessibilityLabel="お手本と自分の声を連続で聞き比べ"

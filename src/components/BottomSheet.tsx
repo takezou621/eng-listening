@@ -23,6 +23,7 @@ export function BottomSheet({ visible, title, onClose, children }: BottomSheetPr
   return (
     <Modal
       visible={visible}
+      statusBarTranslucent
       transparent
       animationType="slide"
       onRequestClose={onClose}
