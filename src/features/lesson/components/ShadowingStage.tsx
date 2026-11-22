@@ -53,7 +53,7 @@ export function ShadowingStage({
   onPlayUser: () => void;
   onCompareSequential: () => void;
 }) {
-  const { scheme, colors } = useTheme();
+  const { colors } = useTheme();
   const [hideText, setHideText] = useState(false);
   const [peekText, setPeekText] = useState(false);
 
@@ -65,8 +65,8 @@ export function ShadowingStage({
     setPeekText(false);
   }
 
-  const dangerColor = scheme === 'dark' ? '#F87171' : '#DC2626';
-  const weakActiveColor = scheme === 'dark' ? '#FBBF24' : '#B45309';
+  const dangerColor = colors.danger;
+  const weakActiveColor = colors.warning;
 
   const currentStep = isRecording
     ? 1
@@ -344,6 +344,7 @@ export function ShadowingFooterBar({
   const { scheme, colors } = useTheme();
   const canPrev = sentenceIndex > 0 && !isRecording;
   const canNext = sentenceIndex < sentenceCount - 1 && !isRecording;
+  // 塗りつぶし背景用の危険色 (文字色の colors.danger とは濃度が異なるため個別に保持)
   const dangerBg = scheme === 'dark' ? '#EF4444' : '#DC2626';
 
   return (
