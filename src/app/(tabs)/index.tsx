@@ -280,8 +280,8 @@ const styles = StyleSheet.create({
   todayCard: {
     borderWidth: 1,
     borderRadius: 12,
-    padding: 14,
-    gap: 6,
+    padding: 16,
+    gap: 8,
     marginBottom: 12,
   },
   todayTopRow: {
@@ -323,8 +323,8 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
     borderWidth: 1,
-    padding: 14,
-    gap: 6,
+    padding: 16,
+    gap: 8,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   badgeType: {
