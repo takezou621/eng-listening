@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "24558606001",
+    "project_id": "mimitore-84015",
+    "storage_bucket": "mimitore-84015.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:24558606001:android:ed6c442172911914d6b490",
+        "android_client_info": {
+          "package_name": "com.takezou.englistening"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT56T1bh8V7ffkHwDRbMzqKokAzyDWwe8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
