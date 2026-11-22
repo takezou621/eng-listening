@@ -1,6 +1,7 @@
 import { Paths, File } from 'expo-file-system';
 import { useEffect, useState } from 'react';
 
+import { recordError } from './crash';
 import { forwardEventToGa4 } from './ga4';
 
 /**
@@ -22,11 +23,25 @@ export type AnalyticsEventType =
   | 'onboarding_started'
   | 'onboarding_completed'
   | 'onboarding_skipped'
+  | 'diagnostic_answered'
   | 'lesson_started'
   | 'lesson_completed'
+  | 'lesson_abandoned'
+  | 'lesson_mode_changed'
+  | 'linking_note_opened'
+  | 'playback_control'
   | 'shadowing_recorded'
+  | 'shadowing_compared'
+  | 'weak_phrase_added'
+  | 'weak_phrase_removed'
   | 'paywall_viewed'
-  | 'purchase_completed';
+  | 'paywall_plan_selected'
+  | 'purchase_started'
+  | 'purchase_completed'
+  | 'purchase_failed'
+  | 'restore_completed'
+  | 'subscription_manage_tapped'
+  | 'watch_session_synced';
 
 export interface AnalyticsEvent {
   /** 端末内連番 (1 起算) */
@@ -88,6 +103,7 @@ function flushToDisk() {
       await STORAGE_FILE.write(JSON.stringify(cachedLog));
     } catch (e) {
       console.error('Failed to save analytics log:', e);
+      recordError(e, 'analytics_flush_failed');
     }
   });
 }
@@ -116,6 +132,7 @@ export function loadAnalyticsLogAsync(): Promise<void> {
       notify();
     } catch (e) {
       console.error('Failed to load analytics log:', e);
+      recordError(e, 'analytics_load_failed');
       // 失敗時も isLoaded = true にして logEvent からの無限再試行を止める。
       // canPersist は false のまま (壊れた既存ファイルの保護)。
       // このセッションのイベントはメモリにのみ蓄積され、永続化は次回起動時に委ねる。

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { setGa4UserId, setGa4UserProperties } from '../analytics/ga4';
 import { REVENUECAT_API_KEY, ENTITLEMENT_ID } from './config';
 
 /**
@@ -34,6 +35,9 @@ export interface OfferingsResult {
   /** ストアのローカライズ済み価格文字列 (表示用。ハードコード価格より優先する) */
   monthlyPriceString: string | null;
   annualPriceString: string | null;
+  /** 数値価格 (計測の purchase_completed の value 用。通貨はストア側設定に従う) */
+  monthlyPrice: number | null;
+  annualPrice: number | null;
   /** 年額を12で割った月あたり換算 (通貨は annual と同じ) */
   annualPerMonthString: string | null;
   /** 年額に無料トライアルのイントロオファーがあるか */
@@ -46,6 +50,8 @@ export interface PurchaseResult {
   premium: boolean;
   /** purchased = false の理由 (ユーザーキャンセル / エラー)。UI のメッセージ分岐用 */
   reason?: 'cancelled' | 'error';
+  /** SDK のエラーコード文字列 (計測の purchase_failed の reason 分類用) */
+  errorCode?: string;
 }
 
 /** restorePurchasesAsync の結果。restored は復元処理の成功、premium は復元後の状態 */
@@ -80,6 +86,8 @@ type PurchasesModule = {
   PURCHASES_ERROR_CODE?: { PURCHASE_CANCELLED_ERROR: string };
   addCustomerInfoUpdateListener: (listener: (info: CustomerInfo) => void) => void;
   getCustomerInfo: () => Promise<CustomerInfo>;
+  /** RevenueCat の匿名ユーザー ID (GA4 のユーザー ID として使う) */
+  getAppUserID?: () => Promise<string>;
   getOfferings: () => Promise<{
     current: {
       monthly: {
@@ -152,6 +160,7 @@ export async function initBillingAsync(): Promise<void> {
     if (!listenerAdded) {
       purchases.addCustomerInfoUpdateListener((info) => {
         premium = checkEntitlement(info);
+        syncPremiumUserProperties(info);
         notify();
       });
       listenerAdded = true;
@@ -159,15 +168,60 @@ export async function initBillingAsync(): Promise<void> {
 
     const info = await purchases.getCustomerInfo();
     premium = checkEntitlement(info);
+    syncPremiumUserProperties(info);
     configured = true;
+    // GA4 のユーザー ID に RevenueCat の匿名 ID を使う (個人情報ではない)
+    try {
+      if (typeof purchases.getAppUserID === 'function') {
+        const appUserId = await purchases.getAppUserID();
+        if (appUserId) {
+          setGa4UserId(appUserId);
+        }
+      }
+    } catch {
+      // ユーザー ID の設定に失敗しても課金初期化は成功扱いにする
+    }
   } catch (e) {
     console.error('Failed to initialize RevenueCat:', e);
     available = false;
     premium = false;
+    syncPremiumUserProperties(null);
     // 失敗時は configured を false のままにし、次回呼び出しで再試行できるようにする
   }
   loading = false;
   notify();
+}
+
+let lastSyncedPremium: boolean | null = null;
+let lastSyncedPlanType: string | null | undefined;
+
+/**
+ * プレミアム状態を GA4 のユーザープロパティ (premium_status / plan_type) に
+ * 同期する単一の入口。プレミアム判定が再計算される箇所すべてから呼び、
+ * 値が変わったときだけ送信する。plan_type は有効なエンタイトルメントの
+ * 商品 ID で、無料の場合は null (削除) にする。
+ */
+function syncPremiumUserProperties(info: CustomerInfo | null | undefined): void {
+  const isPrem = checkEntitlement(info);
+  let planType: string | null = null;
+  try {
+    const active = info?.entitlements?.active?.[ENTITLEMENT_ID] as
+      | { productIdentifier?: unknown }
+      | undefined;
+    planType =
+      active && typeof active.productIdentifier === 'string'
+        ? active.productIdentifier
+        : null;
+  } catch {
+    planType = null;
+  }
+  if (lastSyncedPremium === isPrem && lastSyncedPlanType === planType) return;
+  lastSyncedPremium = isPrem;
+  lastSyncedPlanType = planType;
+  setGa4UserProperties({
+    premium_status: isPrem ? 'premium' : 'free',
+    plan_type: planType,
+  });
 }
 
 /** 顧客情報からプレミアムエンタイトルメントを判定する */
@@ -194,6 +248,8 @@ export async function fetchOfferingsAsync(): Promise<OfferingsResult> {
     annualProductId: null,
     monthlyPriceString: null,
     annualPriceString: null,
+    monthlyPrice: null,
+    annualPrice: null,
     annualPerMonthString: null,
     annualHasFreeTrial: false,
   };
@@ -223,6 +279,8 @@ export async function fetchOfferingsAsync(): Promise<OfferingsResult> {
       annualProductId: annual,
       monthlyPriceString: monthlyProduct?.priceString ?? null,
       annualPriceString: annualProduct?.priceString ?? null,
+      monthlyPrice: typeof monthlyProduct?.price === 'number' ? monthlyProduct.price : null,
+      annualPrice: typeof annualProduct?.price === 'number' ? annualProduct.price : null,
       annualPerMonthString,
       annualHasFreeTrial: Boolean(
         annualProduct?.introPrice && annualProduct.introPrice.price === 0
@@ -245,6 +303,7 @@ export async function purchaseAsync(productId: string): Promise<PurchaseResult> 
   try {
     const result = await purchases.purchaseProduct(productId);
     premium = checkEntitlement(result.customerInfo);
+    syncPremiumUserProperties(result.customerInfo);
     notify();
     return { purchased: true, premium };
   } catch (e) {
@@ -257,7 +316,12 @@ export async function purchaseAsync(productId: string): Promise<PurchaseResult> 
       err?.userCancelled === true ||
       (cancelledCode !== undefined && String(err?.code) === String(cancelledCode));
     console.error('Purchase failed:', e);
-    return { purchased: false, premium, reason: cancelled ? 'cancelled' : 'error' };
+    return {
+      purchased: false,
+      premium,
+      reason: cancelled ? 'cancelled' : 'error',
+      errorCode: err?.code !== undefined && err?.code !== null ? String(err.code) : undefined,
+    };
   }
 }
 
@@ -270,6 +334,7 @@ export async function restorePurchasesAsync(): Promise<RestoreResult> {
   try {
     const customerInfo = await purchases.restorePurchases();
     premium = checkEntitlement(customerInfo);
+    syncPremiumUserProperties(customerInfo);
     notify();
     return { restored: true, premium };
   } catch (e) {

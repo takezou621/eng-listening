@@ -5,15 +5,23 @@ import {
   ThemeProvider,
 } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { initCrashReporting } from '@/features/analytics/crash';
+import { ScreenViewTracker } from '@/features/analytics/ScreenViewTracker';
 import { WatchLibrarySync } from '@/features/watch/WatchLibrarySync';
 import { WatchSessionSync } from '@/features/watch/WatchSessionSync';
 import { AppThemeProvider } from '@/theme/AppThemeProvider';
 import { darkColors, lightColors } from '@/theme/colors';
 
 export default function RootLayout() {
+  // Crashlytics / Performance Monitoring の収集有効化と
+  // JS グローバルエラーハンドラの差し込み (初回マウント時に一度だけ)
+  useEffect(() => {
+    initCrashReporting();
+  }, []);
+
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
@@ -45,6 +53,7 @@ export default function RootLayout() {
     <AppThemeProvider>
       <WatchLibrarySync />
       <WatchSessionSync />
+      <ScreenViewTracker />
       <ThemeProvider value={navTheme}>
           <StatusBar style={isDark ? 'light' : 'dark'} />
           <Stack screenOptions={{ headerShown: false }}>

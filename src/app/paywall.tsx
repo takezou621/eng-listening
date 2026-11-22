@@ -50,6 +50,9 @@ export default function PaywallScreen() {
   // 表示価格はストアの実価格を優先する (コード内の固定文字列はフォールバック)
   const [monthlyPriceString, setMonthlyPriceString] = useState<string | null>(null);
   const [annualPriceString, setAnnualPriceString] = useState<string | null>(null);
+  // 数値価格 (計測の purchase_completed の value 用)
+  const [monthlyPrice, setMonthlyPrice] = useState<number | null>(null);
+  const [annualPrice, setAnnualPrice] = useState<number | null>(null);
   const [annualPerMonthString, setAnnualPerMonthString] = useState<string | null>(null);
   const [annualHasFreeTrial, setAnnualHasFreeTrial] = useState(false);
   // 選択中のプラン ('monthly' | 'annual')。既定は年額 (GM 決定の主力プラン)
@@ -74,6 +77,8 @@ export default function PaywallScreen() {
       setAnnualProductId(result.annualProductId);
       setMonthlyPriceString(result.monthlyPriceString);
       setAnnualPriceString(result.annualPriceString);
+      setMonthlyPrice(result.monthlyPrice);
+      setAnnualPrice(result.annualPrice);
       setAnnualPerMonthString(result.annualPerMonthString);
       setAnnualHasFreeTrial(result.annualHasFreeTrial);
       // 既定の年額プランが Offerings にない場合は月額にフォールバックする
@@ -82,6 +87,12 @@ export default function PaywallScreen() {
       }
     });
   }, [isAvailable]);
+
+  // プラン選択 (ユーザーのタップ時のみ。計測イベントもここでのみ発火する)
+  const selectPlan = (plan: 'monthly' | 'annual') => {
+    setSelectedPlan(plan);
+    logEvent('paywall_plan_selected', { plan });
+  };
 
   // 選択中プランのストア商品 ID (Offerings から取得できていない場合は null)
   const selectedProductId =
@@ -109,18 +120,34 @@ export default function PaywallScreen() {
     // 結果メッセージは 1 つの state で管理するため、開始時に前回の結果を消す
     setResultMessage('');
     setPurchasing(true);
+    logEvent('purchase_started', { productId: selectedProductId });
     const result: PurchaseResult = await purchaseAsync(selectedProductId);
     setPurchasing(false);
     if (result.purchased) {
       setResultMessage('プレミアムへの切り替えが完了しました。');
+      const selectedPrice = selectedPlan === 'monthly' ? monthlyPrice : annualPrice;
       logEvent('purchase_completed', {
         productId: selectedProductId,
+        ...(selectedPrice !== null ? { value: selectedPrice } : {}),
+        currency: 'JPY',
         premium_active: result.premium,
       });
-    } else if (result.reason === 'error') {
+    } else {
+      // 失敗理由は粗い分類のみ記録する (生のエラー文は個人情報を含みうるため送らない)
+      const failReason =
+        result.reason === 'cancelled'
+          ? 'user_cancelled'
+          : result.errorCode === '10'
+            ? 'network'
+            : result.errorCode === '8'
+              ? 'store_error'
+              : 'unknown';
+      logEvent('purchase_failed', { productId: selectedProductId, reason: failReason });
+    }
+    if (!result.purchased && result.reason === 'error') {
       // ユーザーによるキャンセルはメッセージを出さない (エラーのみ案内)
       setResultMessage('購入に失敗しました。時間をおいて再度お試しください。');
-    } else {
+    } else if (!result.purchased) {
       // キャンセル: 前回のメッセージが残らないようクリアする
       setResultMessage('');
     }
@@ -133,6 +160,9 @@ export default function PaywallScreen() {
     setRestoring(true);
     const result: RestoreResult = await restorePurchasesAsync();
     setRestoring(false);
+    if (result.restored) {
+      logEvent('restore_completed', { result: result.premium ? 'restored' : 'nothing' });
+    }
     if (result.restored && result.premium) {
       // 復元成功かつプレミアムが有効な場合のみ購入完了として記録する
       logEvent('purchase_completed', {
@@ -189,7 +219,7 @@ export default function PaywallScreen() {
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ThemedText variant="heading">料金プラン</ThemedText>
         <Pressable
-          onPress={() => setSelectedPlan('monthly')}
+          onPress={() => selectPlan('monthly')}
           disabled={!monthlyProductId}
           accessibilityRole="button"
           accessibilityState={{ selected: selectedPlan === 'monthly' }}
@@ -208,7 +238,7 @@ export default function PaywallScreen() {
           </ThemedText>
         </Pressable>
         <Pressable
-          onPress={() => setSelectedPlan('annual')}
+          onPress={() => selectPlan('annual')}
           disabled={!annualProductId}
           accessibilityRole="button"
           accessibilityState={{ selected: selectedPlan === 'annual' }}

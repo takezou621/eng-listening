@@ -79,6 +79,8 @@ const config: ExpoConfig = {
     'expo-audio',
     '@react-native-firebase/app',
     '@react-native-firebase/analytics',
+    '@react-native-firebase/crashlytics',
+    '@react-native-firebase/perf',
     [
       'expo-build-properties',
       {
