@@ -335,6 +335,9 @@ export function CompletionSummaryModal({
   goalAchieved,
   isPremium,
   hasNextLesson,
+  focusType,
+  overcomingCompletedSteps,
+  nextLessonReason,
   onNextLesson,
   onOpenPaywall,
   onClose,
@@ -350,6 +353,9 @@ export function CompletionSummaryModal({
   goalAchieved?: boolean;
   isPremium: boolean;
   hasNextLesson: boolean;
+  focusType?: LessonLinkingNote['type'] | null;
+  overcomingCompletedSteps?: number;
+  nextLessonReason?: string | null;
   onNextLesson: () => void;
   onOpenPaywall: () => void;
   onClose: () => void;
@@ -439,6 +445,12 @@ export function CompletionSummaryModal({
             苦手フレーズ登録: {weakCount} 件
           </ThemedText>
 
+          {focusType ? (
+            <ThemedText variant="caption" color="primary" style={styles.summaryMeta}>
+              「{LINKING_LABELS[focusType]}」克服パス: {overcomingCompletedSteps ?? 0} / 3 ステップ完了
+            </ThemedText>
+          ) : null}
+
           {!isPremium ? (
             <Pressable
               onPress={onOpenPaywall}
@@ -449,6 +461,12 @@ export function CompletionSummaryModal({
                 プレミアムでは詳細な弱点分析が見られます ›
               </ThemedText>
             </Pressable>
+          ) : null}
+
+          {hasNextLesson && nextLessonReason ? (
+            <ThemedText variant="caption" color="muted" style={styles.summaryMeta} numberOfLines={2}>
+              次のおすすめ理由: {nextLessonReason}
+            </ThemedText>
           ) : null}
 
           <View style={styles.summaryActions}>

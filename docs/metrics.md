@@ -43,6 +43,7 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `restore_completed` | `result`（restored/nothing） | 復元の成否 |
 | `subscription_manage_tapped` | — | 設定のプラン導線タップ = **解約意図のシグナル** |
 | `watch_session_synced` | `sessions_count` | Watch 単体学習の取り込み（連携チャネルの利用） |
+| `overcoming_step_completed` | `lesson_id`, `sound_change_type`, `step` | 弱点克服パスの 3 ステップ（`listen` / `read` / `speak`）完了の把握 |
 | `curriculum_viewed` | `from`（home/result） | 診断から提案された個別カリキュラムの閲覧 |
 | `key_phrase_opened` | `lesson_id`, `sound_change_type` | レッスン冒頭の「今日のキーフレーズ」の利用動向 |
 | `weak_phrase_reviewed` | `lesson_id`, `remembered`, `stage` | 復習キューでの自己想起チェックと正答動向 |

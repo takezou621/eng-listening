@@ -43,6 +43,7 @@ export type AnalyticsEventType =
   | 'restore_completed'
   | 'subscription_manage_tapped'
   | 'watch_session_synced'
+  | 'overcoming_step_completed'
   | 'curriculum_viewed'
   | 'key_phrase_opened'
   | 'weak_phrase_reviewed'
