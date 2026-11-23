@@ -41,7 +41,8 @@ export type AnalyticsEventType =
   | 'purchase_failed'
   | 'restore_completed'
   | 'subscription_manage_tapped'
-  | 'watch_session_synced';
+  | 'watch_session_synced'
+  | 'overcoming_step_completed';
 
 export interface AnalyticsEvent {
   /** 端末内連番 (1 起算) */

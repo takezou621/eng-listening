@@ -7,7 +7,15 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { useEntitlement } from '@/features/billing/billingStore';
 import {
+  MASTERY_STAGE_LABELS,
+  computeTypeMasteryList,
+  useMasteryData,
+  type MasteryStage,
+} from '@/features/learning/masteryStore';
+import { pickWeakestFocusType } from '@/features/learning/overcomingPath';
+import {
   LINKING_LABELS,
+  LINKING_SYMBOLS,
   LINKING_TEXT_DECORATIONS,
   getLinkingColor,
 } from '@/features/lesson/linkingViz';
@@ -48,25 +56,9 @@ export default function ProgressScreen() {
   const days = useProgressData();
   const { isPremium } = useEntitlement();
   const { weakSentences, dailyGoalMinutes, setDailyGoalMinutes } = useUserData();
+  const masteryStore = useMasteryData();
   const [goalSheetVisible, setGoalSheetVisible] = useState(false);
   const lessonList = getLessonList();
-
-  const weakByType = useMemo(() => {
-    if (!isPremium) return [] as [LessonLinkingNote['type'], number][];
-    const counts: Partial<Record<LessonLinkingNote['type'], number>> = {};
-    for (const w of weakSentences) {
-      const bundle = lessonList.find((l) => l.entry.id === w.lessonId)?.bundle;
-      const sentence = bundle?.data.sentences.find((st) => st.index === w.sentenceIndex);
-      for (const note of sentence?.linking ?? []) {
-        counts[note.type] = (counts[note.type] ?? 0) + 1;
-      }
-    }
-    return (Object.entries(counts) as [LessonLinkingNote['type'], number][]).sort(
-      (a, b) => b[1] - a[1]
-    );
-  }, [weakSentences, lessonList, isPremium]);
-
-  const maxWeakCount = weakByType[0]?.[1] ?? 1;
 
   const [today, setToday] = useState(todayStr());
   useEffect(() => {
@@ -101,13 +93,41 @@ export default function ProgressScreen() {
     frozen: boolean;
   } | null>(null);
 
-  const todaysLesson = useMemo(() => {
+  const completedLessonIds = useMemo(() => {
     const set = new Set<string>();
     for (const day of Object.values(days)) {
       for (const id of day.completedLessons ?? []) set.add(id);
     }
-    return getTodaysLesson(set);
+    return set;
   }, [days]);
+
+  const todaysLesson = useMemo(() => getTodaysLesson(completedLessonIds), [completedLessonIds]);
+
+  const masteryList = useMemo(
+    () => computeTypeMasteryList(masteryStore, weakSentences, completedLessonIds, lessonList),
+    [masteryStore, weakSentences, completedLessonIds, lessonList],
+  );
+
+  const weakestPick = useMemo(
+    () => pickWeakestFocusType(masteryList, weakSentences, lessonList),
+    [masteryList, weakSentences, lessonList],
+  );
+
+  const stageColor = (stage: MasteryStage): string => {
+    if (stage === 'mastered') return colors.success;
+    if (stage === 'weak') return colors.warning;
+    if (stage === 'developing') return colors.primary;
+    return colors.textMuted;
+  };
+
+  const firstLessonForType = (type: LessonLinkingNote['type']): string | null => {
+    const match = lessonList.find(
+      (item) =>
+        item.bundle !== null &&
+        item.bundle.data.sentences.some((st) => st.linking.some((note) => note.type === type)),
+    );
+    return match?.entry.id ?? null;
+  };
 
   const formatDayLabel = (date: string): string => {
     const parts = date.split('-').map(Number);
@@ -207,6 +227,41 @@ export default function ProgressScreen() {
               {todaysLesson.item.bundle?.data.titleJa ?? todaysLesson.item.entry.title}
             </ThemedText>
           </Pressable>
+        ) : null}
+
+        {weakestPick || hasData || weakSentences.length > 0 ? (
+          <View style={[styles.goalLinksWrap, { borderTopColor: colors.border }]}>
+            {weakestPick ? (
+              <Pressable
+                onPress={() =>
+                  router.push(
+                    `/lesson?lesson=${weakestPick.lessonId}&focus=${weakestPick.type}`,
+                  )
+                }
+                style={styles.goalLinkRow}
+                accessibilityRole="button"
+              >
+                <ThemedText variant="caption" color="primary" style={styles.goalLinkText} numberOfLines={1}>
+                  {LINKING_SYMBOLS[weakestPick.type]} 最弱「{LINKING_LABELS[weakestPick.type]}」を 3 ステップで克服
+                </ThemedText>
+                <ThemedText variant="caption" color="primary">
+                  ›
+                </ThemedText>
+              </Pressable>
+            ) : null}
+            <Pressable
+              onPress={() => router.push('/onboarding?mode=rediagnosis')}
+              style={styles.goalLinkRow}
+              accessibilityRole="button"
+            >
+              <ThemedText variant="caption" color="muted" style={styles.goalLinkText} numberOfLines={1}>
+                聞き取り再診断で伸びをチェック
+              </ThemedText>
+              <ThemedText variant="caption" color="muted">
+                ›
+              </ThemedText>
+            </Pressable>
+          </View>
         ) : null}
       </View>
 
@@ -490,45 +545,65 @@ export default function ProgressScreen() {
         <ThemedText variant="heading">詳細な弱点分析 (プレミアム)</ThemedText>
         {isPremium ? (
           <>
-            {weakByType.length > 0 ? (
-              weakByType.map(([type, count]) => {
-                const typeColor = getLinkingColor(type, scheme);
-                const ratio = count / maxWeakCount;
-                return (
-                  <View key={type} style={styles.weakBarBlock}>
-                    <View style={styles.missedRow}>
+            {masteryList.map((entry) => {
+              const typeColor = getLinkingColor(entry.type, scheme);
+              const badgeColor = stageColor(entry.stage);
+              const starterId = firstLessonForType(entry.type);
+              return (
+                <View key={entry.type} style={styles.weakBarBlock}>
+                  <View style={styles.masteryRowHeader}>
+                    <View style={styles.masteryTitleGroup}>
                       <ThemedText
                         variant="caption"
                         style={[
                           styles.weakLabel,
                           { color: typeColor, textDecorationColor: typeColor },
-                          LINKING_TEXT_DECORATIONS[type],
+                          LINKING_TEXT_DECORATIONS[entry.type],
                         ]}
                       >
-                        {LINKING_LABELS[type] ?? type}
+                        {LINKING_SYMBOLS[entry.type]} {LINKING_LABELS[entry.type]}
                       </ThemedText>
-                      <ThemedText variant="caption" color="muted">
-                        {count} 件
-                      </ThemedText>
+                      <View style={[styles.masteryStageBadge, { borderColor: badgeColor }]}>
+                        <ThemedText variant="caption" style={{ color: badgeColor, fontWeight: '700' }}>
+                          {MASTERY_STAGE_LABELS[entry.stage]}
+                        </ThemedText>
+                      </View>
                     </View>
-                    <View style={[styles.weakTrack, { backgroundColor: colors.border }]}>
-                      <View
-                        style={[
-                          styles.weakFill,
-                          { width: `${ratio * 100}%`, backgroundColor: typeColor },
-                        ]}
-                      />
-                    </View>
+                    <ThemedText variant="caption" color="muted">
+                      {entry.stage === 'untested' ? '—' : `${entry.score}%`}
+                    </ThemedText>
                   </View>
-                );
-              })
-            ) : (
-              <ThemedText variant="caption" color="muted">
-                苦手フレーズを登録すると、音の変化のタイプ別にグラフで集計されます。
-              </ThemedText>
-            )}
+                  <View style={[styles.weakTrack, { backgroundColor: colors.border }]}>
+                    <View
+                      style={[
+                        styles.weakFill,
+                        { width: `${entry.score}%`, backgroundColor: typeColor },
+                      ]}
+                    />
+                  </View>
+                  <View style={styles.masterySubRow}>
+                    <ThemedText variant="caption" color="muted">
+                      {entry.practiceCount > 0 || entry.activeWeakCount > 0
+                        ? `苦手 ${entry.activeWeakCount}件・練習 ${entry.practiceCount}回`
+                        : '診断またはレッスンで記録されます'}
+                    </ThemedText>
+                    {starterId ? (
+                      <Pressable
+                        onPress={() => router.push(`/lesson?lesson=${starterId}&focus=${entry.type}`)}
+                        hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}
+                        accessibilityRole="button"
+                      >
+                        <ThemedText variant="caption" color="primary" style={styles.masteryPracticeLink}>
+                          3ステップで克服 ›
+                        </ThemedText>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                </View>
+              );
+            })}
             <ThemedText variant="caption" color="muted">
-              苦手フレーズ帳 ({weakSentences.length} 件) に基づく分析です。
+              全 8 種の診断・練習履歴・苦手フレーズ ({weakSentences.length} 件) を統合して算出しています。
             </ThemedText>
           </>
         ) : (
@@ -754,5 +829,49 @@ const styles = StyleSheet.create({
   weakFill: {
     height: 6,
     borderRadius: 3,
+  },
+  goalLinksWrap: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    marginTop: 4,
+    paddingTop: 4,
+  },
+  goalLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 40,
+    paddingVertical: 6,
+    gap: 8,
+  },
+  goalLinkText: {
+    flex: 1,
+    fontWeight: '600',
+  },
+  masteryRowHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  masteryTitleGroup: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  masteryStageBadge: {
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 7,
+    paddingVertical: 1,
+  },
+  masterySubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  masteryPracticeLink: {
+    fontWeight: '700',
   },
 });

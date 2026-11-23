@@ -42,6 +42,7 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `restore_completed` | `result`（restored/nothing） | 復元の成否 |
 | `subscription_manage_tapped` | — | 設定のプラン導線タップ = **解約意図のシグナル** |
 | `watch_session_synced` | `sessions_count` | Watch 単体学習の取り込み（連携チャネルの利用） |
+| `overcoming_step_completed` | `lesson_id`, `sound_change_type`, `step` | 弱点克服パスの 3 ステップ（`listen` / `read` / `speak`）完了の把握 |
 | `screen_view` | `screen_name`（home/phrases/progress/settings/lesson/onboarding/paywall/legal） | 画面遷移・滞在の把握（自動収集と併用） |
 
 ## 3. ユーザープロパティ

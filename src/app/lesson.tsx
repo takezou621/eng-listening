@@ -32,6 +32,19 @@ import {
   registerWatchCommandHandler,
 } from '@/features/watch/watchSync';
 import { initBillingAsync, useEntitlement } from '@/features/billing/billingStore';
+import { OvercomingGuideBar } from '@/features/learning/components/OvercomingGuideBar';
+import {
+  recordMasteryLessonCompleted,
+  recordMasteryLinkingNoteOpened,
+  recordMasteryOvercomingCompleted,
+  recordMasteryShadowing,
+} from '@/features/learning/masteryStore';
+import {
+  getTargetSentenceIndicesForType,
+  parseFocusType,
+  pickNextOvercomingLesson,
+  type OvercomingStepKey,
+} from '@/features/learning/overcomingPath';
 import {
   CompletionSummaryModal,
   LegendSheet,
@@ -319,6 +332,7 @@ function LessonPlayerScreen({
   initialSheet,
   autorecordParam,
   autostudyParam,
+  focusType,
 }: {
   bundle: LessonBundle;
   demoParam: boolean;
@@ -327,6 +341,7 @@ function LessonPlayerScreen({
   initialSheet: 'linking' | 'tools' | 'legend' | null;
   autorecordParam: boolean;
   autostudyParam: boolean;
+  focusType: LessonLinkingNote['type'] | null;
 }) {
   const lesson = bundle.data;
   const sentences = lesson.sentences;
@@ -343,14 +358,26 @@ function LessonPlayerScreen({
   const completedRef = useRef(false);
   const effectivePosRef = useRef(0);
 
-  const nextLesson = useMemo(() => {
+  const nextLessonPick = (() => {
     const list = getLessonList();
+    if (focusType) {
+      const completedIds = new Set<string>();
+      for (const day of Object.values(progressDays)) {
+        for (const id of day.completedLessons ?? []) completedIds.add(id);
+      }
+      return pickNextOvercomingLesson(focusType, lesson.id, completedIds, list);
+    }
     const i = list.findIndex((it) => it.entry.id === lesson.id);
     for (let j = i + 1; j < list.length; j++) {
-      if (list[j].bundle) return list[j];
+      if (list[j].bundle) return { item: list[j], reason: null as string | null };
     }
     return null;
-  }, [lesson.id]);
+  })();
+
+  const targetSentencePositions = useMemo(
+    () => (focusType ? getTargetSentenceIndicesForType(lesson, focusType) : []),
+    [lesson, focusType],
+  );
 
   const prefs = getPlayerPrefs();
   useEffect(() => {
@@ -362,11 +389,45 @@ function LessonPlayerScreen({
     initialSentenceIndex >= 0 &&
     initialSentenceIndex < sentences.length
       ? initialSentenceIndex
-      : 0;
+      : targetSentencePositions[0] ?? 0;
 
-  const [lessonMode, setLessonModeState] = useState<LessonMode>(
-    initialMode ?? (autorecordParam ? 'speak' : prefs.lessonMode)
-  );
+  const initialResolvedMode: LessonMode =
+    initialMode ?? (autorecordParam ? 'speak' : focusType ? 'listen' : prefs.lessonMode);
+
+  const [overcomingDone, setOvercomingDone] = useState<Record<OvercomingStepKey, boolean>>(() => ({
+    listen: false,
+    read: initialResolvedMode === 'read',
+    speak: false,
+  }));
+  const loggedOvercomingRef = useRef<Set<OvercomingStepKey>>(new Set());
+  const overcomingMasteryRecordedRef = useRef(false);
+
+  const markOvercomingStep = (step: OvercomingStepKey) => {
+    if (!focusType) return;
+    if (!loggedOvercomingRef.current.has(step)) {
+      loggedOvercomingRef.current.add(step);
+      logEvent('overcoming_step_completed', {
+        lesson_id: lesson.id,
+        sound_change_type: focusType,
+        step,
+      });
+    }
+    setOvercomingDone((prev) => {
+      const next = prev[step] ? prev : { ...prev, [step]: true };
+      if (
+        next.listen &&
+        next.read &&
+        next.speak &&
+        !overcomingMasteryRecordedRef.current
+      ) {
+        overcomingMasteryRecordedRef.current = true;
+        recordMasteryOvercomingCompleted(focusType);
+      }
+      return next;
+    });
+  };
+
+  const [lessonMode, setLessonModeState] = useState<LessonMode>(initialResolvedMode);
   const [focusedPos, setFocusedPos] = useState<number>(clampedInitialPos);
   const [rate, setRate] = useState<PlaybackRate>(prefs.rate);
   const [showChunkJa, setShowChunkJaState] = useState(prefs.showChunkJa);
@@ -421,10 +482,10 @@ function LessonPlayerScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player]);
 
-  // 初期 ?sentence=<n> 指定時は再生位置も対象文の先頭へ合わせる
+  // 初期 ?sentence=<n> または ?focus=<type> 指定時は再生位置も対象文の先頭へ合わせる
   const initialSeekRef = useRef(false);
   useEffect(() => {
-    if (initialSeekRef.current || initialSentenceIndex === null) return;
+    if (initialSeekRef.current || clampedInitialPos <= 0) return;
     const target = sentences[clampedInitialPos];
     if (!target) return;
     initialSeekRef.current = true;
@@ -601,6 +662,12 @@ function LessonPlayerScreen({
     setShadowingCounts(addShadowingCount(lesson.id, sentenceIndex));
     setSessionShadowingCount((c) => c + 1);
     addShadowingRecord(lesson.id);
+    const recSentence = sentences.find((s) => s.index === sentenceIndex);
+    const recTypes = recSentence ? recSentence.linking.map((n) => n.type) : [];
+    recordMasteryShadowing(recTypes);
+    if (focusType) {
+      markOvercomingStep('speak');
+    }
     logEvent('shadowing_recorded', { lessonId: lesson.id });
     append(`録音完了: 文${sentenceIndex + 1} ${duration.toFixed(1)} 秒`);
   };
@@ -754,6 +821,9 @@ function LessonPlayerScreen({
     }
     setLessonModeState(nextMode);
     setPlayerPrefsLessonMode(nextMode);
+    if (focusType && nextMode === 'read') {
+      markOvercomingStep('read');
+    }
     logEvent('lesson_mode_changed', { lessonId: lesson.id, mode: nextMode });
   };
 
@@ -875,6 +945,9 @@ function LessonPlayerScreen({
     if (status.didJustFinish) {
       completedRef.current = true;
       markLessonCompleted(lesson.id);
+      recordMasteryLessonCompleted(
+        sentences.flatMap((s) => s.linking.map((n) => n.type)),
+      );
       logEvent('lesson_completed', {
         lessonId: lesson.id,
         seconds: Math.round(sessionTotalSecondsRef.current),
@@ -885,7 +958,7 @@ function LessonPlayerScreen({
         setShowSummary(true);
       }
     }
-  }, [status.didJustFinish, lesson.id]);
+  }, [status.didJustFinish, lesson.id, sentences]);
 
   // AB リピート
   useEffect(() => {
@@ -1169,6 +1242,10 @@ function LessonPlayerScreen({
     const note = sentence.linking[noteIndex];
     if (note) {
       append(`音の変化: ${note.span} (${LINKING_LABELS[note.type]})`);
+      recordMasteryLinkingNoteOpened(note.type);
+      if (focusType && note.type === focusType) {
+        markOvercomingStep('listen');
+      }
       logEvent('linking_note_opened', { lessonId: lesson.id, soundChangeType: note.type });
     }
   };
@@ -1301,6 +1378,25 @@ function LessonPlayerScreen({
         </View>
       ) : null}
 
+      {/* 弱点タイプ克服ガイド (Phase 1-C: ?focus=<type> 指定時のみ表示) */}
+      {focusType ? (
+        <OvercomingGuideBar
+          focusType={focusType}
+          completedSteps={overcomingDone}
+          currentMode={lessonMode}
+          targetSentenceCount={targetSentencePositions.length}
+          currentSentenceHasTarget={targetSentencePositions.includes(effectivePos)}
+          onSelectStep={(step) => switchMode(step)}
+          onJumpToTargetSentence={() => {
+            if (targetSentencePositions.length === 0) return;
+            const nextPos =
+              targetSentencePositions.find((pos) => pos > effectivePos) ??
+              targetSentencePositions[0];
+            goToPosition(nextPos, statusRef.current.playing);
+          }}
+        />
+      ) : null}
+
       {/* モード 1: 聞く (カラオケ風表示) */}
       {lessonMode === 'listen' && displaySentence ? (
         <View
@@ -1361,12 +1457,23 @@ function LessonPlayerScreen({
           {displaySentence.linking.length > 0 ? (
             <Pressable
               onPress={() => {
-                setLinkingSheetTarget({ sentenceIndex: displaySentence.index, noteIndex: 0 });
-                const firstNote = displaySentence.linking[0];
-                if (firstNote) {
+                const focusNoteIdx = focusType
+                  ? displaySentence.linking.findIndex((n) => n.type === focusType)
+                  : -1;
+                const targetNoteIdx = focusNoteIdx >= 0 ? focusNoteIdx : 0;
+                setLinkingSheetTarget({
+                  sentenceIndex: displaySentence.index,
+                  noteIndex: targetNoteIdx,
+                });
+                const targetNote = displaySentence.linking[targetNoteIdx];
+                if (targetNote) {
+                  recordMasteryLinkingNoteOpened(targetNote.type);
+                  if (focusType && targetNote.type === focusType) {
+                    markOvercomingStep('listen');
+                  }
                   logEvent('linking_note_opened', {
                     lessonId: lesson.id,
-                    soundChangeType: firstNote.type,
+                    soundChangeType: targetNote.type,
                   });
                 }
               }}
@@ -1617,13 +1724,25 @@ function LessonPlayerScreen({
         goalRatio={goalStatus.ratio}
         goalAchieved={goalStatus.achieved}
         isPremium={isPremium}
-        hasNextLesson={nextLesson !== null}
+        hasNextLesson={nextLessonPick !== null}
+        focusType={focusType}
+        overcomingCompletedSteps={
+          focusType
+            ? (overcomingDone.listen ? 1 : 0) +
+              (overcomingDone.read ? 1 : 0) +
+              (overcomingDone.speak ? 1 : 0)
+            : undefined
+        }
+        nextLessonReason={nextLessonPick?.reason ?? null}
         onNextLesson={() => {
-          if (!nextLesson) return;
+          if (!nextLessonPick) return;
           setShowSummary(false);
           router.replace({
             pathname: '/lesson',
-            params: { lesson: nextLesson.entry.id },
+            params: {
+              lesson: nextLessonPick.item.entry.id,
+              ...(focusType ? { focus: focusType } : {}),
+            },
           });
         }}
         onOpenPaywall={() => {
@@ -2048,7 +2167,7 @@ const styles = StyleSheet.create({
 });
 
 /**
- * ルート: ?lesson=<id>&sentence=<n>&mode=listen|read|speak|script&sheet=linking|tools|legend
+ * ルート: ?lesson=<id>&sentence=<n>&mode=listen|read|speak|script&sheet=linking|tools|legend&focus=<soundType>
  */
 export default function LessonRoute() {
   const params = useLocalSearchParams<{
@@ -2059,11 +2178,13 @@ export default function LessonRoute() {
     sheet?: string | string[];
     autorecord?: string | string[];
     autostudy?: string | string[];
+    focus?: string | string[];
   }>();
   const lessonParam = Array.isArray(params.lesson) ? params.lesson[0] : params.lesson;
   const sentenceParam = Array.isArray(params.sentence) ? params.sentence[0] : params.sentence;
   const modeParam = Array.isArray(params.mode) ? params.mode[0] : params.mode;
   const sheetParam = Array.isArray(params.sheet) ? params.sheet[0] : params.sheet;
+  const focusParam = Array.isArray(params.focus) ? params.focus[0] : params.focus;
 
   const bundle = getLessonBundle(lessonParam);
   const sentenceNumber = Number.parseInt(sentenceParam ?? '', 10);
@@ -2075,10 +2196,11 @@ export default function LessonRoute() {
   const initialSheet = validSheets.includes(sheetParam as (typeof validSheets)[number])
     ? (sheetParam as 'linking' | 'tools' | 'legend')
     : null;
+  const focusType = parseFocusType(focusParam);
 
   return (
     <LessonPlayerScreen
-      key={`${bundle.data.id}-${modeParam ?? ''}-${sheetParam ?? ''}-${sentenceParam ?? ''}`}
+      key={`${bundle.data.id}-${modeParam ?? ''}-${sheetParam ?? ''}-${sentenceParam ?? ''}-${focusParam ?? ''}`}
       bundle={bundle}
       demoParam={params.demo === '1'}
       initialSentenceIndex={Number.isFinite(sentenceNumber) ? sentenceNumber - 1 : null}
@@ -2086,6 +2208,7 @@ export default function LessonRoute() {
       initialSheet={initialSheet}
       autorecordParam={params.autorecord === '1'}
       autostudyParam={params.autostudy === '1'}
+      focusType={focusType}
     />
   );
 }
