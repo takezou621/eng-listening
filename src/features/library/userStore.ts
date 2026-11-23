@@ -206,6 +206,33 @@ export function useUserData() {
       });
     },
     isLessonFavorite: (lessonId: string) => data.favoriteLessons.includes(lessonId),
+    /** 初回診断で聞き取れなかった文を苦手フレーズ帳へ一括自動登録する (既登録分はスキップ) */
+    addWeakSentencesFromDiagnostic: (items: { lessonId: string; sentenceIndex: number }[]) => {
+      if (items.length === 0) return;
+      updateUserData((current) => {
+        const existingKeys = new Set(
+          current.weakSentences.map((s) => `${s.lessonId}:${s.sentenceIndex}`)
+        );
+        const now = Date.now();
+        const added: WeakSentence[] = [];
+        items.forEach((item, idx) => {
+          const key = `${item.lessonId}:${item.sentenceIndex}`;
+          if (!existingKeys.has(key)) {
+            existingKeys.add(key);
+            added.push({
+              lessonId: item.lessonId,
+              sentenceIndex: item.sentenceIndex,
+              addedAtMs: now - idx,
+            });
+          }
+        });
+        if (added.length === 0) return current;
+        return {
+          ...current,
+          weakSentences: [...added, ...current.weakSentences],
+        };
+      });
+    },
     toggleWeakSentence: (lessonId: string, sentenceIndex: number) => {
       // 追加か削除かは現在の状態で判定し、計測イベントを分ける
       const isWeak = data.weakSentences.some(

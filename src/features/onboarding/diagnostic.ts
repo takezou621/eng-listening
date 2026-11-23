@@ -1,3 +1,4 @@
+import { LINKING_LABELS } from '@/features/lesson/linkingViz';
 import { getLessonList, type LessonBundle } from '@/features/lesson/registry';
 import type { LessonLinkingNote } from '@/features/lesson/types';
 
@@ -47,8 +48,10 @@ export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
   },
 ];
 
-/** 診断結果: 種類ごとの正解/不正解 */
+/** 診断結果: 種類ごとの正解/不正解と元文の参照 */
 export interface DiagnosticResult {
+  lessonId: string;
+  sentenceIndex: number;
   type: LessonLinkingNote['type'];
   span: string;
   correct: boolean;
@@ -65,7 +68,11 @@ export function countMissedTypes(results: DiagnosticResult[]): Record<string, nu
   return missed;
 }
 
-/** 弱点に合う推薦レッスン: 不正解種類の注釈を最も多く含むレッスンを返す */
+/**
+ * 弱点に合う推薦レッスンを返す。
+ * - 不正解がある場合: 不正解種類の注釈を最も多く含むレッスン
+ * - 全問正解の場合: 自然な発話スピードに慣れる中級レッスン (フォールバックで先頭)
+ */
 export function pickRecommendedLesson(
   missedTypes: Record<string, number>,
   bundles: LessonBundle[]
@@ -73,7 +80,17 @@ export function pickRecommendedLesson(
   const missedOrder = Object.entries(missedTypes)
     .sort((a, b) => b[1] - a[1])
     .map(([type]) => type);
-  if (missedOrder.length === 0) return null;
+
+  if (missedOrder.length === 0) {
+    const nextStep = bundles.find((b) => b.data.level === 'intermediate') ?? bundles[0];
+    if (!nextStep) return null;
+    return {
+      lessonId: nextStep.data.id,
+      title: nextStep.data.title,
+      titleJa: nextStep.data.titleJa,
+      reason: '全問正解です！自然な会話スピードの中級レッスンでさらに聞き取りを磨きましょう。',
+    };
+  }
 
   let best: { bundle: LessonBundle; score: number } | null = null;
   for (const bundle of bundles) {
@@ -91,22 +108,12 @@ export function pickRecommendedLesson(
     }
   }
   if (!best) return null;
-  const weakest = missedOrder[0];
-  const label: Record<string, string> = {
-    linking: 'リンキング',
-    reduction: 'リダクション',
-    flapping: 'フラッピング',
-    assimilation: '同化',
-    palatalization: '口蓋化',
-    elision: '脱落',
-    intrusion: '侵入',
-    'weak-form': '弱形',
-  };
+  const weakest = missedOrder[0] as LessonLinkingNote['type'];
   return {
     lessonId: best.bundle.data.id,
     title: best.bundle.data.title,
     titleJa: best.bundle.data.titleJa,
-    reason: `${label[weakest] ?? weakest}の音の変化が多く出てくるレッスンです。まずこの 1 本で聞き取りを鍛えましょう。`,
+    reason: `${LINKING_LABELS[weakest] ?? weakest}の音の変化が多く出てくるレッスンです。まずこの 1 本で鍛えましょう。`,
   };
 }
 

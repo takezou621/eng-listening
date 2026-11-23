@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { SEEK_TOLERANCE_MILLIS } from '@/config/appConfig';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { SymbolView } from 'expo-symbols';
 
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
@@ -13,6 +14,11 @@ import {
   resolveQuestionData,
   type DiagnosticResult,
 } from '@/features/onboarding/diagnostic';
+import {
+  LINKING_LABELS,
+  LINKING_TEXT_DECORATIONS,
+  getLinkingColor,
+} from '@/features/lesson/linkingViz';
 import { getLessonList } from '@/features/lesson/registry';
 import { useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
@@ -22,18 +28,19 @@ import { useTheme } from '@/theme/AppThemeProvider';
 /**
  * 初回オンボーディング診断 (60 秒 Aha Moment)。
  * 「単語は知っているのに聞き取れない理由が見える」体験を 3 問で届け、
- * 弱点に合うレッスンへつなぐ。スキップは常時表示 (強制しない)。
+ * 弱点に合うレッスンと苦手フレーズ自動登録へつなぐ。スキップは常時表示 (強制しない)。
  * 実施結果は端末内にのみ保存し、外部送信はしない。
  */
 
 type Phase = 'intro' | 'question' | 'feedback' | 'result';
 
 export default function OnboardingScreen() {
-  const params = useLocalSearchParams<{ step?: string | string[] }>();
+  const params = useLocalSearchParams<{ step?: string | string[]; perfect?: string | string[] }>();
   const stepParam = Array.isArray(params.step) ? params.step[0] : params.step;
+  const perfectParam = Array.isArray(params.perfect) ? params.perfect[0] : params.perfect;
   const router = useRouter();
   const { colors } = useTheme();
-  const { completeOnboarding } = useUserData();
+  const { completeOnboarding, addWeakSentencesFromDiagnostic } = useUserData();
 
   const questions = DIAGNOSTIC_QUESTIONS;
   // ?step=result / ?step=questions で指定フェーズから開始できる (検証用 deep link)。
@@ -43,9 +50,11 @@ export default function OnboardingScreen() {
   const initialResults: DiagnosticResult[] =
     stepParam === 'result'
       ? questions.map((q, i) => ({
+          lessonId: q.lessonId,
+          sentenceIndex: q.sentenceIndex,
           type: q.type,
           span: q.span,
-          correct: i !== 1, // 1 問だけ不正解にして内訳の表示を検証する
+          correct: perfectParam === '1' ? true : i !== 1,
         }))
       : [];
   const [phase, setPhase] = useState<Phase>(initialPhase);
@@ -66,11 +75,63 @@ export default function OnboardingScreen() {
   if (phase === 'intro') {
     return (
       <Screen>
-        <ThemedText variant="title">はじめての 60 秒診断</ThemedText>
-        <ThemedText variant="caption" color="muted" style={styles.subtitle}>
-          3 つの音声を聞いて、「何と聞こえたか」に答えるだけ。
-          単語は知っているのに聞き取れない理由が、ここで見えます。
-        </ThemedText>
+        <View style={styles.introHero}>
+          <View style={[styles.heroBadge, { backgroundColor: colors.secondarySurface }]}>
+            <SymbolView
+              name="waveform"
+              size={28}
+              tintColor={colors.primary}
+              type="monochrome"
+              resizeMode="scaleAspectFit"
+              fallback={<ThemedText style={{ fontSize: 24 }}>🎧</ThemedText>}
+            />
+          </View>
+          <ThemedText variant="title">はじめての 60 秒診断</ThemedText>
+          <ThemedText variant="caption" color="muted" style={styles.subtitle}>
+            3 つの音声を聞いて、「何と聞こえたか」に答えるだけ。
+            単語は知っているのに聞き取れない理由が、ここで見えます。
+          </ThemedText>
+        </View>
+
+        <View
+          style={[
+            styles.card,
+            styles.introPointsCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.introPointRow}>
+            <ThemedText
+              variant="caption"
+              color="primary"
+              style={[styles.introPointBadge, { backgroundColor: colors.secondarySurface }]}
+            >
+              1
+            </ThemedText>
+            <ThemedText variant="caption">全 3 問・約 60 秒で音の変化をチェック</ThemedText>
+          </View>
+          <View style={styles.introPointRow}>
+            <ThemedText
+              variant="caption"
+              color="primary"
+              style={[styles.introPointBadge, { backgroundColor: colors.secondarySurface }]}
+            >
+              2
+            </ThemedText>
+            <ThemedText variant="caption">つまずいた種類を見える化＆おすすめ提案</ThemedText>
+          </View>
+          <View style={styles.introPointRow}>
+            <ThemedText
+              variant="caption"
+              color="primary"
+              style={[styles.introPointBadge, { backgroundColor: colors.secondarySurface }]}
+            >
+              3
+            </ThemedText>
+            <ThemedText variant="caption">結果は端末内にのみ保存（登録不要）</ThemedText>
+          </View>
+        </View>
+
         <Pressable
           style={[styles.primaryButton, { backgroundColor: colors.primary }]}
           accessibilityRole="button"
@@ -84,11 +145,11 @@ export default function OnboardingScreen() {
           </ThemedText>
         </Pressable>
         <Pressable
-        onPress={skip}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        accessibilityRole="button"
-        style={styles.skipButton}
-      >
+          onPress={skip}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          style={styles.skipButton}
+        >
           <ThemedText variant="caption" color="muted">
             スキップしてライブラリへ
           </ThemedText>
@@ -102,19 +163,24 @@ export default function OnboardingScreen() {
       <ResultScreen
         results={results}
         onFinish={() => {
-          // 検証用 deep link (?step=result) の架空の結果は分析ログに記録しない
+          // 検証用 deep link (?step=result) の架空の結果は分析ログ・苦手フレーズへ記録しない
           if (stepParam !== 'result') {
+            const missedItems = results
+              .filter((r) => !r.correct)
+              .map((r) => ({ lessonId: r.lessonId, sentenceIndex: r.sentenceIndex }));
+            addWeakSentencesFromDiagnostic(missedItems);
+
             const score = results.filter((r) => r.correct).length;
             const level = score >= 3 ? 'advanced' : score === 2 ? 'intermediate' : 'beginner';
             logEvent('onboarding_completed', {
-            linking_correct: results.filter((r) => r.type === 'linking' && r.correct).length,
-            linking_missed: results.filter((r) => r.type === 'linking' && !r.correct).length,
-            reduction_correct: results.filter((r) => r.type === 'reduction' && r.correct).length,
-            reduction_missed: results.filter((r) => r.type === 'reduction' && !r.correct).length,
-            flapping_correct: results.filter((r) => r.type === 'flapping' && r.correct).length,
-            flapping_missed: results.filter((r) => r.type === 'flapping' && !r.correct).length,
-            score,
-            level,
+              linking_correct: results.filter((r) => r.type === 'linking' && r.correct).length,
+              linking_missed: results.filter((r) => r.type === 'linking' && !r.correct).length,
+              reduction_correct: results.filter((r) => r.type === 'reduction' && r.correct).length,
+              reduction_missed: results.filter((r) => r.type === 'reduction' && !r.correct).length,
+              flapping_correct: results.filter((r) => r.type === 'flapping' && r.correct).length,
+              flapping_missed: results.filter((r) => r.type === 'flapping' && !r.correct).length,
+              score,
+              level,
             });
             setGa4UserProperties({ diagnostic_level: level });
           }
@@ -126,6 +192,7 @@ export default function OnboardingScreen() {
 
   return (
     <QuestionPhase
+      key={questionIndex}
       questionIndex={questionIndex}
       setQuestionIndex={setQuestionIndex}
       results={results}
@@ -153,12 +220,12 @@ function QuestionPhase({
   setPhase: (p: 'intro' | 'question' | 'feedback' | 'result') => void;
   onSkip: () => void;
 }) {
-  const { colors } = useTheme();
+  const { scheme, colors } = useTheme();
   const question = DIAGNOSTIC_QUESTIONS[questionIndex];
   const resolved = useMemo(() => resolveQuestionData(question), [question]);
   const [answered, setAnswered] = useState<number | null>(null);
 
-  // 選択肢の表示順を問題ごとに変える (正解が常に先頭に来る固定配置にしない)。
+  // 選択肢の表示順を問題ごとに変える (正解が常に先頭に来る固定配置にしない: W8)。
   // 描画の純粋性を保つため、問題内容から決まるシードの決定的シャッフルを使う。
   const shuffledChoices = useMemo(() => {
     const items = question.choices.map((choice, i) => ({ choice, correct: i === 0 }));
@@ -182,7 +249,7 @@ function QuestionPhase({
     return items;
   }, [question, questionIndex]);
 
-  // 設問文に正解 (span) を出さないため、文中の該当箇所を空欄に置き換えた表示を作る
+  // 設問文に正解 (span) を出さないため、文中の該当箇所を空欄に置き換えた表示を作る (W8)
   const maskedSentence = useMemo(() => {
     if (!resolved) return null;
     const idx = resolved.text.indexOf(question.span);
@@ -229,6 +296,8 @@ function QuestionPhase({
     setResults([
       ...results,
       {
+        lessonId: question.lessonId,
+        sentenceIndex: question.sentenceIndex,
         type: question.type,
         span: question.span,
         correct: isCorrect,
@@ -254,6 +323,9 @@ function QuestionPhase({
       </Screen>
     );
   }
+
+  const progressRatio = (questionIndex + 1) / DIAGNOSTIC_QUESTIONS.length;
+  const noteColor = getLinkingColor(question.type, scheme);
 
   return (
     <Screen
@@ -282,14 +354,29 @@ function QuestionPhase({
         ) : undefined
       }
     >
-      <ThemedText variant="caption" color="muted">
-        診断 {questionIndex + 1} / {DIAGNOSTIC_QUESTIONS.length}
+      <View style={styles.progressHeader}>
+        <ThemedText variant="caption" color="muted">
+          診断 {questionIndex + 1} / {DIAGNOSTIC_QUESTIONS.length}
+        </ThemedText>
+        <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+          <View
+            style={[
+              styles.progressFill,
+              { backgroundColor: colors.primary, width: `${progressRatio * 100}%` },
+            ]}
+          />
+        </View>
+      </View>
+
+      <ThemedText variant="heading" style={styles.questionTitle}>
+        音声を聞いて、空欄の部分を選んでください
       </ThemedText>
-      <ThemedText variant="heading">音声を聞いて、何と聞こえたか答えてください</ThemedText>
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={playing ? '音声を再生中' : answered === null ? '音声を再生する' : 'もう一度再生する'}
+        accessibilityLabel={
+          playing ? '音声を再生中' : answered === null ? '音声を再生する' : 'もう一度再生する'
+        }
         accessibilityState={{ busy: playing }}
         style={[
           styles.playButton,
@@ -314,62 +401,88 @@ function QuestionPhase({
       </Pressable>
 
       {maskedSentence ? (
-        <ThemedText style={styles.maskedSentence}>
-          {maskedSentence.before}
-          <ThemedText style={{ color: colors.primary, fontWeight: '700' }}>＿＿＿＿</ThemedText>
-          {maskedSentence.after}
-        </ThemedText>
+        <View
+          style={[
+            styles.sentenceCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <ThemedText style={styles.maskedSentence}>
+            {maskedSentence.before}
+            <ThemedText style={{ color: colors.primary, fontWeight: '700' }}>＿＿＿＿</ThemedText>
+            {maskedSentence.after}
+          </ThemedText>
+        </View>
       ) : null}
-      <ThemedText variant="heading" style={styles.questionTitle}>
-        空欄の部分は何と聞こえた？
-      </ThemedText>
-      {shuffledChoices.map((item, i) => {
-        const choice = item.choice;
-        const isCorrect = item.correct;
-        const isSelected = answered === i;
-        const showState = answered !== null;
-        return (
-          <Pressable
-            key={choice}
-            onPress={() => answer(i)}
-            disabled={answered !== null}
-            accessibilityRole="button"
-            accessibilityState={{ selected: isSelected, disabled: answered !== null }}
-            accessibilityLabel={
-              showState
-                ? isCorrect
-                  ? `${choice}（正解）`
-                  : isSelected
-                    ? `${choice}（不正解）`
-                    : choice
-                : choice
-            }
-            style={[
-              styles.choiceButton,
-              { backgroundColor: colors.surface, borderColor: colors.border },
-              showState && isCorrect && { borderColor: colors.success, borderWidth: 2 },
-              showState && isSelected && !isCorrect && { borderColor: colors.danger, borderWidth: 2 },
-            ]}
-          >
-            <ThemedText
-              style={
-                showState && isCorrect
-                  ? { color: colors.success, fontWeight: '700' }
-                  : showState && isSelected && !isCorrect
-                    ? { color: colors.danger, fontWeight: '600' }
-                    : undefined
+
+      <View style={styles.choicesList}>
+        {shuffledChoices.map((item, i) => {
+          const choice = item.choice;
+          const isCorrect = item.correct;
+          const isSelected = answered === i;
+          const showState = answered !== null;
+          return (
+            <Pressable
+              key={choice}
+              onPress={() => answer(i)}
+              disabled={answered !== null}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected, disabled: answered !== null }}
+              accessibilityLabel={
+                showState
+                  ? isCorrect
+                    ? `${choice}（正解）`
+                    : isSelected
+                      ? `${choice}（不正解）`
+                      : choice
+                  : choice
               }
+              style={[
+                styles.choiceButton,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+                showState && isCorrect && { borderColor: colors.success, borderWidth: 2 },
+                showState && isSelected && !isCorrect && { borderColor: colors.danger, borderWidth: 2 },
+              ]}
             >
-              {showState && isCorrect ? '✓ ' : showState && isSelected ? '✗ ' : ''}
-              {choice}
-            </ThemedText>
-          </Pressable>
-        );
-      })}
+              <ThemedText
+                style={
+                  showState && isCorrect
+                    ? { color: colors.success, fontWeight: '700' }
+                    : showState && isSelected && !isCorrect
+                      ? { color: colors.danger, fontWeight: '600' }
+                      : undefined
+                }
+              >
+                {showState && isCorrect ? '✓ ' : showState && isSelected ? '✗ ' : ''}
+                {choice}
+              </ThemedText>
+            </Pressable>
+          );
+        })}
+      </View>
 
       {answered !== null ? (
-        <View style={[styles.explainCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ThemedText variant="heading">正解は「{question.choices[0]}」</ThemedText>
+        <View
+          style={[
+            styles.explainCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.explainTopRow}>
+            <ThemedText variant="heading">正解は「{question.choices[0]}」</ThemedText>
+            <View style={[styles.typeBadge, { backgroundColor: colors.secondarySurface }]}>
+              <ThemedText
+                variant="caption"
+                style={[
+                  styles.typeBadgeText,
+                  { color: noteColor, textDecorationColor: noteColor },
+                  LINKING_TEXT_DECORATIONS[question.type],
+                ]}
+              >
+                {LINKING_LABELS[question.type]}
+              </ThemedText>
+            </View>
+          </View>
           <ThemedText variant="caption" color="muted">
             {resolved.text}
           </ThemedText>
@@ -378,6 +491,7 @@ function QuestionPhase({
           </ThemedText>
         </View>
       ) : null}
+
       <Pressable
         onPress={onSkip}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -395,48 +509,112 @@ function QuestionPhase({
 // ---------------------------------------------------------------------------
 
 function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFinish: () => void }) {
-  const { colors } = useTheme();
+  const { scheme, colors } = useTheme();
   const router = useRouter();
   const missed = countMissedTypes(results);
-  const missedTypes = Object.keys(missed);
+  const totalCount = Math.max(results.length, 1);
+  const correctCount = results.filter((r) => r.correct).length;
+  const missedCount = results.length - correctCount;
+  const scoreRatio = correctCount / totalCount;
+  const allCorrect = missedCount === 0;
+
   const recommendation = pickRecommendedLesson(
     missed,
-    getLessonList().map((l) => l.bundle).filter((b): b is NonNullable<typeof b> => b !== null)
+    getLessonList()
+      .map((l) => l.bundle)
+      .filter((b): b is NonNullable<typeof b> => b !== null)
   );
-  const LABELS: Record<string, string> = {
-    linking: 'リンキング',
-    reduction: 'リダクション',
-    flapping: 'フラッピング',
-    assimilation: '同化',
-    palatalization: '口蓋化',
-    elision: '脱落',
-    intrusion: '侵入',
-    'weak-form': '弱形',
-  };
 
   return (
     <Screen>
       <ThemedText variant="title">診断結果</ThemedText>
       <ThemedText variant="caption" color="muted" style={styles.subtitle}>
-        {results.filter((r) => !r.correct).length > 0
-          ? '聞き取れなかった音の変化はここにあります。単語は知っているのに、音の変化で聞こえなくなっています。'
-          : 'すべて正解です。音の変化を聞き取れています。ライブラリからレッスンを選びましょう。'}
+        {allCorrect
+          ? '音の変化をしっかり聞き取れています。次のステップへ進みましょう。'
+          : '単語は知っているのに聞き取れない原因が、音の変化に見つかっています。'}
       </ThemedText>
 
-      {missedTypes.length > 0 ? (
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ThemedText variant="heading">聞き取れなかった音の変化</ThemedText>
-          {Object.entries(missed).map(([type, count]) => (
-            <View key={type} style={styles.missedRow}>
-              <ThemedText>{LABELS[type] ?? type}</ThemedText>
-              <ThemedText variant="caption" color="muted">
-                {count} 件
-              </ThemedText>
-            </View>
-          ))}
+      {/* ブロック 1: スコア & 音変化別ビジュアル内訳カード (P4 可視化 > 文章) */}
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.scoreHeaderRow}>
+          <View>
+            <ThemedText variant="caption" color="muted">
+              聞き取りスコア
+            </ThemedText>
+            <ThemedText variant="title" color="primary">
+              {correctCount} <ThemedText variant="caption" color="muted">/ {results.length} 問正解</ThemedText>
+            </ThemedText>
+          </View>
+          <View style={[styles.statusPill, { backgroundColor: colors.secondarySurface }]}>
+            <ThemedText
+              variant="caption"
+              style={{
+                color: allCorrect ? colors.success : colors.warning,
+                fontWeight: '700',
+              }}
+            >
+              {allCorrect ? '✓ 全問クリア' : `△ 要強化 ${missedCount} 件`}
+            </ThemedText>
+          </View>
         </View>
-      ) : null}
 
+        <View style={[styles.scoreTrack, { backgroundColor: colors.border }]}>
+          <View
+            style={[
+              styles.scoreFill,
+              {
+                width: `${scoreRatio * 100}%`,
+                backgroundColor: allCorrect ? colors.success : colors.primary,
+              },
+            ]}
+          />
+        </View>
+
+        <View style={styles.breakdownList}>
+          {results.map((r, idx) => {
+            const typeColor = getLinkingColor(r.type, scheme);
+            return (
+              <View
+                key={`${r.type}-${idx}`}
+                style={[styles.breakdownRow, { borderTopColor: colors.border }]}
+              >
+                <View style={styles.breakdownLeft}>
+                  <ThemedText
+                    variant="caption"
+                    style={[
+                      styles.breakdownType,
+                      { color: typeColor, textDecorationColor: typeColor },
+                      LINKING_TEXT_DECORATIONS[r.type],
+                    ]}
+                  >
+                    {LINKING_LABELS[r.type] ?? r.type}
+                  </ThemedText>
+                  <ThemedText variant="caption" color="muted">
+                    “{r.span}”
+                  </ThemedText>
+                </View>
+                <ThemedText
+                  variant="caption"
+                  style={{
+                    color: r.correct ? colors.success : colors.warning,
+                    fontWeight: '700',
+                  }}
+                >
+                  {r.correct ? '✓ 聞き取れた' : '△ 要強化'}
+                </ThemedText>
+              </View>
+            );
+          })}
+        </View>
+
+        {missedCount > 0 ? (
+          <ThemedText variant="caption" color="muted" style={styles.autoAddedNote}>
+            要強化の {missedCount} 文を「苦手フレーズ」に自動登録しました。
+          </ThemedText>
+        ) : null}
+      </View>
+
+      {/* ブロック 2: おすすめレッスンカード (全問正解時も含め常時提示・唯一の青 CTA) */}
       {recommendation ? (
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <ThemedText variant="caption" color="muted">
@@ -453,7 +631,7 @@ function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFi
             style={[styles.primaryButton, { backgroundColor: colors.primary }]}
             accessibilityRole="button"
             onPress={() => {
-              onFinish(); // 診断完了を記録してからレッスンへ遷移する (再表示防止)
+              onFinish(); // 診断完了・苦手自動登録を記録してからレッスンへ遷移する (再表示防止)
               router.push(`/lesson?lesson=${recommendation.lessonId}`);
             }}
           >
@@ -479,7 +657,50 @@ function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFi
 }
 
 const styles = StyleSheet.create({
-  subtitle: { marginTop: 4, marginBottom: 16 },
+  introHero: {
+    gap: 8,
+    marginTop: 8,
+  },
+  heroBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  introPointsCard: {
+    gap: 10,
+    marginBottom: 8,
+  },
+  introPointRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  introPointBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    textAlign: 'center',
+    lineHeight: 22,
+    fontWeight: '700',
+    overflow: 'hidden',
+  },
+  subtitle: { marginTop: 4, marginBottom: 12 },
+  progressHeader: {
+    gap: 6,
+    marginBottom: 12,
+  },
+  progressTrack: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: 4,
+    borderRadius: 2,
+  },
   primaryButton: {
     borderRadius: 12,
     paddingVertical: 14,
@@ -498,16 +719,25 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 12,
   },
-  questionTitle: { marginTop: 12 },
-  maskedSentence: { marginTop: 16, lineHeight: 24 },
+  questionTitle: { marginTop: 4 },
+  sentenceCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+    marginTop: 12,
+  },
+  maskedSentence: { fontSize: 17, lineHeight: 26 },
+  choicesList: {
+    gap: 8,
+    marginTop: 12,
+  },
   choiceButton: {
     borderRadius: 10,
     borderWidth: 1,
     paddingVertical: 14,
-    paddingHorizontal: 12,
-    marginTop: 8,
+    paddingHorizontal: 14,
   },
   explainCard: {
     borderRadius: 12,
@@ -516,6 +746,20 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 12,
   },
+  explainTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  typeBadge: {
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  typeBadgeText: {
+    fontWeight: '700',
+  },
   card: {
     borderRadius: 12,
     borderWidth: 1,
@@ -523,6 +767,49 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 12,
   },
-  missedRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  scoreHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  statusPill: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  scoreTrack: {
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  scoreFill: {
+    height: 8,
+    borderRadius: 4,
+  },
+  breakdownList: {
+    marginTop: 4,
+  },
+  breakdownRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: 8,
+  },
+  breakdownLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 1,
+  },
+  breakdownType: {
+    fontWeight: '700',
+  },
+  autoAddedNote: {
+    marginTop: 2,
+  },
   gap: { marginTop: 4 },
 });
