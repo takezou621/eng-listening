@@ -42,7 +42,11 @@ export type AnalyticsEventType =
   | 'purchase_failed'
   | 'restore_completed'
   | 'subscription_manage_tapped'
-  | 'watch_session_synced';
+  | 'watch_session_synced'
+  | 'curriculum_viewed'
+  | 'key_phrase_opened'
+  | 'weak_phrase_reviewed'
+  | 'weak_phrase_graduated';
 
 export interface AnalyticsEvent {
   /** 端末内連番 (1 起算) */

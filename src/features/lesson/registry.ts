@@ -127,12 +127,20 @@ export function getLessonList(): LessonListItem[] {
   }));
 }
 
-/** 今日のおすすめ: 未完了の最初のレッスン。全て完了していれば先頭を復習用に返す */
+/**
+ * 今日のおすすめ: 診断/カリキュラム由来の推奨レッスン (未完了のもの) を最優先し、
+ * 未指定または完了済みの場合は未完了の最初のレッスン、全て完了していれば先頭を復習用に返す。
+ */
 export function getTodaysLesson(
-  completedIds: Set<string>
+  completedIds: Set<string>,
+  preferredLessonId?: string | null
 ): { item: LessonListItem; isReview: boolean } | null {
   const bundled = getLessonList().filter((it) => it.bundle !== null);
   if (bundled.length === 0) return null;
+  if (preferredLessonId && !completedIds.has(preferredLessonId)) {
+    const preferred = bundled.find((it) => it.entry.id === preferredLessonId);
+    if (preferred) return { item: preferred, isReview: false };
+  }
   const next = bundled.find((it) => !completedIds.has(it.entry.id));
   if (next) return { item: next, isReview: false };
   return { item: bundled[0], isReview: true };
