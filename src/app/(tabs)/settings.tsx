@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { AppState, Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { DailyGoalSheet } from '@/components/DailyGoalSheet';
 import { Screen } from '@/components/Screen';
@@ -14,6 +14,17 @@ import {
   type RestoreResult,
 } from '@/features/billing/billingStore';
 import { useUserData } from '@/features/library/userStore';
+import {
+  getRediagnosisStatus,
+  loadDiagnosticHistoryAsync,
+  useDiagnosticHistory,
+} from '@/features/onboarding/diagnosticHistoryStore';
+import {
+  computeCompletedLessonCount,
+  computeShadowingTotal,
+  computeTotalSeconds,
+  useProgressData,
+} from '@/features/progress/progressStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 function Row({
@@ -69,13 +80,34 @@ export default function SettingsScreen() {
   const { scheme, colors } = useTheme();
   const { isPremium, isLoading, isAvailable } = useEntitlement();
   const { dailyGoalMinutes, setDailyGoalMinutes } = useUserData();
+  const diagnosticHistory = useDiagnosticHistory();
+  const progressDays = useProgressData();
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const [goalSheetVisible, setGoalSheetVisible] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [restoreMessage, setRestoreMessage] = useState('');
 
   useEffect(() => {
     void initBillingAsync();
+    void loadDiagnosticHistoryAsync();
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') setNowMs(Date.now());
+    });
+    return () => sub.remove();
   }, []);
+
+  const rediagStatus = getRediagnosisStatus(
+    diagnosticHistory,
+    computeCompletedLessonCount(progressDays),
+    computeTotalSeconds(progressDays),
+    computeShadowingTotal(progressDays),
+    nowMs
+  );
+  const diagnosticRowValue = rediagStatus.shouldPrompt
+    ? '再診断おすすめ'
+    : rediagStatus.latestAttempt
+      ? `前回 ${rediagStatus.latestAttempt.accuracyPercent}%`
+      : undefined;
 
   const handleRestore = async () => {
     if (!isAvailable || restoring) return;
@@ -137,7 +169,8 @@ export default function SettingsScreen() {
         />
         <LinkRow
           label="聞き取り診断をもう一度行う"
-          onPress={() => router.push('/onboarding')}
+          value={diagnosticRowValue}
+          onPress={() => router.push('/onboarding?mode=rediagnosis')}
           isLast
         />
       </View>
