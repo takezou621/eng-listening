@@ -179,8 +179,17 @@ export default function PaywallScreen() {
     }
   };
 
+  const annualLabel = annualPriceString ?? '¥4,800';
+  const monthlyLabel = monthlyPriceString ?? '¥680';
+  const trialAndRenewalSummary =
+    selectedPlan === 'annual'
+      ? annualHasFreeTrial
+        ? `初回 7 日間無料 → 終了後は年額 ${annualLabel} で自動更新（無料体験は初回のみ対象）。iOS「設定」のサブスクリプションから次回更新日の 24 時間前までいつでも解約できます。`
+        : `年額 ${annualLabel} で自動更新されます。iOS「設定」のサブスクリプションから次回更新日の 24 時間前までいつでも解約できます。`
+      : `月額 ${monthlyLabel} で自動更新されます。iOS「設定」のサブスクリプションから次回更新日の 24 時間前までいつでも解約できます。`;
+
   return (
-    <Screen>
+    <Screen hasHeader>
       <Stack.Screen
         options={{ headerShown: true, title: 'プレミアム', headerBackTitle: '戻る' }}
       />
@@ -231,10 +240,10 @@ export default function PaywallScreen() {
           ]}
         >
           <ThemedText style={styles.priceRow}>
-            月額 {monthlyPriceString ?? '¥680'}
+            月額 {monthlyLabel}
           </ThemedText>
           <ThemedText variant="caption" color="muted">
-            自動更新。いつでも解約できます。
+            自動更新・いつでも解約可（無料トライアルなし）。
           </ThemedText>
         </Pressable>
         <Pressable
@@ -250,12 +259,13 @@ export default function PaywallScreen() {
           ]}
         >
           <ThemedText style={styles.priceRow}>
-            年額 {annualPriceString ?? '¥4,800'}
-            {annualHasFreeTrial ? ' (7 日間の無料トライアル付き)' : ''}
+            年額 {annualLabel}
+            {annualHasFreeTrial ? ' (初回 7 日間無料)' : ''}
           </ThemedText>
           <ThemedText variant="caption" color="muted">
-            {annualPerMonthString ? `月あたり約 ${annualPerMonthString}。` : ''}
-            トライアル期間中に解約すれば請求されません。
+            {annualHasFreeTrial
+              ? `7日間無料 → 終了後は年額 ${annualLabel} で自動更新${annualPerMonthString ? `（月あたり約 ${annualPerMonthString}）` : ''}。期間中の解約で請求されません。`
+              : `${annualPerMonthString ? `月あたり約 ${annualPerMonthString}・` : ''}自動更新・いつでも解約できます。`}
           </ThemedText>
         </Pressable>
       </View>
@@ -280,10 +290,13 @@ export default function PaywallScreen() {
               : selectedPlan === 'annual' && annualHasFreeTrial
                 ? '7 日間無料で始める'
                 : selectedPlan === 'annual'
-                  ? `年額 ${annualPriceString ?? '¥4,800'} で始める`
-                  : `月額 ${monthlyPriceString ?? '¥680'} で始める`}
+                  ? `年額 ${annualLabel} で始める`
+                  : `月額 ${monthlyLabel} で始める`}
         </ThemedText>
       </Pressable>
+      <ThemedText variant="caption" color="muted" style={styles.billingSummary}>
+        {trialAndRenewalSummary}
+      </ThemedText>
       {!canPurchase && purchaseNote ? (
         <ThemedText variant="caption" color="muted" style={styles.purchaseNote}>
           {purchaseNote}
@@ -309,10 +322,12 @@ export default function PaywallScreen() {
       ) : null}
 
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <ThemedText variant="heading">解約方法</ThemedText>
+        <ThemedText variant="heading">解約方法・自動更新について</ThemedText>
         <ThemedText variant="caption" color="muted">
-          サブスクリプションは自動更新です。解約は、App Store のアカウント設定から次回更新日の
-          24 時間前までに行えます。解約後も現在の契約期間の終了までは機能を利用できます。
+          iOS「設定」→「Apple Account」→「サブスクリプション」から、次回更新日の 24 時間前までいつでも解約できます。
+        </ThemedText>
+        <ThemedText variant="caption" color="muted">
+          解約後も現在の契約期間の終了まで利用できます。無料トライアルは同一グループで初回のみ対象です。
         </ThemedText>
       </View>
 
@@ -390,6 +405,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginTop: 8,
   },
+  billingSummary: { marginTop: 8, lineHeight: 18 },
   purchaseNote: { marginTop: 8, lineHeight: 18 },
   restoreButton: { alignItems: 'center', marginTop: 10, padding: 8 },
   legalRow: { flexDirection: 'row', gap: 16, alignItems: 'center', marginTop: 16, flexWrap: 'wrap' },
