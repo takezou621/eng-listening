@@ -2,6 +2,12 @@ import { Paths, File } from 'expo-file-system';
 import { useEffect, useState } from 'react';
 
 import { logEvent } from '../analytics/analyticsStore';
+import {
+  applyReviewOutcome,
+  isWeakGraduated,
+  reactivateGraduated,
+  type ReviewScheduleFields,
+} from '../learning/spacedRepetition';
 
 /**
  * お気に入りレッスン・苦手フレーズ(文単位)・1日の学習目標の永続化ストア。
@@ -33,6 +39,14 @@ function parseGoalMinutes(value: unknown): DailyGoalMinutes {
   return DEFAULT_DAILY_GOAL_MINUTES;
 }
 
+export interface SavedDiagnosticProfile {
+  completedAtMs: number;
+  score: number;
+  total: number;
+  missedTypes: Record<string, number>;
+  recommendedLessonId: string | null;
+}
+
 interface UserData {
   favoriteLessons: string[]; // お気に入り登録した lessonId の配列
   weakSentences: WeakSentence[];
@@ -40,9 +54,11 @@ interface UserData {
   onboardingDone: boolean;
   /** 1日の学習目標 (分) */
   dailyGoalMinutes: DailyGoalMinutes;
+  /** 直近の診断結果プロフィール (カリキュラムとホーム推薦の接続用・任意) */
+  diagnosticProfile?: SavedDiagnosticProfile;
 }
 
-export interface WeakSentence {
+export interface WeakSentence extends ReviewScheduleFields {
   lessonId: string;
   sentenceIndex: number;
   addedAtMs: number;
@@ -62,21 +78,50 @@ let loadPromise: Promise<void> | null = null;
 let dailyGoalCustomized = false;
 const listeners = new Set<() => void>();
 
-/** JSON 文字列を検証して UserData に変換する (不正な形は既定値にフォールバック) */
+function parseOptionalFiniteNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function parseDiagnosticProfile(raw: unknown): SavedDiagnosticProfile | undefined {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return undefined;
+  const p = raw as Partial<SavedDiagnosticProfile>;
+  if (
+    typeof p.completedAtMs !== 'number' ||
+    !Number.isFinite(p.completedAtMs) ||
+    typeof p.score !== 'number' ||
+    !Number.isFinite(p.score) ||
+    typeof p.total !== 'number' ||
+    !Number.isFinite(p.total)
+  ) {
+    return undefined;
+  }
+  const missedTypes: Record<string, number> = {};
+  if (typeof p.missedTypes === 'object' && p.missedTypes !== null && !Array.isArray(p.missedTypes)) {
+    for (const [k, v] of Object.entries(p.missedTypes)) {
+      if (typeof v === 'number' && Number.isFinite(v) && v > 0) {
+        missedTypes[k] = v;
+      }
+    }
+  }
+  return {
+    completedAtMs: p.completedAtMs,
+    score: p.score,
+    total: p.total,
+    missedTypes,
+    recommendedLessonId: typeof p.recommendedLessonId === 'string' ? p.recommendedLessonId : null,
+  };
+}
+
+/** JSON 文字列を検証して UserData に変換する (不正な形は既定値にフォールバック・旧データ互換) */
 function parseUserData(json: string): UserData {
   const parsed: unknown = JSON.parse(json);
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
     return { ...defaultData };
   }
   const obj = parsed as Partial<UserData>;
-  return {
-    onboardingDone: obj.onboardingDone === true,
-    dailyGoalMinutes: parseGoalMinutes(obj.dailyGoalMinutes),
-    favoriteLessons: Array.isArray(obj.favoriteLessons)
-      ? obj.favoriteLessons.filter((id) => typeof id === 'string')
-      : [],
-    weakSentences: Array.isArray(obj.weakSentences)
-      ? obj.weakSentences.filter(
+  const weakSentences: WeakSentence[] = Array.isArray(obj.weakSentences)
+    ? obj.weakSentences
+        .filter(
           (s): s is WeakSentence =>
             typeof s === 'object' &&
             s !== null &&
@@ -84,11 +129,30 @@ function parseUserData(json: string): UserData {
             typeof s.sentenceIndex === 'number' &&
             typeof s.addedAtMs === 'number'
         )
+        .map((s) => ({
+          lessonId: s.lessonId,
+          sentenceIndex: s.sentenceIndex,
+          addedAtMs: s.addedAtMs,
+          reviewStage: parseOptionalFiniteNumber(s.reviewStage),
+          nextReviewAtMs: parseOptionalFiniteNumber(s.nextReviewAtMs),
+          lastReviewedAtMs: parseOptionalFiniteNumber(s.lastReviewedAtMs),
+          consecutiveSuccesses: parseOptionalFiniteNumber(s.consecutiveSuccesses),
+          reviewCount: parseOptionalFiniteNumber(s.reviewCount),
+          graduatedAtMs: parseOptionalFiniteNumber(s.graduatedAtMs),
+        }))
+    : [];
+  return {
+    onboardingDone: obj.onboardingDone === true,
+    dailyGoalMinutes: parseGoalMinutes(obj.dailyGoalMinutes),
+    favoriteLessons: Array.isArray(obj.favoriteLessons)
+      ? obj.favoriteLessons.filter((id) => typeof id === 'string')
       : [],
+    weakSentences,
+    diagnosticProfile: parseDiagnosticProfile(obj.diagnosticProfile),
   };
 }
 
-/** 苦手フレーズをマージする (同一文は追加日時が古い方 = 登録当初の記録を優先) */
+/** 苦手フレーズをマージする (復習進捗が多い方を優先、未復習同士なら登録が古い方を優先) */
 function mergeWeakSentences(
   base: WeakSentence[],
   override: WeakSentence[]
@@ -97,8 +161,23 @@ function mergeWeakSentences(
   for (const s of [...base, ...override]) {
     const key = `${s.lessonId}:${s.sentenceIndex}`;
     const existing = byKey.get(key);
-    if (!existing || s.addedAtMs < existing.addedAtMs) {
+    if (!existing) {
       byKey.set(key, s);
+      continue;
+    }
+    const sCount = s.reviewCount ?? 0;
+    const eCount = existing.reviewCount ?? 0;
+    if (
+      sCount > eCount ||
+      (sCount === eCount && (s.lastReviewedAtMs ?? 0) > (existing.lastReviewedAtMs ?? 0)) ||
+      (sCount === eCount &&
+        (s.lastReviewedAtMs ?? 0) === (existing.lastReviewedAtMs ?? 0) &&
+        s.addedAtMs < existing.addedAtMs)
+    ) {
+      byKey.set(key, {
+        ...s,
+        addedAtMs: Math.min(s.addedAtMs, existing.addedAtMs),
+      });
     }
   }
   return [...byKey.values()].sort((a, b) => b.addedAtMs - a.addedAtMs);
@@ -150,6 +229,7 @@ export function loadUserDataAsync(): Promise<void> {
               new Set([...current.favoriteLessons, ...parsed.favoriteLessons])
             ),
             weakSentences: mergeWeakSentences(parsed.weakSentences, current.weakSentences),
+            diagnosticProfile: current.diagnosticProfile ?? parsed.diagnosticProfile,
           }));
         }
         canPersist = true;
@@ -206,6 +286,10 @@ export function useUserData() {
       });
     },
     isLessonFavorite: (lessonId: string) => data.favoriteLessons.includes(lessonId),
+    /** 初回診断・再診断の結果プロフィールを保存する (カリキュラムとホーム推薦を連携) */
+    saveDiagnosticProfile: (profile: SavedDiagnosticProfile) => {
+      updateUserData((current) => ({ ...current, diagnosticProfile: profile }));
+    },
     /** 初回診断で聞き取れなかった文を苦手フレーズ帳へ一括自動登録する (既登録分はスキップ) */
     addWeakSentencesFromDiagnostic: (items: { lessonId: string; sentenceIndex: number }[]) => {
       if (items.length === 0) return;
@@ -223,6 +307,8 @@ export function useUserData() {
               lessonId: item.lessonId,
               sentenceIndex: item.sentenceIndex,
               addedAtMs: now - idx,
+              reviewStage: 0,
+              nextReviewAtMs: now,
             });
           }
         });
@@ -238,6 +324,7 @@ export function useUserData() {
       const isWeak = data.weakSentences.some(
         (s) => s.lessonId === lessonId && s.sentenceIndex === sentenceIndex
       );
+      const now = Date.now();
       updateUserData((current) => {
         const exists = current.weakSentences.some(
           (s) => s.lessonId === lessonId && s.sentenceIndex === sentenceIndex
@@ -248,10 +335,62 @@ export function useUserData() {
             ? current.weakSentences.filter(
                 (s) => !(s.lessonId === lessonId && s.sentenceIndex === sentenceIndex)
               )
-            : [{ lessonId, sentenceIndex, addedAtMs: Date.now() }, ...current.weakSentences],
+            : [
+                {
+                  lessonId,
+                  sentenceIndex,
+                  addedAtMs: now,
+                  reviewStage: 0,
+                  nextReviewAtMs: now,
+                },
+                ...current.weakSentences,
+              ],
         };
       });
       logEvent(isWeak ? 'weak_phrase_removed' : 'weak_phrase_added', { lessonId });
+    },
+    /** 復習キューでの自己想起判定 (聞き取れた / もう一度) を記録する */
+    recordWeakSentenceReview: (
+      lessonId: string,
+      sentenceIndex: number,
+      remembered: boolean
+    ) => {
+      const target = cachedData.weakSentences.find(
+        (s) => s.lessonId === lessonId && s.sentenceIndex === sentenceIndex
+      );
+      if (!target) return;
+      const wasGraduated = isWeakGraduated(target);
+      const now = Date.now();
+      const updated = applyReviewOutcome(target, remembered, now);
+      updateUserData((current) => ({
+        ...current,
+        weakSentences: current.weakSentences.map((s) =>
+          s.lessonId === lessonId && s.sentenceIndex === sentenceIndex ? updated : s
+        ),
+      }));
+      logEvent('weak_phrase_reviewed', {
+        lessonId,
+        remembered,
+        stage: updated.reviewStage ?? 0,
+      });
+      if (!wasGraduated && isWeakGraduated(updated)) {
+        logEvent('weak_phrase_graduated', {
+          lessonId,
+          reviewCount: updated.reviewCount ?? 1,
+        });
+      }
+    },
+    /** 卒業済みフレーズを復習キューへ戻す */
+    reactivateWeakSentence: (lessonId: string, sentenceIndex: number) => {
+      const now = Date.now();
+      updateUserData((current) => ({
+        ...current,
+        weakSentences: current.weakSentences.map((s) =>
+          s.lessonId === lessonId && s.sentenceIndex === sentenceIndex
+            ? reactivateGraduated(s, now)
+            : s
+        ),
+      }));
     },
     isSentenceWeak: (lessonId: string, sentenceIndex: number) =>
       data.weakSentences.some(
