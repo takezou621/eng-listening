@@ -1,0 +1,246 @@
+name: App Store
+
+# ## 実行ランナーの恒常ルール (オーナー指示 — eyechecker と同じ)
+# - このワークフローは self-hosted 専用。GitHub ホステッドランナーでの実行は禁止
+#   (個人アカウントのホステッドランナー枠枯渇のため — docs/operations.md §5)。
+#   runs-on をホステッドに戻さないこと
+# - ガード: ジョブ最初の step が runner.environment を見て、self-hosted 以外なら即失敗する。
+#   runs-on が誤ってホステッドに戻されても、checkout・鍵の展開などの本処理に入る前に
+#   落とす (ホステッドは分単位の切り上げ課金なので、落ちるまでの最小 1 分ぶんは課金されうる。
+#   それ以上の消費を止める安全網であり、ルールの本体は runs-on を戻さないこと)
+
+# App Store (iOS) 提出ライン。eyechecker / kilde の「App Store」workflow と同じ仕組み
+# (takezou621/asc-submit を SHA ピン固定で使い、メタデータの正はこのリポジトリの
+#  docs/appstore/ 配下。手順書は docs/appstore/README.md)。
+#
+# モード (workflow_dispatch の mode):
+#   plan   — spec を生成して干渉なく計画を表示 (API キー不要。設定検証・レビュー用)
+#   status — バージョンの状態・ビルド・提出の有無を表示 (読み取りのみ)
+#   apply  — バージョン作成 (無ければ) + メタデータ (説明 / What's New / キーワード /
+#            サブタイトル / 審査メモ) を反映。build を指定すれば割当ても。
+#            **審査への提出はしない**
+#   submit — apply の内容に加えて審査へ提出する。dispatch を手で押すことが提出のゲート
+#   upload — ミミトレをアーカイブして ASC へアップロード (appstore-upload.sh)。
+#            **提出は始まらない**
+#
+# 必要な secrets (status / apply / submit / upload):
+#   ASC_CI_KEY_B64   CI 専用 **Admin** ロール鍵の .p8 を base64 したもの
+#                    (upload のクラウド署名は Admin 限定。メタデータ書き込みは App Manager
+#                     でも可 — eyechecker と同じく鍵は 1 本にまとめる。開発用の鍵を使い回さない)
+#   ASC_CI_KEY_ID    キー ID
+#   ASC_CI_ISSUER    issuer ID
+#   EXPO_PUBLIC_REVENUECAT_API_KEY (upload のみ・任意)
+#                    未登録の場合はランナー側の環境変数か .env で代用でき、
+#                    どちらも無ければ upload スクリプトがアーカイブ前に失敗する
+#
+# ランナー: このリポジトリに登録した self-hosted macOS ランナー (m1) で動く
+# (eyechecker のランナーは eyechecker リポジトリスコープなので、このリポジトリにも
+#  別途ランナー登録が必要 — docs/appstore/README.md「初回セットアップ」)。
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "What to do"
+        type: choice
+        options: [plan, status, apply, submit, upload]
+        default: plan
+      version:
+        description: "App Store version (e.g. 1.1)"
+        type: string
+        required: true
+      build:
+        description: "Build number (attach in apply/upload; e.g. 2)"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: appstore-${{ inputs.version }}
+  cancel-in-progress: false
+
+env:
+  APP_ID: "6837503600" # com.takezou.englistening (ミミトレ)
+  # asc-submit の run 実行ジャーナルの置き場。eyechecker と同じランナーホームの
+  # ディレクトリを共有する (serve ダッシュボードからこのリポジトリの run も見える)
+  ASC_SUBMIT_RUNS_DIR: /Users/kawai/asc-submit-runs
+
+jobs:
+  appstore:
+    name: App Store ${{ inputs.mode }}
+    runs-on: [self-hosted, macOS, ARM64]
+    timeout-minutes: 60
+
+    steps:
+      - name: Refuse GitHub-hosted runners (self-hosted 専用)
+        # 恒常ルール (冒頭コメント): self-hosted 以外 (github-hosted・不明) なら本処理の前に落とす
+        shell: bash
+        env:
+          RUNNER_ENV: ${{ runner.environment }}
+        run: |
+          echo "runner: ${RUNNER_NAME} (runner.environment=${RUNNER_ENV:-unknown})"
+          if [ -z "$RUNNER_ENV" ]; then
+            # 古いランナーソフトは runner.environment を持たない。ホステッドでないと
+            # 言い切れないので止めるが、直す場所は runs-on ではなくランナー側
+            echo "::error::runner.environment を取得できません (self-hosted ランナーのソフトが古い可能性 — ランナーを更新してください)。ホステッド実行を排除できないため停止します"
+            exit 1
+          elif [ "$RUNNER_ENV" != "self-hosted" ]; then
+            echo "::error::このワークフローは self-hosted 専用です。GitHub ホステッドランナー (${RUNNER_ENV}) での実行は禁止。runs-on を [self-hosted, macOS, ARM64] に戻してください"
+            exit 1
+          fi
+
+      - name: Checkout eng-listening
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # 認証情報を .git/config に残さない (zizmor artipacked。この workflow は
+          # push も git 認証もしない)
+          persist-credentials: false
+
+      - name: Checkout asc-submit (pinned)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: takezou621/asc-submit
+          # eyechecker と同じコミット SHA に固定 (タグ移動で異なるコードが走るのを防ぐ)
+          ref: 51e10ad74cc948b57e14f2f1fcdc7507f11ff09d # v0.4.0 + phased-release/submit 修正 + 未提出 submission 再利用 + 終端 state 除外と DELETE 403 許容 + cancel を PATCH 化 + ローカライズ新設をトップレベル POST 化 (asc-submit PR 9-12, 15-16, 19 — PR 19 で #205 の 405 を解消)
+          path: asc-submit
+          persist-credentials: false
+
+      - name: Generate the spec from the metadata files
+        if: inputs.mode != 'status'
+        # plan / apply / submit / upload の全モード共通: docs/appstore から spec.json を
+        # 作る (upload もメタデータの文面検証を兼ねる)。メタデータの上限 (キーワード 100
+        # 文字・ja バイト数、サブタイトル 30 文字、説明・What's New 4000 文字) は
+        # この生成が機械検証する (appstore-spec.py)。spec に secrets は含まれないため
+        # ログへ全文出して監査証跡にする
+        env:
+          MODE: ${{ inputs.mode }}
+          VERSION: ${{ inputs.version }}
+          BUILD: ${{ inputs.build }}
+        run: |
+          # 入力は env 経由 (テンプレート展開のシェルインジェクション防止)
+          echo "$VERSION" | grep -Eq '^[0-9A-Za-z][0-9A-Za-z._-]*$' \
+            || { echo "バージョンに使えない文字が含まれます: $VERSION"; exit 1; }
+          if [ "$MODE" = upload ] && [ -z "$BUILD" ]; then
+            echo "upload モードには build 番号が必要です (CFBundleVersion。前回の提出より大きい値)"
+            exit 1
+          fi
+          ARGS=(--version "$VERSION")
+          [ -n "$BUILD" ] && ARGS+=(--build "$BUILD")
+          python3 scripts/release/appstore-spec.py "${ARGS[@]}"
+          echo "spec_path=dist/appstore/release-$VERSION.json" >> "$GITHUB_ENV"
+          cat "dist/appstore/release-$VERSION.json"
+
+      - name: Show the plan (no API key required)
+        if: inputs.mode == 'plan'
+        env:
+          PYTHONPATH: asc-submit
+        run: |
+          # asc-submit の --dry-run は API キー無しで動く (計画表示のみ)。
+          # secrets を設定する前にこのワークフローの経路を検証できる
+          python3 -m asc_submit run "$APP_ID" --spec "$spec_path" --dry-run
+
+      - name: Decode the App Store Connect API key
+        # upload も含める: アーカイブ〜アップロードのクラウド署名を ASC API キーで
+        # 行う (下の upload step 参照)。plan は書き込まないので鍵不要
+        if: inputs.mode != 'plan'
+        env:
+          ASC_CI_KEY_B64: ${{ secrets.ASC_CI_KEY_B64 }}
+          ASC_CI_KEY_ID: ${{ secrets.ASC_CI_KEY_ID }}
+          ASC_CI_ISSUER: ${{ secrets.ASC_CI_ISSUER }}
+        run: |
+          # 部分的な設定は黙って進めない。セッションは self-hosted のため残したくない
+          # ものは必ず後段の cleanup で消す
+          SET_COUNT=0
+          [ -n "$ASC_CI_KEY_B64" ] && SET_COUNT=$((SET_COUNT+1))
+          [ -n "$ASC_CI_KEY_ID" ] && SET_COUNT=$((SET_COUNT+1))
+          [ -n "$ASC_CI_ISSUER" ] && SET_COUNT=$((SET_COUNT+1))
+          if [ "$SET_COUNT" -ne 3 ]; then
+            echo "ASC_CI_KEY_B64 / ASC_CI_KEY_ID / ASC_CI_ISSUER の 3 つすべてが必要です"
+            echo "(CI 専用の Admin ロールのキーを ASC の Users and Access → Integrations で発行し、"
+            echo " .p8 を base64 して ASC_CI_KEY_B64 に登録してください — 開発用キーの流用はしない。"
+            echo " ロールは発行後に変更できない。クラウド署名 (upload) は Admin 限定 — eyechecker 実測)"
+            exit 1
+          fi
+          umask 077
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s' "$ASC_CI_KEY_B64" | base64 --decode -o "$RUNNER_TEMP/asc/AuthKey.p8"
+          # ASC_KEY_* は asc-submit が読む環境変数。GITHUB_ENV 経由で以降の step へ
+          echo "ASC_KEY_PATH=$RUNNER_TEMP/asc/AuthKey.p8" >> "$GITHUB_ENV"
+          echo "ASC_KEY_ID=$ASC_CI_KEY_ID" >> "$GITHUB_ENV"
+          echo "ASC_ISSUER=$ASC_CI_ISSUER" >> "$GITHUB_ENV"
+
+      - name: Show the version status (read-only)
+        if: inputs.mode == 'status'
+        env:
+          VERSION: ${{ inputs.version }}
+          PYTHONPATH: asc-submit
+        run: |
+          # 書き込みなしの監査用: バージョンの状態・ビルド・提出の有無を表示する
+          python3 -m asc_submit status "$APP_ID" --version "$VERSION"
+
+      - name: Apply metadata
+        if: inputs.mode == 'apply' || inputs.mode == 'submit'
+        env:
+          PYTHONPATH: asc-submit
+        run: |
+          # 先に doctor で鍵が実際に書き込み・提出可能か確かめる (失効・ロール不足を
+          # ここで弾く。doctor はプローブのみで副作用なし)
+          python3 -m asc_submit doctor "$APP_ID"
+          # --submit は付けない: 提出はメタデータの反映が終わった後の専用 step で行う
+          python3 -m asc_submit run "$APP_ID" --spec "$spec_path"
+
+      - name: Submit for review
+        if: inputs.mode == 'submit'
+        env:
+          VERSION: ${{ inputs.version }}
+          PYTHONPATH: asc-submit
+        run: |
+          # 提出はメタデータ反映の完了後だけ。dispatch を手で押すことが提出のゲート。
+          # 直前の反映で ASC 側の処理が数分遅れることがあり、提出が "in progress" 系の
+          # 409 で弾かれることがある (eyechecker 実測)。その場合は待って再試行する
+          # (それ以外の拒否理由は即座に落とす)
+          for i in 1 2 3 4 5; do
+            if python3 -m asc_submit submit "$APP_ID" --version "$VERSION" --yes; then
+              exit 0
+            fi
+            echo "submit 試行 $i 回目が失敗 — 60 秒待って再試行 (アセット処理中の可能性)"
+            sleep 60
+          done
+          echo "5 回再試行しても提出できませんでした (理由は上のログを参照)"
+          exit 1
+
+      - name: Archive and upload the iOS build
+        if: inputs.mode == 'upload'
+        env:
+          VERSION: ${{ inputs.version }}
+          BUILD: ${{ inputs.build }}
+          # クラウド署名は ASC API キー (Admin ロール) で行う — eyechecker と同じ。
+          # ランナーの Xcode Apple ID セッションは xcodebuild から見えないためキー経路に
+          # 統一する。変数名が asc-submit の ASC_KEY_* と違うのはわざと (混線防止)
+          EYECHECKER_ASC_API_KEY: ${{ env.ASC_KEY_PATH }}
+          EYECHECKER_ASC_API_KEY_ID: ${{ env.ASC_KEY_ID }}
+          EYECHECKER_ASC_API_ISSUER: ${{ env.ASC_ISSUER }}
+          # RevenueCat の公開キー (JS バンドルに焼かれる)。secret 未登録なら空になり、
+          # スクリプトはランナーの環境変数 / .env での代用を試み、無ければアーカイブ前に
+          # 失敗する (値はどこにも表示されない)
+          EXPO_PUBLIC_REVENUECAT_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_API_KEY }}
+        run: |
+          [ -n "$EYECHECKER_ASC_API_KEY" ] || { echo "ASC API キーが展開できていません (decode step を確認)"; exit 1; }
+          # ランナー側の前提 (Node.js / CocoaPods)。欠けている場合はスクリプトが
+          # 依存インストールの前に落とす。整備は docs/appstore/README.md「初回セットアップ」
+          for tool in node npx pod xcodebuild; do
+            command -v "$tool" >/dev/null || { echo "$tool が見つかりません (ランナーの PATH を整備してください)"; exit 1; }
+          done
+          scripts/release/appstore-upload.sh --version "$VERSION" --build "$BUILD" --upload
+          echo "アップロードが終わったら ASC でビルドが VALID になるのを待ってから"
+          echo "apply (build 割当て + メタデータ) → submit を実行してください"
+
+      # この cleanup は **最後の step** でなければならない (decode → cleanup → 実行 の順に
+      # 走ると実行時点で .p8 が消える — eyechecker/kilde run の実測)
+      - name: Remove the decoded key
+        if: ${{ always() && (inputs.mode != 'plan') }}
+        run: |
+          # .p8 を RUNNER_TEMP に残さない (self-hosted はジョブ間でディレクトリが残る)
+          rm -rf "$RUNNER_TEMP/asc"
