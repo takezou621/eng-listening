@@ -1,15 +1,18 @@
-import { LINKING_LABELS } from '@/features/lesson/linkingViz';
+import { LINKING_LABELS, LINKING_SYMBOLS } from '@/features/lesson/linkingViz';
 import { getLessonList, type LessonBundle } from '@/features/lesson/registry';
 import type { LessonLinkingNote } from '@/features/lesson/types';
 
 /**
- * 初回オンボーディング診断 (60 秒 Aha Moment) の問題定義。
+ * 聞き取り診断 (全 8 種網羅 8 問標準 / 16 問精密) の問題定義と分析ロジック。
  *
  * 既存 12 レッスンの音声アセットの区間再生と、生成時に付与済みのリンキング
  * 注釈データのみを使う (新規 TTS 生成・アセット変更はしない)。
- * 選択肢は「実際の単語列 (正解)」と「音の変化で聞こえたままの表記 (誤答)」を
- * 組み合わせることで、単語は知っているのに聞き取れない瞬間を見せる。
+ * W8 準拠:
+ * - 各設問の span は文中で 1 度だけ出現し、空欄マスクにより正解が設問文に露出しない。
+ * - choices[0] が正解、画面側で設問ごとに決定的シャッフルして配置を分散する。
  */
+
+export type DiagnosticMode = 'quick' | 'full';
 
 export interface DiagnosticQuestion {
   /** 出題元レッスン (既存アセットの区間を再生する) */
@@ -24,7 +27,8 @@ export interface DiagnosticQuestion {
   choices: string[];
 }
 
-export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
+/** 標準 8 問セット (約 60 秒・音変化全 8 種を 1 問ずつ網羅) */
+export const DIAGNOSTIC_QUESTIONS_QUICK: DiagnosticQuestion[] = [
   {
     lessonId: 'asking-directions',
     sentenceIndex: 1,
@@ -46,7 +50,110 @@ export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = [
     span: 'took a',
     choices: ['took a', 'took her', 'two cars'],
   },
+  {
+    lessonId: 'cafe-ordering',
+    sentenceIndex: 6,
+    type: 'palatalization',
+    span: 'get your',
+    choices: ['get your', 'get her', 'get a'],
+  },
+  {
+    lessonId: 'shopping-clothes',
+    sentenceIndex: 2,
+    type: 'elision',
+    span: 'Let me',
+    choices: ['Let me', 'Leave me', 'Lend me'],
+  },
+  {
+    lessonId: 'my-favorite-movie',
+    sentenceIndex: 2,
+    type: 'weak-form',
+    span: 'with his',
+    choices: ['with his', 'with this', 'with us'],
+  },
+  {
+    lessonId: 'cafe-ordering',
+    sentenceIndex: 3,
+    type: 'assimilation',
+    span: 'Just the',
+    choices: ['Just the', 'Just a', 'Guess the'],
+  },
+  {
+    lessonId: 'small-talk-coworker',
+    sentenceIndex: 6,
+    type: 'intrusion',
+    span: 'go over',
+    choices: ['go over', 'grow over', 'go lower'],
+  },
 ];
+
+/** 精密 16 問セット (約 2 分・全 8 種を各 2 問ずつ測定しタイプ別正答率の信頼性を向上) */
+export const DIAGNOSTIC_QUESTIONS_FULL: DiagnosticQuestion[] = [
+  ...DIAGNOSTIC_QUESTIONS_QUICK,
+  {
+    lessonId: 'my-favorite-movie',
+    sentenceIndex: 9,
+    type: 'flapping',
+    span: 'lot of',
+    choices: ['lot of', 'loud of', 'part of'],
+  },
+  {
+    lessonId: 'my-favorite-movie',
+    sentenceIndex: 0,
+    type: 'reduction',
+    span: 'want to',
+    choices: ['want to', 'went to', 'one to'],
+  },
+  {
+    lessonId: 'at-the-airport',
+    sentenceIndex: 0,
+    type: 'linking',
+    span: 'Could I',
+    choices: ['Could I', 'Should I', 'Good eye'],
+  },
+  {
+    lessonId: 'small-talk-coworker',
+    sentenceIndex: 0,
+    type: 'palatalization',
+    span: 'Did you',
+    choices: ['Did you', 'Do you', 'Would you'],
+  },
+  {
+    lessonId: 'phone-appointment',
+    sentenceIndex: 2,
+    type: 'elision',
+    span: 'next Tuesday',
+    choices: ['next Tuesday', 'this Tuesday', 'next Thursday'],
+  },
+  {
+    lessonId: 'small-talk-coworker',
+    sentenceIndex: 4,
+    type: 'weak-form',
+    span: 'for a',
+    choices: ['for a', 'from a', 'fall a'],
+  },
+  {
+    lessonId: 'cafe-ordering',
+    sentenceIndex: 5,
+    type: 'assimilation',
+    span: 'That sounds',
+    choices: ['That sounds', 'It sounds', 'This sounds'],
+  },
+  {
+    lessonId: 'asking-directions',
+    sentenceIndex: 9,
+    type: 'intrusion',
+    span: 'easy enough',
+    choices: ['easy enough', 'really enough', 'is it enough'],
+  },
+];
+
+/** 互換用デフォルト問題リスト (標準 8 問) */
+export const DIAGNOSTIC_QUESTIONS: DiagnosticQuestion[] = DIAGNOSTIC_QUESTIONS_QUICK;
+
+export function getDiagnosticQuestions(mode: DiagnosticMode): DiagnosticQuestion[] {
+  return mode === 'full' ? DIAGNOSTIC_QUESTIONS_FULL : DIAGNOSTIC_QUESTIONS_QUICK;
+}
 
 /** 診断結果: 種類ごとの正解/不正解と元文の参照 */
 export interface DiagnosticResult {
@@ -66,6 +173,107 @@ export function countMissedTypes(results: DiagnosticResult[]): Record<string, nu
     }
   }
   return missed;
+}
+
+export interface TypeAccuracyItem {
+  type: LessonLinkingNote['type'];
+  label: string;
+  symbol: string;
+  correct: number;
+  total: number;
+  accuracyPercent: number;
+}
+
+/** 音変化タイプごとの正答率を計算し、弱点 (正答率が低い順) で返す */
+export function computeTypeAccuracyBreakdown(
+  results: DiagnosticResult[]
+): TypeAccuracyItem[] {
+  const counts = new Map<LessonLinkingNote['type'], { correct: number; total: number }>();
+  for (const r of results) {
+    const prev = counts.get(r.type) ?? { correct: 0, total: 0 };
+    counts.set(r.type, {
+      correct: prev.correct + (r.correct ? 1 : 0),
+      total: prev.total + 1,
+    });
+  }
+  const list: TypeAccuracyItem[] = [];
+  for (const [type, stat] of counts.entries()) {
+    list.push({
+      type,
+      label: LINKING_LABELS[type] ?? type,
+      symbol: LINKING_SYMBOLS[type] ?? '•',
+      correct: stat.correct,
+      total: stat.total,
+      accuracyPercent: Math.round((stat.correct / Math.max(stat.total, 1)) * 100),
+    });
+  }
+  return list.sort((a, b) => {
+    if (a.accuracyPercent !== b.accuracyPercent) {
+      return a.accuracyPercent - b.accuracyPercent;
+    }
+    const aMissed = a.total - a.correct;
+    const bMissed = b.total - b.correct;
+    if (bMissed !== aMissed) return bMissed - aMissed;
+    return a.type.localeCompare(b.type);
+  });
+}
+
+export type TypeDeltaTrend = 'improved' | 'same' | 'declined' | 'new';
+
+export interface DiagnosticComparison {
+  previousScore: number;
+  previousTotal: number;
+  previousAccuracyPercent: number;
+  deltaAccuracyPercent: number;
+  typeTrends: Partial<Record<LessonLinkingNote['type'], TypeDeltaTrend>>;
+}
+
+/** 今回の診断内訳と前回試行を比較する */
+export function compareDiagnosticAttempts(
+  currentBreakdown: TypeAccuracyItem[],
+  currentAccuracyPercent: number,
+  previous: {
+    score: number;
+    total: number;
+    accuracyPercent: number;
+    byType: Partial<Record<LessonLinkingNote['type'], { correct: number; total: number }>>;
+  } | null
+): DiagnosticComparison | null {
+  if (!previous) return null;
+  const typeTrends: Partial<Record<LessonLinkingNote['type'], TypeDeltaTrend>> = {};
+  for (const item of currentBreakdown) {
+    const prevStat = previous.byType[item.type];
+    if (!prevStat || prevStat.total <= 0) {
+      typeTrends[item.type] = 'new';
+      continue;
+    }
+    const prevPct = Math.round((prevStat.correct / prevStat.total) * 100);
+    if (item.accuracyPercent > prevPct) {
+      typeTrends[item.type] = 'improved';
+    } else if (item.accuracyPercent < prevPct) {
+      typeTrends[item.type] = 'declined';
+    } else {
+      typeTrends[item.type] = 'same';
+    }
+  }
+  return {
+    previousScore: previous.score,
+    previousTotal: previous.total,
+    previousAccuracyPercent: previous.accuracyPercent,
+    deltaAccuracyPercent: currentAccuracyPercent - previous.accuracyPercent,
+    typeTrends,
+  };
+}
+
+/** 正答率に基づくレベル分類 (問数 8 / 16 共通) */
+export function computeDiagnosticLevel(
+  score: number,
+  total: number
+): 'beginner' | 'intermediate' | 'advanced' {
+  const ratio = total > 0 ? score / total : 0;
+  if (ratio >= 0.85) return 'advanced';
+  if (ratio >= 0.6) return 'intermediate';
+  return 'beginner';
 }
 
 /**

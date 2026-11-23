@@ -23,6 +23,7 @@ export type AnalyticsEventType =
   | 'onboarding_started'
   | 'onboarding_completed'
   | 'onboarding_skipped'
+  | 'rediagnosis_completed'
   | 'diagnostic_answered'
   | 'lesson_started'
   | 'lesson_completed'
