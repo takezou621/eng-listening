@@ -613,3 +613,115 @@ export function buildHeatmap(
   }
   return out;
 }
+
+export interface HeatmapDayCell {
+  date: string;
+  seconds: number;
+  frozen: boolean;
+  isToday: boolean;
+  isFuture: boolean;
+}
+
+export interface HeatmapWeekColumn {
+  weekStart: string;
+  monthLabel: string | null;
+  days: HeatmapDayCell[];
+}
+
+/**
+ * 週×曜日 (月〜日 7 行 × weeks 列) の整列カレンダーグリッドを返す (P4 可視化)。
+ * 最終列は endDate を含む暦週 (月〜日) とし、未来日は isFuture=true にする。
+ */
+export function buildWeeklyHeatmap(
+  days: ProgressData,
+  endDate: Date,
+  weeks: number
+): HeatmapWeekColumn[] {
+  const frozenSet = computeFrozenDates(days, endDate);
+  const todayBase = new Date(endDate);
+  todayBase.setHours(12, 0, 0, 0);
+  const todayKey = localDateStr(todayBase);
+
+  const currentMonday = new Date(todayBase);
+  currentMonday.setDate(currentMonday.getDate() - ((currentMonday.getDay() + 6) % 7));
+  const firstMonday = new Date(currentMonday);
+  firstMonday.setDate(firstMonday.getDate() - (weeks - 1) * 7);
+
+  const columns: HeatmapWeekColumn[] = [];
+  let lastLabeledMonth = -1;
+
+  for (let w = 0; w < weeks; w++) {
+    const weekMonday = new Date(firstMonday);
+    weekMonday.setDate(firstMonday.getDate() + w * 7);
+    const weekDays: HeatmapDayCell[] = [];
+    let monthLabel: string | null = null;
+
+    for (let dIdx = 0; dIdx < 7; dIdx++) {
+      const d = new Date(weekMonday);
+      d.setDate(weekMonday.getDate() + dIdx);
+      const key = localDateStr(d);
+      const isFuture = key > todayKey;
+      const isToday = key === todayKey;
+      const seconds = isFuture ? 0 : (days[key]?.seconds ?? 0);
+      const frozen = !isFuture && seconds <= 0 && frozenSet.has(key);
+      weekDays.push({ date: key, seconds, frozen, isToday, isFuture });
+
+      if (d.getDate() === 1 && !isFuture) {
+        const m = d.getMonth() + 1;
+        if (m !== lastLabeledMonth) {
+          monthLabel = `${m}月`;
+          lastLabeledMonth = m;
+        }
+      }
+    }
+
+    if (w === 0 && monthLabel === null) {
+      const m = weekMonday.getMonth() + 1;
+      monthLabel = `${m}月`;
+      lastLabeledMonth = m;
+    }
+
+    columns.push({
+      weekStart: localDateStr(weekMonday),
+      monthLabel,
+      days: weekDays,
+    });
+  }
+
+  return columns;
+}
+
+export interface WeekStripDay {
+  date: string;
+  weekdayLabel: string;
+  seconds: number;
+  frozen: boolean;
+  isToday: boolean;
+  isFuture: boolean;
+}
+
+const WEEKDAY_LABELS_JA = ['月', '火', '水', '木', '金', '土', '日'] as const;
+
+/** 今週 (月〜日) 7 日間のストリーク視覚ドット用配列を返す */
+export function buildCurrentWeekStrip(
+  days: ProgressData,
+  today: Date = new Date()
+): WeekStripDay[] {
+  const frozenSet = computeFrozenDates(days, today);
+  const base = new Date(today);
+  base.setHours(12, 0, 0, 0);
+  const todayKey = localDateStr(base);
+  const monday = new Date(base);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+
+  return WEEKDAY_LABELS_JA.map((weekdayLabel, idx) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + idx);
+    const key = localDateStr(d);
+    const isFuture = key > todayKey;
+    const isToday = key === todayKey;
+    const seconds = isFuture ? 0 : (days[key]?.seconds ?? 0);
+    const frozen = !isFuture && seconds <= 0 && frozenSet.has(key);
+    return { date: key, weekdayLabel, seconds, frozen, isToday, isFuture };
+  });
+}
