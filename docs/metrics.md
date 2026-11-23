@@ -24,7 +24,8 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `onboarding_started` | — | 診断の開始率 |
 | `onboarding_skipped` | — | 診断を避ける割合 |
 | `diagnostic_answered` | `question_index`, `correct`, `sound_change_type` | どの音変化でつまずくか（問題別の正答率） |
-| `onboarding_completed` | 種別ごとの correct/missed、`score`, `level` | Aha 到達。診断スコア分布 |
+| `onboarding_completed` | 種別ごとの correct/missed、`score`, `total`, `accuracy_percent`, `mode`, `level` | Aha 到達。全 8 種診断スコア分布 |
+| `rediagnosis_completed` | `mode`, `score`, `total`, `accuracy_percent`, `delta_accuracy` | 学習後の再診断実施と前回比の伸長計測 |
 | `lesson_started` | `lesson_id` | レッスン別の開始数 |
 | `lesson_completed` | `lesson_id`, `seconds` | 完了率・North Star の分子 |
 | `lesson_abandoned` | `lesson_id`, `progress_bucket`（0-25/25-50/50-75/75-99） | **離脱箇所**: どこまで進めて辞めたか |
@@ -43,6 +44,10 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `subscription_manage_tapped` | — | 設定のプラン導線タップ = **解約意図のシグナル** |
 | `watch_session_synced` | `sessions_count` | Watch 単体学習の取り込み（連携チャネルの利用） |
 | `overcoming_step_completed` | `lesson_id`, `sound_change_type`, `step` | 弱点克服パスの 3 ステップ（`listen` / `read` / `speak`）完了の把握 |
+| `curriculum_viewed` | `from`（home/result） | 診断から提案された個別カリキュラムの閲覧 |
+| `key_phrase_opened` | `lesson_id`, `sound_change_type` | レッスン冒頭の「今日のキーフレーズ」の利用動向 |
+| `weak_phrase_reviewed` | `lesson_id`, `remembered`, `stage` | 復習キューでの自己想起チェックと正答動向 |
+| `weak_phrase_graduated` | `lesson_id`, `review_count` | 苦手フレーズの定着・卒業到達数 |
 | `screen_view` | `screen_name`（home/phrases/progress/settings/lesson/onboarding/paywall/legal） | 画面遷移・滞在の把握（自動収集と併用） |
 
 ## 3. ユーザープロパティ

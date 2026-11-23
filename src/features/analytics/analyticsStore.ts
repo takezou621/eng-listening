@@ -23,6 +23,7 @@ export type AnalyticsEventType =
   | 'onboarding_started'
   | 'onboarding_completed'
   | 'onboarding_skipped'
+  | 'rediagnosis_completed'
   | 'diagnostic_answered'
   | 'lesson_started'
   | 'lesson_completed'
@@ -42,7 +43,11 @@ export type AnalyticsEventType =
   | 'restore_completed'
   | 'subscription_manage_tapped'
   | 'watch_session_synced'
-  | 'overcoming_step_completed';
+  | 'overcoming_step_completed'
+  | 'curriculum_viewed'
+  | 'key_phrase_opened'
+  | 'weak_phrase_reviewed'
+  | 'weak_phrase_graduated';
 
 export interface AnalyticsEvent {
   /** 端末内連番 (1 起算) */

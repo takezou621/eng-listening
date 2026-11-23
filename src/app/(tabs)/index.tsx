@@ -7,6 +7,9 @@ import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { CONTENT_TYPE_LABELS, type ContentType } from '@/data/types';
+import { CurriculumSheet } from '@/features/learning/components/CurriculumSheet';
+import { buildPersonalCurriculum } from '@/features/learning/curriculum';
+import { summarizeReviewQueue } from '@/features/learning/spacedRepetition';
 import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
 import { isOnboardingDone, loadUserDataAsync, useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
@@ -32,11 +35,19 @@ function countLinkingNotes(
 export default function LibraryScreen() {
   const { colors } = useTheme();
   const router = useRouter();
-  const { favoriteLessons, toggleFavoriteLesson, onboardingDone, dailyGoalMinutes } = useUserData();
+  const {
+    favoriteLessons,
+    toggleFavoriteLesson,
+    onboardingDone,
+    dailyGoalMinutes,
+    weakSentences,
+    diagnosticProfile,
+  } = useUserData();
 
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [filterLevel, setFilterLevel] = useState<FilterLevel>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [curriculumVisible, setCurriculumVisible] = useState(false);
 
   const lessonList = getLessonList();
   const progressDays = useProgressData();
@@ -48,26 +59,49 @@ export default function LibraryScreen() {
     }
     return set;
   }, [progressDays]);
+  const allBundles = useMemo(
+    () =>
+      lessonList
+        .map((l) => l.bundle)
+        .filter((b): b is NonNullable<typeof b> => b !== null),
+    [lessonList]
+  );
+  const curriculum = useMemo(
+    () =>
+      buildPersonalCurriculum(
+        diagnosticProfile?.missedTypes,
+        completedLessonIds,
+        allBundles
+      ),
+    [diagnosticProfile, completedLessonIds, allBundles]
+  );
   const todaysLesson = useMemo(
-    () => getTodaysLesson(completedLessonIds),
-    [completedLessonIds]
+    () => getTodaysLesson(completedLessonIds, curriculum.nextLessonId),
+    [completedLessonIds, curriculum.nextLessonId]
   );
   // 日付をまたいでも「今日」が古くならないよう、復帰時と1分間隔で日付を更新する
   const [todayKey, setTodayKey] = useState(() => localDateStr());
+  const [nowMs, setNowMs] = useState(() => Date.now());
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
         setTodayKey(localDateStr());
+        setNowMs(Date.now());
       }
     });
     const interval = setInterval(() => {
       setTodayKey(localDateStr());
+      setNowMs(Date.now());
     }, 60_000);
     return () => {
       sub.remove();
       clearInterval(interval);
     };
   }, []);
+  const reviewSummary = useMemo(
+    () => summarizeReviewQueue(weakSentences, nowMs),
+    [weakSentences, nowMs]
+  );
   const refDate = new Date(todayKey + 'T12:00:00');
   const streakInfo = computeStreakWithFreeze(progressDays, refDate);
   const goalStatus = computeDailyGoalStatus(
@@ -212,78 +246,134 @@ export default function LibraryScreen() {
       </View>
 
       {isFilterDefault && todaysLesson ? (
-        <Pressable
-          onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
-          accessibilityRole="button"
-          accessibilityLabel={`${todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}: ${todayBundle?.data.titleJa ?? todaysLesson.item.entry.title}。今日の目標は ${goalStatus.todayMinutes} 分 / ${goalStatus.goalMinutes} 分${goalStatus.achieved ? '、目標達成' : ''}`}
-          accessibilityHint="タップでレッスンをはじめる"
-          style={[
-            styles.todayCard,
-            { backgroundColor: colors.secondarySurface, borderColor: colors.primary },
-          ]}
-        >
-          <View style={styles.todayTopRow}>
-            <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>
-              {todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}
-            </ThemedText>
-            {goalStatus.achieved ? (
-              <View style={styles.goalStatusRow}>
-                <SymbolView
-                  name="checkmark.circle.fill"
-                  size={13}
-                  tintColor={successColor}
-                  fallback={
-                    <ThemedText variant="caption" style={{ color: successColor, fontWeight: '700' }}>
-                      ✓
-                    </ThemedText>
-                  }
-                />
-                <ThemedText variant="caption" style={{ color: successColor, fontWeight: '600' }}>
-                  目標達成 ({goalStatus.todayMinutes}分)
-                </ThemedText>
-              </View>
-            ) : (
-              <ThemedText variant="caption" style={{ color: colors.textMuted, fontWeight: '600' }}>
-                今日 {goalStatus.todayMinutes} / {goalStatus.goalMinutes} 分
+        <View style={styles.heroStack}>
+          <Pressable
+            onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
+            accessibilityRole="button"
+            accessibilityLabel={`${todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}: ${todayBundle?.data.titleJa ?? todaysLesson.item.entry.title}。今日の目標は ${goalStatus.todayMinutes} 分 / ${goalStatus.goalMinutes} 分${goalStatus.achieved ? '、目標達成' : ''}`}
+            accessibilityHint="タップでレッスンをはじめる"
+            style={[
+              styles.todayCard,
+              { backgroundColor: colors.secondarySurface, borderColor: colors.primary },
+            ]}
+          >
+            <View style={styles.todayTopRow}>
+              <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>
+                {todaysLesson.isReview
+                  ? '復習におすすめ'
+                  : curriculum.isCustomizedByDiagnostic && curriculum.nextStepLabel
+                    ? `今日の1本 ・ ${curriculum.nextStepLabel}`
+                    : '今日の1本'}
               </ThemedText>
-            )}
-          </View>
-          <ThemedText variant="heading">{todayBundle?.data.titleJa}</ThemedText>
-          <ThemedText variant="caption" color="muted" numberOfLines={1}>
-            {todaysLesson.item.entry.title}
-          </ThemedText>
-          <ThemedText variant="caption" color="muted">
-            約 {Math.round(todayBundle?.data.durationSec ?? 0)} 秒 ・{' '}
-            {todayBundle?.data.sentences.length ?? 0} 文
-            {todayNoteCount > 0 ? ` ・ 音変化 ${todayNoteCount} 箇所` : ''}
-          </ThemedText>
-          <View style={[styles.goalTrack, { backgroundColor: colors.border }]}>
-            <View
-              style={[
-                styles.goalFill,
-                {
-                  width: `${goalStatus.ratio * 100}%`,
-                  backgroundColor: goalStatus.achieved ? successColor : colors.primary,
-                },
-              ]}
-            />
-          </View>
-          <View style={[styles.todayPrimaryCta, { backgroundColor: colors.primary }]}>
-            <SymbolView
-              name="play.fill"
-              size={13}
-              tintColor={colors.primaryText}
-              fallback={
-                <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
-                  ▶
+              {goalStatus.achieved ? (
+                <View style={styles.goalStatusRow}>
+                  <SymbolView
+                    name="checkmark.circle.fill"
+                    size={13}
+                    tintColor={successColor}
+                    fallback={
+                      <ThemedText variant="caption" style={{ color: successColor, fontWeight: '700' }}>
+                        ✓
+                      </ThemedText>
+                    }
+                  />
+                  <ThemedText variant="caption" style={{ color: successColor, fontWeight: '600' }}>
+                    目標達成 ({goalStatus.todayMinutes}分)
+                  </ThemedText>
+                </View>
+              ) : (
+                <ThemedText variant="caption" style={{ color: colors.textMuted, fontWeight: '600' }}>
+                  今日 {goalStatus.todayMinutes} / {goalStatus.goalMinutes} 分
                 </ThemedText>
-              }
-            />
-            <ThemedText style={[styles.todayPrimaryCtaText, { color: colors.primaryText }]}>
-              はじめる
+              )}
+            </View>
+            <ThemedText variant="heading">{todayBundle?.data.titleJa}</ThemedText>
+            <ThemedText variant="caption" color="muted" numberOfLines={1}>
+              {todaysLesson.item.entry.title}
             </ThemedText>
+            <ThemedText variant="caption" color="muted">
+              約 {Math.round(todayBundle?.data.durationSec ?? 0)} 秒 ・{' '}
+              {todayBundle?.data.sentences.length ?? 0} 文
+              {todayNoteCount > 0 ? ` ・ 音変化 ${todayNoteCount} 箇所` : ''}
+            </ThemedText>
+            <View style={[styles.goalTrack, { backgroundColor: colors.border }]}>
+              <View
+                style={[
+                  styles.goalFill,
+                  {
+                    width: `${goalStatus.ratio * 100}%`,
+                    backgroundColor: goalStatus.achieved ? successColor : colors.primary,
+                  },
+                ]}
+              />
+            </View>
+            <View style={[styles.todayPrimaryCta, { backgroundColor: colors.primary }]}>
+              <SymbolView
+                name="play.fill"
+                size={13}
+                tintColor={colors.primaryText}
+                fallback={
+                  <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
+                    ▶
+                  </ThemedText>
+                }
+              />
+              <ThemedText style={[styles.todayPrimaryCtaText, { color: colors.primaryText }]}>
+                はじめる
+              </ThemedText>
+            </View>
+          </Pressable>
+
+          <View style={styles.quickActionRow}>
+            <Pressable
+              onPress={() => {
+                logEvent('curriculum_viewed', { from: 'home' });
+                setCurriculumVisible(true);
+              }}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel="あなた向けカリキュラムを見る"
+              style={[
+                styles.quickActionCard,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+            >
+              <ThemedText variant="caption" color="primary" style={styles.quickActionTitle}>
+                あなた向けカリキュラム
+              </ThemedText>
+              <ThemedText variant="caption" color="muted" numberOfLines={1}>
+                3ステップの順序を見る ›
+              </ThemedText>
+            </Pressable>
+
+            {weakSentences.length > 0 ? (
+              <Pressable
+                onPress={() => router.push('/(tabs)/phrases?review=1')}
+                hitSlop={6}
+                accessibilityRole="button"
+                accessibilityLabel={`今日の復習: 残り ${reviewSummary.dueCount} 件、卒業 ${reviewSummary.graduatedCount} 件`}
+                style={[
+                  styles.quickActionCard,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: reviewSummary.dueCount > 0 ? colors.primary : colors.border,
+                  },
+                ]}
+              >
+                <ThemedText
+                  variant="caption"
+                  color={reviewSummary.dueCount > 0 ? 'primary' : 'default'}
+                  style={styles.quickActionTitle}
+                >
+                  今日の復習{reviewSummary.dueCount === 0 ? ' ✓' : ''}
+                </ThemedText>
+                <ThemedText variant="caption" color="muted" numberOfLines={1}>
+                  残り {reviewSummary.dueCount} 件 ・ 卒業 {reviewSummary.graduatedCount} 件 ›
+                </ThemedText>
+              </Pressable>
+            ) : null}
           </View>
-        </Pressable>
+        </View>
       ) : null}
 
       {renderFilterChips()}
@@ -394,6 +484,13 @@ export default function LibraryScreen() {
           );
         }}
       />
+
+      <CurriculumSheet
+        visible={curriculumVisible}
+        curriculum={curriculum}
+        onSelectLesson={(lessonId) => router.push(`/lesson?lesson=${lessonId}`)}
+        onClose={() => setCurriculumVisible(false)}
+      />
     </Screen>
   );
 }
@@ -428,7 +525,25 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     gap: 6,
+  },
+  heroStack: {
+    gap: 8,
     marginBottom: 12,
+  },
+  quickActionRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  quickActionCard: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 2,
+  },
+  quickActionTitle: {
+    fontWeight: '700',
   },
   todayTopRow: {
     flexDirection: 'row',
