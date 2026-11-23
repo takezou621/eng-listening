@@ -8,10 +8,11 @@ import type { AppColorScheme } from '@/theme/colors';
 
 // 音の変化の色 (ライトモード)。UI のアクセント (青, colors.primary) と意味が衝突しないよう、
 // 音変化カラーには青系を使わない (Issue #45 C1)。
+// secondarySurface (#EEF2FF) 上でも WCAG AA (4.5:1) を満たす濃度にする。
 export const LINKING_COLORS: Record<LessonLinkingNote['type'], string> = {
   linking: '#6D28D9',
   reduction: '#B45309',
-  flapping: '#C026D3',
+  flapping: '#A21CAF',
   assimilation: '#0F766E',
   palatalization: '#BE185D',
   elision: '#4D7C0F',
@@ -34,6 +35,21 @@ export const LINKING_COLORS_DARK: Record<LessonLinkingNote['type'], string> = {
 export function getLinkingColor(type: LessonLinkingNote['type'], scheme: AppColorScheme): string {
   return scheme === 'dark' ? LINKING_COLORS_DARK[type] : LINKING_COLORS[type];
 }
+
+/**
+ * 色以外の手がかり (C2 強化): 各音変化を一意に識別する記号シンボル。
+ * シートや凡例・バッジで共通表示し、色覚特性や OS 差に依存せず区別できるようにする。
+ */
+export const LINKING_SYMBOLS: Record<LessonLinkingNote['type'], string> = {
+  linking: '⌒',
+  reduction: '◌',
+  flapping: '∿',
+  assimilation: '⇄',
+  palatalization: '↱',
+  elision: '×',
+  intrusion: '+',
+  'weak-form': '↓',
+};
 
 export const LINKING_DESCRIPTIONS: Record<LessonLinkingNote['type'], string> = {
   linking: '前の語尾と次の語頭がつながって発音されます',
@@ -65,13 +81,32 @@ export const LINKING_TEXT_DECORATIONS: Record<
     fontStyle: 'italic',
   },
   elision: { textDecorationLine: 'line-through', textDecorationStyle: 'solid' },
-  intrusion: { backgroundColor: '#B91C1C26' },
+  intrusion: {
+    backgroundColor: '#B91C1C22',
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dashed',
+  },
   'weak-form': {
     textDecorationLine: 'underline',
     textDecorationStyle: 'dotted',
     fontStyle: 'italic',
   },
 };
+
+/** テーマに応じた音変化テキスト装飾を返す (intrusion のダークモード視認性確保) */
+export function getLinkingTextDecoration(
+  type: LessonLinkingNote['type'],
+  scheme: AppColorScheme
+): import('react-native').TextStyle {
+  if (type === 'intrusion') {
+    return {
+      backgroundColor: scheme === 'dark' ? '#F8717133' : '#B91C1C22',
+      textDecorationLine: 'underline',
+      textDecorationStyle: 'dashed',
+    };
+  }
+  return LINKING_TEXT_DECORATIONS[type];
+}
 
 export const LINKING_LABELS: Record<LessonLinkingNote['type'], string> = {
   linking: 'リンキング',
