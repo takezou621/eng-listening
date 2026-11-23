@@ -19,6 +19,7 @@ import {
   LINKING_TEXT_DECORATIONS,
   getLinkingColor,
 } from '@/features/lesson/linkingViz';
+import { buildPersonalCurriculum } from '@/features/learning/curriculum';
 import { getLessonList } from '@/features/lesson/registry';
 import { useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
@@ -40,7 +41,7 @@ export default function OnboardingScreen() {
   const perfectParam = Array.isArray(params.perfect) ? params.perfect[0] : params.perfect;
   const router = useRouter();
   const { colors } = useTheme();
-  const { completeOnboarding, addWeakSentencesFromDiagnostic } = useUserData();
+  const { completeOnboarding, addWeakSentencesFromDiagnostic, saveDiagnosticProfile } = useUserData();
 
   const questions = DIAGNOSTIC_QUESTIONS;
   // ?step=result / ?step=questions で指定フェーズから開始できる (検証用 deep link)。
@@ -159,33 +160,43 @@ export default function OnboardingScreen() {
   }
 
   if (phase === 'result') {
+    const commitDiagnosticResult = (recommendedLessonId: string | null) => {
+      // 検証用 deep link (?step=result) の架空の結果は分析ログ・苦手フレーズへ記録しない
+      if (stepParam !== 'result') {
+        const missedItems = results
+          .filter((r) => !r.correct)
+          .map((r) => ({ lessonId: r.lessonId, sentenceIndex: r.sentenceIndex }));
+        addWeakSentencesFromDiagnostic(missedItems);
+
+        const missedMap = countMissedTypes(results);
+        const score = results.filter((r) => r.correct).length;
+        saveDiagnosticProfile({
+          completedAtMs: Date.now(),
+          score,
+          total: results.length,
+          missedTypes: missedMap,
+          recommendedLessonId,
+        });
+
+        const level = score >= 3 ? 'advanced' : score === 2 ? 'intermediate' : 'beginner';
+        logEvent('onboarding_completed', {
+          linking_correct: results.filter((r) => r.type === 'linking' && r.correct).length,
+          linking_missed: results.filter((r) => r.type === 'linking' && !r.correct).length,
+          reduction_correct: results.filter((r) => r.type === 'reduction' && r.correct).length,
+          reduction_missed: results.filter((r) => r.type === 'reduction' && !r.correct).length,
+          flapping_correct: results.filter((r) => r.type === 'flapping' && r.correct).length,
+          flapping_missed: results.filter((r) => r.type === 'flapping' && !r.correct).length,
+          score,
+          level,
+        });
+        setGa4UserProperties({ diagnostic_level: level });
+      }
+      finish();
+    };
     return (
       <ResultScreen
         results={results}
-        onFinish={() => {
-          // 検証用 deep link (?step=result) の架空の結果は分析ログ・苦手フレーズへ記録しない
-          if (stepParam !== 'result') {
-            const missedItems = results
-              .filter((r) => !r.correct)
-              .map((r) => ({ lessonId: r.lessonId, sentenceIndex: r.sentenceIndex }));
-            addWeakSentencesFromDiagnostic(missedItems);
-
-            const score = results.filter((r) => r.correct).length;
-            const level = score >= 3 ? 'advanced' : score === 2 ? 'intermediate' : 'beginner';
-            logEvent('onboarding_completed', {
-              linking_correct: results.filter((r) => r.type === 'linking' && r.correct).length,
-              linking_missed: results.filter((r) => r.type === 'linking' && !r.correct).length,
-              reduction_correct: results.filter((r) => r.type === 'reduction' && r.correct).length,
-              reduction_missed: results.filter((r) => r.type === 'reduction' && !r.correct).length,
-              flapping_correct: results.filter((r) => r.type === 'flapping' && r.correct).length,
-              flapping_missed: results.filter((r) => r.type === 'flapping' && !r.correct).length,
-              score,
-              level,
-            });
-            setGa4UserProperties({ diagnostic_level: level });
-          }
-          finish();
-        }}
+        onFinish={commitDiagnosticResult}
       />
     );
   }
@@ -508,7 +519,13 @@ function QuestionPhase({
 
 // ---------------------------------------------------------------------------
 
-function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFinish: () => void }) {
+function ResultScreen({
+  results,
+  onFinish,
+}: {
+  results: DiagnosticResult[];
+  onFinish: (recommendedLessonId: string | null) => void;
+}) {
   const { scheme, colors } = useTheme();
   const router = useRouter();
   const missed = countMissedTypes(results);
@@ -518,12 +535,18 @@ function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFi
   const scoreRatio = correctCount / totalCount;
   const allCorrect = missedCount === 0;
 
-  const recommendation = pickRecommendedLesson(
-    missed,
-    getLessonList()
-      .map((l) => l.bundle)
-      .filter((b): b is NonNullable<typeof b> => b !== null)
-  );
+  const allBundles = getLessonList()
+    .map((l) => l.bundle)
+    .filter((b): b is NonNullable<typeof b> => b !== null);
+  const recommendation = pickRecommendedLesson(missed, allBundles);
+  const curriculum = buildPersonalCurriculum(missed, new Set<string>(), allBundles);
+  const primaryLessonId = curriculum.nextLessonId ?? recommendation?.lessonId ?? null;
+
+  const openCurriculumLesson = (lessonId: string) => {
+    logEvent('curriculum_viewed', { from: 'result' });
+    onFinish(primaryLessonId);
+    router.push(`/lesson?lesson=${lessonId}`);
+  };
 
   return (
     <Screen>
@@ -614,36 +637,67 @@ function ResultScreen({ results, onFinish }: { results: DiagnosticResult[]; onFi
         ) : null}
       </View>
 
-      {/* ブロック 2: おすすめレッスンカード (全問正解時も含め常時提示・唯一の青 CTA) */}
-      {recommendation ? (
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ThemedText variant="caption" color="muted">
-            あなたにおすすめのレッスン
-          </ThemedText>
-          <ThemedText variant="heading">{recommendation.titleJa}</ThemedText>
-          <ThemedText variant="caption" color="muted">
-            {recommendation.title}
-          </ThemedText>
-          <ThemedText variant="caption" color="muted" style={styles.gap}>
-            {recommendation.reason}
-          </ThemedText>
+      {/* ブロック 2: あなた向けカリキュラム (タイプ別の学習順序と対象レッスン + 唯一の青 CTA) */}
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <ThemedText variant="heading">あなた向けカリキュラム</ThemedText>
+        <ThemedText variant="caption" color="muted">
+          {allCorrect
+            ? '基礎から自然な速度まで 3 ステップで聞き取りを伸ばす学習順です。'
+            : 'つまずいた音変化から順に克服できるよう、対象レッスンを組みました。'}
+        </ThemedText>
+        <View style={styles.curriculumList}>
+          {curriculum.steps.map((step) => {
+            const typeColor = getLinkingColor(step.type, scheme);
+            const firstLesson = step.lessons[0];
+            return (
+              <Pressable
+                key={step.stepNumber}
+                disabled={!firstLesson}
+                onPress={() => {
+                  if (firstLesson) openCurriculumLesson(firstLesson.lessonId);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`ステップ${step.stepNumber} ${step.label}: ${step.lessons.map((l) => l.titleJa).join('、')}`}
+                style={[
+                  styles.curriculumRow,
+                  { backgroundColor: colors.secondarySurface, borderColor: colors.border },
+                ]}
+              >
+                <View style={styles.curriculumTopRow}>
+                  <ThemedText variant="caption" color="primary" style={styles.stepLabel}>
+                    ステップ {step.stepNumber}
+                  </ThemedText>
+                  <ThemedText variant="caption" style={[styles.stepTypeText, { color: typeColor }]}>
+                    {step.symbol} {step.label}
+                  </ThemedText>
+                  {step.isWeakTarget ? (
+                    <ThemedText variant="caption" style={{ color: colors.warning, fontWeight: '700' }}>
+                      重点
+                    </ThemedText>
+                  ) : null}
+                </View>
+                <ThemedText variant="caption" color="muted" numberOfLines={2}>
+                  対象: {step.lessons.map((l) => `${l.titleJa}(${l.level === 'beginner' ? '初級' : '中級'})`).join(' → ')}
+                </ThemedText>
+              </Pressable>
+            );
+          })}
+        </View>
+        {primaryLessonId ? (
           <Pressable
             style={[styles.primaryButton, { backgroundColor: colors.primary }]}
             accessibilityRole="button"
-            onPress={() => {
-              onFinish(); // 診断完了・苦手自動登録を記録してからレッスンへ遷移する (再表示防止)
-              router.push(`/lesson?lesson=${recommendation.lessonId}`);
-            }}
+            onPress={() => openCurriculumLesson(primaryLessonId)}
           >
             <ThemedText style={{ color: colors.primaryText, fontWeight: '700' }}>
-              このレッスンをはじめる
+              ステップ 1 から始める
             </ThemedText>
           </Pressable>
-        </View>
-      ) : null}
+        ) : null}
+      </View>
 
       <Pressable
-        onPress={onFinish}
+        onPress={() => onFinish(primaryLessonId)}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         accessibilityRole="button"
         style={styles.skipButton}
@@ -810,6 +864,28 @@ const styles = StyleSheet.create({
   },
   autoAddedNote: {
     marginTop: 2,
+  },
+  curriculumList: {
+    gap: 8,
+    marginTop: 4,
+  },
+  curriculumRow: {
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 4,
+  },
+  curriculumTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  stepLabel: {
+    fontWeight: '700',
+  },
+  stepTypeText: {
+    fontWeight: '700',
   },
   gap: { marginTop: 4 },
 });

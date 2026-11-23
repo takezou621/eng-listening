@@ -44,10 +44,12 @@ import {
 } from '@/features/lesson/components/ShadowingStage';
 import {
   LINKING_LABELS,
+  LINKING_SYMBOLS,
   getLinkingColor,
   getLinkingTextDecoration,
   wordLinkMap,
 } from '@/features/lesson/linkingViz';
+import { getLessonKeyPhrase } from '@/features/learning/curriculum';
 import { getLessonBundle, getLessonList, type LessonBundle } from '@/features/lesson/registry';
 import type { LessonLinkingNote, LessonSentence, LessonWord } from '@/features/lesson/types';
 import { useUserData } from '@/features/library/userStore';
@@ -330,7 +332,7 @@ function LessonPlayerScreen({
 }) {
   const lesson = bundle.data;
   const sentences = lesson.sentences;
-  const { colors } = useTheme();
+  const { scheme, colors } = useTheme();
   const { isSentenceWeak, toggleWeakSentence, dailyGoalMinutes } = useUserData();
   const router = useRouter();
   const progressDays = useProgressData();
@@ -1123,6 +1125,13 @@ function LessonPlayerScreen({
     return [...set];
   }, [sentences]);
 
+  const keyPhrase = useMemo(() => getLessonKeyPhrase(lesson), [lesson]);
+  const keyPhrasePos = useMemo(
+    () =>
+      keyPhrase ? sentences.findIndex((s) => s.index === keyPhrase.sentenceIndex) : -1,
+    [keyPhrase, sentences]
+  );
+
   const abPhrase = useMemo(() => {
     if (!ab) return null;
     const texts = sentences
@@ -1299,6 +1308,57 @@ function LessonPlayerScreen({
             </ThemedText>
           </Pressable>
         </View>
+      ) : null}
+
+      {/* 今日のキーフレーズ (全レッスン統一の焦点表示: 1行コンパクトカード) */}
+      {keyPhrase ? (
+        <Pressable
+          onPress={() => {
+            if (keyPhrasePos >= 0) {
+              goToPosition(keyPhrasePos, lessonMode !== 'speak');
+            }
+            const noteIdx = keyPhrase.sentence.linking.findIndex(
+              (n) => n.span === keyPhrase.note.span && n.type === keyPhrase.note.type
+            );
+            setLinkingSheetTarget({
+              sentenceIndex: keyPhrase.sentenceIndex,
+              noteIndex: noteIdx >= 0 ? noteIdx : 0,
+            });
+            logEvent('key_phrase_opened', {
+              lessonId: lesson.id,
+              soundChangeType: keyPhrase.note.type,
+            });
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={`今日のキーフレーズ: ${keyPhrase.note.span}（${LINKING_LABELS[keyPhrase.note.type]}）の解説を開く`}
+          style={[
+            styles.keyPhraseBar,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.keyPhraseLeft}>
+            <ThemedText variant="caption" color="muted" style={styles.keyPhraseTag}>
+              今日のキーフレーズ
+            </ThemedText>
+            <View style={styles.keyPhraseMainRow}>
+              <ThemedText
+                variant="caption"
+                style={{
+                  color: getLinkingColor(keyPhrase.note.type, scheme),
+                  fontWeight: '700',
+                }}
+              >
+                {LINKING_SYMBOLS[keyPhrase.note.type]} {LINKING_LABELS[keyPhrase.note.type]}
+              </ThemedText>
+              <ThemedText variant="caption" style={styles.keyPhraseSpan} numberOfLines={1}>
+                “{keyPhrase.note.span}” {keyPhrase.note.ipa}
+              </ThemedText>
+            </View>
+          </View>
+          <ThemedText variant="caption" color="primary" style={styles.keyPhraseAction}>
+            解説 ›
+          </ThemedText>
+        </Pressable>
       ) : null}
 
       {/* モード 1: 聞く (カラオケ風表示) */}
@@ -1861,6 +1921,37 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   abClearText: {
+    fontWeight: '700',
+  },
+  keyPhraseBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+    gap: 8,
+  },
+  keyPhraseLeft: {
+    flex: 1,
+    gap: 2,
+  },
+  keyPhraseTag: {
+    fontWeight: '600',
+  },
+  keyPhraseMainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  keyPhraseSpan: {
+    fontWeight: '700',
+    flexShrink: 1,
+  },
+  keyPhraseAction: {
     fontWeight: '700',
   },
   stageCard: {

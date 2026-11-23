@@ -1,14 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { AppState, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, usePathname, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
+import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { SEEK_TOLERANCE_MILLIS } from '@/config/appConfig';
 import {
+  ReviewQueueSheet,
+  type ReviewQueueCardItem,
+} from '@/features/learning/components/ReviewQueueSheet';
+import {
+  GRADUATION_STAGE,
+  formatReviewStatusLabel,
+  isWeakDueForReview,
+  isWeakGraduated,
+  summarizeReviewQueue,
+} from '@/features/learning/spacedRepetition';
+import {
   LINKING_LABELS,
+  LINKING_SYMBOLS,
   getLinkingColor,
 } from '@/features/lesson/linkingViz';
 import { getLessonList } from '@/features/lesson/registry';
@@ -17,6 +30,7 @@ import { useUserData } from '@/features/library/userStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 type LinkingNoteType = LessonLinkingNote['type'];
+type FilterMode = 'all' | 'due' | 'graduated';
 
 interface ResolvableWeakItem {
   lessonId: string;
@@ -26,14 +40,48 @@ interface ResolvableWeakItem {
   audio: number;
   sentence: LessonSentence;
   uniqueTypes: LinkingNoteType[];
+  reviewStage: number;
+  nextReviewAtMs?: number;
+  graduatedAtMs?: number;
+  graduated: boolean;
+  due: boolean;
+  statusLabel: string;
 }
 
-/** 苦手フレーズ帳（即聴き直し・即シャドーイング復習ループ付き） */
+/** 苦手フレーズ帳 & 間隔反復復習キュー（残り件数・卒業数可視化 + 1タップ連続復習） */
 export default function PhrasesScreen() {
+  const params = useLocalSearchParams<{ review?: string | string[] }>();
+  const reviewParam = Array.isArray(params.review) ? params.review[0] : params.review;
   const { scheme, colors } = useTheme();
   const router = useRouter();
-  const { weakSentences, toggleWeakSentence } = useUserData();
+  const pathname = usePathname();
+  const {
+    weakSentences,
+    toggleWeakSentence,
+    recordWeakSentenceReview,
+    reactivateWeakSentence,
+  } = useUserData();
   const [playingKey, setPlayingKey] = useState<string | null>(null);
+  const [filterMode, setFilterMode] = useState<FilterMode>('all');
+  const [reviewSheetVisible, setReviewSheetVisible] = useState(false);
+  const [autoReviewPending, setAutoReviewPending] = useState(reviewParam === '1');
+  const [prevReviewParam, setPrevReviewParam] = useState(reviewParam);
+  if (prevReviewParam !== reviewParam) {
+    setPrevReviewParam(reviewParam);
+    setAutoReviewPending(reviewParam === '1');
+  }
+
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') setNowMs(Date.now());
+    });
+    const timer = setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => {
+      sub.remove();
+      clearInterval(timer);
+    };
+  }, []);
 
   const playerRef = useRef<AudioPlayer | null>(null);
   const subRef = useRef<{ remove: () => void } | null>(null);
@@ -87,10 +135,41 @@ export default function PhrasesScreen() {
         audio: bundle.audio,
         sentence,
         uniqueTypes: uniqueTypes.slice(0, 3),
+        reviewStage: item.reviewStage ?? 0,
+        nextReviewAtMs: item.nextReviewAtMs,
+        graduatedAtMs: item.graduatedAtMs,
+        graduated: isWeakGraduated(item),
+        due: isWeakDueForReview(item, nowMs),
+        statusLabel: formatReviewStatusLabel(item, nowMs),
       });
     }
     return items;
-  }, [weakSentences, lessonList]);
+  }, [weakSentences, lessonList, nowMs]);
+
+  const reviewSummary = useMemo(
+    () => summarizeReviewQueue(resolvableWeakItems, nowMs),
+    [resolvableWeakItems, nowMs]
+  );
+
+  const filteredItems = useMemo(() => {
+    if (filterMode === 'due') return reviewSummary.dueItems;
+    if (filterMode === 'graduated') return reviewSummary.graduatedItems;
+    return resolvableWeakItems;
+  }, [filterMode, reviewSummary.dueItems, reviewSummary.graduatedItems, resolvableWeakItems]);
+
+  const dueQueueCardItems = useMemo<ReviewQueueCardItem[]>(
+    () =>
+      reviewSummary.dueItems.map((it) => ({
+        lessonId: it.lessonId,
+        sentenceIndex: it.sentenceIndex,
+        titleJa: it.titleJa,
+        audio: it.audio,
+        sentence: it.sentence,
+        uniqueTypes: it.uniqueTypes,
+        reviewStage: it.reviewStage,
+      })),
+    [reviewSummary.dueItems]
+  );
 
   const handleTogglePlay = useCallback(
     async (item: ResolvableWeakItem) => {
@@ -142,30 +221,83 @@ export default function PhrasesScreen() {
     [playingKey, stopPlayback]
   );
 
-  const firstReviewTarget = resolvableWeakItems[0] ?? null;
+  const firstActiveTarget =
+    reviewSummary.dueItems[0] ?? reviewSummary.upcomingItems[0] ?? null;
+
+  const effectiveReviewSheetVisible =
+    pathname === '/phrases' &&
+    (reviewSheetVisible || (autoReviewPending && dueQueueCardItems.length > 0));
 
   return (
     <Screen scroll={false}>
       <ThemedText variant="title">苦手フレーズ</ThemedText>
       <ThemedText variant="caption" color="muted" style={styles.subtitle}>
-        全 {resolvableWeakItems.length} 件 ・ 聞いてすぐシャドーイング復習
+        今日の復習 残り {reviewSummary.dueCount} 件 ・ 学習中 {reviewSummary.activeCount} 件 ・ 卒業{' '}
+        {reviewSummary.graduatedCount} 件
       </ThemedText>
 
+      {resolvableWeakItems.length > 0 ? (
+        <View style={styles.filterRow}>
+          <Chip
+            label={`すべて (${resolvableWeakItems.length})`}
+            variant="outlined"
+            active={filterMode === 'all'}
+            onPress={() => setFilterMode('all')}
+          />
+          <Chip
+            label={`今日復習 (${reviewSummary.dueCount})`}
+            variant="outlined"
+            active={filterMode === 'due'}
+            onPress={() => setFilterMode('due')}
+          />
+          <Chip
+            label={`卒業済み (${reviewSummary.graduatedCount})`}
+            variant="outlined"
+            active={filterMode === 'graduated'}
+            onPress={() => setFilterMode('graduated')}
+          />
+        </View>
+      ) : null}
+
       <FlatList
-        data={resolvableWeakItems}
+        data={filteredItems}
         keyExtractor={(item) => `${item.lessonId}-${item.sentenceIndex}`}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          firstReviewTarget ? (
+          reviewSummary.dueCount > 0 ? (
+            <Pressable
+              onPress={() => {
+                stopPlayback();
+                setReviewSheetVisible(true);
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`今日の復習をはじめる 残り ${reviewSummary.dueCount} 件`}
+              style={[styles.primaryCta, { backgroundColor: colors.primary }]}
+            >
+              <SymbolView
+                name="play.fill"
+                size={14}
+                tintColor={colors.primaryText}
+                fallback={
+                  <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
+                    ▶
+                  </ThemedText>
+                }
+              />
+              <ThemedText style={[styles.primaryCtaText, { color: colors.primaryText }]}>
+                今日の復習をはじめる（残り {reviewSummary.dueCount} 件）
+              </ThemedText>
+            </Pressable>
+          ) : firstActiveTarget ? (
             <Pressable
               onPress={() => {
                 stopPlayback();
                 router.push(
-                  `/lesson?lesson=${firstReviewTarget.lessonId}&sentence=${firstReviewTarget.sentenceIndex + 1}&mode=speak`
+                  `/lesson?lesson=${firstActiveTarget.lessonId}&sentence=${firstActiveTarget.sentenceIndex + 1}&mode=speak`
                 );
               }}
               accessibilityRole="button"
-              accessibilityLabel={`最初のフレーズ「${firstReviewTarget.sentence.text}」をシャドーイング復習`}
+              accessibilityLabel={`学習中フレーズ「${firstActiveTarget.sentence.text}」をシャドーイング復習`}
               style={[styles.primaryCta, { backgroundColor: colors.primary }]}
             >
               <SymbolView
@@ -179,33 +311,51 @@ export default function PhrasesScreen() {
                 }
               />
               <ThemedText style={[styles.primaryCtaText, { color: colors.primaryText }]}>
-                最初のフレーズをシャドーイング復習
+                シャドーイングで先取り練習
               </ThemedText>
             </Pressable>
           ) : undefined
         }
         ListEmptyComponent={
-          <View
-            style={[
-              styles.emptyCard,
-              { backgroundColor: colors.surface, borderColor: colors.border },
-            ]}
-          >
-            <ThemedText variant="heading">登録された苦手フレーズはありません</ThemedText>
-            <ThemedText variant="caption" color="muted" style={styles.emptyHint}>
-              レッスンの各文にある苦手アイコンをタップすると、聞き取れなかった文をここに集められます。
-            </ThemedText>
-            <Pressable
-              onPress={() => router.push('/(tabs)')}
-              hitSlop={8}
-              style={[styles.emptyCta, { borderColor: colors.primary }]}
-              accessibilityRole="button"
+          resolvableWeakItems.length > 0 ? (
+            <View
+              style={[
+                styles.emptyCard,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
             >
-              <ThemedText variant="caption" color="primary" style={styles.emptyCtaText}>
-                ライブラリを開く
+              <ThemedText variant="heading">
+                {filterMode === 'due' ? '今日の復習は完了しました' : '卒業済みフレーズはまだありません'}
               </ThemedText>
-            </Pressable>
-          </View>
+              <ThemedText variant="caption" color="muted" style={styles.emptyHint}>
+                {filterMode === 'due'
+                  ? '3回連続で聞き取れると卒業します。「すべて」から他のフレーズも確認できます。'
+                  : '復習キューで 3 回連続「聞き取れた」を達成すると卒業済みになります。'}
+              </ThemedText>
+            </View>
+          ) : (
+            <View
+              style={[
+                styles.emptyCard,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+            >
+              <ThemedText variant="heading">登録された苦手フレーズはありません</ThemedText>
+              <ThemedText variant="caption" color="muted" style={styles.emptyHint}>
+                レッスンの各文にある苦手アイコンをタップすると、聞き取れなかった文をここに集められます。
+              </ThemedText>
+              <Pressable
+                onPress={() => router.push('/(tabs)')}
+                hitSlop={8}
+                style={[styles.emptyCta, { borderColor: colors.primary }]}
+                accessibilityRole="button"
+              >
+                <ThemedText variant="caption" color="primary" style={styles.emptyCtaText}>
+                  ライブラリを開く
+                </ThemedText>
+              </Pressable>
+            </View>
+          )
         }
         renderItem={({ item }) => {
           const itemKey = `${item.lessonId}:${item.sentenceIndex}`;
@@ -231,9 +381,37 @@ export default function PhrasesScreen() {
                   <ThemedText variant="caption" color="primary" numberOfLines={1} style={styles.lessonTitle}>
                     {item.titleJa}
                   </ThemedText>
-                  <ThemedText variant="caption" color="muted">
-                    {new Date(item.addedAtMs).toLocaleDateString('ja-JP')}
-                  </ThemedText>
+                  <View style={styles.statusGroup}>
+                    <View style={styles.stageDots}>
+                      {Array.from({ length: GRADUATION_STAGE }).map((_, idx) => (
+                        <View
+                          key={idx}
+                          style={[
+                            styles.stageDot,
+                            {
+                              backgroundColor:
+                                item.graduated || idx < item.reviewStage
+                                  ? colors.success
+                                  : colors.border,
+                            },
+                          ]}
+                        />
+                      ))}
+                    </View>
+                    <ThemedText
+                      variant="caption"
+                      style={{
+                        color: item.graduated
+                          ? colors.success
+                          : item.due
+                            ? colors.primary
+                            : colors.textMuted,
+                        fontWeight: '600',
+                      }}
+                    >
+                      {item.statusLabel}
+                    </ThemedText>
+                  </View>
                 </View>
 
                 <ThemedText variant="heading">{item.sentence.text}</ThemedText>
@@ -253,12 +431,11 @@ export default function PhrasesScreen() {
                             { backgroundColor: colors.surface, borderColor: colors.border },
                           ]}
                         >
-                          <View style={[styles.typeDot, { backgroundColor: typeColor }]} />
                           <ThemedText
                             variant="caption"
                             style={[styles.typeBadgeText, { color: typeColor }]}
                           >
-                            {LINKING_LABELS[type]}
+                            {LINKING_SYMBOLS[type]} {LINKING_LABELS[type]}
                           </ThemedText>
                         </View>
                       );
@@ -328,6 +505,38 @@ export default function PhrasesScreen() {
                       話す
                     </ThemedText>
                   </Pressable>
+
+                  {item.graduated ? (
+                    <Pressable
+                      hitSlop={6}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${item.sentence.text}を再復習に戻す`}
+                      onPress={() => reactivateWeakSentence(item.lessonId, item.sentenceIndex)}
+                      style={[
+                        styles.actionBtn,
+                        { backgroundColor: colors.surface, borderColor: colors.border },
+                      ]}
+                    >
+                      <ThemedText variant="caption" color="muted" style={styles.actionBtnText}>
+                        再復習
+                      </ThemedText>
+                    </Pressable>
+                  ) : item.due ? (
+                    <Pressable
+                      hitSlop={6}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${item.sentence.text}を聞き取れたとして次へ進める`}
+                      onPress={() => recordWeakSentenceReview(item.lessonId, item.sentenceIndex, true)}
+                      style={[
+                        styles.actionBtn,
+                        { backgroundColor: colors.surface, borderColor: colors.success },
+                      ]}
+                    >
+                      <ThemedText variant="caption" style={{ color: colors.success, fontWeight: '700' }}>
+                        ✓ 覚えた
+                      </ThemedText>
+                    </Pressable>
+                  ) : null}
                 </View>
 
                 <Pressable
@@ -351,6 +560,22 @@ export default function PhrasesScreen() {
           );
         }}
       />
+
+      <ReviewQueueSheet
+        visible={effectiveReviewSheetVisible}
+        dueItems={dueQueueCardItems}
+        graduatedCount={reviewSummary.graduatedCount}
+        onRecordOutcome={recordWeakSentenceReview}
+        onPracticeSpeak={(lessonId, sentenceIndex) => {
+          setAutoReviewPending(false);
+          setReviewSheetVisible(false);
+          router.push(`/lesson?lesson=${lessonId}&sentence=${sentenceIndex + 1}&mode=speak`);
+        }}
+        onClose={() => {
+          setAutoReviewPending(false);
+          setReviewSheetVisible(false);
+        }}
+      />
     </Screen>
   );
 }
@@ -358,7 +583,28 @@ export default function PhrasesScreen() {
 const styles = StyleSheet.create({
   subtitle: {
     marginTop: 4,
+    marginBottom: 10,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 12,
+  },
+  statusGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  stageDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  stageDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   list: {
     paddingBottom: 24,
