@@ -12,11 +12,9 @@
 
 ## 2. 分析イベントについて
 
-アプリの改善のため、起動・レッスン開始・完了・シャドーイング実施などの利用状況をイベントとして記録しています。
+アプリの改善のため、起動・レッスン開始・完了・シャドーイング実施などの利用状況をイベントとして記録しています。v1.1以降、これらのイベントは Google の Firebase Analytics へ送信され、匿名の統計として集計されます。送信される情報には、イベントの種別と付随情報（レッスンID・学習秒数・診断の種類別正誤など）、アプリの利用状況（画面表示・機能の利用状況）、アプリのインストール単位で付与される仮名の識別子が含まれます。氏名・メールアドレス等の個人を特定する情報は含まれず、広告目的のトラッキングにも使用しません。
 
-これらのイベントは端末内のログとして保存されるのみで、v1.0 時点では外部へ送信されません。イベントには端末内の連番・ローカル時刻・イベント種別、および種別ごとの付随情報 (レッスン ID・学習秒数・診断の種類別正誤など) が含まれますが、個人を特定する情報は含まれません。
-
-外部送信を開始する場合は、事前に本ポリシーを改定してお知らせします。
+また、アプリの安定性向上のため、Firebase Crashlytics によるクラッシュ情報とパフォーマンス情報（いずれも個人を特定しない形のもの）を送信します。
 
 ## 3. 課金について
 
@@ -45,11 +43,9 @@ No account registration is required, and we do not collect personally identifiab
 
 ## 2. Analytics Events
 
-To improve the app, usage events (app launch, lesson start/completion, shadowing) are recorded.
+To improve the app, usage events (app launch, lesson start and completion, shadowing) are recorded. From v1.1, these events are sent to Firebase Analytics (Google Analytics) and aggregated as anonymous statistics. The information sent includes the event type and its details (lesson ID, study seconds, per-type diagnostic results), app usage (screens viewed and features used), and a pseudonymous identifier assigned per app installation. No personally identifiable information is included, and the data is not used for advertising tracking.
 
-These events are stored in a local on-device log only and are NOT sent to any external service as of v1.0. Events contain a device-local sequence number, local timestamp, event type, and type-specific details (lesson ID, study seconds, diagnostic per-type results) — no personally identifiable information.
-
-If external collection is introduced in the future, this policy will be updated in advance.
+Crash and performance data is also sent via Firebase Crashlytics to improve app stability, in a form that does not identify individuals.
 
 ## 3. Subscriptions
 
