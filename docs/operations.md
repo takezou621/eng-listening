@@ -1,23 +1,37 @@
 # ミミトレ 運用手順書
 
-最終更新: 2026-11-22（v1.0 修正版の再提出で得た知見を反映）
+最終更新: 2026-11-24（リリースの正規経路を GitHub Actions（m1 ランナー）+ asc-submit に変更）
 
 日常運用とリリース作業の手順をまとめたものです。設計は `docs/architecture.md`、計測の定義は `docs/metrics.md`、コンテンツ生成は `docs/content-pipeline.md` を参照してください。
 
 ## 1. リリース手順（iOS）
 
-EAS クラウドビルドは使いません（Expo アカウントを持たないため）。Mac mini 上のローカルアーカイブ＋ App Store Connect（ASC）API アップロードが正規経路です。
+EAS クラウドビルドは使いません（Expo アカウントを持たないため）。**正規経路は GitHub Actions（m1 ランナー）+ asc-submit** です（eyechecker / kilde と同じ仕組み。構成・初回セットアップは `docs/appstore/README.md`）。ランナーが使えないときのフォールバックとして、Mac mini でのローカル手順（§1.0.1）が残っています。
 
 **提出前ゲート（必須）**: 審査提出・TestFlight 配信の前に、(1) 全画面をライトモードとダークモードの両方で実画面撮影して文字の視認性を検証し、(2) 初回診断を含む設問コンテンツを全問通しで確認する（正解が設問文に含まれていないこと、選択肢の位置が固定されていないこと）。根拠ルールは `docs/ui-design-rules.md` の W7 / W8。
+
+1. `main` がクリーンで `npm run lint` と `npm run typecheck` が通ることを確認する。
+2. バージョンを `src/config/appConfig.json` で決め、CHANGELOG と What's New（`docs/appstore/metadata-ja.md` に `## What's New (x.y)` セクションを追加。無いと spec 生成が失敗する）を更新する。
+3. workflow `App Store` を `mode=upload`、`version` と `build`（前回提出より大きい整数）を指定して実行する。`scripts/release/appstore-upload.sh` が npm ci → expo prebuild → 用途文字列ゲート（§1.2）→ pod install → アーカイブ → クラウド署名 → ASC アップロードまで行う。**審査は始まらない**。
+4. ASC API で builds を照会し、対象ビルドが `VALID` になることを確認する（数分）。
+5. `mode=apply`（version と build を指定）でメタデータ（`docs/appstore/` 配下が正）とビルド割当てを反映する。**審査への提出はしない**。反映結果は `mode=status` か ASC の画面で裏取りする。
+6. `mode=submit` で審査提出する。dispatch を手で押すことが提出のゲート。
+7. 提出後はバージョン・両サブスクリプション・グループの全てが `WAITING_FOR_REVIEW` であることを API で確認する（バージョンだけ提出された状態にしない）。サブスクリプションの提出アイテムの扱いは `docs/appstore/README.md`「メモ」を参照。
+
+### 1.0.1 フォールバック: Mac mini ローカルからの手動リリース
+
+GitHub Actions のランナーが使えないとき（ランナー停止・ネットワーク障害など）は、次のローカル手順で同じ経路を再現する。
 
 1. `main` がクリーンで `npm run lint` と `npm run typecheck` が通ることを確認する。
 2. バージョン／ビルド番号を決める。バージョンは `src/config/appConfig.json` が単一ソース。ビルド番号の実体は `ios/app/Info.plist` のリテラル `CFBundleVersion` で、提出ごとに PlistBuddy で +1 する（CURRENT_PROJECT_VERSION ではない）。アーカイブ後は元の値に戻し、作業ツリーを汚さない。
 3. `.env` に `EXPO_PUBLIC_REVENUECAT_API_KEY`（RevenueCat の公開キー）が設定されていることを確認する（値は表示・記録しない）。
 4. `npx expo prebuild --platform ios` → `pod install`（`ios/` 内）。
 5. `xcodebuild archive`（自動署名、`-allowProvisioningUpdates` と ASC API キー認証を付ける）。SSH セッションからはログインキーチェーンがロックされ codesign が `errSecInternalComponent` で失敗するため、アーカイブは GUI セッションへ bootstrap した一時 LaunchAgent 経由で実行する。xcodebuild には `DEVELOPMENT_TEAM=4B873Q67MK` を渡すこと（prebuild はチームなしでプロジェクトを生成する）。pod install 等は `LANG=en_US.UTF-8` で実行する（ロケールがないと Ruby が日本語アプリ名で落ちる）。署名で詰まった場合は証明書を削除・再発行せず、エラー文をそのまま記録して止まる。
-6. App Store 配布用に IPA を書き出し、ASC API キー認証でアップロードする（eyechecker の asc-submit と同じ方式。キー: `~/.appstoreconnect/AuthKey_8HM846FQ5Z.p8`、環境変数は `~/.appstoreconnect/eyechecker-local-upload.env`）。
+6. App Store 配布用に IPA を書き出し、ASC API キー認証でアップロードする（`scripts/release/appstore-upload.sh --version X --build N --upload` がこの手順を自動化する。キー: `~/.appstoreconnect/AuthKey_8HM846FQ5Z.p8`、環境変数は `~/.appstoreconnect/eyechecker-local-upload.env`）。スクリプトは prebuild と archive を自ら実行するため、スクリプトを使う場合は手順 5 と同じく GUI セッション（LaunchAgent 経由）でスクリプト自体を実行すること。手順 5 の手動 archive は、スクリプトを使わない完全手動の経路のためのものである。
 7. ASC API で builds を照会し、対象ビルドが `VALID` になることを確認する。
 8. ASC でメタデータ（`docs/store/listing-ja-final.md` が正）とスクリーンショット（`docs/store/screenshots/`）をそろえ、ビルドをバージョンにひも付けて審査提出する。審査提出アイテムはサブスクリプション本体ではなく **subscriptionVersion**、グループは **subscriptionGroupVersion** を `reviewSubmissionItems` に追加する（本体 ID で POST すると 409 unknown relationship になる）。バージョン ID は各リソースの `versions` 関係から取得する。提出後はバージョン・両サブスクリプション・グループの全てが `WAITING_FOR_REVIEW` であることを API で確認する（バージョンだけ提出された状態にしない）。
+
+メタデータの反映・提出だけをローカルで行う手順は `docs/appstore/README.md`「手元の Mac から実行する場合」を参照（`asc-submit` を `PYTHONPATH` 経由で直接実行できる）。
 
 ### 1.1 iPhone Duo 検証（リリース前ゲート）
 
@@ -44,6 +58,7 @@ xcodebuild test -workspace ios/app.xcworkspace -scheme duo-smoke -configuration 
 - プラグインやフレームワークのデフォルト文・汎用文（例: "Allow ... to access your ..."、"App needs ... access"）が1つでも残っていたら**提出禁止**。用途文字列は「どの機能で・何のために・データをどう扱うか（外部送信の有無を含む）」を具体的に書く。
 - 新しい権限（マイク、カメラ、写真、位置情報、通知、トラッキング等）を追加する PR は、用途文字列の設定を同じ PR に含め、文面を PR 本文に明記する。文面のない権限追加 PR はマージしない。
 - この監査は §1 の提出手順の一部であり、実施記録（確認した文字列の一覧）を提出時の報告に含める。
+- 2026-11-24 から `scripts/release/appstore-upload.sh` がこのゲートを自動実行する（生成直後の Info.plist とアーカイブ済み .app の Info.plist の両方で、プレースホルダ文を検出したらアーカイブ前に失敗する。マイク用途文は確定文の接頭一致も検査）。ただし自動化の有無にかかわらず、人が文面を読んで確認する義務は残る。
 
 ## 2. コンテンツ（レッスン）の追加
 
@@ -72,7 +87,7 @@ xcodebuild test -workspace ios/app.xcworkspace -scheme duo-smoke -configuration 
 
 ## 5. 既知の注意点
 
-- GitHub Actions のホステッドランナーは使わない（クォータ制約）。CI が必要な作業はローカルで実行する。
+- GitHub Actions のホステッドランナーは使わない（クォータ制約）。検証が必要な作業はローカルで実行する。ただし `appstore.yml` だけは **self-hosted ランナー（m1）限定**で実行する（最初の step が `runner.environment` を検査し、ホステッド実行は即座に失敗する）。
 - ASC のアプリレコード作成は API 不可で Web UI が必要（作成済み: アプリ ID 6837503600、SKU mimitore-ios）。
 - `docs/store/eas-production-checklist.md` は EAS 経路の旧資料。現在の正規経路は本書 §1。
 

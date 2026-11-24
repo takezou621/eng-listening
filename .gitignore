@@ -31,6 +31,9 @@ yarn-error.*
 # content pipeline intermediates (行 WAV / 連結 master は再生成可能)
 tools/content/build/
 
+# リリース成果物 (appstore-spec.py / appstore-upload.sh の出力先)
+/dist/
+
 # Python ツールチェーン (uv) とアトミック書き込みの残骸
 tools/content/.venv/
 tools/content/usage/*.tmp
