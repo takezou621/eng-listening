@@ -1,0 +1,91 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "weekend-plans",
+ "lines": {
+  "L01_female.wav": {
+   "index": 1,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Hey Ken, do you want to go hiking this Saturday?",
+   "chars": 48,
+   "durationSec": 3.009,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_male.wav": {
+   "index": 2,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "That sounds great, but can we meet early in the morning?",
+   "chars": 56,
+   "durationSec": 3.317,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_female.wav": {
+   "index": 3,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Sure, we can take a train to Mount Takao around eight.",
+   "chars": 54,
+   "durationSec": 3.945,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_male.wav": {
+   "index": 4,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Let us meet in front of the central ticket gate then.",
+   "chars": 53,
+   "durationSec": 2.768,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_female.wav": {
+   "index": 5,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Perfect, and what should we bring for lunch and snacks?",
+   "chars": 55,
+   "durationSec": 3.231,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_male.wav": {
+   "index": 6,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "I can buy some sandwiches and bottles of cold green tea.",
+   "chars": 56,
+   "durationSec": 3.231,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_female.wav": {
+   "index": 7,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Thanks, and do not forget to bring a light rain jacket.",
+   "chars": 55,
+   "durationSec": 3.739,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_male.wav": {
+   "index": 8,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Got it, I will check the weather forecast tonight.",
+   "chars": 50,
+   "durationSec": 2.816,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 427,
+  "lessonRequests": 8,
+  "monthChars": 9389,
+  "monthRequests": 173,
+  "monthlyStopChars": 900000
+ }
+}

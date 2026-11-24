@@ -1,0 +1,188 @@
+{
+ "title": "Making Weekend Plans",
+ "titleJa": "週末の計画を立てる",
+ "type": "conversation",
+ "level": "intermediate",
+ "speakerNames": {
+  "female": "Lisa",
+  "male": "Ken"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "female",
+   "text": "Hey Ken, do you want to go hiking this Saturday?",
+   "chunks": [
+    "Hey Ken,",
+    "do you want to",
+    "go hiking",
+    "this Saturday?"
+   ],
+   "translationJa": "ねえケン、今週の土曜日にハイキングに行かない？",
+   "linking": [
+    {
+     "span": "want to",
+     "type": "reduction",
+     "ipa": "/ˈwɑːnə/",
+     "noteJa": "want to が縮約されて「ワナ」のように短く発音されます。"
+    },
+    {
+     "span": "to",
+     "type": "weak-form",
+     "ipa": "/tə/",
+     "noteJa": "前置詞・不定詞の to は母音があいまい母音になり、「トゥ」ではなく「タ」のように弱く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "text": "That sounds great, but can we meet early in the morning?",
+   "chunks": [
+    "That sounds great,",
+    "but can we meet",
+    "early in the morning?"
+   ],
+   "translationJa": "いいね！でも、朝早くに待ち合わせできる？",
+   "linking": [
+    {
+     "span": "can",
+     "type": "weak-form",
+     "ipa": "/kən/",
+     "noteJa": "助動詞の can は弱形になり、「キャン」ではなく「クン」のように軽く短く読まれます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "text": "Sure, we can take a train to Mount Takao around eight.",
+   "chunks": [
+    "Sure,",
+    "we can take a train",
+    "to Mount Takao",
+    "around eight."
+   ],
+   "translationJa": "もちろん、8時ごろの高尾山行きの電車に乗れるよ。",
+   "linking": [
+    {
+     "span": "take a",
+     "type": "linking",
+     "ipa": "/ˈteɪk‿ə/",
+     "noteJa": "take の子音 /k/ と a がつながり、「テイカ」のように発音されます。"
+    },
+    {
+     "span": "to",
+     "type": "weak-form",
+     "ipa": "/tə/",
+     "noteJa": "to が弱形化して「タ」に近いあいまいな音になります。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "male",
+   "text": "Let us meet in front of the central ticket gate then.",
+   "chunks": [
+    "Let us meet",
+    "in front of",
+    "the central ticket gate then."
+   ],
+   "translationJa": "じゃあ、中央改札の前で集合しようか。",
+   "linking": [
+    {
+     "span": "of",
+     "type": "weak-form",
+     "ipa": "/əv/",
+     "noteJa": "前置詞 of は母音が弱化し、「オブ」ではなく「アヴ」や「ヴ」のように軽く添える程度に発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "female",
+   "text": "Perfect, and what should we bring for lunch and snacks?",
+   "chunks": [
+    "Perfect,",
+    "and what should we bring",
+    "for lunch and snacks?"
+   ],
+   "translationJa": "了解、それで昼食とおやつには何を持っていくべきかな？",
+   "linking": [
+    {
+     "span": "for",
+     "type": "weak-form",
+     "ipa": "/fər/",
+     "noteJa": "for は弱形になり、「フォー」ではなく「ファ」のように軽く短く発音されます。"
+    },
+    {
+     "span": "and",
+     "type": "weak-form",
+     "ipa": "/ən/",
+     "noteJa": "接続詞の and は d が脱落しやすく、「アン」や「エン」ではなく「ン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "male",
+   "text": "I can buy some sandwiches and bottles of cold green tea.",
+   "chunks": [
+    "I can buy",
+    "some sandwiches",
+    "and bottles of",
+    "cold green tea."
+   ],
+   "translationJa": "僕がサンドイッチと冷たい緑茶のペットボトルを買っていくよ。",
+   "linking": [
+    {
+     "span": "bottles of",
+     "type": "linking",
+     "ipa": "/ˈbɑːtlz‿əv/",
+     "noteJa": "bottles の語尾 /z/ と of の /əv/ が連結して「ボトルザヴ」のようにスムーズに繋がります。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "female",
+   "text": "Thanks, and do not forget to bring a light rain jacket.",
+   "chunks": [
+    "Thanks,",
+    "and do not forget",
+    "to bring",
+    "a light rain jacket."
+   ],
+   "translationJa": "ありがとう、それと薄手のレインジャケットを持ってくるのを忘れないでね。",
+   "linking": [
+    {
+     "span": "to",
+     "type": "weak-form",
+     "ipa": "/tə/",
+     "noteJa": "to が弱形になり、「タ」のように短く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "male",
+   "text": "Got it, I will check the weather forecast tonight.",
+   "chunks": [
+    "Got it,",
+    "I will check",
+    "the weather forecast tonight."
+   ],
+   "translationJa": "分かった、今夜天気予報をチェックしておくよ。",
+   "linking": [
+    {
+     "span": "Got it",
+     "type": "flapping",
+     "ipa": "/ˈɡɑːɾɪt/",
+     "noteJa": "Got の t が母音に挟まれてフラップ化し、日本語のラ行のような「ガリッ」と聞こえます。"
+    }
+   ]
+  }
+ ],
+ "id": "weekend-plans",
+ "category": "plans"
+}

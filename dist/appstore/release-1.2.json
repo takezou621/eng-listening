@@ -1,0 +1,26 @@
+{
+  "version": "1.2",
+  "platform": "IOS",
+  "releaseType": "AFTER_APPROVAL",
+  "phasedRelease": false,
+  "whatsNew": {
+    "ja": "・新しいレッスンを3本追加（全15本）。「同化」「侵入」「弱形」といった聞き取りにくい音変化に特化した内容です\n・診断で弱点タイプが見つかったとき、そのタイプを練習できるレッスンへ進みやすくなりました\n・Apple Watchでも新しいレッスンが再生できます"
+  },
+  "reviewNotes": "Mimitore is an English listening practice app for Japanese speakers. Short\n(3-minute) lessons train learners to hear natural sound changes in spoken\nEnglish (linking, reduction, flapping) with karaoke-style word highlighting.\n\n- No account or sign-in is required. All 15 lessons are free, with no limit on\n  the number of lessons per day.\n- The premium subscription unlocks only the detailed weakness analysis on the\n  Progress tab. Billing goes through Apple in-app purchases managed with\n  RevenueCat: JPY 680 per month, or JPY 4,800 per year (the yearly plan includes\n  a 7-day free trial). Subscriptions auto-renew and can be cancelled in App Store\n  settings at least 24 hours before renewal.\n- The microphone permission is used only to record the user's own voice for\n  shadowing practice, so they can compare it with the lesson audio. Recordings\n  are processed on the device only and are never transmitted to any server or\n  third party. Speech recognition is not used, and every feature works without\n  granting microphone access.\n- All lesson audio is pre-generated AI speech (Google Cloud TTS, Neural2 voices)\n  with original scripts. There is no user-generated content, no chat, no\n  messaging, and no unrestricted web browsing.\n- New in version 1.1: the app collects anonymous usage data with Firebase\n  Analytics (Google Analytics for Firebase) — screen views, lesson completion,\n  and feature usage. The data is not linked to the user's identity. Firebase\n  Crashlytics collects crash diagnostics, and Firebase Performance Monitoring\n  collects app performance metrics, to improve stability. The app shows no ads,\n  does not use the advertising identifier (IDFA), and does not track users\n  across other companies' apps or websites.\n\nNew in version 1.2: three new lessons focus on assimilation, intrusion, and weak forms — the rarer sound-change types — so learners can practice every diagnostic type. All lessons remain free and the premium paywall is unchanged.",
+  "supportUrls": {
+    "ja": "https://33eigo.win/support"
+  },
+  "privacyUrls": {
+    "ja": "https://33eigo.win/privacy"
+  },
+  "descriptions": {
+    "ja": "単語は知っているのに、聞き取れない。\n\nその理由は、音の変化。「could you」が「クッジュ」に、「it is」が「イリズ」に聞こえるのは、リンキングやフラッピングといった音の変化が起きているから。知らない単語を増やしても、この原因には触れません。\n\nミミトレは、この「音の変化」を見える化する 3 分集中リスニングアプリです。\n\n■ 60 秒診断で「音が見える」体験\nインストール直後の 60 秒診断で、リンキング・リダクション・フラッピングのどれが聞き取れないかがすぐわかります。\n\n■ カラオケ風表示で「聞こえた位置」を追う\n再生位置に合わせて単語がハイライトされていくカラオケ風表示。音の変化がどこで起きているか、文字で追いながら確認できます。\n\n■ リンキング可視化\n「took a → トゥッカ」のような音の変化を、IPA と日本語解説付きで表示。チャンクごとの区切り表示で、塊ごとに聞く練習もできます。\n\n■ シャドーイング録音と比較再生\nレッスン音声 (AI 生成音声) を聞いた後に自分の音声を録音して聞き比べ。音声認識の判定で進行が止まることがないため、自分のペースで発音とリズムを確かめられます。録音は端末内にのみ保存され、外部には送信されません。\n\n■ 苦手フレーズ帳と進捗\n聞き取れなかった文はワンタップで苦手フレーズ帳へ。連続学習日数・学習時間・ヒートマップで継続を可視化します。\n\n■ 全 15 レッスン収録・進行上限なし\nカフェ・ホテル・道案内など、実場面の会話とモノローグを全レッスン音声付きで収録。1 日のレッスン数に上限はなく、好きなペースで何度でも練習できます。\n\n---\n【利用規約】\nhttps://www.apple.com/legal/internet-services/itunes/dev/stdeula (Apple 標準 EULA。アプリ独自の利用規約の全文はアプリ内の「設定 → 利用規約」に掲載)\n\n【価格について】\nすべてのレッスンの基本機能は無料。プレミアムプラン（月額 ¥680 / 年額 ¥4,800）では、完了後の詳細な弱点分析などの拡張機能が利用できます。年額プランには初回 7 日間の無料トライアルが付きます（7 日間無料 → 終了後は年額 ¥4,800 で自動更新。無料トライアルは同じサブスクリプショングループで初めて利用する方のみ対象です）。サブスクリプションは自動更新で、iOS「設定」→「Apple Account」→「サブスクリプション」から次回更新日の 24 時間前までいつでも解約できます。"
+  },
+  "keywords": {
+    "ja": "発音,英会話,英語耳,音変化,リンキング,聞き取り,シャドーイング"
+  },
+  "subtitles": {
+    "ja": "英語の音が見える3分リスニング"
+  },
+  "build": "9"
+}

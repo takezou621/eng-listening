@@ -2,7 +2,7 @@
   "appName": "ミミトレ",
   "slug": "eng-listening",
   "scheme": "englistening",
-  "version": "1.1",
+  "version": "1.2",
   "iosBundleIdentifier": "com.takezou.englistening",
   "androidPackageName": "com.takezou.englistening"
 }

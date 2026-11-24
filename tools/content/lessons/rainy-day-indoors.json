@@ -1,0 +1,207 @@
+{
+ "title": "A Rainy Day Indoors",
+ "titleJa": "雨の日はおうち時間",
+ "type": "monologue",
+ "level": "intermediate",
+ "speakerNames": {
+  "narrator": "Narrator"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "text": "It was raining heavily on Sunday, so I stayed inside all day.",
+   "chunks": [
+    "It was raining heavily",
+    "on Sunday,",
+    "so I stayed inside",
+    "all day."
+   ],
+   "translationJa": "日曜日は激しい雨が降っていたので、一日中家の中にいました。",
+   "linking": [
+    {
+     "span": "stayed inside",
+     "type": "linking",
+     "ipa": "/steɪd‿ɪnˈsaɪd/",
+     "noteJa": "stayed の末尾の /d/ と inside の語頭の /ɪ/ が連結して「ステイディンサイド」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "text": "I really loved the idea of spending a quiet afternoon at home.",
+   "chunks": [
+    "I really loved",
+    "the idea of",
+    "spending a quiet afternoon",
+    "at home."
+   ],
+   "translationJa": "家で静かな午後を過ごすという考えが、本当に気に入っていました。",
+   "linking": [
+    {
+     "span": "idea of",
+     "type": "intrusion",
+     "ipa": "/aɪˈdiːə‿r‿əv/",
+     "noteJa": "母音で終わる idea と母音で始まる of の間に /r/ の音（イントルージョン）が挟まり、「アイディアラヴ」のように滑らかにつながって聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "text": "First, I made a hot cup of tea and grabbed a book.",
+   "chunks": [
+    "First,",
+    "I made a hot cup of tea",
+    "and grabbed a book."
+   ],
+   "translationJa": "まず、温かい紅茶を淹れて本を手に取りました。",
+   "linking": [
+    {
+     "span": "tea and",
+     "type": "intrusion",
+     "ipa": "/tiː‿j‿ənd/",
+     "noteJa": "tea の末尾の母音 /iː/ から and の母音に移る際、渡り音としてかすかな /j/（「ヤ行」の音）が挟まり「ティーイアンド」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "text": "I could hear the gentle sound of rain against the windowpane.",
+   "chunks": [
+    "I could hear",
+    "the gentle sound of rain",
+    "against the windowpane."
+   ],
+   "translationJa": "窓ガラスに当たる優しい雨の音が聞こえてきました。",
+   "linking": [
+    {
+     "span": "sound of",
+     "type": "linking",
+     "ipa": "/saʊnd‿əv/",
+     "noteJa": "sound の /d/ と of の曖昧母音 /ə/ がつながり、「サウンダヴ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "text": "After reading a few chapters, I saw a comedy on television.",
+   "chunks": [
+    "After reading a few chapters,",
+    "I saw a comedy",
+    "on television."
+   ],
+   "translationJa": "何章か読んだあと、テレビでコメディ映画を観ました。",
+   "linking": [
+    {
+     "span": "saw a",
+     "type": "intrusion",
+     "ipa": "/sɔː‿r‿ə/",
+     "noteJa": "saw の母音 /ɔː/ と a の母音 /ə/ の間に /r/ が挿入され、「ソーラ」のように聞こえます（intrusive r）。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "text": "It made me laugh out loud and forget the gray weather.",
+   "chunks": [
+    "It made me laugh out loud",
+    "and forget",
+    "the gray weather."
+   ],
+   "translationJa": "その映画のおかげで大笑いして、どんよりした天気を忘れることができました。",
+   "linking": [
+    {
+     "span": "laugh out",
+     "type": "linking",
+     "ipa": "/læf‿aʊt/",
+     "noteJa": "laugh の /f/ と out の母音が連結し、「ラファウト」のように一息に発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "text": "Later on, I decided to go into the kitchen for dinner.",
+   "chunks": [
+    "Later on,",
+    "I decided to go into",
+    "the kitchen",
+    "for dinner."
+   ],
+   "translationJa": "その後、夕食を作るためにキッチンへ行くことにしました。",
+   "linking": [
+    {
+     "span": "go into",
+     "type": "intrusion",
+     "ipa": "/ɡoʊ‿w‿ˈɪntuː/",
+     "noteJa": "go の円唇母音 /oʊ/ の後ろに /w/ が滑り込み、into と結びついて「ゴウウィントゥ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "text": "I prepared a warm vegetable soup with fresh bread and butter.",
+   "chunks": [
+    "I prepared",
+    "a warm vegetable soup",
+    "with fresh bread and butter."
+   ],
+   "translationJa": "新鮮なパンとバターを添えて、温かい野菜スープを作りました。",
+   "linking": [
+    {
+     "span": "butter",
+     "type": "flapping",
+     "ipa": "/ˈbʌɾər/",
+     "noteJa": "母音に挟まれた /t/ が日本語のラ行のような軽い音（フラップT）になり、「バラー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "text": "Eating a hearty meal at home made me feel very relaxed.",
+   "chunks": [
+    "Eating a hearty meal",
+    "at home",
+    "made me feel",
+    "very relaxed."
+   ],
+   "translationJa": "家でボリュームのある食事をとると、とてもリラックスした気分になりました。",
+   "linking": [
+    {
+     "span": "Eating a",
+     "type": "flapping",
+     "ipa": "/ˈiːɾɪŋ‿ə/",
+     "noteJa": "Eating の /t/ がフラップ化し、さらに a とつながって「イーリンガ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "narrator",
+   "text": "It turned out to be a very peaceful and cozy Sunday.",
+   "chunks": [
+    "It turned out",
+    "to be",
+    "a very peaceful and cozy Sunday."
+   ],
+   "translationJa": "結局、とても穏やかで居心地の良い日曜日になりました。",
+   "linking": [
+    {
+     "span": "turned out",
+     "type": "linking",
+     "ipa": "/tɜːrnd‿aʊt/",
+     "noteJa": "turned の語末の /d/ と out の母音がつながり、「ターンダウト」のように聞こえます。"
+    }
+   ]
+  }
+ ],
+ "id": "rainy-day-indoors",
+ "category": "leisure"
+}

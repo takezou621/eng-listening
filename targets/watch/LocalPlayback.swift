@@ -25,7 +25,9 @@ enum LessonLibrary {
     static let orderedIds: [String] = [
         "cafe-ordering", "hotel-checkin", "asking-directions", "shopping-clothes",
         "restaurant-order", "phone-appointment", "at-the-airport", "small-talk-coworker",
+        "gym-signup", "weekend-plans",
         "my-morning-routine", "weekend-in-kyoto", "introducing-my-hometown", "my-favorite-movie",
+        "rainy-day-indoors",
     ]
 
     static let all: [WatchLesson] = orderedIds.compactMap(load)

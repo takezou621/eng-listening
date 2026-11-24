@@ -1,0 +1,849 @@
+{
+ "id": "gym-signup",
+ "title": "Joining a Gym",
+ "titleJa": "ジムに入会する",
+ "type": "conversation",
+ "level": "beginner",
+ "category": "gym",
+ "audio": "audio.m4a",
+ "durationSec": 35.945,
+ "speakerNames": {
+  "female": "Front Desk Staff",
+  "male": "Customer"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-24T15:44:47Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "male",
+   "startSec": 0.0,
+   "endSec": 2.895,
+   "text": "Hello, can I ask about a trial membership today?",
+   "translationJa": "こんにちは、今日のお試し体験について伺ってもよろしいですか？",
+   "chunks": [
+    {
+     "text": "Hello,",
+     "startSec": 0.0,
+     "endSec": 0.28
+    },
+    {
+     "text": "can I ask",
+     "startSec": 0.6,
+     "endSec": 1.08
+    },
+    {
+     "text": "about a trial membership",
+     "startSec": 1.08,
+     "endSec": 2.04
+    },
+    {
+     "text": "today?",
+     "startSec": 2.04,
+     "endSec": 2.4
+    }
+   ],
+   "words": [
+    {
+     "text": "Hello,",
+     "startSec": 0.0,
+     "endSec": 0.28
+    },
+    {
+     "text": "can",
+     "startSec": 0.6,
+     "endSec": 0.72
+    },
+    {
+     "text": "I",
+     "startSec": 0.72,
+     "endSec": 0.84
+    },
+    {
+     "text": "ask",
+     "startSec": 0.84,
+     "endSec": 1.08
+    },
+    {
+     "text": "about",
+     "startSec": 1.08,
+     "endSec": 1.26
+    },
+    {
+     "text": "a",
+     "startSec": 1.26,
+     "endSec": 1.36
+    },
+    {
+     "text": "trial",
+     "startSec": 1.36,
+     "endSec": 1.6
+    },
+    {
+     "text": "membership",
+     "startSec": 1.6,
+     "endSec": 2.04
+    },
+    {
+     "text": "today?",
+     "startSec": 2.04,
+     "endSec": 2.4
+    }
+   ],
+   "linking": [
+    {
+     "span": "can I ask",
+     "type": "linking",
+     "ipa": "/kə naɪ ɑːsk/",
+     "noteJa": "canの末尾の/n/が続くIとaskにスムーズに連結し、「キャナイ・アスク」とひと続きに発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "female",
+   "startSec": 3.395,
+   "endSec": 6.261,
+   "text": "Sure, that sounds like a good plan for you.",
+   "translationJa": "もちろんです、それは良いお考えですね。",
+   "chunks": [
+    {
+     "text": "Sure,",
+     "startSec": 3.395,
+     "endSec": 3.675
+    },
+    {
+     "text": "that sounds",
+     "startSec": 4.015,
+     "endSec": 4.435
+    },
+    {
+     "text": "like a good plan",
+     "startSec": 4.435,
+     "endSec": 5.275
+    },
+    {
+     "text": "for you.",
+     "startSec": 5.275,
+     "endSec": 5.795
+    }
+   ],
+   "words": [
+    {
+     "text": "Sure,",
+     "startSec": 3.395,
+     "endSec": 3.675
+    },
+    {
+     "text": "that",
+     "startSec": 4.015,
+     "endSec": 4.195
+    },
+    {
+     "text": "sounds",
+     "startSec": 4.195,
+     "endSec": 4.435
+    },
+    {
+     "text": "like",
+     "startSec": 4.435,
+     "endSec": 4.755
+    },
+    {
+     "text": "a",
+     "startSec": 4.755,
+     "endSec": 4.875
+    },
+    {
+     "text": "good",
+     "startSec": 4.875,
+     "endSec": 5.035
+    },
+    {
+     "text": "plan",
+     "startSec": 5.035,
+     "endSec": 5.275
+    },
+    {
+     "text": "for",
+     "startSec": 5.275,
+     "endSec": 5.595
+    },
+    {
+     "text": "you.",
+     "startSec": 5.595,
+     "endSec": 5.795
+    }
+   ],
+   "linking": [
+    {
+     "span": "good plan",
+     "type": "assimilation",
+     "ipa": "/ɡʊb plæn/",
+     "noteJa": "goodの末尾/d/が次の両唇音/p/に同化し、/b/に変化して「グッブプラン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "male",
+   "startSec": 6.761,
+   "endSec": 9.558,
+   "text": "How much does the basic plan cost each month?",
+   "translationJa": "基本プランは毎月いくらかかりますか？",
+   "chunks": [
+    {
+     "text": "How much does",
+     "startSec": 6.761,
+     "endSec": 7.261
+    },
+    {
+     "text": "the basic plan cost",
+     "startSec": 7.261,
+     "endSec": 8.461
+    },
+    {
+     "text": "each month?",
+     "startSec": 8.461,
+     "endSec": 9.041
+    }
+   ],
+   "words": [
+    {
+     "text": "How",
+     "startSec": 6.761,
+     "endSec": 6.881
+    },
+    {
+     "text": "much",
+     "startSec": 6.881,
+     "endSec": 7.021
+    },
+    {
+     "text": "does",
+     "startSec": 7.021,
+     "endSec": 7.261
+    },
+    {
+     "text": "the",
+     "startSec": 7.261,
+     "endSec": 7.421
+    },
+    {
+     "text": "basic",
+     "startSec": 7.421,
+     "endSec": 7.681
+    },
+    {
+     "text": "plan",
+     "startSec": 7.681,
+     "endSec": 8.061
+    },
+    {
+     "text": "cost",
+     "startSec": 8.061,
+     "endSec": 8.461
+    },
+    {
+     "text": "each",
+     "startSec": 8.461,
+     "endSec": 8.741
+    },
+    {
+     "text": "month?",
+     "startSec": 8.741,
+     "endSec": 9.041
+    }
+   ],
+   "linking": [
+    {
+     "span": "basic plan",
+     "type": "assimilation",
+     "ipa": "/ˈbeɪsɪk plæn/",
+     "noteJa": "basicの末尾の/k/が弱まり、そのまま/p/に素早く移行します。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "female",
+   "startSec": 10.058,
+   "endSec": 13.013,
+   "text": "It is fifty dollars, and you can pay cash.",
+   "translationJa": "50ドルとなっており、現金でのお支払いも可能です。",
+   "chunks": [
+    {
+     "text": "It is fifty dollars,",
+     "startSec": 10.058,
+     "endSec": 10.738
+    },
+    {
+     "text": "and you can pay cash.",
+     "startSec": 11.358,
+     "endSec": 12.378
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 10.058,
+     "endSec": 10.178
+    },
+    {
+     "text": "is",
+     "startSec": 10.178,
+     "endSec": 10.298
+    },
+    {
+     "text": "fifty",
+     "startSec": 10.298,
+     "endSec": 10.467
+    },
+    {
+     "text": "dollars,",
+     "startSec": 10.467,
+     "endSec": 10.738
+    },
+    {
+     "text": "and",
+     "startSec": 11.358,
+     "endSec": 11.558
+    },
+    {
+     "text": "you",
+     "startSec": 11.558,
+     "endSec": 11.678
+    },
+    {
+     "text": "can",
+     "startSec": 11.678,
+     "endSec": 11.818
+    },
+    {
+     "text": "pay",
+     "startSec": 11.818,
+     "endSec": 12.058
+    },
+    {
+     "text": "cash.",
+     "startSec": 12.058,
+     "endSec": 12.378
+    }
+   ],
+   "linking": [
+    {
+     "span": "can pay",
+     "type": "assimilation",
+     "ipa": "/kəm peɪ/",
+     "noteJa": "canの/n/が次の両唇音/p/の影響を受けて/m/に同化し、「カムペイ」のように変化します。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "male",
+   "startSec": 13.513,
+   "endSec": 16.629,
+   "text": "That is reasonable. When is the best period to visit?",
+   "translationJa": "手頃ですね。訪れるのに一番空いている時間帯はいつですか？",
+   "chunks": [
+    {
+     "text": "That is reasonable.",
+     "startSec": 13.513,
+     "endSec": 14.313
+    },
+    {
+     "text": "When is the best period",
+     "startSec": 14.633,
+     "endSec": 15.633
+    },
+    {
+     "text": "to visit?",
+     "startSec": 15.633,
+     "endSec": 16.053
+    }
+   ],
+   "words": [
+    {
+     "text": "That",
+     "startSec": 13.513,
+     "endSec": 13.653
+    },
+    {
+     "text": "is",
+     "startSec": 13.653,
+     "endSec": 13.753
+    },
+    {
+     "text": "reasonable.",
+     "startSec": 13.753,
+     "endSec": 14.313
+    },
+    {
+     "text": "When",
+     "startSec": 14.633,
+     "endSec": 14.793
+    },
+    {
+     "text": "is",
+     "startSec": 14.793,
+     "endSec": 14.913
+    },
+    {
+     "text": "the",
+     "startSec": 14.913,
+     "endSec": 15.053
+    },
+    {
+     "text": "best",
+     "startSec": 15.053,
+     "endSec": 15.253
+    },
+    {
+     "text": "period",
+     "startSec": 15.253,
+     "endSec": 15.633
+    },
+    {
+     "text": "to",
+     "startSec": 15.633,
+     "endSec": 15.833
+    },
+    {
+     "text": "visit?",
+     "startSec": 15.833,
+     "endSec": 16.053
+    }
+   ],
+   "linking": [
+    {
+     "span": "best period",
+     "type": "assimilation",
+     "ipa": "/bɛsp ˈpɪəriəd/",
+     "noteJa": "bestの末尾/t/が次の/p/の影響で/p/に同化・脱落気味になり、「ベスペリオッド」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "female",
+   "startSec": 17.129,
+   "endSec": 21.313,
+   "text": "Weekday mornings are quiet, so ten minutes of waiting is rare.",
+   "translationJa": "平日の午前中は静かですので、10分も待つことはめったにありません。",
+   "chunks": [
+    {
+     "text": "Weekday mornings are quiet,",
+     "startSec": 17.129,
+     "endSec": 18.389
+    },
+    {
+     "text": "so ten minutes of waiting",
+     "startSec": 18.809,
+     "endSec": 19.929
+    },
+    {
+     "text": "is rare.",
+     "startSec": 19.929,
+     "endSec": 20.449
+    }
+   ],
+   "words": [
+    {
+     "text": "Weekday",
+     "startSec": 17.129,
+     "endSec": 17.329
+    },
+    {
+     "text": "mornings",
+     "startSec": 17.329,
+     "endSec": 17.809
+    },
+    {
+     "text": "are",
+     "startSec": 17.809,
+     "endSec": 18.069
+    },
+    {
+     "text": "quiet,",
+     "startSec": 18.069,
+     "endSec": 18.389
+    },
+    {
+     "text": "so",
+     "startSec": 18.809,
+     "endSec": 19.009
+    },
+    {
+     "text": "ten",
+     "startSec": 19.009,
+     "endSec": 19.309
+    },
+    {
+     "text": "minutes",
+     "startSec": 19.309,
+     "endSec": 19.529
+    },
+    {
+     "text": "of",
+     "startSec": 19.529,
+     "endSec": 19.729
+    },
+    {
+     "text": "waiting",
+     "startSec": 19.729,
+     "endSec": 19.929
+    },
+    {
+     "text": "is",
+     "startSec": 19.929,
+     "endSec": 20.189
+    },
+    {
+     "text": "rare.",
+     "startSec": 20.189,
+     "endSec": 20.449
+    }
+   ],
+   "linking": [
+    {
+     "span": "ten minutes",
+     "type": "assimilation",
+     "ipa": "/tɛm ˈmɪnɪts/",
+     "noteJa": "tenの語尾/n/が後ろの鼻音/m/に同化して/m/になり、「テムミニッツ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "male",
+   "startSec": 21.813,
+   "endSec": 25.0,
+   "text": "That sounds perfect. Do you have a green park view here?",
+   "translationJa": "それはいいですね。ここから緑豊かな公園の景色は見えますか？",
+   "chunks": [
+    {
+     "text": "That sounds perfect.",
+     "startSec": 21.813,
+     "endSec": 22.713
+    },
+    {
+     "text": "Do you have",
+     "startSec": 23.133,
+     "endSec": 23.453
+    },
+    {
+     "text": "a green park view",
+     "startSec": 23.453,
+     "endSec": 24.313
+    },
+    {
+     "text": "here?",
+     "startSec": 24.313,
+     "endSec": 24.533
+    }
+   ],
+   "words": [
+    {
+     "text": "That",
+     "startSec": 21.813,
+     "endSec": 21.953
+    },
+    {
+     "text": "sounds",
+     "startSec": 21.953,
+     "endSec": 22.193
+    },
+    {
+     "text": "perfect.",
+     "startSec": 22.193,
+     "endSec": 22.713
+    },
+    {
+     "text": "Do",
+     "startSec": 23.133,
+     "endSec": 23.213
+    },
+    {
+     "text": "you",
+     "startSec": 23.213,
+     "endSec": 23.313
+    },
+    {
+     "text": "have",
+     "startSec": 23.313,
+     "endSec": 23.453
+    },
+    {
+     "text": "a",
+     "startSec": 23.453,
+     "endSec": 23.513
+    },
+    {
+     "text": "green",
+     "startSec": 23.513,
+     "endSec": 23.713
+    },
+    {
+     "text": "park",
+     "startSec": 23.713,
+     "endSec": 24.033
+    },
+    {
+     "text": "view",
+     "startSec": 24.033,
+     "endSec": 24.313
+    },
+    {
+     "text": "here?",
+     "startSec": 24.313,
+     "endSec": 24.533
+    }
+   ],
+   "linking": [
+    {
+     "span": "green park",
+     "type": "assimilation",
+     "ipa": "/ɡriːm pɑːrk/",
+     "noteJa": "greenの語尾/n/が次の/p/に引きずられて両唇鼻音の/m/に変わり、「グリームパーク」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "female",
+   "startSec": 25.5,
+   "endSec": 29.237,
+   "text": "Yes, our studio overlooks the trees across the street.",
+   "translationJa": "はい、スタジオからは通りの向かいにある木々が見渡せますよ。",
+   "chunks": [
+    {
+     "text": "Yes,",
+     "startSec": 25.5,
+     "endSec": 25.76
+    },
+    {
+     "text": "our studio overlooks",
+     "startSec": 26.18,
+     "endSec": 27.46
+    },
+    {
+     "text": "the trees across the street.",
+     "startSec": 27.46,
+     "endSec": 28.62
+    }
+   ],
+   "words": [
+    {
+     "text": "Yes,",
+     "startSec": 25.5,
+     "endSec": 25.76
+    },
+    {
+     "text": "our",
+     "startSec": 26.18,
+     "endSec": 26.32
+    },
+    {
+     "text": "studio",
+     "startSec": 26.32,
+     "endSec": 26.72
+    },
+    {
+     "text": "overlooks",
+     "startSec": 26.72,
+     "endSec": 27.46
+    },
+    {
+     "text": "the",
+     "startSec": 27.46,
+     "endSec": 27.54
+    },
+    {
+     "text": "trees",
+     "startSec": 27.54,
+     "endSec": 27.78
+    },
+    {
+     "text": "across",
+     "startSec": 27.78,
+     "endSec": 28.1
+    },
+    {
+     "text": "the",
+     "startSec": 28.1,
+     "endSec": 28.38
+    },
+    {
+     "text": "street.",
+     "startSec": 28.38,
+     "endSec": 28.62
+    }
+   ],
+   "linking": [
+    {
+     "span": "across the",
+     "type": "reduction",
+     "ipa": "/əˈkrɒs ðə/",
+     "noteJa": "theが弱形となり、素早く流れるように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "male",
+   "startSec": 29.737,
+   "endSec": 31.808,
+   "text": "Great, I will sign up right now.",
+   "translationJa": "素晴らしいです、今すぐ入会手続きをします。",
+   "chunks": [
+    {
+     "text": "Great,",
+     "startSec": 29.737,
+     "endSec": 29.977
+    },
+    {
+     "text": "I will sign up",
+     "startSec": 29.977,
+     "endSec": 30.857
+    },
+    {
+     "text": "right now.",
+     "startSec": 30.857,
+     "endSec": 31.297
+    }
+   ],
+   "words": [
+    {
+     "text": "Great,",
+     "startSec": 29.737,
+     "endSec": 29.977
+    },
+    {
+     "text": "I",
+     "startSec": 29.977,
+     "endSec": 30.337
+    },
+    {
+     "text": "will",
+     "startSec": 30.337,
+     "endSec": 30.477
+    },
+    {
+     "text": "sign",
+     "startSec": 30.477,
+     "endSec": 30.697
+    },
+    {
+     "text": "up",
+     "startSec": 30.697,
+     "endSec": 30.857
+    },
+    {
+     "text": "right",
+     "startSec": 30.857,
+     "endSec": 31.077
+    },
+    {
+     "text": "now.",
+     "startSec": 31.077,
+     "endSec": 31.297
+    }
+   ],
+   "linking": [
+    {
+     "span": "sign up",
+     "type": "linking",
+     "ipa": "/saɪn ʌp/",
+     "noteJa": "signの語尾/n/とupの母音/ʌ/が繋がり、「サイナップ」と発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "female",
+   "startSec": 32.308,
+   "endSec": 35.945,
+   "text": "Welcome aboard! Please fill in this short paper first.",
+   "translationJa": "ようこそ！まずはこちらの簡単な用紙にご記入をお願いします。",
+   "chunks": [
+    {
+     "text": "Welcome aboard!",
+     "startSec": 32.308,
+     "endSec": 33.068
+    },
+    {
+     "text": "Please fill in",
+     "startSec": 33.488,
+     "endSec": 34.128
+    },
+    {
+     "text": "this short paper first.",
+     "startSec": 34.128,
+     "endSec": 35.248
+    }
+   ],
+   "words": [
+    {
+     "text": "Welcome",
+     "startSec": 32.308,
+     "endSec": 32.648
+    },
+    {
+     "text": "aboard!",
+     "startSec": 32.648,
+     "endSec": 33.068
+    },
+    {
+     "text": "Please",
+     "startSec": 33.488,
+     "endSec": 33.688
+    },
+    {
+     "text": "fill",
+     "startSec": 33.688,
+     "endSec": 33.948
+    },
+    {
+     "text": "in",
+     "startSec": 33.948,
+     "endSec": 34.128
+    },
+    {
+     "text": "this",
+     "startSec": 34.128,
+     "endSec": 34.268
+    },
+    {
+     "text": "short",
+     "startSec": 34.268,
+     "endSec": 34.528
+    },
+    {
+     "text": "paper",
+     "startSec": 34.528,
+     "endSec": 34.788
+    },
+    {
+     "text": "first.",
+     "startSec": 34.788,
+     "endSec": 35.248
+    }
+   ],
+   "linking": [
+    {
+     "span": "fill in",
+     "type": "linking",
+     "ipa": "/fɪl ɪn/",
+     "noteJa": "fillの語尾/l/が次のinと結びつき、「フィリン」のように滑らかにつながります。"
+    }
+   ]
+  }
+ ]
+}

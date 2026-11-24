@@ -1,0 +1,206 @@
+{
+ "title": "Joining a Gym",
+ "titleJa": "ジムに入会する",
+ "type": "conversation",
+ "level": "beginner",
+ "speakerNames": {
+  "female": "Front Desk Staff",
+  "male": "Customer"
+ },
+ "lines": [
+  {
+   "index": 1,
+   "speaker": "male",
+   "text": "Hello, can I ask about a trial membership today?",
+   "chunks": [
+    "Hello,",
+    "can I ask",
+    "about a trial membership",
+    "today?"
+   ],
+   "translationJa": "こんにちは、今日のお試し体験について伺ってもよろしいですか？",
+   "linking": [
+    {
+     "span": "can I ask",
+     "type": "linking",
+     "ipa": "/kə naɪ ɑːsk/",
+     "noteJa": "canの末尾の/n/が続くIとaskにスムーズに連結し、「キャナイ・アスク」とひと続きに発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "female",
+   "text": "Sure, that sounds like a good plan for you.",
+   "chunks": [
+    "Sure,",
+    "that sounds",
+    "like a good plan",
+    "for you."
+   ],
+   "translationJa": "もちろんです、それは良いお考えですね。",
+   "linking": [
+    {
+     "span": "good plan",
+     "type": "assimilation",
+     "ipa": "/ɡʊb plæn/",
+     "noteJa": "goodの末尾/d/が次の両唇音/p/に同化し、/b/に変化して「グッブプラン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "male",
+   "text": "How much does the basic plan cost each month?",
+   "chunks": [
+    "How much does",
+    "the basic plan cost",
+    "each month?"
+   ],
+   "translationJa": "基本プランは毎月いくらかかりますか？",
+   "linking": [
+    {
+     "span": "basic plan",
+     "type": "assimilation",
+     "ipa": "/ˈbeɪsɪk plæn/",
+     "noteJa": "basicの末尾の/k/が弱まり、そのまま/p/に素早く移行します。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "female",
+   "text": "It is fifty dollars, and you can pay cash.",
+   "chunks": [
+    "It is fifty dollars,",
+    "and you can pay cash."
+   ],
+   "translationJa": "50ドルとなっており、現金でのお支払いも可能です。",
+   "linking": [
+    {
+     "span": "can pay",
+     "type": "assimilation",
+     "ipa": "/kəm peɪ/",
+     "noteJa": "canの/n/が次の両唇音/p/の影響を受けて/m/に同化し、「カムペイ」のように変化します。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "male",
+   "text": "That is reasonable. When is the best period to visit?",
+   "chunks": [
+    "That is reasonable.",
+    "When is the best period",
+    "to visit?"
+   ],
+   "translationJa": "手頃ですね。訪れるのに一番空いている時間帯はいつですか？",
+   "linking": [
+    {
+     "span": "best period",
+     "type": "assimilation",
+     "ipa": "/bɛsp ˈpɪəriəd/",
+     "noteJa": "bestの末尾/t/が次の/p/の影響で/p/に同化・脱落気味になり、「ベスペリオッド」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "female",
+   "text": "Weekday mornings are quiet, so ten minutes of waiting is rare.",
+   "chunks": [
+    "Weekday mornings are quiet,",
+    "so ten minutes of waiting",
+    "is rare."
+   ],
+   "translationJa": "平日の午前中は静かですので、10分も待つことはめったにありません。",
+   "linking": [
+    {
+     "span": "ten minutes",
+     "type": "assimilation",
+     "ipa": "/tɛm ˈmɪnɪts/",
+     "noteJa": "tenの語尾/n/が後ろの鼻音/m/に同化して/m/になり、「テムミニッツ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "male",
+   "text": "That sounds perfect. Do you have a green park view here?",
+   "chunks": [
+    "That sounds perfect.",
+    "Do you have",
+    "a green park view",
+    "here?"
+   ],
+   "translationJa": "それはいいですね。ここから緑豊かな公園の景色は見えますか？",
+   "linking": [
+    {
+     "span": "green park",
+     "type": "assimilation",
+     "ipa": "/ɡriːm pɑːrk/",
+     "noteJa": "greenの語尾/n/が次の/p/に引きずられて両唇鼻音の/m/に変わり、「グリームパーク」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "female",
+   "text": "Yes, our studio overlooks the trees across the street.",
+   "chunks": [
+    "Yes,",
+    "our studio overlooks",
+    "the trees across the street."
+   ],
+   "translationJa": "はい、スタジオからは通りの向かいにある木々が見渡せますよ。",
+   "linking": [
+    {
+     "span": "across the",
+     "type": "reduction",
+     "ipa": "/əˈkrɒs ðə/",
+     "noteJa": "theが弱形となり、素早く流れるように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "male",
+   "text": "Great, I will sign up right now.",
+   "chunks": [
+    "Great,",
+    "I will sign up",
+    "right now."
+   ],
+   "translationJa": "素晴らしいです、今すぐ入会手続きをします。",
+   "linking": [
+    {
+     "span": "sign up",
+     "type": "linking",
+     "ipa": "/saɪn ʌp/",
+     "noteJa": "signの語尾/n/とupの母音/ʌ/が繋がり、「サイナップ」と発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "speaker": "female",
+   "text": "Welcome aboard! Please fill in this short paper first.",
+   "chunks": [
+    "Welcome aboard!",
+    "Please fill in",
+    "this short paper first."
+   ],
+   "translationJa": "ようこそ！まずはこちらの簡単な用紙にご記入をお願いします。",
+   "linking": [
+    {
+     "span": "fill in",
+     "type": "linking",
+     "ipa": "/fɪl ɪn/",
+     "noteJa": "fillの語尾/l/が次のinと結びつき、「フィリン」のように滑らかにつながります。"
+    }
+   ]
+  }
+ ],
+ "id": "gym-signup",
+ "category": "gym"
+}
