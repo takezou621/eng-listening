@@ -74,7 +74,10 @@ jobs:
   appstore:
     name: App Store ${{ inputs.mode }}
     runs-on: [self-hosted, macOS, ARM64]
-    timeout-minutes: 60
+    # upload モードのアーカイブは m1 実測で 60 分を超える (run 45311818195 は
+    # 60 分で timeout cancelled — Pods / RevenueCat のビルド中に打ち切られた)。
+    # 提出セッションの 3 時間ルールに収まる 180 分に引き上げる
+    timeout-minutes: 180
 
     steps:
       - name: Refuse GitHub-hosted runners (self-hosted 専用)
