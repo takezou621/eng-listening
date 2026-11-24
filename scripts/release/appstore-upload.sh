@@ -180,9 +180,12 @@ fi
 log "EXPO_PUBLIC_REVENUECAT_API_KEY: 設定を確認 (値は非表示)"
 
 # ---- 2/7 ネイティブプロジェクト生成 ----------------------------------------
-# /ios は gitignore 済みの生成物 (CNG)。常に prebuild し直す
+# /ios は gitignore 済みの生成物 (CNG)。--clean で既存の ios/ を消してから常に
+# 作り直す (self-hosted ランナーやローカルはジョブ間で /ios を残すため、--clean
+# なしでは古いプロジェクトに sync が走る。--no-install と併用可 — pod install は
+# 5/7 で自分で行う)
 log "[2/7] expo prebuild で ios プロジェクトを生成"
-CI=1 npx expo prebuild --platform ios --no-install
+CI=1 npx expo prebuild --platform ios --clean --no-install
 
 # ---- 3/7 バージョン・ビルド番号の確認と差し込み -----------------------------
 log "[3/7] Info.plist のバージョン確認と CFBundleVersion 差し込み"
@@ -321,12 +324,19 @@ log ".ipa を書き出し: $IPA_PATH"
 if [ "$UPLOAD" = true ]; then
     # altool は -authenticationKeyPath を受け取らないため、キーを
     # ~/private_keys/AuthKey_<ID>.p8 (既定の探索ディレクトリ) に置いてから
-    # --apiKey / --apiIssuer で参照する。値は表示しない
+    # --apiKey / --apiIssuer で参照する。値は表示しない。
+    # 複製した鍵は **EXIT trap で必ず消す** (altool 失敗時は set -e で抜けるため。
+    # Admin ロールの鍵を self-hosted ランナーに残さない — workflow の cleanup が
+    # RUNNER_TEMP/asc しか消さないため、こちらの面倒はこのスクリプトが見る)
     mkdir -p "$HOME/private_keys"
-    cp -f "$KEY_PATH" "$HOME/private_keys/AuthKey_${KEY_ID}.p8"
-    chmod 600 "$HOME/private_keys/AuthKey_${KEY_ID}.p8"
+    COPIED_KEY="$HOME/private_keys/AuthKey_${KEY_ID}.p8"
+    cp -f "$KEY_PATH" "$COPIED_KEY"
+    chmod 600 "$COPIED_KEY"
+    trap 'rm -f "$COPIED_KEY"' EXIT
     log "App Store Connect へアップロード (altool, API キー認証)"
     xcrun altool --upload-app -f "$IPA_PATH" -t ios --apiKey "$KEY_ID" --apiIssuer "$ISSUER"
+    rm -f "$COPIED_KEY"
+    trap - EXIT
     log "アップロード完了 ($IPA_PATH)。ASC でビルドが VALID になるのを待ってから" \
         "appstore.yml ワークフローの apply (build 指定) → submit を実行してください"
 else

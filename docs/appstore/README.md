@@ -113,6 +113,10 @@ EYECHECKER_ASC_API_KEY_ID=XXX EYECHECKER_ASC_API_ISSUER=00000000-… \
   `WAITING_FOR_REVIEW` をバージョン・両サブスクリプション・グループのすべてで
   確認し、抜けている場合は ASC 画面 / API で追加する (eyechecker と異なり
   サブスク課金アプリなので、submit モード実行後の確認を省略しない)
+- **アップロード経路**: `xcrun altool --upload-app`（API キー認証）を使う。altool は
+  非推奨になっており、将来の Xcode で廃止された場合は exportOptions の
+  `destination` を `upload` に変えて `xcodebuild -exportArchive` にアップロードを
+  任せれば同じ経路になる（その場合スクリプト内の `~/private_keys` への鍵複製も不要）
 - **用途文字列**: upload スクリプトが生成直後の Info.plist とアーカイブ済み
   .app の Info.plist の両方で `NS*UsageDescription` を検査し、プラグインの
   デフォルト文 (プレースホルダ) が 1 つでも残っていれば失敗する

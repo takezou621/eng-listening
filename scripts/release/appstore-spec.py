@@ -49,6 +49,8 @@ LOCALES = {
 }
 
 APP_ID = "6837503600"  # com.takezou.englistening (ミミトレ)
+# ↑ workflow (.github/workflows/appstore.yml) の env APP_ID が API 呼び出しの正。
+# ここにあるのは `next:` の案内表示用 (両者で食い違わせないこと)
 
 # サポート URL (バージョン情報) とプライバシーポリシー URL (アプリ情報)。
 # 文面の正は docs/store/listing-ja-final.md §サポート URL / §プライバシー。
@@ -90,11 +92,25 @@ def code_blocks(text: str) -> list[tuple[str, str]]:
     the fenced block may be separated by prose (the What's New sections carry
     editorial notes), and letting ``.+?`` swallow that prose would make
     version matching below see version strings from the notes.
+
+    A heading whose own ```text block is missing would silently pair with the
+    *next* section's block (e.g. a half-written "What's New (1.2)" would
+    publish the Keywords block as release notes). Fail loudly when the
+    captured span crosses another ``##`` heading.
     """
-    return [
-        (m.group(1).strip().split("\n", 1)[0], m.group(2))
-        for m in re.finditer(r"## (.+?)\n+```text\n(.*?)\n```", text, re.S)
-    ]
+    pairs: list[tuple[str, str]] = []
+    for m in re.finditer(r"## (.+?)\n+```text\n(.*?)\n```", text, re.S):
+        heading_text = m.group(1).strip()
+        heading = heading_text.split("\n", 1)[0]
+        rest = heading_text.split("\n", 1)[1] if "\n" in heading_text else ""
+        if re.search(r"^## ", rest, re.M):
+            raise SystemExit(
+                f"'{heading}' has no ```text block of its own in the metadata "
+                "(another '##' heading appears before the next fence); "
+                "write the section copy before generating the spec"
+            )
+        pairs.append((heading, m.group(2)))
+    return pairs
 
 
 def section_for_version(headings: list[tuple[str, str]], version: str, locale: str) -> str:
@@ -254,14 +270,17 @@ def main() -> int:
 
     print(f"spec written: {output}")
     print(f"  whatsNew locales : {', '.join(sorted(spec['whatsNew']))}")
-    if "descriptions" in spec:
-        print(f"  description chars: { {k: len(v) for k, v in spec['descriptions'].items()} }")
+    # 見出しの書き間違い (### や ``` 以外のフェンス) があると任意項目は静かに
+    # 欠けて、ASC 側の前回文面が残る。欠けていることを要約に明示して気づけるようにする
+    for field, label in (("descriptions", "description"), ("keywords", "keywords"), ("subtitles", "subtitle")):
+        if field in spec:
+            print(f"  {label:<16} : { {k: len(v) for k, v in spec[field].items()} } chars")
+        else:
+            print(f"  {label:<16} : ABSENT — spec に載せない (ASC の現行値を維持)。意図していなければ metadata-ja.md の見出しを確認")
     if "keywords" in spec:
         print(
-            f"  keywords chars   : { {k: (len(v), len(v.encode('utf-8'))) for k, v in spec['keywords'].items()} } (chars, bytes)"
+            f"  keywords bytes   : { {k: len(v.encode('utf-8')) for k, v in spec['keywords'].items()} }"
         )
-    if "subtitles" in spec:
-        print(f"  subtitle chars   : { {k: len(v) for k, v in spec['subtitles'].items()} }")
     print(f"  review notes     : {len(spec['reviewNotes'])} chars")
     print(f"  support URLs     : {len(spec['supportUrls'])} locales -> {SUPPORT_URLS['ja']}")
     print(f"  privacy URLs     : {len(spec['privacyUrls'])} locales -> {PRIVACY_URLS['ja']}")
