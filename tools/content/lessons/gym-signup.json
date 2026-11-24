@@ -58,14 +58,7 @@
     "each month?"
    ],
    "translationJa": "基本プランは毎月いくらかかりますか？",
-   "linking": [
-    {
-     "span": "basic plan",
-     "type": "assimilation",
-     "ipa": "/ˈbeɪsɪk plæn/",
-     "noteJa": "basicの末尾の/k/が弱まり、そのまま/p/に素早く移行します。"
-    }
-   ]
+   "linking": []
   },
   {
    "index": 4,

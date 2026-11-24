@@ -18,7 +18,7 @@
   "male": "en-US-Neural2-D",
   "narrator": "en-US-Neural2-A"
  },
- "generatedAtUtc": "2026-11-24T15:44:50Z",
+ "generatedAtUtc": "2026-11-24T16:01:20Z",
  "sentences": [
   {
    "index": 0,
@@ -107,12 +107,6 @@
      "type": "reduction",
      "ipa": "/ˈwɑːnə/",
      "noteJa": "want to が縮約されて「ワナ」のように短く発音されます。"
-    },
-    {
-     "span": "to",
-     "type": "weak-form",
-     "ipa": "/tə/",
-     "noteJa": "前置詞・不定詞の to は母音があいまい母音になり、「トゥ」ではなく「タ」のように弱く発音されます。"
     }
    ]
   },
