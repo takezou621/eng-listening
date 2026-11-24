@@ -27,7 +27,7 @@ GitHub Actions のランナーが使えないとき（ランナー停止・ネ�
 3. `.env` に `EXPO_PUBLIC_REVENUECAT_API_KEY`（RevenueCat の公開キー）が設定されていることを確認する（値は表示・記録しない）。
 4. `npx expo prebuild --platform ios` → `pod install`（`ios/` 内）。
 5. `xcodebuild archive`（自動署名、`-allowProvisioningUpdates` と ASC API キー認証を付ける）。SSH セッションからはログインキーチェーンがロックされ codesign が `errSecInternalComponent` で失敗するため、アーカイブは GUI セッションへ bootstrap した一時 LaunchAgent 経由で実行する。xcodebuild には `DEVELOPMENT_TEAM=4B873Q67MK` を渡すこと（prebuild はチームなしでプロジェクトを生成する）。pod install 等は `LANG=en_US.UTF-8` で実行する（ロケールがないと Ruby が日本語アプリ名で落ちる）。署名で詰まった場合は証明書を削除・再発行せず、エラー文をそのまま記録して止まる。
-6. App Store 配布用に IPA を書き出し、ASC API キー認証でアップロードする（`scripts/release/appstore-upload.sh --version X --build N --upload` がこの手順を自動化する。キー: `~/.appstoreconnect/AuthKey_8HM846FQ5Z.p8`、環境変数は `~/.appstoreconnect/eyechecker-local-upload.env`）。
+6. App Store 配布用に IPA を書き出し、ASC API キー認証でアップロードする（`scripts/release/appstore-upload.sh --version X --build N --upload` がこの手順を自動化する。キー: `~/.appstoreconnect/AuthKey_8HM846FQ5Z.p8`、環境変数は `~/.appstoreconnect/eyechecker-local-upload.env`）。スクリプトは prebuild と archive を自ら実行するため、スクリプトを使う場合は手順 5 と同じく GUI セッション（LaunchAgent 経由）でスクリプト自体を実行すること。手順 5 の手動 archive は、スクリプトを使わない完全手動の経路のためのものである。
 7. ASC API で builds を照会し、対象ビルドが `VALID` になることを確認する。
 8. ASC でメタデータ（`docs/store/listing-ja-final.md` が正）とスクリーンショット（`docs/store/screenshots/`）をそろえ、ビルドをバージョンにひも付けて審査提出する。審査提出アイテムはサブスクリプション本体ではなく **subscriptionVersion**、グループは **subscriptionGroupVersion** を `reviewSubmissionItems` に追加する（本体 ID で POST すると 409 unknown relationship になる）。バージョン ID は各リソースの `versions` 関係から取得する。提出後はバージョン・両サブスクリプション・グループの全てが `WAITING_FOR_REVIEW` であることを API で確認する（バージョンだけ提出された状態にしない）。
 

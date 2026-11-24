@@ -330,13 +330,21 @@ if [ "$UPLOAD" = true ]; then
     # RUNNER_TEMP/asc しか消さないため、こちらの面倒はこのスクリプトが見る)
     mkdir -p "$HOME/private_keys"
     COPIED_KEY="$HOME/private_keys/AuthKey_${KEY_ID}.p8"
-    cp -f "$KEY_PATH" "$COPIED_KEY"
-    chmod 600 "$COPIED_KEY"
-    trap 'rm -f "$COPIED_KEY"' EXIT
+    # 鍵が既に探索先そのものにある場合はコピーしない (コピー元と先が同じだと
+    # cp が自滅し、EXIT trap の rm で原本まで消してしまうため)
+    KEY_IS_TEMP_COPY=false
+    if [ "$KEY_PATH" != "$COPIED_KEY" ]; then
+        cp -f "$KEY_PATH" "$COPIED_KEY"
+        chmod 600 "$COPIED_KEY"
+        KEY_IS_TEMP_COPY=true
+        trap 'rm -f "$COPIED_KEY"' EXIT
+    fi
     log "App Store Connect へアップロード (altool, API キー認証)"
     xcrun altool --upload-app -f "$IPA_PATH" -t ios --apiKey "$KEY_ID" --apiIssuer "$ISSUER"
-    rm -f "$COPIED_KEY"
-    trap - EXIT
+    if [ "$KEY_IS_TEMP_COPY" = true ]; then
+        rm -f "$COPIED_KEY"
+        trap - EXIT
+    fi
     log "アップロード完了 ($IPA_PATH)。ASC でビルドが VALID になるのを待ってから" \
         "appstore.yml ワークフローの apply (build 指定) → submit を実行してください"
 else

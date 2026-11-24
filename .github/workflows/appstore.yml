@@ -29,9 +29,12 @@ name: App Store
 #                     でも可 — eyechecker と同じく鍵は 1 本にまとめる。開発用の鍵を使い回さない)
 #   ASC_CI_KEY_ID    キー ID
 #   ASC_CI_ISSUER    issuer ID
-#   EXPO_PUBLIC_REVENUECAT_API_KEY (upload のみ・任意)
-#                    未登録の場合はランナー側の環境変数か .env で代用でき、
-#                    どちらも無ければ upload スクリプトがアーカイブ前に失敗する
+#   EXPO_PUBLIC_REVENUECAT_API_KEY (upload のみ)
+#                    CI ではこの secret が正。upload スクリプトには .env や
+#                    環境変数での代用もあるが、それが効くのはローカル実行時だけ
+#                    (CI の checkout はワークスペースをクリーンするため、
+#                    ランナーに置いた .env は残らない)。secret が無く代用も
+#                    無ければ upload スクリプトがアーカイブ前に失敗する
 #
 # ランナー: このリポジトリに登録した self-hosted macOS ランナー (m1) で動く
 # (eyechecker のランナーは eyechecker リポジトリスコープなので、このリポジトリにも
@@ -232,12 +235,16 @@ jobs:
           EYECHECKER_ASC_API_KEY: ${{ env.ASC_KEY_PATH }}
           EYECHECKER_ASC_API_KEY_ID: ${{ env.ASC_KEY_ID }}
           EYECHECKER_ASC_API_ISSUER: ${{ env.ASC_ISSUER }}
-          # RevenueCat の公開キー (JS バンドルに焼かれる)。secret 未登録なら空になり、
-          # スクリプトはランナーの環境変数 / .env での代用を試み、無ければアーカイブ前に
-          # 失敗する (値はどこにも表示されない)
-          EXPO_PUBLIC_REVENUECAT_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_API_KEY }}
+          # RevenueCat の公開キー (JS バンドルに焼かれる)。secret は別名で受け取り、
+          # 値がある場合だけ EXPO_PUBLIC_REVENUECAT_API_KEY として export する
+          # (未登録 = 空文字をそのまま env に載せると、ランナー側の同名環境変数を
+          # 上書きしてしまうため)。値はどこにも表示されない
+          RC_KEY_FROM_SECRET: ${{ secrets.EXPO_PUBLIC_REVENUECAT_API_KEY }}
         run: |
           [ -n "$EYECHECKER_ASC_API_KEY" ] || { echo "ASC API キーが展開できていません (decode step を確認)"; exit 1; }
+          if [ -n "$RC_KEY_FROM_SECRET" ]; then
+            export EXPO_PUBLIC_REVENUECAT_API_KEY="$RC_KEY_FROM_SECRET"
+          fi
           # ランナー側の前提 (Node.js / CocoaPods)。欠けている場合はスクリプトが
           # 依存インストールの前に落とす。整備は docs/appstore/README.md「初回セットアップ」
           for tool in node npx pod xcodebuild; do

@@ -177,6 +177,11 @@ def build_spec(version: str, build: str | None) -> dict:
         headings = code_blocks(path.read_text(encoding="utf-8"))
 
         wn = section_for_version(headings, version, locale)
+        if not wn:
+            raise SystemExit(
+                f"{locale}: What's New ({version}) is empty in {fname}; "
+                "write the release copy before generating the spec"
+            )
         if len(wn) > WHATSNEW_MAX_CHARS:
             raise SystemExit(
                 f"{locale}: What's New is {len(wn)} characters (limit {WHATSNEW_MAX_CHARS}) in {fname}"

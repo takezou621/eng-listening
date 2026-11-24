@@ -62,8 +62,10 @@ spec 生成が `supportUrls` / `privacyUrls` を自動で埋める。
    **CI 専用鍵を作り、開発用鍵を流用しない**こと。発行後 `mode=plan` → `mode=status`
    で経路を検証する
 2. **RevenueCat の公開キー** (upload モードのみ) — secret
-   `EXPO_PUBLIC_REVENUECAT_API_KEY` を登録する。未登録の場合はランナー側の環境変数か
-   リポジトリ直下の `.env` で代用でき、どちらも無ければ upload スクリプトが
+   `EXPO_PUBLIC_REVENUECAT_API_KEY` を登録する (CI ではこれが正)。upload
+   スクリプトには環境変数 / リポジトリ直下の `.env` での代用もあるが、効くのは
+   ローカル実行時だけ (CI の checkout はワークスペースをクリーンするため、
+   ランナーに置いた `.env` は残らない)。どちらも無ければ upload スクリプトが
    アーカイブ前に失敗する (値はログに表示されない)
 3. **self-hosted ランナーの登録** — `appstore.yml` は `[self-hosted, macOS, ARM64]` で
    動く。eyechecker の m1 ランナーは eyechecker リポジトリスコープのため、この
@@ -87,14 +89,15 @@ spec 生成が `supportUrls` / `privacyUrls` を自動で埋める。
 python3 scripts/release/appstore-spec.py --version 1.1 --build 2
 PYTHONPATH=~/dev/asc-submit python3 -m asc_submit validate --spec dist/appstore/release-1.1.json
 
-# 反映・提出 (ASC API キー)
-export ASC_KEY_PATH=… ASC_KEY_ID=… ASC_ISSUER=…
-PYTHONPATH=~/dev/asc-submit python3 -m asc_submit run 6837503600 --spec dist/appstore/release-1.1.json [--submit]
-
 # ビルドのアーカイブとアップロード (eyechecker と同じ env 名・同じ鍵ファイル)
 EYECHECKER_ASC_API_KEY=~/.appstoreconnect/AuthKey_XXX.p8 \
 EYECHECKER_ASC_API_KEY_ID=XXX EYECHECKER_ASC_API_ISSUER=00000000-… \
     scripts/release/appstore-upload.sh --version 1.1 --build 2 --upload
+
+# アップロードしたビルドが ASC で VALID になったことを確認してから、
+# メタデータ反映・提出 (ASC API キー)
+export ASC_KEY_PATH=… ASC_KEY_ID=… ASC_ISSUER=…
+PYTHONPATH=~/dev/asc-submit python3 -m asc_submit run 6837503600 --spec dist/appstore/release-1.1.json [--submit]
 ```
 
 ## メモ
