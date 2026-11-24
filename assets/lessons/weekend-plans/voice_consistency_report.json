@@ -1,0 +1,95 @@
+{
+ "lesson": "weekend-plans",
+ "configHash": "1b1725b9a69efe25",
+ "thresholds": {
+  "f0DeviationMax": 0.15,
+  "rateDeviationMax": 0.25,
+  "rateUnit": "words/sec"
+ },
+ "digests": {
+  "L01_female.wav": "893fabcd617151f7",
+  "L02_male.wav": "350713a54e5494fd",
+  "L03_female.wav": "d130816f29dc0de9",
+  "L04_male.wav": "0e35e823e434ea2c",
+  "L05_female.wav": "8e81648cc0106276",
+  "L06_male.wav": "d64518c4c843247e",
+  "L07_female.wav": "44ee7a31f181006e",
+  "L08_male.wav": "5edeefc6d6f29883"
+ },
+ "rows": [
+  {
+   "file": "L01_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 218.2,
+   "rateWps": 3.32,
+   "durationSec": 3.01,
+   "flag": ""
+  },
+  {
+   "file": "L02_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 143.7,
+   "rateWps": 3.32,
+   "durationSec": 3.32,
+   "flag": ""
+  },
+  {
+   "file": "L03_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 203.4,
+   "rateWps": 2.79,
+   "durationSec": 3.95,
+   "flag": ""
+  },
+  {
+   "file": "L04_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 134.1,
+   "rateWps": 3.97,
+   "durationSec": 2.77,
+   "flag": ""
+  },
+  {
+   "file": "L05_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 214.3,
+   "rateWps": 3.1,
+   "durationSec": 3.23,
+   "flag": ""
+  },
+  {
+   "file": "L06_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 127.7,
+   "rateWps": 3.4,
+   "durationSec": 3.23,
+   "flag": ""
+  },
+  {
+   "file": "L07_female.wav",
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "f0Hz": 206.9,
+   "rateWps": 2.94,
+   "durationSec": 3.74,
+   "flag": ""
+  },
+  {
+   "file": "L08_male.wav",
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "f0Hz": 129.0,
+   "rateWps": 3.2,
+   "durationSec": 2.82,
+   "flag": ""
+  }
+ ],
+ "flagged": [],
+ "missing": []
+}

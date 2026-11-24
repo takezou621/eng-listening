@@ -1,21 +1,24 @@
 import airportJson from '@/assets/lessons/at-the-airport/lesson.json';
 import cafeJson from '@/assets/lessons/cafe-ordering/lesson.json';
 import directionsJson from '@/assets/lessons/asking-directions/lesson.json';
+import gymJson from '@/assets/lessons/gym-signup/lesson.json';
 import hometownJson from '@/assets/lessons/introducing-my-hometown/lesson.json';
 import hotelJson from '@/assets/lessons/hotel-checkin/lesson.json';
 import kyotoJson from '@/assets/lessons/weekend-in-kyoto/lesson.json';
 import movieJson from '@/assets/lessons/my-favorite-movie/lesson.json';
 import morningJson from '@/assets/lessons/my-morning-routine/lesson.json';
 import phoneJson from '@/assets/lessons/phone-appointment/lesson.json';
+import plansJson from '@/assets/lessons/weekend-plans/lesson.json';
+import rainyJson from '@/assets/lessons/rainy-day-indoors/lesson.json';
 import restaurantJson from '@/assets/lessons/restaurant-order/lesson.json';
 import shoppingJson from '@/assets/lessons/shopping-clothes/lesson.json';
 import smallTalkJson from '@/assets/lessons/small-talk-coworker/lesson.json';
 import { assertValidLesson, type LessonData } from '@/features/lesson/types';
 
 /**
- * パイプライン生成レッスンの登録表 (12 本計画 v1.0)。
+ * パイプライン生成レッスンの登録表 (v1.0 12 本 + v1.2 希少音変化特化 3 本 = 15 本)。
  *
- * - CATALOG が計画の全 12 本。BUNDLES は音声付きで同梱済みのもの。
+ * - CATALOG が計画の全 15 本。BUNDLES は音声付きで同梱済みのもの。
  * - BUNDLES に無いレッスンは「準備中」表示になり、クラッシュしない
  *   (音声の生成は tools/content/ のパイプラインで行う。docs/content-pipeline.md)。
  * - Metro がアセットを静的に解決するため、require のパスはリテラルで書く。
@@ -39,10 +42,13 @@ export const LESSON_CATALOG: CatalogEntry[] = [
   { id: 'phone-appointment', title: 'Making an Appointment by Phone', titleJa: '電話で予約を入れる', type: 'conversation', level: 'intermediate' },
   { id: 'at-the-airport', title: 'At the Airport', titleJa: '空港で', type: 'conversation', level: 'intermediate' },
   { id: 'small-talk-coworker', title: 'Small Talk with a Coworker', titleJa: '同僚との雑談', type: 'conversation', level: 'intermediate' },
+  { id: 'gym-signup', title: 'Joining a Gym', titleJa: 'ジムに入会する', type: 'conversation', level: 'beginner' },
+  { id: 'weekend-plans', title: 'Making Weekend Plans', titleJa: '週末の計画を立てる', type: 'conversation', level: 'intermediate' },
   { id: 'my-morning-routine', title: 'My Morning Routine', titleJa: '朝の習慣', type: 'monologue', level: 'beginner' },
   { id: 'weekend-in-kyoto', title: 'A Weekend Trip to Kyoto', titleJa: '週末の京都旅行', type: 'monologue', level: 'intermediate' },
   { id: 'introducing-my-hometown', title: 'Introducing My Hometown', titleJa: '故郷の紹介', type: 'monologue', level: 'intermediate' },
   { id: 'my-favorite-movie', title: 'My Favorite Movie', titleJa: '好きな映画', type: 'monologue', level: 'beginner' },
+  { id: 'rainy-day-indoors', title: 'A Rainy Day Indoors', titleJa: '雨の日はおうち時間', type: 'monologue', level: 'intermediate' },
 ];
 
 function loadLesson(json: unknown, id: string): LessonData {
@@ -93,6 +99,14 @@ export const BUNDLES: Record<string, LessonBundle> = {
     data: loadLesson(smallTalkJson, 'small-talk-coworker'),
     audio: require('@/assets/lessons/small-talk-coworker/audio.m4a') as number,
   },
+  'gym-signup': {
+    data: loadLesson(gymJson, 'gym-signup'),
+    audio: require('@/assets/lessons/gym-signup/audio.m4a') as number,
+  },
+  'weekend-plans': {
+    data: loadLesson(plansJson, 'weekend-plans'),
+    audio: require('@/assets/lessons/weekend-plans/audio.m4a') as number,
+  },
   'my-morning-routine': {
     data: loadLesson(morningJson, 'my-morning-routine'),
     audio: require('@/assets/lessons/my-morning-routine/audio.m4a') as number,
@@ -109,6 +123,10 @@ export const BUNDLES: Record<string, LessonBundle> = {
     data: loadLesson(movieJson, 'my-favorite-movie'),
     audio: require('@/assets/lessons/my-favorite-movie/audio.m4a') as number,
   },
+  'rainy-day-indoors': {
+    data: loadLesson(rainyJson, 'rainy-day-indoors'),
+    audio: require('@/assets/lessons/rainy-day-indoors/audio.m4a') as number,
+  },
 };
 
 export const DEFAULT_LESSON_ID = 'cafe-ordering';
@@ -119,7 +137,7 @@ export interface LessonListItem {
   bundle: LessonBundle | null;
 }
 
-/** 計画 12 本の一覧。音声の有無を含めて返す */
+/** 計画 15 本の一覧。音声の有無を含めて返す */
 export function getLessonList(): LessonListItem[] {
   return LESSON_CATALOG.map((entry) => ({
     entry,

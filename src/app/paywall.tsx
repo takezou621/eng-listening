@@ -14,6 +14,7 @@ import {
   type RestoreResult,
 } from '@/features/billing/billingStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
+import { LESSON_CATALOG } from '@/features/lesson/registry';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
@@ -32,7 +33,7 @@ const PREMIUM_FEATURES_JA = [
 ];
 
 const FREE_FEATURES_JA = [
-  '全 12 レッスンの再生・カラオケ風表示・AB リピート',
+  `全 ${LESSON_CATALOG.length} レッスンの再生・カラオケ風表示・AB リピート`,
   'シャドーイング録音と比較再生',
   'ライブラリ・お気に入り・苦手フレーズ帳',
   '学習進捗の記録と表示',

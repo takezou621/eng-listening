@@ -1,0 +1,756 @@
+{
+ "id": "weekend-plans",
+ "title": "Making Weekend Plans",
+ "titleJa": "週末の計画を立てる",
+ "type": "conversation",
+ "level": "intermediate",
+ "category": "plans",
+ "audio": "audio.m4a",
+ "durationSec": 29.557,
+ "speakerNames": {
+  "female": "Lisa",
+  "male": "Ken"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-24T16:01:20Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "female",
+   "startSec": 0.0,
+   "endSec": 3.009,
+   "text": "Hey Ken, do you want to go hiking this Saturday?",
+   "translationJa": "ねえケン、今週の土曜日にハイキングに行かない？",
+   "chunks": [
+    {
+     "text": "Hey Ken,",
+     "startSec": 0.0,
+     "endSec": 0.48
+    },
+    {
+     "text": "do you want to",
+     "startSec": 0.8,
+     "endSec": 1.34
+    },
+    {
+     "text": "go hiking",
+     "startSec": 1.34,
+     "endSec": 1.7
+    },
+    {
+     "text": "this Saturday?",
+     "startSec": 1.7,
+     "endSec": 2.3
+    }
+   ],
+   "words": [
+    {
+     "text": "Hey",
+     "startSec": 0.0,
+     "endSec": 0.18
+    },
+    {
+     "text": "Ken,",
+     "startSec": 0.18,
+     "endSec": 0.48
+    },
+    {
+     "text": "do",
+     "startSec": 0.8,
+     "endSec": 0.96
+    },
+    {
+     "text": "you",
+     "startSec": 0.96,
+     "endSec": 1.06
+    },
+    {
+     "text": "want",
+     "startSec": 1.06,
+     "endSec": 1.2
+    },
+    {
+     "text": "to",
+     "startSec": 1.2,
+     "endSec": 1.34
+    },
+    {
+     "text": "go",
+     "startSec": 1.34,
+     "endSec": 1.44
+    },
+    {
+     "text": "hiking",
+     "startSec": 1.44,
+     "endSec": 1.7
+    },
+    {
+     "text": "this",
+     "startSec": 1.7,
+     "endSec": 1.98
+    },
+    {
+     "text": "Saturday?",
+     "startSec": 1.98,
+     "endSec": 2.3
+    }
+   ],
+   "linking": [
+    {
+     "span": "want to",
+     "type": "reduction",
+     "ipa": "/ˈwɑːnə/",
+     "noteJa": "want to が縮約されて「ワナ」のように短く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "male",
+   "startSec": 3.509,
+   "endSec": 6.826,
+   "text": "That sounds great, but can we meet early in the morning?",
+   "translationJa": "いいね！でも、朝早くに待ち合わせできる？",
+   "chunks": [
+    {
+     "text": "That sounds great,",
+     "startSec": 3.509,
+     "endSec": 4.329
+    },
+    {
+     "text": "but can we meet",
+     "startSec": 4.669,
+     "endSec": 5.189
+    },
+    {
+     "text": "early in the morning?",
+     "startSec": 5.189,
+     "endSec": 5.969
+    }
+   ],
+   "words": [
+    {
+     "text": "That",
+     "startSec": 3.509,
+     "endSec": 3.649
+    },
+    {
+     "text": "sounds",
+     "startSec": 3.649,
+     "endSec": 3.889
+    },
+    {
+     "text": "great,",
+     "startSec": 3.889,
+     "endSec": 4.329
+    },
+    {
+     "text": "but",
+     "startSec": 4.669,
+     "endSec": 4.809
+    },
+    {
+     "text": "can",
+     "startSec": 4.809,
+     "endSec": 4.949
+    },
+    {
+     "text": "we",
+     "startSec": 4.949,
+     "endSec": 5.049
+    },
+    {
+     "text": "meet",
+     "startSec": 5.049,
+     "endSec": 5.189
+    },
+    {
+     "text": "early",
+     "startSec": 5.189,
+     "endSec": 5.429
+    },
+    {
+     "text": "in",
+     "startSec": 5.429,
+     "endSec": 5.669
+    },
+    {
+     "text": "the",
+     "startSec": 5.669,
+     "endSec": 5.749
+    },
+    {
+     "text": "morning?",
+     "startSec": 5.749,
+     "endSec": 5.969
+    }
+   ],
+   "linking": [
+    {
+     "span": "can",
+     "type": "weak-form",
+     "ipa": "/kən/",
+     "noteJa": "助動詞の can は弱形になり、「キャン」ではなく「クン」のように軽く短く読まれます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "female",
+   "startSec": 7.326,
+   "endSec": 11.272,
+   "text": "Sure, we can take a train to Mount Takao around eight.",
+   "translationJa": "もちろん、8時ごろの高尾山行きの電車に乗れるよ。",
+   "chunks": [
+    {
+     "text": "Sure,",
+     "startSec": 7.326,
+     "endSec": 7.606
+    },
+    {
+     "text": "we can take a train",
+     "startSec": 7.946,
+     "endSec": 8.826
+    },
+    {
+     "text": "to Mount Takao",
+     "startSec": 8.826,
+     "endSec": 9.706
+    },
+    {
+     "text": "around eight.",
+     "startSec": 9.706,
+     "endSec": 10.326
+    }
+   ],
+   "words": [
+    {
+     "text": "Sure,",
+     "startSec": 7.326,
+     "endSec": 7.606
+    },
+    {
+     "text": "we",
+     "startSec": 7.946,
+     "endSec": 8.106
+    },
+    {
+     "text": "can",
+     "startSec": 8.106,
+     "endSec": 8.266
+    },
+    {
+     "text": "take",
+     "startSec": 8.266,
+     "endSec": 8.466
+    },
+    {
+     "text": "a",
+     "startSec": 8.466,
+     "endSec": 8.626
+    },
+    {
+     "text": "train",
+     "startSec": 8.626,
+     "endSec": 8.826
+    },
+    {
+     "text": "to",
+     "startSec": 8.826,
+     "endSec": 9.026
+    },
+    {
+     "text": "Mount",
+     "startSec": 9.026,
+     "endSec": 9.186
+    },
+    {
+     "text": "Takao",
+     "startSec": 9.186,
+     "endSec": 9.706
+    },
+    {
+     "text": "around",
+     "startSec": 9.706,
+     "endSec": 10.006
+    },
+    {
+     "text": "eight.",
+     "startSec": 10.006,
+     "endSec": 10.326
+    }
+   ],
+   "linking": [
+    {
+     "span": "take a",
+     "type": "linking",
+     "ipa": "/ˈteɪk‿ə/",
+     "noteJa": "take の子音 /k/ と a がつながり、「テイカ」のように発音されます。"
+    },
+    {
+     "span": "to",
+     "type": "weak-form",
+     "ipa": "/tə/",
+     "noteJa": "to が弱形化して「タ」に近いあいまいな音になります。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "male",
+   "startSec": 11.772,
+   "endSec": 14.54,
+   "text": "Let us meet in front of the central ticket gate then.",
+   "translationJa": "じゃあ、中央改札の前で集合しようか。",
+   "chunks": [
+    {
+     "text": "Let us meet",
+     "startSec": 11.772,
+     "endSec": 12.172
+    },
+    {
+     "text": "in front of",
+     "startSec": 12.172,
+     "endSec": 12.772
+    },
+    {
+     "text": "the central ticket gate then.",
+     "startSec": 12.772,
+     "endSec": 14.072
+    }
+   ],
+   "words": [
+    {
+     "text": "Let",
+     "startSec": 11.772,
+     "endSec": 11.892
+    },
+    {
+     "text": "us",
+     "startSec": 11.892,
+     "endSec": 11.992
+    },
+    {
+     "text": "meet",
+     "startSec": 11.992,
+     "endSec": 12.172
+    },
+    {
+     "text": "in",
+     "startSec": 12.172,
+     "endSec": 12.352
+    },
+    {
+     "text": "front",
+     "startSec": 12.352,
+     "endSec": 12.572
+    },
+    {
+     "text": "of",
+     "startSec": 12.572,
+     "endSec": 12.772
+    },
+    {
+     "text": "the",
+     "startSec": 12.772,
+     "endSec": 12.852
+    },
+    {
+     "text": "central",
+     "startSec": 12.852,
+     "endSec": 13.152
+    },
+    {
+     "text": "ticket",
+     "startSec": 13.152,
+     "endSec": 13.472
+    },
+    {
+     "text": "gate",
+     "startSec": 13.472,
+     "endSec": 13.792
+    },
+    {
+     "text": "then.",
+     "startSec": 13.792,
+     "endSec": 14.072
+    }
+   ],
+   "linking": [
+    {
+     "span": "of",
+     "type": "weak-form",
+     "ipa": "/əv/",
+     "noteJa": "前置詞 of は母音が弱化し、「オブ」ではなく「アヴ」や「ヴ」のように軽く添える程度に発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "female",
+   "startSec": 15.04,
+   "endSec": 18.27,
+   "text": "Perfect, and what should we bring for lunch and snacks?",
+   "translationJa": "了解、それで昼食とおやつには何を持っていくべきかな？",
+   "chunks": [
+    {
+     "text": "Perfect,",
+     "startSec": 15.04,
+     "endSec": 15.38
+    },
+    {
+     "text": "and what should we bring",
+     "startSec": 15.78,
+     "endSec": 16.58
+    },
+    {
+     "text": "for lunch and snacks?",
+     "startSec": 16.58,
+     "endSec": 17.5
+    }
+   ],
+   "words": [
+    {
+     "text": "Perfect,",
+     "startSec": 15.04,
+     "endSec": 15.38
+    },
+    {
+     "text": "and",
+     "startSec": 15.78,
+     "endSec": 15.9
+    },
+    {
+     "text": "what",
+     "startSec": 15.9,
+     "endSec": 16.06
+    },
+    {
+     "text": "should",
+     "startSec": 16.06,
+     "endSec": 16.26
+    },
+    {
+     "text": "we",
+     "startSec": 16.26,
+     "endSec": 16.4
+    },
+    {
+     "text": "bring",
+     "startSec": 16.4,
+     "endSec": 16.58
+    },
+    {
+     "text": "for",
+     "startSec": 16.58,
+     "endSec": 16.78
+    },
+    {
+     "text": "lunch",
+     "startSec": 16.78,
+     "endSec": 17.0
+    },
+    {
+     "text": "and",
+     "startSec": 17.0,
+     "endSec": 17.24
+    },
+    {
+     "text": "snacks?",
+     "startSec": 17.24,
+     "endSec": 17.5
+    }
+   ],
+   "linking": [
+    {
+     "span": "for",
+     "type": "weak-form",
+     "ipa": "/fər/",
+     "noteJa": "for は弱形になり、「フォー」ではなく「ファ」のように軽く短く発音されます。"
+    },
+    {
+     "span": "and",
+     "type": "weak-form",
+     "ipa": "/ən/",
+     "noteJa": "接続詞の and は d が脱落しやすく、「アン」や「エン」ではなく「ン」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "male",
+   "startSec": 18.77,
+   "endSec": 22.001,
+   "text": "I can buy some sandwiches and bottles of cold green tea.",
+   "translationJa": "僕がサンドイッチと冷たい緑茶のペットボトルを買っていくよ。",
+   "chunks": [
+    {
+     "text": "I can buy",
+     "startSec": 18.77,
+     "endSec": 19.11
+    },
+    {
+     "text": "some sandwiches",
+     "startSec": 19.11,
+     "endSec": 19.79
+    },
+    {
+     "text": "and bottles of",
+     "startSec": 19.79,
+     "endSec": 20.65
+    },
+    {
+     "text": "cold green tea.",
+     "startSec": 20.65,
+     "endSec": 21.41
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 18.77,
+     "endSec": 18.83
+    },
+    {
+     "text": "can",
+     "startSec": 18.83,
+     "endSec": 18.95
+    },
+    {
+     "text": "buy",
+     "startSec": 18.95,
+     "endSec": 19.11
+    },
+    {
+     "text": "some",
+     "startSec": 19.11,
+     "endSec": 19.33
+    },
+    {
+     "text": "sandwiches",
+     "startSec": 19.33,
+     "endSec": 19.79
+    },
+    {
+     "text": "and",
+     "startSec": 19.79,
+     "endSec": 20.11
+    },
+    {
+     "text": "bottles",
+     "startSec": 20.11,
+     "endSec": 20.35
+    },
+    {
+     "text": "of",
+     "startSec": 20.35,
+     "endSec": 20.65
+    },
+    {
+     "text": "cold",
+     "startSec": 20.65,
+     "endSec": 20.83
+    },
+    {
+     "text": "green",
+     "startSec": 20.83,
+     "endSec": 21.13
+    },
+    {
+     "text": "tea.",
+     "startSec": 21.13,
+     "endSec": 21.41
+    }
+   ],
+   "linking": [
+    {
+     "span": "bottles of",
+     "type": "linking",
+     "ipa": "/ˈbɑːtlz‿əv/",
+     "noteJa": "bottles の語尾 /z/ と of の /əv/ が連結して「ボトルザヴ」のようにスムーズに繋がります。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "female",
+   "startSec": 22.501,
+   "endSec": 26.24,
+   "text": "Thanks, and do not forget to bring a light rain jacket.",
+   "translationJa": "ありがとう、それと薄手のレインジャケットを持ってくるのを忘れないでね。",
+   "chunks": [
+    {
+     "text": "Thanks,",
+     "startSec": 22.501,
+     "endSec": 22.861
+    },
+    {
+     "text": "and do not forget",
+     "startSec": 23.181,
+     "endSec": 23.981
+    },
+    {
+     "text": "to bring",
+     "startSec": 23.981,
+     "endSec": 24.321
+    },
+    {
+     "text": "a light rain jacket.",
+     "startSec": 24.321,
+     "endSec": 25.201
+    }
+   ],
+   "words": [
+    {
+     "text": "Thanks,",
+     "startSec": 22.501,
+     "endSec": 22.861
+    },
+    {
+     "text": "and",
+     "startSec": 23.181,
+     "endSec": 23.341
+    },
+    {
+     "text": "do",
+     "startSec": 23.341,
+     "endSec": 23.461
+    },
+    {
+     "text": "not",
+     "startSec": 23.461,
+     "endSec": 23.641
+    },
+    {
+     "text": "forget",
+     "startSec": 23.641,
+     "endSec": 23.981
+    },
+    {
+     "text": "to",
+     "startSec": 23.981,
+     "endSec": 24.181
+    },
+    {
+     "text": "bring",
+     "startSec": 24.181,
+     "endSec": 24.321
+    },
+    {
+     "text": "a",
+     "startSec": 24.321,
+     "endSec": 24.461
+    },
+    {
+     "text": "light",
+     "startSec": 24.461,
+     "endSec": 24.621
+    },
+    {
+     "text": "rain",
+     "startSec": 24.621,
+     "endSec": 24.881
+    },
+    {
+     "text": "jacket.",
+     "startSec": 24.881,
+     "endSec": 25.201
+    }
+   ],
+   "linking": [
+    {
+     "span": "to",
+     "type": "weak-form",
+     "ipa": "/tə/",
+     "noteJa": "to が弱形になり、「タ」のように短く発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "male",
+   "startSec": 26.74,
+   "endSec": 29.557,
+   "text": "Got it, I will check the weather forecast tonight.",
+   "translationJa": "分かった、今夜天気予報をチェックしておくよ。",
+   "chunks": [
+    {
+     "text": "Got it,",
+     "startSec": 26.74,
+     "endSec": 27.08
+    },
+    {
+     "text": "I will check",
+     "startSec": 27.34,
+     "endSec": 27.8
+    },
+    {
+     "text": "the weather forecast tonight.",
+     "startSec": 27.8,
+     "endSec": 28.98
+    }
+   ],
+   "words": [
+    {
+     "text": "Got",
+     "startSec": 26.74,
+     "endSec": 26.92
+    },
+    {
+     "text": "it,",
+     "startSec": 26.92,
+     "endSec": 27.08
+    },
+    {
+     "text": "I",
+     "startSec": 27.34,
+     "endSec": 27.5
+    },
+    {
+     "text": "will",
+     "startSec": 27.5,
+     "endSec": 27.62
+    },
+    {
+     "text": "check",
+     "startSec": 27.62,
+     "endSec": 27.8
+    },
+    {
+     "text": "the",
+     "startSec": 27.8,
+     "endSec": 27.96
+    },
+    {
+     "text": "weather",
+     "startSec": 27.96,
+     "endSec": 28.14
+    },
+    {
+     "text": "forecast",
+     "startSec": 28.14,
+     "endSec": 28.56
+    },
+    {
+     "text": "tonight.",
+     "startSec": 28.56,
+     "endSec": 28.98
+    }
+   ],
+   "linking": [
+    {
+     "span": "Got it",
+     "type": "flapping",
+     "ipa": "/ˈɡɑːɾɪt/",
+     "noteJa": "Got の t が母音に挟まれてフラップ化し、日本語のラ行のような「ガリッ」と聞こえます。"
+    }
+   ]
+  }
+ ]
+}

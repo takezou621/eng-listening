@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "noteJa": "v1.0 の 12 本計画 (GM 決定: 会話 8 本 + モノローグ 4 本、初級 6 + 中級 6)。シチュエーションは重複しない。行数の目安: 会話 8〜12 行、モノローグ 10〜14 行。speakerNames と lines は LLM 生成 (generate_scripts.py) が決めるため、ここには書かない。",
+  "noteJa": "v1.0 の 12 本計画 (GM 決定: 会話 8 本 + モノローグ 4 本、初級 6 + 中級 6)。シチュエーションは重複しない。行数の目安: 会話 8〜12 行、モノローグ 10〜14 行。speakerNames と lines は LLM 生成 (generate_scripts.py) が決めるため、ここには書かない。v1.2 (#104): 希少音変化タイプ (同化・侵入・弱形) に焦点を当てた 3 本を追加 (situation にタイプ別の注釈方針を記載)。",
   "lessons": [
     {
       "id": "cafe-ordering",
@@ -120,6 +120,36 @@
       "level": "beginner",
       "category": "entertainment",
       "situation": "好きな映画のあらすじと好きな理由を、ネタバレを避けながら平易な語彙で話す。",
+      "speakers": ["narrator"]
+    },
+    {
+      "id": "gym-signup",
+      "title": "Joining a Gym",
+      "titleJa": "ジムに入会する",
+      "type": "conversation",
+      "level": "beginner",
+      "category": "gym",
+      "situation": "スポーツジムのフロントで体験と入会を申し込み、料金・空いている時間・設備を尋ねる。音変化注釈は同化 (assimilation: 「ten minutes → tem minutes」「good practice」のように、語尾の子音が次の語頭の子音に合わせて調音位置が変わる現象) を中心に配置し、レッスン全体で assimilation を最低 5 箇所含める。それ以外は自然な音変化で合計 6 箇所以上。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "weekend-plans",
+      "title": "Making Weekend Plans",
+      "titleJa": "週末の計画を立てる",
+      "type": "conversation",
+      "level": "intermediate",
+      "category": "plans",
+      "situation": "友人と今週末に一緒に出かける計画を電話で立てる。行き先・曜日と時間・待ち合わせ場所・持ち物を具体的に決める (オフィスの雑談ではなく、特定の外出の計画)。音変化注釈は弱形 (weak-form: to /tə/、for /fər/、and /ən/、can /kən/、of /əv/ のように機能語が弱化して聞こえる現象) を中心に配置し、レッスン全体で weak-form を最低 5 箇所含める。それ以外は自然な音変化で合計 6 箇所以上。",
+      "speakers": ["female", "male"]
+    },
+    {
+      "id": "rainy-day-indoors",
+      "title": "A Rainy Day Indoors",
+      "titleJa": "雨の日はおうち時間",
+      "type": "monologue",
+      "level": "intermediate",
+      "category": "leisure",
+      "situation": "雨で出かけられなかった日曜日に、家で映画や読書、お茶、夜の食事をどう過ごしたかを話すモノローグ。音変化注釈は侵入 (intrusion: 「the idea of it」「saw a movie」「law and order」のように、語末母音の後に /r/・/w/・/j/ が挟まって聞こえる現象) を中心に配置し、レッスン全体で intrusion を最低 4 箇所含める。それ以外は自然な音変化で合計 6 箇所以上。",
       "speakers": ["narrator"]
     }
   ]

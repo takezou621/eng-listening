@@ -10,7 +10,7 @@ Mimitore is an English listening practice app for Japanese speakers. Short
 (3-minute) lessons train learners to hear natural sound changes in spoken
 English (linking, reduction, flapping) with karaoke-style word highlighting.
 
-- No account or sign-in is required. All 12 lessons are free, with no limit on
+- No account or sign-in is required. All 15 lessons are free, with no limit on
   the number of lessons per day.
 - The premium subscription unlocks only the detailed weakness analysis on the
   Progress tab. Billing goes through Apple in-app purchases managed with
@@ -32,6 +32,8 @@ English (linking, reduction, flapping) with karaoke-style word highlighting.
   collects app performance metrics, to improve stability. The app shows no ads,
   does not use the advertising identifier (IDFA), and does not track users
   across other companies' apps or websites.
+
+New in version 1.2: three new lessons focus on assimilation, intrusion, and weak forms — the rarer sound-change types — so learners can practice every diagnostic type. All lessons remain free and the premium paywall is unchanged.
 
 ---
 

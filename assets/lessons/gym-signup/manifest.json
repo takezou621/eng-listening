@@ -1,0 +1,109 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "gym-signup",
+ "lines": {
+  "L01_male.wav": {
+   "index": 1,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Hello, can I ask about a trial membership today?",
+   "chars": 48,
+   "durationSec": 2.895,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_female.wav": {
+   "index": 2,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Sure, that sounds like a good plan for you.",
+   "chars": 43,
+   "durationSec": 2.866,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_male.wav": {
+   "index": 3,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "How much does the basic plan cost each month?",
+   "chars": 45,
+   "durationSec": 2.797,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_female.wav": {
+   "index": 4,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "It is fifty dollars, and you can pay cash.",
+   "chars": 42,
+   "durationSec": 2.955,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_male.wav": {
+   "index": 5,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "That is reasonable. When is the best period to visit?",
+   "chars": 53,
+   "durationSec": 3.115,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_female.wav": {
+   "index": 6,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Weekday mornings are quiet, so ten minutes of waiting is rare.",
+   "chars": 62,
+   "durationSec": 4.184,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_male.wav": {
+   "index": 7,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "That sounds perfect. Do you have a green park view here?",
+   "chars": 56,
+   "durationSec": 3.188,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_female.wav": {
+   "index": 8,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Yes, our studio overlooks the trees across the street.",
+   "chars": 54,
+   "durationSec": 3.736,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_male.wav": {
+   "index": 9,
+   "speaker": "male",
+   "voice": "en-US-Neural2-D",
+   "text": "Great, I will sign up right now.",
+   "chars": 32,
+   "durationSec": 2.071,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_female.wav": {
+   "index": 10,
+   "speaker": "female",
+   "voice": "en-US-Neural2-F",
+   "text": "Welcome aboard! Please fill in this short paper first.",
+   "chars": 54,
+   "durationSec": 3.638,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 489,
+  "lessonRequests": 10,
+  "monthChars": 8962,
+  "monthRequests": 165,
+  "monthlyStopChars": 900000
+ }
+}

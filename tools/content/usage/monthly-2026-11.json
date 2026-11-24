@@ -1,7 +1,7 @@
 {
  "month": "2026-11",
- "chars": 8473,
- "requests": 155,
+ "chars": 9958,
+ "requests": 183,
  "lessons": {
   "_manual_connectivity_check": {
    "chars": 3,
@@ -71,6 +71,21 @@
   "my-favorite-movie": {
    "chars": 526,
    "requests": 12,
+   "pendingChars": 0
+  },
+  "gym-signup": {
+   "chars": 489,
+   "requests": 10,
+   "pendingChars": 0
+  },
+  "weekend-plans": {
+   "chars": 427,
+   "requests": 8,
+   "pendingChars": 0
+  },
+  "rainy-day-indoors": {
+   "chars": 569,
+   "requests": 10,
    "pendingChars": 0
   }
  },

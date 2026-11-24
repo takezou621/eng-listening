@@ -1,0 +1,109 @@
+{
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "lessonId": "rainy-day-indoors",
+ "lines": {
+  "L01_narrator.wav": {
+   "index": 1,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "It was raining heavily on Sunday, so I stayed inside all day.",
+   "chars": 61,
+   "durationSec": 4.438,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L02_narrator.wav": {
+   "index": 2,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I really loved the idea of spending a quiet afternoon at home.",
+   "chars": 62,
+   "durationSec": 4.184,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L03_narrator.wav": {
+   "index": 3,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "First, I made a hot cup of tea and grabbed a book.",
+   "chars": 50,
+   "durationSec": 3.669,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L04_narrator.wav": {
+   "index": 4,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I could hear the gentle sound of rain against the windowpane.",
+   "chars": 61,
+   "durationSec": 3.517,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L05_narrator.wav": {
+   "index": 5,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "After reading a few chapters, I saw a comedy on television.",
+   "chars": 59,
+   "durationSec": 4.209,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L06_narrator.wav": {
+   "index": 6,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "It made me laugh out loud and forget the gray weather.",
+   "chars": 54,
+   "durationSec": 3.23,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L07_narrator.wav": {
+   "index": 7,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Later on, I decided to go into the kitchen for dinner.",
+   "chars": 54,
+   "durationSec": 3.626,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L08_narrator.wav": {
+   "index": 8,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "I prepared a warm vegetable soup with fresh bread and butter.",
+   "chars": 61,
+   "durationSec": 3.715,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L09_narrator.wav": {
+   "index": 9,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "Eating a hearty meal at home made me feel very relaxed.",
+   "chars": 55,
+   "durationSec": 3.727,
+   "configHash": "1b1725b9a69efe25"
+  },
+  "L10_narrator.wav": {
+   "index": 10,
+   "speaker": "narrator",
+   "voice": "en-US-Neural2-A",
+   "text": "It turned out to be a very peaceful and cozy Sunday.",
+   "chars": 52,
+   "durationSec": 3.312,
+   "configHash": "1b1725b9a69efe25"
+  }
+ },
+ "totals": {
+  "lessonChars": 569,
+  "lessonRequests": 10,
+  "monthChars": 9958,
+  "monthRequests": 183,
+  "monthlyStopChars": 900000
+ }
+}

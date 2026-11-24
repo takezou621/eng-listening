@@ -1,0 +1,958 @@
+{
+ "id": "rainy-day-indoors",
+ "title": "A Rainy Day Indoors",
+ "titleJa": "雨の日はおうち時間",
+ "type": "monologue",
+ "level": "intermediate",
+ "category": "leisure",
+ "audio": "audio.m4a",
+ "durationSec": 42.126,
+ "speakerNames": {
+  "narrator": "Narrator"
+ },
+ "configHash": "1b1725b9a69efe25",
+ "engine": "google-cloud-tts",
+ "voices": {
+  "female": "en-US-Neural2-F",
+  "male": "en-US-Neural2-D",
+  "narrator": "en-US-Neural2-A"
+ },
+ "generatedAtUtc": "2026-11-24T15:44:55Z",
+ "sentences": [
+  {
+   "index": 0,
+   "speaker": "narrator",
+   "startSec": 0.0,
+   "endSec": 4.438,
+   "text": "It was raining heavily on Sunday, so I stayed inside all day.",
+   "translationJa": "日曜日は激しい雨が降っていたので、一日中家の中にいました。",
+   "chunks": [
+    {
+     "text": "It was raining heavily",
+     "startSec": 0.0,
+     "endSec": 0.94
+    },
+    {
+     "text": "on Sunday,",
+     "startSec": 0.94,
+     "endSec": 1.76
+    },
+    {
+     "text": "so I stayed inside",
+     "startSec": 2.08,
+     "endSec": 2.9
+    },
+    {
+     "text": "all day.",
+     "startSec": 2.9,
+     "endSec": 3.58
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 0.0,
+     "endSec": 0.1
+    },
+    {
+     "text": "was",
+     "startSec": 0.1,
+     "endSec": 0.26
+    },
+    {
+     "text": "raining",
+     "startSec": 0.26,
+     "endSec": 0.56
+    },
+    {
+     "text": "heavily",
+     "startSec": 0.56,
+     "endSec": 0.94
+    },
+    {
+     "text": "on",
+     "startSec": 0.94,
+     "endSec": 1.3
+    },
+    {
+     "text": "Sunday,",
+     "startSec": 1.3,
+     "endSec": 1.76
+    },
+    {
+     "text": "so",
+     "startSec": 2.08,
+     "endSec": 2.2
+    },
+    {
+     "text": "I",
+     "startSec": 2.2,
+     "endSec": 2.34
+    },
+    {
+     "text": "stayed",
+     "startSec": 2.34,
+     "endSec": 2.58
+    },
+    {
+     "text": "inside",
+     "startSec": 2.58,
+     "endSec": 2.9
+    },
+    {
+     "text": "all",
+     "startSec": 2.9,
+     "endSec": 3.32
+    },
+    {
+     "text": "day.",
+     "startSec": 3.32,
+     "endSec": 3.58
+    }
+   ],
+   "linking": [
+    {
+     "span": "stayed inside",
+     "type": "linking",
+     "ipa": "/steɪd‿ɪnˈsaɪd/",
+     "noteJa": "stayed の末尾の /d/ と inside の語頭の /ɪ/ が連結して「ステイディンサイド」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "speaker": "narrator",
+   "startSec": 4.938,
+   "endSec": 9.122,
+   "text": "I really loved the idea of spending a quiet afternoon at home.",
+   "translationJa": "家で静かな午後を過ごすという考えが、本当に気に入っていました。",
+   "chunks": [
+    {
+     "text": "I really loved",
+     "startSec": 4.938,
+     "endSec": 5.658
+    },
+    {
+     "text": "the idea of",
+     "startSec": 5.658,
+     "endSec": 6.398
+    },
+    {
+     "text": "spending a quiet afternoon",
+     "startSec": 6.398,
+     "endSec": 7.718
+    },
+    {
+     "text": "at home.",
+     "startSec": 7.718,
+     "endSec": 8.258
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 4.938,
+     "endSec": 5.038
+    },
+    {
+     "text": "really",
+     "startSec": 5.038,
+     "endSec": 5.258
+    },
+    {
+     "text": "loved",
+     "startSec": 5.258,
+     "endSec": 5.658
+    },
+    {
+     "text": "the",
+     "startSec": 5.658,
+     "endSec": 5.858
+    },
+    {
+     "text": "idea",
+     "startSec": 5.858,
+     "endSec": 6.138
+    },
+    {
+     "text": "of",
+     "startSec": 6.138,
+     "endSec": 6.398
+    },
+    {
+     "text": "spending",
+     "startSec": 6.398,
+     "endSec": 6.698
+    },
+    {
+     "text": "a",
+     "startSec": 6.698,
+     "endSec": 6.938
+    },
+    {
+     "text": "quiet",
+     "startSec": 6.938,
+     "endSec": 7.178
+    },
+    {
+     "text": "afternoon",
+     "startSec": 7.178,
+     "endSec": 7.718
+    },
+    {
+     "text": "at",
+     "startSec": 7.718,
+     "endSec": 8.018
+    },
+    {
+     "text": "home.",
+     "startSec": 8.018,
+     "endSec": 8.258
+    }
+   ],
+   "linking": [
+    {
+     "span": "idea of",
+     "type": "intrusion",
+     "ipa": "/aɪˈdiːə‿r‿əv/",
+     "noteJa": "母音で終わる idea と母音で始まる of の間に /r/ の音（イントルージョン）が挟まり、「アイディアラヴ」のように滑らかにつながって聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "speaker": "narrator",
+   "startSec": 9.622,
+   "endSec": 13.29,
+   "text": "First, I made a hot cup of tea and grabbed a book.",
+   "translationJa": "まず、温かい紅茶を淹れて本を手に取りました。",
+   "chunks": [
+    {
+     "text": "First,",
+     "startSec": 9.622,
+     "endSec": 10.002
+    },
+    {
+     "text": "I made a hot cup of tea",
+     "startSec": 10.222,
+     "endSec": 11.482
+    },
+    {
+     "text": "and grabbed a book.",
+     "startSec": 11.482,
+     "endSec": 12.442
+    }
+   ],
+   "words": [
+    {
+     "text": "First,",
+     "startSec": 9.622,
+     "endSec": 10.002
+    },
+    {
+     "text": "I",
+     "startSec": 10.222,
+     "endSec": 10.322
+    },
+    {
+     "text": "made",
+     "startSec": 10.322,
+     "endSec": 10.482
+    },
+    {
+     "text": "a",
+     "startSec": 10.482,
+     "endSec": 10.662
+    },
+    {
+     "text": "hot",
+     "startSec": 10.662,
+     "endSec": 10.862
+    },
+    {
+     "text": "cup",
+     "startSec": 10.862,
+     "endSec": 11.082
+    },
+    {
+     "text": "of",
+     "startSec": 11.082,
+     "endSec": 11.242
+    },
+    {
+     "text": "tea",
+     "startSec": 11.242,
+     "endSec": 11.482
+    },
+    {
+     "text": "and",
+     "startSec": 11.482,
+     "endSec": 11.762
+    },
+    {
+     "text": "grabbed",
+     "startSec": 11.762,
+     "endSec": 12.002
+    },
+    {
+     "text": "a",
+     "startSec": 12.002,
+     "endSec": 12.222
+    },
+    {
+     "text": "book.",
+     "startSec": 12.222,
+     "endSec": 12.442
+    }
+   ],
+   "linking": [
+    {
+     "span": "tea and",
+     "type": "intrusion",
+     "ipa": "/tiː‿j‿ənd/",
+     "noteJa": "tea の末尾の母音 /iː/ から and の母音に移る際、渡り音としてかすかな /j/（「ヤ行」の音）が挟まり「ティーイアンド」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "speaker": "narrator",
+   "startSec": 13.79,
+   "endSec": 17.307,
+   "text": "I could hear the gentle sound of rain against the windowpane.",
+   "translationJa": "窓ガラスに当たる優しい雨の音が聞こえてきました。",
+   "chunks": [
+    {
+     "text": "I could hear",
+     "startSec": 13.79,
+     "endSec": 14.25
+    },
+    {
+     "text": "the gentle sound of rain",
+     "startSec": 14.25,
+     "endSec": 15.59
+    },
+    {
+     "text": "against the windowpane.",
+     "startSec": 15.59,
+     "endSec": 16.79
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 13.79,
+     "endSec": 13.87
+    },
+    {
+     "text": "could",
+     "startSec": 13.87,
+     "endSec": 14.05
+    },
+    {
+     "text": "hear",
+     "startSec": 14.05,
+     "endSec": 14.25
+    },
+    {
+     "text": "the",
+     "startSec": 14.25,
+     "endSec": 14.45
+    },
+    {
+     "text": "gentle",
+     "startSec": 14.45,
+     "endSec": 14.79
+    },
+    {
+     "text": "sound",
+     "startSec": 14.79,
+     "endSec": 15.13
+    },
+    {
+     "text": "of",
+     "startSec": 15.13,
+     "endSec": 15.35
+    },
+    {
+     "text": "rain",
+     "startSec": 15.35,
+     "endSec": 15.59
+    },
+    {
+     "text": "against",
+     "startSec": 15.59,
+     "endSec": 15.99
+    },
+    {
+     "text": "the",
+     "startSec": 15.99,
+     "endSec": 16.25
+    },
+    {
+     "text": "windowpane.",
+     "startSec": 16.25,
+     "endSec": 16.79
+    }
+   ],
+   "linking": [
+    {
+     "span": "sound of",
+     "type": "linking",
+     "ipa": "/saʊnd‿əv/",
+     "noteJa": "sound の /d/ と of の曖昧母音 /ə/ がつながり、「サウンダヴ」のように発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "speaker": "narrator",
+   "startSec": 17.807,
+   "endSec": 22.016,
+   "text": "After reading a few chapters, I saw a comedy on television.",
+   "translationJa": "何章か読んだあと、テレビでコメディ映画を観ました。",
+   "chunks": [
+    {
+     "text": "After reading a few chapters,",
+     "startSec": 17.807,
+     "endSec": 19.207
+    },
+    {
+     "text": "I saw a comedy",
+     "startSec": 19.207,
+     "endSec": 20.367
+    },
+    {
+     "text": "on television.",
+     "startSec": 20.367,
+     "endSec": 21.027
+    }
+   ],
+   "words": [
+    {
+     "text": "After",
+     "startSec": 17.807,
+     "endSec": 18.067
+    },
+    {
+     "text": "reading",
+     "startSec": 18.067,
+     "endSec": 18.287
+    },
+    {
+     "text": "a",
+     "startSec": 18.287,
+     "endSec": 18.547
+    },
+    {
+     "text": "few",
+     "startSec": 18.547,
+     "endSec": 18.707
+    },
+    {
+     "text": "chapters,",
+     "startSec": 18.707,
+     "endSec": 19.207
+    },
+    {
+     "text": "I",
+     "startSec": 19.207,
+     "endSec": 19.647
+    },
+    {
+     "text": "saw",
+     "startSec": 19.647,
+     "endSec": 19.907
+    },
+    {
+     "text": "a",
+     "startSec": 19.907,
+     "endSec": 20.027
+    },
+    {
+     "text": "comedy",
+     "startSec": 20.027,
+     "endSec": 20.367
+    },
+    {
+     "text": "on",
+     "startSec": 20.367,
+     "endSec": 20.627
+    },
+    {
+     "text": "television.",
+     "startSec": 20.627,
+     "endSec": 21.027
+    }
+   ],
+   "linking": [
+    {
+     "span": "saw a",
+     "type": "intrusion",
+     "ipa": "/sɔː‿r‿ə/",
+     "noteJa": "saw の母音 /ɔː/ と a の母音 /ə/ の間に /r/ が挿入され、「ソーラ」のように聞こえます（intrusive r）。"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "speaker": "narrator",
+   "startSec": 22.516,
+   "endSec": 25.746,
+   "text": "It made me laugh out loud and forget the gray weather.",
+   "translationJa": "その映画のおかげで大笑いして、どんよりした天気を忘れることができました。",
+   "chunks": [
+    {
+     "text": "It made me laugh out loud",
+     "startSec": 22.516,
+     "endSec": 23.776
+    },
+    {
+     "text": "and forget",
+     "startSec": 23.776,
+     "endSec": 24.416
+    },
+    {
+     "text": "the gray weather.",
+     "startSec": 24.416,
+     "endSec": 25.216
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 22.516,
+     "endSec": 22.616
+    },
+    {
+     "text": "made",
+     "startSec": 22.616,
+     "endSec": 22.796
+    },
+    {
+     "text": "me",
+     "startSec": 22.796,
+     "endSec": 22.996
+    },
+    {
+     "text": "laugh",
+     "startSec": 22.996,
+     "endSec": 23.256
+    },
+    {
+     "text": "out",
+     "startSec": 23.256,
+     "endSec": 23.476
+    },
+    {
+     "text": "loud",
+     "startSec": 23.476,
+     "endSec": 23.776
+    },
+    {
+     "text": "and",
+     "startSec": 23.776,
+     "endSec": 24.096
+    },
+    {
+     "text": "forget",
+     "startSec": 24.096,
+     "endSec": 24.416
+    },
+    {
+     "text": "the",
+     "startSec": 24.416,
+     "endSec": 24.656
+    },
+    {
+     "text": "gray",
+     "startSec": 24.656,
+     "endSec": 24.856
+    },
+    {
+     "text": "weather.",
+     "startSec": 24.856,
+     "endSec": 25.216
+    }
+   ],
+   "linking": [
+    {
+     "span": "laugh out",
+     "type": "linking",
+     "ipa": "/læf‿aʊt/",
+     "noteJa": "laugh の /f/ と out の母音が連結し、「ラファウト」のように一息に発音されます。"
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "speaker": "narrator",
+   "startSec": 26.246,
+   "endSec": 29.872,
+   "text": "Later on, I decided to go into the kitchen for dinner.",
+   "translationJa": "その後、夕食を作るためにキッチンへ行くことにしました。",
+   "chunks": [
+    {
+     "text": "Later on,",
+     "startSec": 26.246,
+     "endSec": 26.826
+    },
+    {
+     "text": "I decided to go into",
+     "startSec": 27.026,
+     "endSec": 28.026
+    },
+    {
+     "text": "the kitchen",
+     "startSec": 28.026,
+     "endSec": 28.406
+    },
+    {
+     "text": "for dinner.",
+     "startSec": 28.406,
+     "endSec": 28.926
+    }
+   ],
+   "words": [
+    {
+     "text": "Later",
+     "startSec": 26.246,
+     "endSec": 26.406
+    },
+    {
+     "text": "on,",
+     "startSec": 26.406,
+     "endSec": 26.826
+    },
+    {
+     "text": "I",
+     "startSec": 27.026,
+     "endSec": 27.146
+    },
+    {
+     "text": "decided",
+     "startSec": 27.146,
+     "endSec": 27.426
+    },
+    {
+     "text": "to",
+     "startSec": 27.426,
+     "endSec": 27.706
+    },
+    {
+     "text": "go",
+     "startSec": 27.706,
+     "endSec": 27.886
+    },
+    {
+     "text": "into",
+     "startSec": 27.886,
+     "endSec": 28.026
+    },
+    {
+     "text": "the",
+     "startSec": 28.026,
+     "endSec": 28.206
+    },
+    {
+     "text": "kitchen",
+     "startSec": 28.206,
+     "endSec": 28.406
+    },
+    {
+     "text": "for",
+     "startSec": 28.406,
+     "endSec": 28.726
+    },
+    {
+     "text": "dinner.",
+     "startSec": 28.726,
+     "endSec": 28.926
+    }
+   ],
+   "linking": [
+    {
+     "span": "go into",
+     "type": "intrusion",
+     "ipa": "/ɡoʊ‿w‿ˈɪntuː/",
+     "noteJa": "go の円唇母音 /oʊ/ の後ろに /w/ が滑り込み、into と結びついて「ゴウウィントゥ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "speaker": "narrator",
+   "startSec": 30.372,
+   "endSec": 34.087,
+   "text": "I prepared a warm vegetable soup with fresh bread and butter.",
+   "translationJa": "新鮮なパンとバターを添えて、温かい野菜スープを作りました。",
+   "chunks": [
+    {
+     "text": "I prepared",
+     "startSec": 30.372,
+     "endSec": 30.772
+    },
+    {
+     "text": "a warm vegetable soup",
+     "startSec": 30.772,
+     "endSec": 32.212
+    },
+    {
+     "text": "with fresh bread and butter.",
+     "startSec": 32.212,
+     "endSec": 33.512
+    }
+   ],
+   "words": [
+    {
+     "text": "I",
+     "startSec": 30.372,
+     "endSec": 30.452
+    },
+    {
+     "text": "prepared",
+     "startSec": 30.452,
+     "endSec": 30.772
+    },
+    {
+     "text": "a",
+     "startSec": 30.772,
+     "endSec": 31.072
+    },
+    {
+     "text": "warm",
+     "startSec": 31.072,
+     "endSec": 31.292
+    },
+    {
+     "text": "vegetable",
+     "startSec": 31.292,
+     "endSec": 31.772
+    },
+    {
+     "text": "soup",
+     "startSec": 31.772,
+     "endSec": 32.212
+    },
+    {
+     "text": "with",
+     "startSec": 32.212,
+     "endSec": 32.492
+    },
+    {
+     "text": "fresh",
+     "startSec": 32.492,
+     "endSec": 32.732
+    },
+    {
+     "text": "bread",
+     "startSec": 32.732,
+     "endSec": 33.052
+    },
+    {
+     "text": "and",
+     "startSec": 33.052,
+     "endSec": 33.272
+    },
+    {
+     "text": "butter.",
+     "startSec": 33.272,
+     "endSec": 33.512
+    }
+   ],
+   "linking": [
+    {
+     "span": "butter",
+     "type": "flapping",
+     "ipa": "/ˈbʌɾər/",
+     "noteJa": "母音に挟まれた /t/ が日本語のラ行のような軽い音（フラップT）になり、「バラー」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "speaker": "narrator",
+   "startSec": 34.587,
+   "endSec": 38.314,
+   "text": "Eating a hearty meal at home made me feel very relaxed.",
+   "translationJa": "家でボリュームのある食事をとると、とてもリラックスした気分になりました。",
+   "chunks": [
+    {
+     "text": "Eating a hearty meal",
+     "startSec": 34.587,
+     "endSec": 35.527
+    },
+    {
+     "text": "at home",
+     "startSec": 35.527,
+     "endSec": 36.027
+    },
+    {
+     "text": "made me feel",
+     "startSec": 36.027,
+     "endSec": 36.867
+    },
+    {
+     "text": "very relaxed.",
+     "startSec": 36.867,
+     "endSec": 37.667
+    }
+   ],
+   "words": [
+    {
+     "text": "Eating",
+     "startSec": 34.587,
+     "endSec": 34.787
+    },
+    {
+     "text": "a",
+     "startSec": 34.787,
+     "endSec": 34.987
+    },
+    {
+     "text": "hearty",
+     "startSec": 34.987,
+     "endSec": 35.207
+    },
+    {
+     "text": "meal",
+     "startSec": 35.207,
+     "endSec": 35.527
+    },
+    {
+     "text": "at",
+     "startSec": 35.527,
+     "endSec": 35.787
+    },
+    {
+     "text": "home",
+     "startSec": 35.787,
+     "endSec": 36.027
+    },
+    {
+     "text": "made",
+     "startSec": 36.027,
+     "endSec": 36.407
+    },
+    {
+     "text": "me",
+     "startSec": 36.407,
+     "endSec": 36.567
+    },
+    {
+     "text": "feel",
+     "startSec": 36.567,
+     "endSec": 36.867
+    },
+    {
+     "text": "very",
+     "startSec": 36.867,
+     "endSec": 37.087
+    },
+    {
+     "text": "relaxed.",
+     "startSec": 37.087,
+     "endSec": 37.667
+    }
+   ],
+   "linking": [
+    {
+     "span": "Eating a",
+     "type": "flapping",
+     "ipa": "/ˈiːɾɪŋ‿ə/",
+     "noteJa": "Eating の /t/ がフラップ化し、さらに a とつながって「イーリンガ」のように聞こえます。"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "speaker": "narrator",
+   "startSec": 38.814,
+   "endSec": 42.126,
+   "text": "It turned out to be a very peaceful and cozy Sunday.",
+   "translationJa": "結局、とても穏やかで居心地の良い日曜日になりました。",
+   "chunks": [
+    {
+     "text": "It turned out",
+     "startSec": 38.814,
+     "endSec": 39.354
+    },
+    {
+     "text": "to be",
+     "startSec": 39.354,
+     "endSec": 39.674
+    },
+    {
+     "text": "a very peaceful and cozy Sunday.",
+     "startSec": 39.674,
+     "endSec": 41.554
+    }
+   ],
+   "words": [
+    {
+     "text": "It",
+     "startSec": 38.814,
+     "endSec": 38.914
+    },
+    {
+     "text": "turned",
+     "startSec": 38.914,
+     "endSec": 39.134
+    },
+    {
+     "text": "out",
+     "startSec": 39.134,
+     "endSec": 39.354
+    },
+    {
+     "text": "to",
+     "startSec": 39.354,
+     "endSec": 39.534
+    },
+    {
+     "text": "be",
+     "startSec": 39.534,
+     "endSec": 39.674
+    },
+    {
+     "text": "a",
+     "startSec": 39.674,
+     "endSec": 39.774
+    },
+    {
+     "text": "very",
+     "startSec": 39.774,
+     "endSec": 40.074
+    },
+    {
+     "text": "peaceful",
+     "startSec": 40.074,
+     "endSec": 40.554
+    },
+    {
+     "text": "and",
+     "startSec": 40.554,
+     "endSec": 40.834
+    },
+    {
+     "text": "cozy",
+     "startSec": 40.834,
+     "endSec": 41.074
+    },
+    {
+     "text": "Sunday.",
+     "startSec": 41.074,
+     "endSec": 41.554
+    }
+   ],
+   "linking": [
+    {
+     "span": "turned out",
+     "type": "linking",
+     "ipa": "/tɜːrnd‿aʊt/",
+     "noteJa": "turned の語末の /d/ と out の母音がつながり、「ターンダウト」のように聞こえます。"
+    }
+   ]
+  }
+ ]
+}
