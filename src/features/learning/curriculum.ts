@@ -139,7 +139,12 @@ export function buildPersonalCurriculum(
       seen.add(t);
       return true;
     });
-    selectedTypes = [...manuallySelectedTypes];
+    // 重点タイプ未指定 (おまかせ) では診断上位タイプを使う (自動おすすめと同じ選び方)。
+    // 難易度だけ変更した場合も診断由来の重点タイプが失われないようにする。
+    selectedTypes =
+      manuallySelectedTypes.length > 0
+        ? [...manuallySelectedTypes]
+        : weakEntries.slice(0, 3).map(([t]) => t as LinkingNoteType);
   } else {
     selectedTypes = weakEntries
       .slice(0, 3)

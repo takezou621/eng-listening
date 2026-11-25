@@ -86,6 +86,9 @@ let cachedData: UserData = { ...defaultData };
 let isLoaded = false;
 let loadPromise: Promise<void> | null = null;
 let dailyGoalCustomized = false;
+/** ユーザーが手動カスタマイズを触ったか (読み込み完了前の変更がディスクの古い値で
+ *  上書きされないようにするためのフラグ。dailyGoalCustomized と同じパターン) */
+let curriculumCustomTouched = false;
 const listeners = new Set<() => void>();
 
 function parseOptionalFiniteNumber(value: unknown): number | undefined {
@@ -268,7 +271,9 @@ export function loadUserDataAsync(): Promise<void> {
             ),
             weakSentences: mergeWeakSentences(parsed.weakSentences, current.weakSentences),
             diagnosticProfile: current.diagnosticProfile ?? parsed.diagnosticProfile,
-            curriculumCustom: current.curriculumCustom ?? parsed.curriculumCustom,
+            curriculumCustom: curriculumCustomTouched
+              ? current.curriculumCustom
+              : current.curriculumCustom ?? parsed.curriculumCustom,
           }));
         }
         canPersist = true;
@@ -337,6 +342,7 @@ export function useUserData() {
         | null
         | ((prev: CurriculumCustomization | null) => CurriculumCustomization | null)
     ) => {
+      curriculumCustomTouched = true;
       updateUserData((current) => {
         const prev = current.curriculumCustom ?? null;
         const custom = typeof value === 'function' ? value(prev) : value;
