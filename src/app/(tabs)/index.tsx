@@ -100,9 +100,20 @@ export default function LibraryScreen() {
       ),
     [diagnosticProfile, completedLessonIds, allBundles, curriculumCustom]
   );
+  // 初回未完了時・直近診断直後に推薦レッスンがあれば優先、なければカリキュラム順
+  const preferredLessonId = useMemo(() => {
+    if (
+      diagnosticProfile?.recommendedLessonId &&
+      !completedLessonIds.has(diagnosticProfile.recommendedLessonId)
+    ) {
+      return diagnosticProfile.recommendedLessonId;
+    }
+    return curriculum.nextLessonId;
+  }, [diagnosticProfile, completedLessonIds, curriculum.nextLessonId]);
+
   const todaysLesson = useMemo(
-    () => getTodaysLesson(completedLessonIds, curriculum.nextLessonId),
-    [completedLessonIds, curriculum.nextLessonId]
+    () => getTodaysLesson(completedLessonIds, preferredLessonId),
+    [completedLessonIds, preferredLessonId]
   );
   // 日付をまたいでも「今日」が古くならないよう、復帰時と1分間隔で日付を更新する
   const [todayKey, setTodayKey] = useState(() => localDateStr());

@@ -32,7 +32,7 @@ import {
   LINKING_TEXT_DECORATIONS,
   getLinkingColor,
 } from '@/features/lesson/linkingViz';
-import { buildPersonalCurriculum } from '@/features/learning/curriculum';
+import { buildPersonalCurriculum, type LinkingNoteType } from '@/features/learning/curriculum';
 import { getLessonList } from '@/features/lesson/registry';
 import { useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
@@ -277,12 +277,18 @@ function OnboardingScreen({
         const accuracyPercent = Math.round((score / total) * 100);
         const level = computeDiagnosticLevel(score, total);
 
+        const missedTypes = countMissedTypes(results);
+        const weakSoundTypes = Object.entries(missedTypes)
+          .sort((a, b) => b[1] - a[1])
+          .map(([t]) => t as LinkingNoteType);
+
         saveDiagnosticProfile({
           completedAtMs: Date.now(),
           score,
           total: results.length,
-          missedTypes: countMissedTypes(results),
+          missedTypes,
           recommendedLessonId,
+          weakSoundTypes: weakSoundTypes.length > 0 ? weakSoundTypes : undefined,
         });
 
         const hadPrevious = latestPreviousAttempt !== null;
