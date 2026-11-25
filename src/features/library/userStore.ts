@@ -53,6 +53,8 @@ export interface SavedDiagnosticProfile {
   total: number;
   missedTypes: Record<string, number>;
   recommendedLessonId: string | null;
+  /** 診断由来の弱点音変化タイプ (ミスが多い順・任意永続値) */
+  weakSoundTypes?: LinkingNoteType[];
 }
 
 interface UserData {
@@ -116,12 +118,31 @@ function parseDiagnosticProfile(raw: unknown): SavedDiagnosticProfile | undefine
       }
     }
   }
+  const weakSoundTypes: LinkingNoteType[] = [];
+  if (Array.isArray(p.weakSoundTypes)) {
+    for (const item of p.weakSoundTypes as unknown[]) {
+      if (typeof item === 'string' && CURRICULUM_FOCUS_TYPES.includes(item as LinkingNoteType)) {
+        if (!weakSoundTypes.includes(item as LinkingNoteType)) {
+          weakSoundTypes.push(item as LinkingNoteType);
+        }
+      }
+    }
+  } else if (Object.keys(missedTypes).length > 0) {
+    // 旧データ互換: weakSoundTypes 未保持の場合は missedTypes から導出
+    const sorted = Object.entries(missedTypes)
+      .sort((a, b) => b[1] - a[1])
+      .map(([t]) => t as LinkingNoteType)
+      .filter((t) => CURRICULUM_FOCUS_TYPES.includes(t));
+    weakSoundTypes.push(...sorted);
+  }
+
   return {
     completedAtMs: p.completedAtMs,
     score: p.score,
     total: p.total,
     missedTypes,
     recommendedLessonId: typeof p.recommendedLessonId === 'string' ? p.recommendedLessonId : null,
+    weakSoundTypes: weakSoundTypes.length > 0 ? weakSoundTypes : undefined,
   };
 }
 

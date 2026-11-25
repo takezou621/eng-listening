@@ -57,6 +57,7 @@ export default function PhrasesScreen() {
   const pathname = usePathname();
   const {
     weakSentences,
+    diagnosticProfile,
     toggleWeakSentence,
     recordWeakSentenceReview,
     reactivateWeakSentence,
@@ -151,25 +152,89 @@ export default function PhrasesScreen() {
     [resolvableWeakItems, nowMs]
   );
 
-  const filteredItems = useMemo(() => {
-    if (filterMode === 'due') return reviewSummary.dueItems;
-    if (filterMode === 'graduated') return reviewSummary.graduatedItems;
-    return resolvableWeakItems;
-  }, [filterMode, reviewSummary.dueItems, reviewSummary.graduatedItems, resolvableWeakItems]);
+  // 診断由来の弱点音変化タイプと推薦レッスンを情報源として取得
+  const diagnosticWeakTypes = useMemo(() => {
+    return (
+      diagnosticProfile?.weakSoundTypes ??
+      (diagnosticProfile?.missedTypes
+        ? Object.entries(diagnosticProfile.missedTypes)
+            .sort((a, b) => b[1] - a[1])
+            .map(([t]) => t as LinkingNoteType)
+        : [])
+    );
+  }, [diagnosticProfile]);
+  const diagnosticRecommendedLessonId = diagnosticProfile?.recommendedLessonId ?? null;
 
-  const dueQueueCardItems = useMemo<ReviewQueueCardItem[]>(
-    () =>
-      reviewSummary.dueItems.map((it) => ({
-        lessonId: it.lessonId,
-        sentenceIndex: it.sentenceIndex,
-        titleJa: it.titleJa,
-        audio: it.audio,
-        sentence: it.sentence,
-        uniqueTypes: it.uniqueTypes,
-        reviewStage: it.reviewStage,
-      })),
-    [reviewSummary.dueItems]
+  // 診断由来の弱点タイプ・推薦レッスンに基づく優先度スコア (高いほど優先)
+  const computeDiagnosticPriority = useCallback(
+    (item: ResolvableWeakItem): number => {
+      let score = 0;
+      if (diagnosticRecommendedLessonId && item.lessonId === diagnosticRecommendedLessonId) {
+        score += 10;
+      }
+      if (diagnosticWeakTypes.length > 0) {
+        for (const t of item.uniqueTypes) {
+          const rank = diagnosticWeakTypes.indexOf(t);
+          if (rank >= 0) {
+            score += Math.max(1, diagnosticWeakTypes.length - rank);
+          }
+        }
+      }
+      return score;
+    },
+    [diagnosticRecommendedLessonId, diagnosticWeakTypes]
   );
+
+  const filteredItems = useMemo(() => {
+    let list: ResolvableWeakItem[];
+    if (filterMode === 'due') {
+      list = [...reviewSummary.dueItems];
+    } else if (filterMode === 'graduated') {
+      list = [...reviewSummary.graduatedItems];
+    } else {
+      list = [...resolvableWeakItems];
+    }
+    // 診断結果との接続: 弱点音変化タイプ・推薦レッスンを含むフレーズを同ステータス内で優先提示
+    if (diagnosticWeakTypes.length > 0 || diagnosticRecommendedLessonId) {
+      list.sort((a, b) => {
+        // ステータス(due/graduated/upcoming)の基本順は維持
+        if (a.due !== b.due) return a.due ? -1 : 1;
+        if (a.graduated !== b.graduated) return a.graduated ? 1 : -1;
+        const prioDiff = computeDiagnosticPriority(b) - computeDiagnosticPriority(a);
+        if (prioDiff !== 0) return prioDiff;
+        return (a.nextReviewAtMs ?? a.addedAtMs) - (b.nextReviewAtMs ?? b.addedAtMs);
+      });
+    }
+    return list;
+  }, [
+    filterMode,
+    reviewSummary.dueItems,
+    reviewSummary.graduatedItems,
+    resolvableWeakItems,
+    diagnosticWeakTypes,
+    diagnosticRecommendedLessonId,
+    computeDiagnosticPriority,
+  ]);
+
+  const dueQueueCardItems = useMemo<ReviewQueueCardItem[]>(() => {
+    let items = [...reviewSummary.dueItems];
+    if (diagnosticWeakTypes.length > 0 || diagnosticRecommendedLessonId) {
+      items.sort((a, b) => {
+        const prioDiff = computeDiagnosticPriority(b) - computeDiagnosticPriority(a);
+        if (prioDiff !== 0) return prioDiff;
+        return (a.nextReviewAtMs ?? a.addedAtMs) - (b.nextReviewAtMs ?? b.addedAtMs);
+      });
+    }
+    return items.map((it) => ({
+      lessonId: it.lessonId,
+      sentenceIndex: it.sentenceIndex,
+      titleJa: it.titleJa,
+      audio: it.audio,
+      sentence: it.sentence,
+      uniqueTypes: it.uniqueTypes,
+      reviewStage: it.reviewStage,
+    }));
+  }, [reviewSummary.dueItems, diagnosticWeakTypes, diagnosticRecommendedLessonId, computeDiagnosticPriority]);
 
   const handleTogglePlay = useCallback(
     async (item: ResolvableWeakItem) => {
