@@ -8,7 +8,7 @@ import {
   useAudioRecorder,
   type AudioPlayer,
 } from 'expo-audio';
-import { deleteAsync } from 'expo-file-system';
+import { File } from 'expo-file-system';
 import { SymbolView, type SFSymbol } from 'expo-symbols';
 
 import { BottomSheet } from '@/components/BottomSheet';
@@ -54,7 +54,9 @@ const MIC_ICON: ButtonIcon = { name: 'mic.fill', fallback: '●' };
 /** 自分の録音の一時ファイルを破棄する (録音は端末内でだけ使い、使い終えたら消す) */
 function deleteRecordingFile(uri: string | null): void {
   if (uri && uri.startsWith('file://')) {
-    void deleteAsync(uri, { idempotent: true }).catch(() => {});
+    try {
+      new File(uri).delete();
+    } catch {}
   }
 }
 
@@ -218,6 +220,9 @@ export function PhrasePlaylistSheet({
     setActiveWordIndex(-1);
     setIsUserPlaying(false);
     setIsRecording(false);
+    // 前の文・前モードの録音は使い回さない (ファイルは effect の後始末で破棄)
+    setRecordedUri(null);
+    setMicDenied(false);
   }
 
   const clearAutoAdvanceTimer = useCallback(() => {
@@ -272,13 +277,13 @@ export function PhrasePlaylistSheet({
     recordTokenRef.current += 1;
     if (isRecordingRef.current) {
       isRecordingRef.current = false;
-      const token = recordTokenRef.current;
       recorder
         .stop()
         .catch(() => {})
         .then(() => {
           // 停止を待っている間に新しい録音が始まっていたら手を引く
-          if (recordTokenRef.current !== token) return;
+          // (閉じる・後始末による再呼び出しでは、削除と音声モードの復帰は必ず行う)
+          if (isRecordingRef.current) return;
           deleteRecordingFile(recorder.uri);
           void setAudioModeAsync(PLAYBACK_AUDIO_MODE).catch(() => {});
         });

@@ -44,7 +44,10 @@ interface ResolvableWeakItem {
   titleJa: string;
   audio: number;
   sentence: LessonSentence;
+  /** バッジ表示用 (最大 3 種) */
   uniqueTypes: LinkingNoteType[];
+  /** 絞り込み・件数集計用の全タイプ */
+  allTypes: LinkingNoteType[];
   reviewStage: number;
   nextReviewAtMs?: number;
   graduatedAtMs?: number;
@@ -155,6 +158,7 @@ export default function PhrasesScreen() {
         audio: bundle.audio,
         sentence,
         uniqueTypes: uniqueTypes.slice(0, 3),
+        allTypes: uniqueTypes,
         reviewStage: item.reviewStage ?? 0,
         nextReviewAtMs: item.nextReviewAtMs,
         graduatedAtMs: item.graduatedAtMs,
@@ -204,6 +208,24 @@ export default function PhrasesScreen() {
     [diagnosticRecommendedLessonId, diagnosticWeakTypes]
   );
 
+  // 登録フレーズに実際に含まれる音変化タイプと件数 (多い順)。未使用タイプのチップは出さない
+  const typeFilterOptions = useMemo(() => {
+    const counts = new Map<LinkingNoteType, number>();
+    for (const item of resolvableWeakItems) {
+      for (const type of item.allTypes) {
+        counts.set(type, (counts.get(type) ?? 0) + 1);
+      }
+    }
+    return Array.from(counts, ([type, count]) => ({ type, count })).sort(
+      (a, b) => b.count - a.count
+    );
+  }, [resolvableWeakItems]);
+
+  // 選択中のタイプのフレーズがなくなったら「すべて」として扱う (state を render 中に書き換えない)
+  const effectiveTypeFilter: TypeFilter =
+    typeFilter !== 'all' && typeFilterOptions.some((option) => option.type === typeFilter)
+      ? typeFilter
+      : 'all';
   const filteredItems = useMemo(() => {
     let list: ResolvableWeakItem[];
     if (filterMode === 'due') {
@@ -214,8 +236,8 @@ export default function PhrasesScreen() {
       list = [...resolvableWeakItems];
     }
     // ステータスと音変化タイプの AND 絞り込み。診断優先ソートは絞り込み後も維持する
-    if (typeFilter !== 'all') {
-      list = list.filter((item) => item.uniqueTypes.includes(typeFilter));
+    if (effectiveTypeFilter !== 'all') {
+      list = list.filter((item) => item.allTypes.includes(effectiveTypeFilter));
     }
     // 診断結果との接続: 弱点音変化タイプ・推薦レッスンを含むフレーズを同ステータス内で優先提示
     if (diagnosticWeakTypes.length > 0 || diagnosticRecommendedLessonId) {
@@ -231,7 +253,7 @@ export default function PhrasesScreen() {
     return list;
   }, [
     filterMode,
-    typeFilter,
+    effectiveTypeFilter,
     reviewSummary.dueItems,
     reviewSummary.graduatedItems,
     resolvableWeakItems,
@@ -239,28 +261,6 @@ export default function PhrasesScreen() {
     diagnosticRecommendedLessonId,
     computeDiagnosticPriority,
   ]);
-
-  // 登録フレーズに実際に含まれる音変化タイプと件数 (多い順)。未使用タイプのチップは出さない
-  const typeFilterOptions = useMemo(() => {
-    const counts = new Map<LinkingNoteType, number>();
-    for (const item of resolvableWeakItems) {
-      for (const type of item.uniqueTypes) {
-        counts.set(type, (counts.get(type) ?? 0) + 1);
-      }
-    }
-    return Array.from(counts, ([type, count]) => ({ type, count })).sort(
-      (a, b) => b.count - a.count
-    );
-  }, [resolvableWeakItems]);
-
-  // 選択中のタイプのフレーズがなくなったら「すべて」へ戻す (props 変化に応じた state 調整パターン)
-  const [prevTypeFilterOptions, setPrevTypeFilterOptions] = useState(typeFilterOptions);
-  if (prevTypeFilterOptions !== typeFilterOptions) {
-    setPrevTypeFilterOptions(typeFilterOptions);
-    if (typeFilter !== 'all' && !typeFilterOptions.some((option) => option.type === typeFilter)) {
-      setTypeFilter('all');
-    }
-  }
 
   const dueQueueCardItems = useMemo<ReviewQueueCardItem[]>(() => {
     let items = [...reviewSummary.dueItems];
@@ -352,14 +352,13 @@ export default function PhrasesScreen() {
       id: (prev?.id ?? 0) + 1,
       open: true,
       items: filteredItems,
-      soundChangeType: typeFilter === 'all' ? null : typeFilter,
+      soundChangeType: effectiveTypeFilter === 'all' ? null : effectiveTypeFilter,
     }));
   };
 
   const closePlaylist = () =>
     setPlaylist((prev) => (prev !== null && prev.open ? { ...prev, open: false } : prev));
 
-  dbg(`render path=${pathname} pl=${playlist ? `${playlist.id}:${playlist.open}` : 'null'}`);
 
   return (
     <Screen scroll={false}>
@@ -402,7 +401,7 @@ export default function PhrasesScreen() {
           <Chip
             label={`すべて (${resolvableWeakItems.length})`}
             variant="outlined"
-            active={typeFilter === 'all'}
+            active={effectiveTypeFilter === 'all'}
             onPress={() => setTypeFilter('all')}
           />
           {typeFilterOptions.map(({ type, count }) => (
@@ -410,7 +409,7 @@ export default function PhrasesScreen() {
               key={type}
               label={`${LINKING_LABELS[type]} (${count})`}
               variant="outlined"
-              active={typeFilter === type}
+              active={effectiveTypeFilter === type}
               onPress={() => setTypeFilter(type)}
             />
           ))}
@@ -499,7 +498,7 @@ export default function PhrasesScreen() {
               ]}
             >
               <ThemedText variant="heading">
-                {typeFilter !== 'all'
+                {effectiveTypeFilter !== 'all'
                   ? filterMode === 'due'
                     ? '今日の復習に、この音変化タイプのフレーズはありません'
                     : filterMode === 'graduated'
@@ -773,10 +772,6 @@ export default function PhrasesScreen() {
     </Screen>
   );
 }
-
-const dbg = (m: string) => {
-  void fetch(`http://127.0.0.1:8795/?m=P:${encodeURIComponent(m)}`).catch(() => {});
-};
 
 const styles = StyleSheet.create({
   subtitle: {
