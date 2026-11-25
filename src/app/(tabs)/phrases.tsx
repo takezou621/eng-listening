@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { AppState, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 import { useLocalSearchParams, usePathname, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -8,6 +8,10 @@ import { Chip } from '@/components/Chip';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { SEEK_TOLERANCE_MILLIS } from '@/config/appConfig';
+import {
+  PhrasePlaylistSheet,
+  type PhrasePlaylistItem,
+} from '@/features/learning/components/PhrasePlaylistSheet';
 import {
   ReviewQueueSheet,
   type ReviewQueueCardItem,
@@ -31,6 +35,7 @@ import { useTheme } from '@/theme/AppThemeProvider';
 
 type LinkingNoteType = LessonLinkingNote['type'];
 type FilterMode = 'all' | 'due' | 'graduated';
+type TypeFilter = 'all' | LinkingNoteType;
 
 interface ResolvableWeakItem {
   lessonId: string;
@@ -48,6 +53,18 @@ interface ResolvableWeakItem {
   statusLabel: string;
 }
 
+interface PlaylistSession {
+  /** 開くたびに増える番号。シートの key に渡し、開くたびに内部状態を初期化する */
+  id: number;
+  open: boolean;
+  /** 開いた時点のフィルタ結果 (filteredItems と同じ順序) */
+  items: PhrasePlaylistItem[];
+  /** タイプ別フィルタ中はそのタイプ */
+  soundChangeType: LinkingNoteType | null;
+}
+
+const EMPTY_PLAYLIST_ITEMS: PhrasePlaylistItem[] = [];
+
 /** 苦手フレーズ帳 & 間隔反復復習キュー（残り件数・卒業数可視化 + 1タップ連続復習） */
 export default function PhrasesScreen() {
   const params = useLocalSearchParams<{ review?: string | string[] }>();
@@ -64,6 +81,8 @@ export default function PhrasesScreen() {
   } = useUserData();
   const [playingKey, setPlayingKey] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [playlist, setPlaylist] = useState<PlaylistSession | null>(null);
   const [reviewSheetVisible, setReviewSheetVisible] = useState(false);
   const [autoReviewPending, setAutoReviewPending] = useState(reviewParam === '1');
   const [prevReviewParam, setPrevReviewParam] = useState(reviewParam);
@@ -194,6 +213,10 @@ export default function PhrasesScreen() {
     } else {
       list = [...resolvableWeakItems];
     }
+    // ステータスと音変化タイプの AND 絞り込み。診断優先ソートは絞り込み後も維持する
+    if (typeFilter !== 'all') {
+      list = list.filter((item) => item.uniqueTypes.includes(typeFilter));
+    }
     // 診断結果との接続: 弱点音変化タイプ・推薦レッスンを含むフレーズを同ステータス内で優先提示
     if (diagnosticWeakTypes.length > 0 || diagnosticRecommendedLessonId) {
       list.sort((a, b) => {
@@ -208,6 +231,7 @@ export default function PhrasesScreen() {
     return list;
   }, [
     filterMode,
+    typeFilter,
     reviewSummary.dueItems,
     reviewSummary.graduatedItems,
     resolvableWeakItems,
@@ -215,6 +239,28 @@ export default function PhrasesScreen() {
     diagnosticRecommendedLessonId,
     computeDiagnosticPriority,
   ]);
+
+  // 登録フレーズに実際に含まれる音変化タイプと件数 (多い順)。未使用タイプのチップは出さない
+  const typeFilterOptions = useMemo(() => {
+    const counts = new Map<LinkingNoteType, number>();
+    for (const item of resolvableWeakItems) {
+      for (const type of item.uniqueTypes) {
+        counts.set(type, (counts.get(type) ?? 0) + 1);
+      }
+    }
+    return Array.from(counts, ([type, count]) => ({ type, count })).sort(
+      (a, b) => b.count - a.count
+    );
+  }, [resolvableWeakItems]);
+
+  // 選択中のタイプのフレーズがなくなったら「すべて」へ戻す (props 変化に応じた state 調整パターン)
+  const [prevTypeFilterOptions, setPrevTypeFilterOptions] = useState(typeFilterOptions);
+  if (prevTypeFilterOptions !== typeFilterOptions) {
+    setPrevTypeFilterOptions(typeFilterOptions);
+    if (typeFilter !== 'all' && !typeFilterOptions.some((option) => option.type === typeFilter)) {
+      setTypeFilter('all');
+    }
+  }
 
   const dueQueueCardItems = useMemo<ReviewQueueCardItem[]>(() => {
     let items = [...reviewSummary.dueItems];
@@ -289,9 +335,31 @@ export default function PhrasesScreen() {
   const firstActiveTarget =
     reviewSummary.dueItems[0] ?? reviewSummary.upcomingItems[0] ?? null;
 
+  const playlistOpen = playlist !== null && playlist.open;
+
+  // 連続復習プレイリストを開いている間は復習キューを開かない (同時には開かない)
   const effectiveReviewSheetVisible =
     pathname === '/phrases' &&
+    !playlistOpen &&
     (reviewSheetVisible || (autoReviewPending && dueQueueCardItems.length > 0));
+
+  // 開いた時点のフィルタ結果をプレイリストとして渡す (SRS の復習ステージは更新しない)
+  const openPlaylist = () => {
+    stopPlayback();
+    setAutoReviewPending(false);
+    setReviewSheetVisible(false);
+    setPlaylist((prev) => ({
+      id: (prev?.id ?? 0) + 1,
+      open: true,
+      items: filteredItems,
+      soundChangeType: typeFilter === 'all' ? null : typeFilter,
+    }));
+  };
+
+  const closePlaylist = () =>
+    setPlaylist((prev) => (prev !== null && prev.open ? { ...prev, open: false } : prev));
+
+  dbg(`render path=${pathname} pl=${playlist ? `${playlist.id}:${playlist.open}` : 'null'}`);
 
   return (
     <Screen scroll={false}>
@@ -324,61 +392,102 @@ export default function PhrasesScreen() {
         </View>
       ) : null}
 
+      {typeFilterOptions.length > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.typeFilterScroll}
+          contentContainerStyle={styles.typeFilterRow}
+        >
+          <Chip
+            label={`すべて (${resolvableWeakItems.length})`}
+            variant="outlined"
+            active={typeFilter === 'all'}
+            onPress={() => setTypeFilter('all')}
+          />
+          {typeFilterOptions.map(({ type, count }) => (
+            <Chip
+              key={type}
+              label={`${LINKING_LABELS[type]} (${count})`}
+              variant="outlined"
+              active={typeFilter === type}
+              onPress={() => setTypeFilter(type)}
+            />
+          ))}
+        </ScrollView>
+      ) : null}
+
       <FlatList
         data={filteredItems}
         keyExtractor={(item) => `${item.lessonId}-${item.sentenceIndex}`}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          reviewSummary.dueCount > 0 ? (
-            <Pressable
-              onPress={() => {
-                stopPlayback();
-                setReviewSheetVisible(true);
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={`今日の復習をはじめる 残り ${reviewSummary.dueCount} 件`}
-              style={[styles.primaryCta, { backgroundColor: colors.primary }]}
-            >
-              <SymbolView
-                name="play.fill"
-                size={14}
-                tintColor={colors.primaryText}
-                fallback={
-                  <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
-                    ▶
+          reviewSummary.dueCount > 0 || firstActiveTarget || filteredItems.length > 0 ? (
+            <View style={styles.listHeader}>
+              {reviewSummary.dueCount > 0 ? (
+                <Pressable
+                  onPress={() => {
+                    stopPlayback();
+                    setReviewSheetVisible(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`今日の復習をはじめる 残り ${reviewSummary.dueCount} 件`}
+                  style={[styles.primaryCta, { backgroundColor: colors.primary }]}
+                >
+                  <SymbolView
+                    name="play.fill"
+                    size={14}
+                    tintColor={colors.primaryText}
+                    fallback={
+                      <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
+                        ▶
+                      </ThemedText>
+                    }
+                  />
+                  <ThemedText style={[styles.primaryCtaText, { color: colors.primaryText }]}>
+                    今日の復習をはじめる（残り {reviewSummary.dueCount} 件）
                   </ThemedText>
-                }
-              />
-              <ThemedText style={[styles.primaryCtaText, { color: colors.primaryText }]}>
-                今日の復習をはじめる（残り {reviewSummary.dueCount} 件）
-              </ThemedText>
-            </Pressable>
-          ) : firstActiveTarget ? (
-            <Pressable
-              onPress={() => {
-                stopPlayback();
-                router.push(
-                  `/lesson?lesson=${firstActiveTarget.lessonId}&sentence=${firstActiveTarget.sentenceIndex + 1}&mode=speak`
-                );
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={`学習中フレーズ「${firstActiveTarget.sentence.text}」をシャドーイング復習`}
-              style={[styles.primaryCta, { backgroundColor: colors.primary }]}
-            >
-              <SymbolView
-                name="mic.fill"
-                size={15}
-                tintColor={colors.primaryText}
-                fallback={
-                  <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
-                    ●
+                </Pressable>
+              ) : firstActiveTarget ? (
+                <Pressable
+                  onPress={() => {
+                    stopPlayback();
+                    router.push(
+                      `/lesson?lesson=${firstActiveTarget.lessonId}&sentence=${firstActiveTarget.sentenceIndex + 1}&mode=speak`
+                    );
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`学習中フレーズ「${firstActiveTarget.sentence.text}」をシャドーイング復習`}
+                  style={[styles.primaryCta, { backgroundColor: colors.primary }]}
+                >
+                  <SymbolView
+                    name="mic.fill"
+                    size={15}
+                    tintColor={colors.primaryText}
+                    fallback={
+                      <ThemedText variant="caption" style={{ color: colors.primaryText, fontWeight: '700' }}>
+                        ●
+                      </ThemedText>
+                    }
+                  />
+                  <ThemedText style={[styles.primaryCtaText, { color: colors.primaryText }]}>
+                    シャドーイングで先取り練習
                   </ThemedText>
-                }
-              />
-              <ThemedText style={[styles.primaryCtaText, { color: colors.primaryText }]}>
-                シャドーイングで先取り練習
-              </ThemedText>
-            </Pressable>
+                </Pressable>
+              ) : null}
+              {filteredItems.length > 0 ? (
+                <Pressable
+                  onPress={openPlaylist}
+                  accessibilityRole="button"
+                  accessibilityLabel={`連続で復習する ${filteredItems.length} 件`}
+                  style={[styles.emptyCta, styles.playlistButton, { borderColor: colors.primary }]}
+                >
+                  <ThemedText variant="caption" color="primary" style={styles.emptyCtaText}>
+                    連続で復習する（{filteredItems.length} 件）
+                  </ThemedText>
+                </Pressable>
+              ) : null}
+            </View>
           ) : undefined
         }
         ListEmptyComponent={
@@ -390,12 +499,22 @@ export default function PhrasesScreen() {
               ]}
             >
               <ThemedText variant="heading">
-                {filterMode === 'due' ? '今日の復習は完了しました' : '卒業済みフレーズはまだありません'}
+                {typeFilter !== 'all'
+                  ? filterMode === 'due'
+                    ? '今日の復習に、この音変化タイプのフレーズはありません'
+                    : filterMode === 'graduated'
+                      ? '卒業済みに、この音変化タイプのフレーズはまだありません'
+                      : 'この音変化タイプのフレーズはありません'
+                  : filterMode === 'due'
+                    ? '今日の復習は完了しました'
+                    : '卒業済みフレーズはまだありません'}
               </ThemedText>
               <ThemedText variant="caption" color="muted" style={styles.emptyHint}>
-                {filterMode === 'due'
-                  ? '3回連続で聞き取れると卒業します。「すべて」から他のフレーズも確認できます。'
-                  : '復習キューで 3 回連続「聞き取れた」を達成すると卒業済みになります。'}
+                {typeFilter !== 'all'
+                  ? '上の「すべて」を選ぶと、この音変化タイプのフレーズが一覧で見られます。'
+                  : filterMode === 'due'
+                    ? '3回連続で聞き取れると卒業します。「すべて」から他のフレーズも確認できます。'
+                    : '復習キューで 3 回連続「聞き取れた」を達成すると卒業済みになります。'}
               </ThemedText>
             </View>
           ) : (
@@ -641,9 +760,23 @@ export default function PhrasesScreen() {
           setReviewSheetVisible(false);
         }}
       />
+
+      {playlistOpen ? (
+        <PhrasePlaylistSheet
+          key={playlist?.id ?? 0}
+          visible={pathname === '/phrases'}
+          items={playlist?.items ?? EMPTY_PLAYLIST_ITEMS}
+          soundChangeType={playlist?.soundChangeType ?? null}
+          onClose={closePlaylist}
+        />
+      ) : null}
     </Screen>
   );
 }
+
+const dbg = (m: string) => {
+  void fetch(`http://127.0.0.1:8795/?m=P:${encodeURIComponent(m)}`).catch(() => {});
+};
 
 const styles = StyleSheet.create({
   subtitle: {
@@ -655,6 +788,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
     marginBottom: 12,
+  },
+  // flexGrow: 0 で高さを内容に合わせる (横 ScrollView は既定で伸びるため、リストが空のときに縦に広がる)
+  typeFilterScroll: {
+    flexGrow: 0,
+    marginBottom: 12,
+  },
+  typeFilterRow: {
+    gap: 8,
   },
   statusGroup: {
     flexDirection: 'row',
@@ -674,6 +815,13 @@ const styles = StyleSheet.create({
   list: {
     paddingBottom: 24,
     gap: 12,
+  },
+  listHeader: {
+    gap: 8,
+  },
+  playlistButton: {
+    alignItems: 'center',
+    minHeight: 44,
   },
   primaryCta: {
     minHeight: 48,

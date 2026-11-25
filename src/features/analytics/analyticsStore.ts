@@ -48,7 +48,9 @@ export type AnalyticsEventType =
   | 'curriculum_customized'
   | 'key_phrase_opened'
   | 'weak_phrase_reviewed'
-  | 'weak_phrase_graduated';
+  | 'weak_phrase_graduated'
+  | 'weak_phrase_playlist_started'
+  | 'weak_phrase_playlist_finished';
 
 export interface AnalyticsEvent {
   /** 端末内連番 (1 起算) */
