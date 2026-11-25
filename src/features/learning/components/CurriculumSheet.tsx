@@ -30,15 +30,17 @@ export function CurriculumSheet({
 }) {
   const { scheme, colors } = useTheme();
 
+  const caption = isCustomized
+    ? '選択した重点タイプと難易度で学習する順序です。'
+    : curriculum.isCustomizedByDiagnostic
+      ? '診断結果で見つかった弱点タイプから順に、初級から中級へ段階的に克服する順序です。'
+      : '会話でよく現れる音変化を基礎から順に定着させるおすすめコースです。';
+
   return (
     <BottomSheet visible={visible} title="あなた向けカリキュラム" onClose={onClose}>
       <View style={styles.captionRow}>
         <ThemedText variant="caption" color="muted" style={styles.captionText}>
-          {isCustomized
-            ? '選択した重点タイプと難易度で学習する順序です。'
-            : curriculum.isCustomizedByDiagnostic
-              ? '診断結果で見つかった弱点タイプから順に、初級から中級へ段階的に克服する順序です。'
-              : '会話でよく現れる音変化を基礎から順に定着させるおすすめコースです。'}
+          {caption}
         </ThemedText>
         {onOpenCustomize ? (
           <Pressable

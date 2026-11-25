@@ -132,19 +132,23 @@ export function buildPersonalCurriculum(
   let selectedTypes: LinkingNoteType[];
   let manuallySelectedTypes: readonly LinkingNoteType[] = [];
   if (activeCustom) {
-    // store で検証済みだが二重防御: 有効タイプのみ・重複排除で残す (選択順は保持)
+    // store で検証済みだが二重防御: 有効タイプのみ・重複排除・最大 3 に制限 (選択順は保持)
     const seen = new Set<LinkingNoteType>();
-    manuallySelectedTypes = activeCustom.focusTypes.filter((t) => {
-      if (!validTypes.has(t) || seen.has(t)) return false;
-      seen.add(t);
-      return true;
-    });
+    manuallySelectedTypes = activeCustom.focusTypes
+      .filter((t) => {
+        if (!validTypes.has(t) || seen.has(t)) return false;
+        seen.add(t);
+        return true;
+      })
+      .slice(0, MAX_CURRICULUM_FOCUS_TYPES);
     // 重点タイプ未指定 (おまかせ) では診断上位タイプを使う (自動おすすめと同じ選び方)。
     // 難易度だけ変更した場合も診断由来の重点タイプが失われないようにする。
     selectedTypes =
       manuallySelectedTypes.length > 0
         ? [...manuallySelectedTypes]
-        : weakEntries.slice(0, 3).map(([t]) => t as LinkingNoteType);
+        : weakEntries
+            .slice(0, MAX_CURRICULUM_FOCUS_TYPES)
+            .map(([t]) => t as LinkingNoteType);
   } else {
     selectedTypes = weakEntries
       .slice(0, 3)
