@@ -2,6 +2,49 @@
 
 ミミトレ (App ID 6837503600) の審査提出記録。run ID・時刻・ゲート結果を残す。
 
+## v1.4 (build 11) — 2026-11-26
+
+- セッション開始: 2026-11-26 01:11 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 02:54:10 JST**
+  (所要 **1 時間 43 分** — 3 時間ルール内)
+- 内容テーマ: #93 診断結果の推薦レッスンをホーム「今日の1本」・復習キューへ接続。
+  診断由来の推薦レッスンIDおよび弱点音変化タイプを `userStore.ts` に保持し、ホーム画面の「今日の1本」で初回未完了時・直近診断直後に該当推薦レッスンを優先提示。復習キューでも診断弱点タイプ・推薦レッスンを情報源として上位提示。
+  `DuoSmokeTests.swift` のアクセシビリティラベル要件 (今日の1本) を維持。
+
+### 経路の記録
+
+| 手順 | 経路 | 時刻 (JST) | 結果 |
+|---|---|---|---|
+| 実装 | Orchestrator + omp (仕様整合) | 01:50–02:22 | `userStore.ts` / `onboarding.tsx` / `index.tsx` / `phrases.tsx`。型チェック・lint・後方互換を完全検証 |
+| PR | PR #119 (feat + v1.4 バージョン準備) → squash マージ `2c1a70f` | 02:32–02:33 | cubic: skipping / GitGuardian: PASS。指摘なしでマージ |
+| upload (第一候補) | GitHub Actions (m1-eng-listening run 45665959166) | 02:33–02:36 | failure (m1 ランナー上の xcodebuild SPM パッケージ解決権限エラー: SourcePackages ファイル削除で Operation not permitted、exit 74) |
+| upload (切替) | **m4 (Mac mini) ローカル** `appstore-upload.sh --version 1.4 --build 11 --upload` | 02:42–02:48 | **アップロード成功** (altool "UPLOAD SUCCEEDED with no errors")。**Delivery UUID `6403857c-f752-43fd-bde9-f4010187dc82`** (ASC uploadedDate 02:49:49 JST)。アーカイブ検証 OK: version=1.4 build=11 |
+| VALID 確認 | ASC API (builds) | 02:53 | **build 11 = VALID** |
+| 暗号申告 | ASC API PATCH | 02:53 | `usesNonExemptEncryption = false` を build 11 に事前適用 (submit 1 回目で成功させるための標準手順) |
+| apply | ローカル asc-submit run (run `20261126-025351-d8e2`) | 02:53 | version 1.4 作成 (`c72e1ddf-5a93-42ad-9d53-0ee1b817e624`) + build 11 割当 + メタデータ (What's New ja / 説明 / キーワード / サブタイトル / 審査メモ / phased release) 反映 |
+| submit | ローカル asc-submit submit (run `20261126-025410-7ee6`) | 02:54:10 | **提出成功** (version 1.4 submitted for review) |
+| status | ローカル asc-submit status | 02:54 | **version 1.4 = WAITING_FOR_REVIEW** / releaseType AFTER_APPROVAL |
+
+- **upload 経路: m4 ローカルへ切替** — 第一候補の GitHub Actions ワークフロー (m1-eng-listening) が m1 ランナーの SPM DerivedData キャッシュ権限エラーで失敗したため、本実施プロンプトの指定どおり直ちに m4 ローカル経路 (`scripts/release/appstore-upload.sh`) へ切り替えてアップロード成功。
+- **apply / submit 経路: m4 ローカル asc-submit** (`~/dev/asc-submit`・ローカル鍵 `AuthKey_8HM846FQ5Z.p8`)。spec は `dist/appstore/release-1.4.json`。
+
+### 提出前ゲートの結果
+
+- **最終バイナリ NS*UsageDescription 監査** (docs/operations.md §1.2、アーカイブ済み `.app` Info.plist で全件列挙):
+  - `NSMicrophoneUsageDescription` =
+    「シャドーイング練習であなたの発音を録音し、この端末の中でお手本の音声と聞き比べるために使用します。録音した音声が外部に送信されることはありません。」
+    — 確定文を維持 (スクリプトの用途文字列ゲート `[4/7]` PASS)
+  - `NSLocalNetworkUsageDescription` =
+    "Expo Dev Launcher uses the local network to discover and connect to development servers running on your computer."
+    — expo-dev-client の既定文 (v1.1 / v1.2 / v1.3 と同一条件、審査通過実績あり)
+  - 上記 2 件のみ (それ以外の NS*UsageDescription は無し)
+  - 同梱 Watch バンドル (`app.app/Watch/watch.app`): NS*UsageDescription 0 件・`CFBundleIconName = AppIcon` 維持・`CFBundleShortVersionString 1.4` を確認
+- **spec**: `dist/appstore/release-1.4.json` (version 1.4 / build 11 / AFTER_APPROVAL / phasedRelease false / What's New ja) — validate PASS
+- **UI ルールブック** (PR #119 に §3 点検数値を記載): P1 プライマリ 0 / P2 ブロック既存内 / P5 内部文字列 0 / P6 セクション見出し既存内 / P7 既存部品のみ。Light/Dark 視認性確認済み。アクセシビリティラベル要件「今日の1本」維持。
+- **W7 / W8**: W7 = 既存デザイントークン利用により Light/Dark 両モード視認性維持。W8 (診断設問の全問目視) = 設問内容の diff ゼロのため既存結果を引き継ぎ。
+- watch スクリーンショット: 既存登録済みの実物を引き継ぎ (watch バンドルの内容変更なし・新規取得不要)。
+
+---
+
 ## v1.3 (build 10) — 2026-11-25
 
 - セッション開始: 2026-11-25 08:15 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 10:36:17 JST**
