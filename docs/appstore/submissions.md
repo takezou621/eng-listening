@@ -2,6 +2,67 @@
 
 ミミトレ (App ID 6837503600) の審査提出記録。run ID・時刻・ゲート結果を残す。
 
+## v1.5 (build 12) — 2026-11-26
+
+- セッション開始: 2026-11-26 07:34 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 08:56:52 JST**
+  (所要 **1 時間 22 分** — 3 時間ルール内)
+- 内容テーマ: #95 苦手フレーズの連続プレイリスト復習と音変化タイプ別フィルタ。
+  `phrases.tsx` に `Chip variant="outlined"` の音変化タイプ別フィルタ (登録済みタイプのみ・件数順、
+  ステータスフィルタと AND)。新規 `PhrasePlaylistSheet` で「連続で復習する」を追加
+  (モデル音声の自動再生 + カラオケ風表示 / シャドーイング (録音 → 自動再生) の排他切替、
+  文末で次文へ自動進行。プレイヤー・録音は文/モード切替・閉じる・アンマウントで解放)。
+  新規計測イベント `weak_phrase_playlist_started` / `_finished` を `docs/metrics.md` に先行定義。
+
+### 経路の記録
+
+| 手順 | 経路 | 時刻 (JST) | 結果 |
+|---|---|---|---|
+| 着手前事前確認 | ローカル + ASC API | 07:35–07:40 | (a) Watch: `CFBundleIconName=AppIcon`・アイコンは prebuild で生成されることを確認 (b) Watch スクリーンショット: ja セット `APP_WATCH_SERIES_10` の登録を確認 → 既存を再利用 (c) `usesNonExemptEncryption` は spec に含まれない → VALID 後に API PATCH で対応 (v1.2〜1.4 と同一手順) |
+| 実装 | Orchestrator + omp (`~/.local/bin/omp` 19.1.1、 既定モデル) → Orchestrator レビュー | 07:37–08:24 | metrics.md → タイプ別フィルタ → プレイリスト。lint / typecheck PASS。シミュレータ (Mimitore-67) で Light/Dark 撮影 (`docs/ui/phrases-playlist-95/`) |
+| PR | PR #121 → squash マージ `54c61e1` | 08:24–08:42 | cubic: skipping / GitGuardian: PASS。CodeRabbit 指摘 6 件 (5 件対応、`prepareToRecordAsync` 指摘は既存レッスン画面と同じ JS `record()` 経路のため対応せず)。スレッド解決後にマージ |
+| upload (第一候補) | GitHub Actions (m1-eng-listening run 45723425636) | 08:42–08:45 | failure (m1 の SourcePackages 削除権限エラー Code=513 が再発、exit 74)。再試行せず切替 |
+| upload (切替) | **m4 (Mac mini) ローカル** `appstore-upload.sh --version 1.5 --build 12 --upload` (Aqua セッション直実行) | 08:45–08:51 | **アップロード成功** (altool "UPLOAD SUCCEEDED with no errors")。build id `3f81c1d3-4dae-4e3c-a7da-6dab1ddbc1e2`。アーカイブ検証 OK: version=1.5 build=12 |
+| VALID 確認 | ASC API (builds) | 08:56 | **build 12 = VALID** |
+| 暗号申告 | ASC API PATCH | 08:56 | `usesNonExemptEncryption = false` を build 12 に事前適用 |
+| apply | ローカル asc-submit run (run `20261126-085610-9887`) | 08:56 | version 1.5 作成 (`7e1cfa64-4c42-44a4-8410-7a3edd02f79b`) + build 12 割当 + メタデータ (What's New ja / 説明 / キーワード / サブタイトル / 審査メモ / phased release) 反映 |
+| submit | ローカル asc-submit submit | 08:56:30 | **提出成功** (version 1.5 submitted for review) |
+| status | ローカル asc-submit status + ASC API | 08:56:52 | **version 1.5 = WAITING_FOR_REVIEW** / releaseType AFTER_APPROVAL。サブスクは IAP 変更なしのため提出対象外 (v1.4 と同じ) |
+
+- **upload 経路: m4 ローカルへ切替** — 第一候補の GitHub Actions ワークフロー (m1-eng-listening) が
+  v1.4 と同じ m1 ランナーの SPM DerivedData 権限エラー (Code=513) で失敗したため、本実施プロンプトの
+  指定どおり直ちに m4 ローカル経路へ切り替えてアップロード成功。
+- **CI**: このリポジトリには PR 向け GitHub Actions ワークフローは無し (App Store ワークフローのみ)。
+  PR のチェックは cubic / CodeRabbit / GitGuardian。ローカル `npm run lint` / `npm run typecheck` PASS。
+
+### 提出前ゲートの結果
+
+- **最終バイナリ NS*UsageDescription 監査** (docs/operations.md §1.2、アップロードした `.ipa` を展開した
+  `Payload/app.app/Info.plist` で全件列挙。ネストした全バンドル (frameworks / plugins / Watch) も走査):
+  - `NSMicrophoneUsageDescription` =
+    「シャドーイング練習であなたの発音を録音し、この端末の中でお手本の音声と聞き比べるために使用します。録音した音声が外部に送信されることはありません。」
+    — 確定文を維持 (スクリプトの用途文字列ゲート `[4/7]` PASS)
+  - `NSLocalNetworkUsageDescription` =
+    "Expo Dev Launcher uses the local network to discover and connect to development servers running on your computer."
+    — expo-dev-client の既定文 (v1.1〜v1.4 と同一条件、審査通過実績あり)
+  - 上記 2 件のみ (それ以外の NS*UsageDescription は無し、プラグイン既定文 "Allow ... to access" は 0 件)
+  - 同梱 Watch バンドル: NS*UsageDescription 0 件・`CFBundleIconName = AppIcon`・version 1.5 / build 12 を確認
+- **spec**: `dist/appstore/release-1.5.json` (version 1.5 / build 12 / AFTER_APPROVAL / phasedRelease false / What's New ja) — validate PASS
+- **UI ルールブック** (PR #121 に §3 点検数値を記載): P1 プライマリ = 一覧 1 / シート 1 / P2 初期ブロック 5 / P3 下部 1 段 / P4 2 行超 0 / P5 内部文字列 0 / P6 見出し 0・モード排他 / P7 新規色定数なし。Light/Dark 実画面確認済み。
+- **W7 / W8**: W7 = 変更画面を Light/Dark 両モードで撮影・確認。W8 = 設問内容の diff ゼロのため既存結果を引き継ぎ。
+- watch スクリーンショット: 既存登録済みの実物を引き継ぎ (watch バンドルの内容変更なし・新規取得不要)。
+- iPhone Duo XCUITest: レイアウト大変更ではない (チップ 1 行とボトムシート) ため未実施 — 実機確認は TestFlight で実施。
+
+### 教訓 (次回改善)
+
+- m1 ランナーの Code=513 は v1.4 から未解決のまま。`actions-runner-eng-listening/_work/.../dist/appstore/derived` の
+  所有権を整備するまで、upload は m4 ローカル (Aqua セッション直実行、アーカイブ約 5 分) が実質の最短経路。
+- `usesNonExemptEncryption=false` は spec / asc-submit に含まれていないため、毎回 VALID 後に手動 PATCH が必要。
+  `appstore-spec.py` と asc-submit の build 割当に組み込めば手順を 1 つ減らせる。
+- omp の実装にはデバッグ用の `fetch('http://127.0.0.1:…')` が残ることがある (本版でも 2 ファイルで発生、マージ前に除去)。
+  omp の成果物はマージ前に `grep -n "dbg\|fetch(" ` で必ず確認する。
+
+---
+
 ## v1.4 (build 11) — 2026-11-26
 
 - セッション開始: 2026-11-26 01:11 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 02:54:10 JST**
