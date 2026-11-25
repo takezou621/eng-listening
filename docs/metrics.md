@@ -45,6 +45,7 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `watch_session_synced` | `sessions_count` | Watch 単体学習の取り込み（連携チャネルの利用） |
 | `overcoming_step_completed` | `lesson_id`, `sound_change_type`, `step` | 弱点克服パスの 3 ステップ（`listen` / `read` / `speak`）完了の把握 |
 | `curriculum_viewed` | `from`（home/result） | 診断から提案された個別カリキュラムの閲覧 |
+| `curriculum_customized` | `action`（select_type/clear_type/set_level/reset_all。`clear_type` はタイプ全解除も含む）、`sound_change_type`（select_type 時に選択したタイプ名、clear_type の個別解除時に解除したタイプ名。全解除時は省略）、`level`（set_level 時に all/beginner/intermediate） | カリキュラムの手動カスタマイズ（重点タイプ・難易度）の利用状況。重点タイプ別の選択分布から学習継続の納得感を検証する |
 | `key_phrase_opened` | `lesson_id`, `sound_change_type` | レッスン冒頭の「今日のキーフレーズ」の利用動向 |
 | `weak_phrase_reviewed` | `lesson_id`, `remembered`, `stage` | 復習キューでの自己想起チェックと正答動向 |
 | `weak_phrase_graduated` | `lesson_id`, `review_count` | 苦手フレーズの定着・卒業到達数 |

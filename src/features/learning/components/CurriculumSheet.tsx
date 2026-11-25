@@ -9,27 +9,50 @@ import { useTheme } from '@/theme/AppThemeProvider';
 
 /**
  * 診断結果にもとづく「あなた向けカリキュラム」(3ステップ学習順序 + 対象レッスン一覧) ボトムシート。
+ * 「調整する」から手動カスタマイズ (重点タイプ・難易度) へ遷移できる (シート自体の切替は親側)。
  */
 export function CurriculumSheet({
   visible,
   curriculum,
   onSelectLesson,
   onClose,
+  isCustomized,
+  onOpenCustomize,
 }: {
   visible: boolean;
   curriculum: PersonalCurriculum;
   onSelectLesson: (lessonId: string) => void;
   onClose: () => void;
+  /** 手動カスタマイズが適用されているか (説明文を切り替える) */
+  isCustomized?: boolean;
+  /** 指定時のみ caption 行の右端に「調整する」テキストボタンを出す */
+  onOpenCustomize?: () => void;
 }) {
   const { scheme, colors } = useTheme();
 
   return (
     <BottomSheet visible={visible} title="あなた向けカリキュラム" onClose={onClose}>
-      <ThemedText variant="caption" color="muted">
-        {curriculum.isCustomizedByDiagnostic
-          ? '診断結果で見つかった弱点タイプから順に、初級から中級へ段階的に克服する順序です。'
-          : '会話でよく現れる音変化を基礎から順に定着させるおすすめコースです。'}
-      </ThemedText>
+      <View style={styles.captionRow}>
+        <ThemedText variant="caption" color="muted" style={styles.captionText}>
+          {isCustomized
+            ? '選択した重点タイプと難易度で学習する順序です。'
+            : curriculum.isCustomizedByDiagnostic
+              ? '診断結果で見つかった弱点タイプから順に、初級から中級へ段階的に克服する順序です。'
+              : '会話でよく現れる音変化を基礎から順に定着させるおすすめコースです。'}
+        </ThemedText>
+        {onOpenCustomize ? (
+          <Pressable
+            onPress={onOpenCustomize}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="カリキュラムを調整する"
+          >
+            <ThemedText variant="caption" color="primary" style={styles.customizeText}>
+              調整する
+            </ThemedText>
+          </Pressable>
+        ) : null}
+      </View>
 
       <View style={styles.stepsList}>
         {curriculum.steps.map((step) => {
@@ -119,6 +142,17 @@ export function CurriculumSheet({
 }
 
 const styles = StyleSheet.create({
+  captionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  captionText: {
+    flex: 1,
+  },
+  customizeText: {
+    fontWeight: '700',
+  },
   stepsList: {
     gap: 12,
   },

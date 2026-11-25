@@ -3,6 +3,14 @@ import { useEffect, useState } from 'react';
 
 import { logEvent } from '../analytics/analyticsStore';
 import {
+  CURRICULUM_FOCUS_TYPES,
+  MAX_CURRICULUM_FOCUS_TYPES,
+  isCurriculumCustomizationActive,
+  type CurriculumCustomization,
+  type CurriculumLevelFilter,
+  type LinkingNoteType,
+} from '../learning/curriculum';
+import {
   applyReviewOutcome,
   isWeakGraduated,
   reactivateGraduated,
@@ -56,6 +64,8 @@ interface UserData {
   dailyGoalMinutes: DailyGoalMinutes;
   /** 直近の診断結果プロフィール (カリキュラムとホーム推薦の接続用・任意) */
   diagnosticProfile?: SavedDiagnosticProfile;
+  /** カリキュラムの手動カスタマイズ (重点タイプ・難易度)。未設定 = 自動おすすめ */
+  curriculumCustom?: CurriculumCustomization;
 }
 
 export interface WeakSentence extends ReviewScheduleFields {
@@ -76,6 +86,9 @@ let cachedData: UserData = { ...defaultData };
 let isLoaded = false;
 let loadPromise: Promise<void> | null = null;
 let dailyGoalCustomized = false;
+/** ユーザーが手動カスタマイズを触ったか (読み込み完了前の変更がディスクの古い値で
+ *  上書きされないようにするためのフラグ。dailyGoalCustomized と同じパターン) */
+let curriculumCustomTouched = false;
 const listeners = new Set<() => void>();
 
 function parseOptionalFiniteNumber(value: unknown): number | undefined {
@@ -110,6 +123,33 @@ function parseDiagnosticProfile(raw: unknown): SavedDiagnosticProfile | undefine
     missedTypes,
     recommendedLessonId: typeof p.recommendedLessonId === 'string' ? p.recommendedLessonId : null,
   };
+}
+
+/**
+ * 保存された手動カスタマイズを検証する。
+ * focusTypes は文字列配列のみ受け付け (有効タイプのみ保持・重複排除・最大 3 個)、
+ * levelFilter は定義外なら 'all'。無効内容 (空 + 'all') や不正な形は
+ * undefined (= 保存しない・自動おすすめ) にフォールバックする (旧データ互換)。
+ */
+function parseCurriculumCustom(raw: unknown): CurriculumCustomization | undefined {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return undefined;
+  const r = raw as Partial<CurriculumCustomization>;
+  const seen = new Set<LinkingNoteType>();
+  const focusTypes: LinkingNoteType[] = [];
+  if (Array.isArray(r.focusTypes)) {
+    for (const item of r.focusTypes as unknown[]) {
+      if (typeof item !== 'string') continue;
+      const t = item as LinkingNoteType;
+      if (!CURRICULUM_FOCUS_TYPES.includes(t) || seen.has(t)) continue;
+      seen.add(t);
+      focusTypes.push(t);
+      if (focusTypes.length >= MAX_CURRICULUM_FOCUS_TYPES) break;
+    }
+  }
+  const levelFilter: CurriculumLevelFilter =
+    r.levelFilter === 'beginner' || r.levelFilter === 'intermediate' ? r.levelFilter : 'all';
+  const custom: CurriculumCustomization = { focusTypes, levelFilter };
+  return isCurriculumCustomizationActive(custom) ? custom : undefined;
 }
 
 /** JSON 文字列を検証して UserData に変換する (不正な形は既定値にフォールバック・旧データ互換) */
@@ -149,6 +189,7 @@ function parseUserData(json: string): UserData {
       : [],
     weakSentences,
     diagnosticProfile: parseDiagnosticProfile(obj.diagnosticProfile),
+    curriculumCustom: parseCurriculumCustom(obj.curriculumCustom),
   };
 }
 
@@ -230,6 +271,9 @@ export function loadUserDataAsync(): Promise<void> {
             ),
             weakSentences: mergeWeakSentences(parsed.weakSentences, current.weakSentences),
             diagnosticProfile: current.diagnosticProfile ?? parsed.diagnosticProfile,
+            curriculumCustom: curriculumCustomTouched
+              ? current.curriculumCustom
+              : current.curriculumCustom ?? parsed.curriculumCustom,
           }));
         }
         canPersist = true;
@@ -289,6 +333,25 @@ export function useUserData() {
     /** 初回診断・再診断の結果プロフィールを保存する (カリキュラムとホーム推薦を連携) */
     saveDiagnosticProfile: (profile: SavedDiagnosticProfile) => {
       updateUserData((current) => ({ ...current, diagnosticProfile: profile }));
+    },
+    /** カリキュラムの手動カスタマイズを保存する (null・無効内容は削除して自動おすすめへ戻す)。
+     *  関数を渡すと直近の保存値から次の値を計算する (連続タップ時の古い値ベースの上書きを防ぐ) */
+    setCurriculumCustom: (
+      value:
+        | CurriculumCustomization
+        | null
+        | ((prev: CurriculumCustomization | null) => CurriculumCustomization | null)
+    ) => {
+      curriculumCustomTouched = true;
+      updateUserData((current) => {
+        const prev = current.curriculumCustom ?? null;
+        const custom = typeof value === 'function' ? value(prev) : value;
+        if (custom === null || !isCurriculumCustomizationActive(custom)) {
+          const { curriculumCustom: _removed, ...rest } = current;
+          return rest;
+        }
+        return { ...current, curriculumCustom: custom };
+      });
     },
     /** 初回診断で聞き取れなかった文を苦手フレーズ帳へ一括自動登録する (既登録分はスキップ) */
     addWeakSentencesFromDiagnostic: (items: { lessonId: string; sentenceIndex: number }[]) => {

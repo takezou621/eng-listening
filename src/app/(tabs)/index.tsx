@@ -8,7 +8,11 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { CONTENT_TYPE_LABELS, type ContentType } from '@/data/types';
 import { CurriculumSheet } from '@/features/learning/components/CurriculumSheet';
-import { buildPersonalCurriculum } from '@/features/learning/curriculum';
+import { CurriculumCustomizeSheet } from '@/features/learning/components/CurriculumCustomizeSheet';
+import {
+  buildPersonalCurriculum,
+  MAX_CURRICULUM_FOCUS_TYPES,
+} from '@/features/learning/curriculum';
 import { summarizeReviewQueue } from '@/features/learning/spacedRepetition';
 import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
 import { isOnboardingDone, loadUserDataAsync, useUserData } from '@/features/library/userStore';
@@ -42,12 +46,15 @@ export default function LibraryScreen() {
     dailyGoalMinutes,
     weakSentences,
     diagnosticProfile,
+    curriculumCustom,
+    setCurriculumCustom,
   } = useUserData();
 
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [filterLevel, setFilterLevel] = useState<FilterLevel>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [curriculumVisible, setCurriculumVisible] = useState(false);
+  const [customizeVisible, setCustomizeVisible] = useState(false);
 
   const lessonList = getLessonList();
   const progressDays = useProgressData();
@@ -71,9 +78,10 @@ export default function LibraryScreen() {
       buildPersonalCurriculum(
         diagnosticProfile?.missedTypes,
         completedLessonIds,
-        allBundles
+        allBundles,
+        curriculumCustom
       ),
-    [diagnosticProfile, completedLessonIds, allBundles]
+    [diagnosticProfile, completedLessonIds, allBundles, curriculumCustom]
   );
   const todaysLesson = useMemo(
     () => getTodaysLesson(completedLessonIds, curriculum.nextLessonId),
@@ -490,6 +498,50 @@ export default function LibraryScreen() {
         curriculum={curriculum}
         onSelectLesson={(lessonId) => router.push(`/lesson?lesson=${lessonId}`)}
         onClose={() => setCurriculumVisible(false)}
+        isCustomized={curriculum.isCustomizedManually}
+        onOpenCustomize={() => {
+          setCurriculumVisible(false);
+          setCustomizeVisible(true);
+        }}
+      />
+
+      <CurriculumCustomizeSheet
+        visible={customizeVisible}
+        focusTypes={curriculumCustom?.focusTypes ?? []}
+        levelFilter={curriculumCustom?.levelFilter ?? 'all'}
+        onToggleType={(type) => {
+          const wasSelected = (curriculumCustom?.focusTypes ?? []).includes(type);
+          // 保存は関数型更新 (直近の保存値ベース)。連続タップでも選択が欠落しないようにする
+          setCurriculumCustom((prev) => {
+            const current = prev?.focusTypes ?? [];
+            const next = current.includes(type)
+              ? current.filter((t) => t !== type)
+              : [...current, type].slice(0, MAX_CURRICULUM_FOCUS_TYPES);
+            return { focusTypes: next, levelFilter: prev?.levelFilter ?? 'all' };
+          });
+          logEvent('curriculum_customized', {
+            action: wasSelected ? 'clear_type' : 'select_type',
+            sound_change_type: type,
+          });
+        }}
+        onClearTypes={() => {
+          // すでに空 (おまかせ) のときは状態変更も計測もしない
+          if ((curriculumCustom?.focusTypes.length ?? 0) === 0) return;
+          // おまかせチップ = 全タイプ解除。難易度は保持する (全面リセットは onResetAll)
+          setCurriculumCustom((prev) => ({ focusTypes: [], levelFilter: prev?.levelFilter ?? 'all' }));
+          logEvent('curriculum_customized', { action: 'clear_type' });
+        }}
+        onSetLevel={(level) => {
+          // 選択済み難易度の再タップは無視する (計測ノイズと不要な永続化書き込みを防ぐ)
+          if (level === (curriculumCustom?.levelFilter ?? 'all')) return;
+          setCurriculumCustom((prev) => ({ focusTypes: prev?.focusTypes ?? [], levelFilter: level }));
+          logEvent('curriculum_customized', { action: 'set_level', level });
+        }}
+        onResetAll={() => {
+          setCurriculumCustom(null);
+          logEvent('curriculum_customized', { action: 'reset_all' });
+        }}
+        onClose={() => setCustomizeVisible(false)}
       />
     </Screen>
   );

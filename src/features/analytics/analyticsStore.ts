@@ -45,6 +45,7 @@ export type AnalyticsEventType =
   | 'watch_session_synced'
   | 'overcoming_step_completed'
   | 'curriculum_viewed'
+  | 'curriculum_customized'
   | 'key_phrase_opened'
   | 'weak_phrase_reviewed'
   | 'weak_phrase_graduated';
