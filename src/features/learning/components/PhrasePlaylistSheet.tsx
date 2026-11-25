@@ -16,6 +16,7 @@ import { Chip } from '@/components/Chip';
 import { ThemedText } from '@/components/ThemedText';
 import { SEEK_TOLERANCE_MILLIS, STATUS_UPDATE_INTERVAL_MILLIS } from '@/config/appConfig';
 import { logEvent } from '@/features/analytics/analyticsStore';
+import { recordError } from '@/features/analytics/crash';
 import {
   LINKING_LABELS,
   LINKING_SYMBOLS,
@@ -413,9 +414,10 @@ export function PhrasePlaylistSheet({
           setActiveWordIndex(active);
         });
         player.play();
-      } catch {
+      } catch (e) {
         // 読み込めなかった場合は何も鳴らさない (表示は「再生」のまま)
         releaseModelPlayer();
+        recordError(e, 'playlist model audio');
       }
     },
     [clearAutoAdvanceTimer, releaseModelPlayer, handleSentenceEnd]
@@ -465,7 +467,8 @@ export function PhrasePlaylistSheet({
       recorder.record();
       isRecordingRef.current = true;
       setIsRecording(true);
-    } catch {
+    } catch (e) {
+      recordError(e, 'playlist start recording');
       if (recordTokenRef.current === token) {
         void setAudioModeAsync(PLAYBACK_AUDIO_MODE).catch(() => {});
       }
@@ -482,7 +485,9 @@ export function PhrasePlaylistSheet({
       try {
         await recorder.stop();
         uri = recorder.uri;
-      } catch {}
+      } catch (e) {
+        recordError(e, 'playlist stop recording');
+      }
       void setAudioModeAsync(PLAYBACK_AUDIO_MODE).catch(() => {});
       // 停止を待っている間に閉じる・文送りが入ったら、この録音は採用しない
       if (recordTokenRef.current !== token) {
