@@ -2,6 +2,61 @@
 
 ミミトレ (App ID 6837503600) の審査提出記録。run ID・時刻・ゲート結果を残す。
 
+## v1.3 (build 10) — 2026-11-25
+
+- セッション開始: 2026-11-25 08:15 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 10:36:17 JST**
+  (所要 **2 時間 21 分** — 3 時間ルール内)
+- 内容テーマ: #106 あなた向けカリキュラムの手動カスタマイズ。重点音変化タイプ (最大 3・選択順保持) と
+  難易度 (ぜんぶ/初級/中級) を「あなた向けカリキュラム」シートの「調整する」から手動再編成できるようにした。
+  保存スキーマ後方互換 (旧データ・不正値は自動おすすめへフォールバック)・自動推薦 (ゼロ設定) の既定動作は維持。
+
+### 経路の記録
+
+| 手順 | 経路 | 時刻 (JST) | 結果 |
+|---|---|---|---|
+| 実装 | omp (Oh My Pi / zai/glm-5.3-flash) に仕様書を渡して実装 → Orchestrator が検収 | 08:30–08:58 | curriculum.ts / userStore.ts / CurriculumSheet / CurriculumCustomizeSheet (新規) / index.tsx / analyticsStore。検収時に実画面検証で「連続タップ時に古い state を基に選択が欠落する競合」を発見 → `setCurriculumCustom` を関数型更新に修正 |
+| PR | PR #116 (feat + v1.3 バージョン準備 + UI 証跡) → squash マージ `e39f2a4` | 09:59–10:20 | cubic: NEUTRAL (指摘なし)。CodeRabbit: Major 1 + Minor 3 → **Major** (難易度のみ変更時に診断重点タイプが失われる) と **Minor 2 件** (ロード完了前のリセットがディスクの古い値で復活 / 審査メモのデータ収集文面) を実コード検証のうえ修正 (`35d54fd`)、**Minor 1 件** (レベル内全完了時の「今日の1本」フォールバック) は自動推薦と同一の既存既定動作のため対応見送りをスレッドで回答して解決 |
+| CI | self-hosted のみ (runs-on 変更なし) | — | **実行なし** — ランナー m1-eng-listening が offline (08:15 時点で ping 100% loss 継続) のため workflow は起動せず。ローカル検証 (`npm run lint` / `npm run typecheck` / シミュレータ実画面・XCUITest による実導線 4 ラン = Light/Dark × 2 テストを全て PASS) を証拠としてマージ判断。ホステッドランナーには切替えない (運用ルール) |
+| upload | **m4 (Mac mini) ローカル** `appstore-upload.sh --version 1.3 --build 10 --upload` | 10:26:44 | **アップロード成功** (altool "UPLOAD SUCCEEDED with no errors")。**Delivery UUID `0c41c821-1a3a-47f6-9200-769764f80408`** (ASC uploadedDate 10:28:06 JST)。アーカイブ検証 OK: version=1.3 build=10 |
+| VALID 確認 | ASC API (builds) | 10:38 | **build 10 = VALID** |
+| 暗号申告 | ASC API PATCH | 10:38 | `usesNonExemptEncryption = false` を build 10 に事前適用 (v1.1/v1.2 の submit 検証必須指摘を前倒しで解消。今回は 1 回目の submit で成功) |
+| apply | ローカル asc-submit run (run `20261125-103531-3b6c`) | 10:35–10:36 | version 1.3 作成 (`d6a22f4b-bea5-4fc6-a8db-477614ab9d68`) + build 10 割当 + メタデータ (What's New ja / 説明 / キーワード / サブタイトル / 審査メモ / phased release) 反映 |
+| submit | ローカル asc-submit submit | 10:36:17 | **提出成功** (reviewSubmission `2e34e758-079f-4067-9139-1072f089e789`, IOS) |
+| status | ローカル asc-submit status | 10:37 | **version 1.3 = WAITING_FOR_REVIEW** / releaseType AFTER_APPROVAL |
+
+- **upload 経路: m4 ローカル** — m1 ランナー offline 継続のため v1.2 と同じく当初から m4 ローカル経路
+  (`scripts/release/appstore-upload.sh`、GUI セッション直実行・LaunchAgent ブートストラップ不要・
+  incremental derived data でアーカイブ約 3 分)。**apply / submit 経路: m4 ローカル asc-submit**
+  (`~/dev/asc-submit` pinned・ローカル鍵 `AuthKey_8HM846FQ5Z.p8`)。ワークフローの upload/apply/submit は未使用
+- サブスクリプション (Premium Annual / Monthly) とグループは同時提出対象外 — v1.3 は IAP の価格・メタデータ変更を含まない (v1.1/v1.2 と同じ判断)
+
+### 提出前ゲートの結果
+
+- **最終バイナリ NS*UsageDescription 監査** (docs/operations.md §1.2、アーカイブ済み `.app` Info.plist で全件列挙):
+  - `NSMicrophoneUsageDescription` =
+    「シャドーイング練習であなたの発音を録音し、この端末の中でお手本の音声と聞き比べるために使用します。録音した音声が外部に送信されることはありません。」
+    — 確定文を維持 (スクリプトの用途文字列ゲート `[4/7]` PASS)
+  - `NSLocalNetworkUsageDescription` =
+    "Expo Dev Launcher uses the local network to discover and connect to development servers running on your computer."
+    — expo-dev-client の既定文。**v1.1 build 8 / v1.2 build 9 と同一条件** (v1.2 提出以降 app.config.ts / package.json / lockfile 無変更で prebuild 出力は決定論的) であり v1.1・v1.2 はこの文字列のまま審査通過・公開済み
+  - 上記 2 件のみ (それ以外の NS*UsageDescription は無し)
+  - 同梱 Watch バンドル (`app.app/Watch/watch.app`): NS*UsageDescription 0 件・`CFBundleIconName = AppIcon` 維持
+    (v1.1 の ITMS-90713 対策が生きていること)・`WKCompanionAppBundleIdentifier = com.takezou.englistening`・
+    CFBundleShortVersionString 1.3 を確認 (v1.1 の ITMS-90362 対策後の upload は今回も ITMS 警告なし)
+- **spec**: `dist/appstore/release-1.3.json` (version 1.3 / build 10 / AFTER_APPROVAL / phasedRelease false / What's New ja) — validate PASS
+- **UI ルールブック** (PR #116 に §3 点検数値を記載): P1 プライマリ 0 / P2 ブロック 4 / P5 内部文字列 0 /
+  P6 セクション見出し 0 (インラインフィールドラベル) / P7 既存部品のみ。Light/Dark 実画面 10 枚を
+  `docs/evidence/v1.3-curriculum-customize/` に格納 (curriculum-sheet / customize-sheet / customize-applied /
+  home-todays-lesson-linked / curriculum-customized-persisted × Light/Dark)
+- **W7 / W8**: W7 = 上記 Light/Dark 10 枚で視認性確認。W8 (診断設問の全問目視) = 今回は onboarding・診断関連の diff ゼロのため v1.2 の全問目視結果を引き継ぎ
+- watch スクリーンショット: v1.2 で ASC に登録済みの実物を引き継ぎ (watch バンドルの内容変更なし・新規取得不要)
+
+### 備考
+
+- omp (Oh My Pi) 実装時のモデル指定は `--model zai/glm-5.3-flash` (設定済み既定。非 TTY では既定ロールが読まれないため明示指定)
+- シミュレータ実画面検証は XCUITest probe (一時物・ios/ ごと git 管理外) でナビゲーションし、
+  xcresult の attachment を `xcrun xcresulttool export attachments` で書き出して証跡化した
+
 ## v1.2 (build 9) — 2026-11-25
 
 - セッション開始: 2026-11-25 00:36 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 01:33 JST**
