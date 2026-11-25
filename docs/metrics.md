@@ -1,6 +1,6 @@
 # ミミトレ 計測設計
 
-最終更新: 2026-11-22（計測計画 v2: イベント拡充・ユーザープロパティ・Crashlytics）
+最終更新: 2026-11-26（計測計画 v2: イベント拡充・ユーザープロパティ・Crashlytics）
 
 事業の最重要目的は「リリース」ではなく、インストールしたユーザーが使い続け、課金につながることです。その判断に使う指標と、アプリが記録するイベントを定義します。本書が計測の正であり、イベント名・意味を変更するときは本書を先に更新します。
 
@@ -49,7 +49,11 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `key_phrase_opened` | `lesson_id`, `sound_change_type` | レッスン冒頭の「今日のキーフレーズ」の利用動向 |
 | `weak_phrase_reviewed` | `lesson_id`, `remembered`, `stage` | 復習キューでの自己想起チェックと正答動向 |
 | `weak_phrase_graduated` | `lesson_id`, `review_count` | 苦手フレーズの定着・卒業到達数 |
+| `weak_phrase_playlist_started` | `item_count`, `sound_change_type`（タイプ別フィルタ中はそのタイプ名、すべてのときは省略） | 連続復習プレイリストの開始数・利用規模 |
+| `weak_phrase_playlist_finished` | `item_count`, `played_count`, `completed` | 連続復習の完走率と中断位置の把握 |
 | `screen_view` | `screen_name`（home/phrases/progress/settings/lesson/onboarding/paywall/legal） | 画面遷移・滞在の把握（自動収集と併用） |
+
+`weak_phrase_playlist_finished` の `played_count` は、モデル音声を文末まで聞いた、または録音を完了したフレーズの件数（「次へ」で読み飛ばした分は含まない）。`completed` は最後のフレーズまで到達したときに `true`、途中で閉じたときに `false`。
 
 ## 3. ユーザープロパティ
 
