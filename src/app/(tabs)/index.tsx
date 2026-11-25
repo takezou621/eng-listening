@@ -12,6 +12,7 @@ import { CurriculumCustomizeSheet } from '@/features/learning/components/Curricu
 import {
   buildPersonalCurriculum,
   MAX_CURRICULUM_FOCUS_TYPES,
+  type CurriculumCustomization,
 } from '@/features/learning/curriculum';
 import { summarizeReviewQueue } from '@/features/learning/spacedRepetition';
 import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
@@ -55,6 +56,22 @@ export default function LibraryScreen() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [curriculumVisible, setCurriculumVisible] = useState(false);
   const [customizeVisible, setCustomizeVisible] = useState(false);
+
+  // 直近の保存値を ref に同期しておく (レンダリング前の連続タップでも判定・計測を最新値ベースにする。
+  // ハンドラー内でも書き込むため、描画前のギャップでは常に最後の書き込み値が参照される)
+  const curriculumCustomRef = useRef<CurriculumCustomization | null>(
+    curriculumCustom ?? null
+  );
+  useEffect(() => {
+    curriculumCustomRef.current = curriculumCustom ?? null;
+  }, [curriculumCustom]);
+  const applyCurriculumCustom = (
+    compute: (prev: CurriculumCustomization | null) => CurriculumCustomization | null
+  ) => {
+    const prev = curriculumCustomRef.current;
+    curriculumCustomRef.current = compute(prev);
+    setCurriculumCustom(compute);
+  };
 
   const lessonList = getLessonList();
   const progressDays = useProgressData();
@@ -510,14 +527,16 @@ export default function LibraryScreen() {
         focusTypes={curriculumCustom?.focusTypes ?? []}
         levelFilter={curriculumCustom?.levelFilter ?? 'all'}
         onToggleType={(type) => {
-          const wasSelected = (curriculumCustom?.focusTypes ?? []).includes(type);
-          // 保存は関数型更新 (直近の保存値ベース)。連続タップでも選択が欠落しないようにする
-          setCurriculumCustom((prev) => {
-            const current = prev?.focusTypes ?? [];
+          // 直近の書き込み値 (ref) を基に判定・計測する。レンダリング前の連続タップでも
+          // 状態・計測の不一致が起きないようにする (保存自体は関数型更新で冪等に適用)
+          const prev = curriculumCustomRef.current;
+          const wasSelected = (prev?.focusTypes ?? []).includes(type);
+          applyCurriculumCustom((p) => {
+            const current = p?.focusTypes ?? [];
             const next = current.includes(type)
               ? current.filter((t) => t !== type)
               : [...current, type].slice(0, MAX_CURRICULUM_FOCUS_TYPES);
-            return { focusTypes: next, levelFilter: prev?.levelFilter ?? 'all' };
+            return { focusTypes: next, levelFilter: p?.levelFilter ?? 'all' };
           });
           logEvent('curriculum_customized', {
             action: wasSelected ? 'clear_type' : 'select_type',
@@ -526,19 +545,25 @@ export default function LibraryScreen() {
         }}
         onClearTypes={() => {
           // すでに空 (おまかせ) のときは状態変更も計測もしない
-          if ((curriculumCustom?.focusTypes.length ?? 0) === 0) return;
+          if ((curriculumCustomRef.current?.focusTypes.length ?? 0) === 0) return;
           // おまかせチップ = 全タイプ解除。難易度は保持する (全面リセットは onResetAll)
-          setCurriculumCustom((prev) => ({ focusTypes: [], levelFilter: prev?.levelFilter ?? 'all' }));
+          applyCurriculumCustom((prev) => ({
+            focusTypes: [],
+            levelFilter: prev?.levelFilter ?? 'all',
+          }));
           logEvent('curriculum_customized', { action: 'clear_type' });
         }}
         onSetLevel={(level) => {
           // 選択済み難易度の再タップは無視する (計測ノイズと不要な永続化書き込みを防ぐ)
-          if (level === (curriculumCustom?.levelFilter ?? 'all')) return;
-          setCurriculumCustom((prev) => ({ focusTypes: prev?.focusTypes ?? [], levelFilter: level }));
+          if (level === (curriculumCustomRef.current?.levelFilter ?? 'all')) return;
+          applyCurriculumCustom((prev) => ({
+            focusTypes: prev?.focusTypes ?? [],
+            levelFilter: level,
+          }));
           logEvent('curriculum_customized', { action: 'set_level', level });
         }}
         onResetAll={() => {
-          setCurriculumCustom(null);
+          applyCurriculumCustom(() => null);
           logEvent('curriculum_customized', { action: 'reset_all' });
         }}
         onClose={() => setCustomizeVisible(false)}
