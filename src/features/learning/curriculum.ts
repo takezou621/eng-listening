@@ -22,6 +22,30 @@ const DEFAULT_FOCUS_ORDER: readonly LinkingNoteType[] = [
   'intrusion',
 ];
 
+/** 手動カスタマイズ UI で選べる音変化タイプ (DEFAULT_FOCUS_ORDER と同一・表示順) */
+export const CURRICULUM_FOCUS_TYPES: readonly LinkingNoteType[] = DEFAULT_FOCUS_ORDER;
+
+/** 手動で重点選択できる音変化タイプの上限 (= ステップ数。UI・保存検証・ビルダーで共有) */
+export const MAX_CURRICULUM_FOCUS_TYPES = 3;
+
+/** 手動カスタマイズで指定できる難易度。'all' は制限なし (自動おすすめと同じ候補プール) */
+export type CurriculumLevelFilter = 'all' | 'beginner' | 'intermediate';
+
+export interface CurriculumCustomization {
+  /** 手動で重点選択した音変化タイプ (最大 3・選択順を保持)。空 = おまかせ */
+  focusTypes: LinkingNoteType[];
+  /** 対象レッスンの難易度。'all' = 制限なし */
+  levelFilter: CurriculumLevelFilter;
+}
+
+/** 手動カスタマイズが有効か (タイプ 1 つ以上の選択、または難易度の制限がある) */
+export function isCurriculumCustomizationActive(
+  custom?: CurriculumCustomization | null
+): boolean {
+  if (!custom) return false;
+  return custom.focusTypes.length > 0 || custom.levelFilter !== 'all';
+}
+
 /** 今日のキーフレーズで優先する特徴的音変化タイプ (高頻度すぎる linking より学習価値が高いものを優先) */
 const KEY_PHRASE_TYPE_PRIORITY: readonly LinkingNoteType[] = [
   'palatalization',
@@ -60,6 +84,8 @@ export interface PersonalCurriculum {
   nextLessonTitleJa: string | null;
   nextStepLabel: string | null;
   isCustomizedByDiagnostic: boolean;
+  /** 手動カスタマイズ (重点タイプ・難易度) が適用されているか */
+  isCustomizedManually: boolean;
 }
 
 function countTypeInLesson(lesson: LessonData, type: LinkingNoteType): number {
@@ -78,12 +104,21 @@ function countTypeInLesson(lesson: LessonData, type: LinkingNoteType): number {
  * - 弱点タイプが多い順にステップ 1〜3 を構成し、足りない場合は基礎頻出タイプで補う。
  * - 各ステップ内の対象レッスンは初級 → 中級の階段順、同レベル内では該当注釈数降順。
  * - ホーム「今日の1本」はこのカリキュラム先頭から最初の未完了レッスンと一致させる。
+ * - custom が指定され有効な場合は手動モード: 重点タイプと難易度はユーザー指定を優先する
+ *   (第 4 引数を省略した場合の出力は従来ロジックと完全同一)。
  */
 export function buildPersonalCurriculum(
   missedTypes: Record<string, number> | undefined | null,
   completedLessonIds: Set<string>,
-  bundles: LessonBundle[]
+  bundles: LessonBundle[],
+  custom?: CurriculumCustomization | null
 ): PersonalCurriculum {
+  // 手動モードかどうか。activeCustom は検証済みの non-null 値 (無効内容は undefined = 自動おすすめ)
+  const activeCustom =
+    custom !== null && custom !== undefined && isCurriculumCustomizationActive(custom)
+      ? custom
+      : undefined;
+  const isCustomizedManually = activeCustom !== undefined;
   const validTypes = new Set<LinkingNoteType>(DEFAULT_FOCUS_ORDER);
   const weakEntries = Object.entries(missedTypes ?? {})
     .filter(([type, count]) => validTypes.has(type as LinkingNoteType) && count > 0)
@@ -94,21 +129,40 @@ export function buildPersonalCurriculum(
     weakEntries.map(([t]) => t as LinkingNoteType)
   );
 
-  const selectedTypes: LinkingNoteType[] = weakEntries
-    .slice(0, 3)
-    .map(([t]) => t as LinkingNoteType);
+  let selectedTypes: LinkingNoteType[];
+  let manuallySelectedTypes: readonly LinkingNoteType[] = [];
+  if (activeCustom) {
+    // store で検証済みだが二重防御: 有効タイプのみ・重複排除で残す (選択順は保持)
+    const seen = new Set<LinkingNoteType>();
+    manuallySelectedTypes = activeCustom.focusTypes.filter((t) => {
+      if (!validTypes.has(t) || seen.has(t)) return false;
+      seen.add(t);
+      return true;
+    });
+    selectedTypes = [...manuallySelectedTypes];
+  } else {
+    selectedTypes = weakEntries
+      .slice(0, 3)
+      .map(([t]) => t as LinkingNoteType);
+  }
 
   for (const fallback of DEFAULT_FOCUS_ORDER) {
-    if (selectedTypes.length >= 3) break;
+    if (selectedTypes.length >= MAX_CURRICULUM_FOCUS_TYPES) break;
     if (!selectedTypes.includes(fallback)) {
       selectedTypes.push(fallback);
     }
   }
 
+  // 手動モードでは候補プールを難易度で絞る。絞り込みで候補 0 件のステップだけ
+  // 全プールへフォールバックし、全ステップでレッスンを必ず 1 本以上出す。
+  const levelPool =
+    activeCustom && activeCustom.levelFilter !== 'all'
+      ? bundles.filter((b) => b.data.level === activeCustom.levelFilter)
+      : bundles;
+
   const usedPrimaryIds = new Set<string>();
-  const steps: CurriculumStep[] = selectedTypes.map((type, idx) => {
-    const stepNumber = (idx + 1) as 1 | 2 | 3;
-    const candidates = bundles
+  const pickCandidates = (pool: LessonBundle[], type: LinkingNoteType) =>
+    pool
       .map((b) => ({
         bundle: b,
         noteCount: countTypeInLesson(b.data, type),
@@ -126,6 +180,13 @@ export function buildPersonalCurriculum(
         if (b.noteCount !== a.noteCount) return b.noteCount - a.noteCount;
         return a.bundle.data.id.localeCompare(b.bundle.data.id);
       });
+
+  const steps: CurriculumStep[] = selectedTypes.map((type, idx) => {
+    const stepNumber = (idx + 1) as 1 | 2 | 3;
+    let candidates = pickCandidates(levelPool, type);
+    if (activeCustom && candidates.length === 0 && levelPool.length !== bundles.length) {
+      candidates = pickCandidates(bundles, type);
+    }
 
     // 初級・中級がバランスよく入るよう最大 2 本を選出
     const picked: { bundle: LessonBundle; noteCount: number }[] = [];
@@ -145,9 +206,14 @@ export function buildPersonalCurriculum(
 
     const label = LINKING_LABELS[type];
     const isWeak = weakTypeSet.has(type);
-    const focusReason = isWeak
-      ? `診断でつまずいた「${label}」を集中的に聞き取れるようにします。`
-      : `会話で頻出する「${label}」の感覚を自然な速さで定着させます。`;
+    let focusReason: string;
+    if (isWeak) {
+      focusReason = `診断でつまずいた「${label}」を集中的に聞き取れるようにします。`;
+    } else if (manuallySelectedTypes.includes(type)) {
+      focusReason = `あなたが選んだ「${label}」を集中して聞き取れるようにします。`;
+    } else {
+      focusReason = `会話で頻出する「${label}」の感覚を自然な速さで定着させます。`;
+    }
 
     return {
       stepNumber,
@@ -197,6 +263,7 @@ export function buildPersonalCurriculum(
     nextLessonTitleJa,
     nextStepLabel,
     isCustomizedByDiagnostic,
+    isCustomizedManually,
   };
 }
 

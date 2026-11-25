@@ -35,5 +35,7 @@ English (linking, reduction, flapping) with karaoke-style word highlighting.
 
 New in version 1.2: three new lessons focus on assimilation, intrusion, and weak forms — the rarer sound-change types — so learners can practice every diagnostic type. All lessons remain free and the premium paywall is unchanged.
 
+New in version 1.3: the personal curriculum (three-step lesson order on the home screen) can now be adjusted manually — learners can pick up to three sound-change types to focus on and a difficulty level (all / beginner / intermediate). Untouched items keep the automatic recommendations. No changes to billing, pricing, accounts, or data collection in this release.
+
 ---
 
