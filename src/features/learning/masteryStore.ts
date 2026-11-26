@@ -8,7 +8,7 @@ import type { LessonLinkingNote } from '@/features/lesson/types';
  * 音変化 8 タイプ別の習熟度永続化ストア (Phase 1-B)。
  *
  * 端末内 Document ディレクトリの `mastery-data.json` に保存し、
- * 診断結果・解説閲覧・シャドーイング・レッスン完了・3 ステップ克服完了を統合して
+ * 診断結果・解説閲覧・シャドーイング・レッスン完了・レッスン内クイズ・3 ステップ克服完了を統合して
  * 各タイプのスコア (0〜100) とステージ (未測定/要強化/練習中/定着) を算出する。
  */
 
@@ -37,6 +37,9 @@ export const MASTERY_STAGE_LABELS: Record<MasteryStage, string> = {
 export interface TypeMasteryRecord {
   diagnosticCorrect: number;
   diagnosticTotal: number;
+  /** レッスン内ミニ聞き分けクイズ (#103) の正答数。旧 JSON では未設定 = 0 */
+  quizCorrect: number;
+  quizTotal: number;
   linkingNotesOpened: number;
   shadowingCount: number;
   lessonsCompleted: number;
@@ -59,6 +62,8 @@ export interface TypeMasteryEntry {
   stage: MasteryStage;
   diagnosticCorrect: number;
   diagnosticTotal: number;
+  quizCorrect: number;
+  quizTotal: number;
   activeWeakCount: number;
   graduatedWeakCount: number;
   linkingNotesOpened: number;
@@ -72,6 +77,8 @@ function emptyRecord(): TypeMasteryRecord {
   return {
     diagnosticCorrect: 0,
     diagnosticTotal: 0,
+    quizCorrect: 0,
+    quizTotal: 0,
     linkingNotesOpened: 0,
     shadowingCount: 0,
     lessonsCompleted: 0,
@@ -111,6 +118,8 @@ function mergeRecords(a: TypeMasteryRecord, b: TypeMasteryRecord): TypeMasteryRe
   return {
     diagnosticCorrect: a.diagnosticCorrect + b.diagnosticCorrect,
     diagnosticTotal: a.diagnosticTotal + b.diagnosticTotal,
+    quizCorrect: a.quizCorrect + b.quizCorrect,
+    quizTotal: a.quizTotal + b.quizTotal,
     linkingNotesOpened: a.linkingNotesOpened + b.linkingNotesOpened,
     shadowingCount: a.shadowingCount + b.shadowingCount,
     lessonsCompleted: a.lessonsCompleted + b.lessonsCompleted,
@@ -131,6 +140,8 @@ function parseMasteryJson(json: string): MasteryStoreData {
     out[key] = {
       diagnosticCorrect: sanitizeCount(rec.diagnosticCorrect),
       diagnosticTotal: sanitizeCount(rec.diagnosticTotal),
+      quizCorrect: sanitizeCount(rec.quizCorrect),
+      quizTotal: sanitizeCount(rec.quizTotal),
       linkingNotesOpened: sanitizeCount(rec.linkingNotesOpened),
       shadowingCount: sanitizeCount(rec.shadowingCount),
       lessonsCompleted: sanitizeCount(rec.lessonsCompleted),
@@ -313,6 +324,27 @@ export function recordMasteryDiagnostic(
   });
 }
 
+/** レッスン内ミニ聞き分けクイズ (#103) の結果を各タイプの証拠として加算する */
+export function recordMasteryQuiz(
+  results: readonly { type: LessonLinkingNote['type']; correct: boolean }[],
+): void {
+  if (results.length === 0) return;
+  const now = Date.now();
+  mutateData(() => {
+    const delta: MasteryStoreData = {};
+    for (const r of results) {
+      const prev = delta[r.type] ?? emptyRecord();
+      delta[r.type] = {
+        ...prev,
+        quizTotal: prev.quizTotal + 1,
+        quizCorrect: prev.quizCorrect + (r.correct ? 1 : 0),
+        lastPracticedAtMs: now,
+      };
+    }
+    return delta;
+  });
+}
+
 const STAGE_ORDER: Record<MasteryStage, number> = {
   weak: 0,
   developing: 1,
@@ -388,7 +420,11 @@ export function computeTypeMasteryList(
       graduatedWeakCount;
 
     const evidence =
-      rec.diagnosticTotal + practiceCount + activeWeakCount + graduatedWeakCount;
+      rec.diagnosticTotal +
+      rec.quizTotal +
+      practiceCount +
+      activeWeakCount +
+      graduatedWeakCount;
 
     if (evidence === 0) {
       return {
@@ -397,6 +433,8 @@ export function computeTypeMasteryList(
         stage: 'untested',
         diagnosticCorrect: rec.diagnosticCorrect,
         diagnosticTotal: rec.diagnosticTotal,
+        quizCorrect: rec.quizCorrect,
+        quizTotal: rec.quizTotal,
         activeWeakCount,
         graduatedWeakCount,
         linkingNotesOpened: rec.linkingNotesOpened,
@@ -407,12 +445,15 @@ export function computeTypeMasteryList(
       };
     }
 
-    const diagnosticBase =
-      rec.diagnosticTotal > 0
-        ? (rec.diagnosticCorrect / rec.diagnosticTotal) * 55
-        : activeWeakCount > 0 && practiceCount === 0
-          ? 24
-          : 40;
+    // 診断 + クイズの合算正答率を基本点にする。診断 0 問でクイズのみの場合は
+    // 診断なし扱い (24/40) を維持し、クイズは practiceBoost 側に反映する
+    const testedTotal = rec.diagnosticTotal + rec.quizTotal;
+    const hasDiagnostic = rec.diagnosticTotal > 0;
+    const diagnosticBase = hasDiagnostic
+      ? ((rec.diagnosticCorrect + rec.quizCorrect) / testedTotal) * 55
+      : activeWeakCount > 0 && practiceCount === 0
+        ? 24
+        : 40;
 
     const practiceBoost = Math.min(
       35,
@@ -420,7 +461,8 @@ export function computeTypeMasteryList(
         rec.shadowingCount * 5 +
         lessonsCompleted * 10 +
         rec.overcomingCompleted * 16 +
-        graduatedWeakCount * 8,
+        graduatedWeakCount * 8 +
+        rec.quizCorrect * 3,
     );
 
     const stabilityBonus = activeWeakCount === 0 && practiceCount >= 2 ? 12 : 0;
@@ -445,6 +487,8 @@ export function computeTypeMasteryList(
       stage,
       diagnosticCorrect: rec.diagnosticCorrect,
       diagnosticTotal: rec.diagnosticTotal,
+      quizCorrect: rec.quizCorrect,
+      quizTotal: rec.quizTotal,
       activeWeakCount,
       graduatedWeakCount,
       linkingNotesOpened: rec.linkingNotesOpened,
