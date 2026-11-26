@@ -963,10 +963,11 @@ function LessonPlayerScreen({
       completedRef.current = true;
       // 完了後の再生 (クイズの「もう一度聞く」等) で音声終端に再到達しても、
       // 完了の記録・習熟度加算・計測は初回の 1 回だけ発火させる
-      const firstCompletion = !lessonCompletedFiredRef.current;
-      if (firstCompletion) {
+      // 日別の完了記録は画面を開いたまま日付をまたいで再完走したときも残すため、
+      // 初回判定の外で呼ぶ (同日の重複は markLessonCompleted 側で除外される)
+      markLessonCompleted(lesson.id);
+      if (!lessonCompletedFiredRef.current) {
         lessonCompletedFiredRef.current = true;
-        markLessonCompleted(lesson.id);
         recordMasteryLessonCompleted(
           sentences.flatMap((s) => s.linking.map((n) => n.type)),
         );
@@ -1010,7 +1011,17 @@ function LessonPlayerScreen({
       sentence.startSec,
       `クイズ: 文${sentence.index + 1} をもう一度聞く`,
       () => {
-        if (seekTokenRef.current === token) play();
+        if (seekTokenRef.current !== token) return;
+        play();
+        // play() は失敗を通知しないため、シーク後すぐに再生が始まらなければ状態を戻す
+        // (「再生中…」でボタンが固まるのを防ぐフォールバック)
+        setTimeout(() => {
+          if (quizReplayRef.current !== sentence.index) return;
+          if (!quizReplayPlayingRef.current) {
+            quizReplayRef.current = null;
+            setQuizReplaying(false);
+          }
+        }, 1500);
       },
       () => {
         quizReplayRef.current = null;
@@ -1042,6 +1053,8 @@ function LessonPlayerScreen({
   }, [status.currentTime, status.playing, status.didJustFinish, status.duration, showQuiz]);
 
   const finishQuiz = () => {
+    // 再生中に閉じた場合は音声を止める (完了サマリの裏で鳴り続けないように)
+    if (quizReplayRef.current !== null) pause('クイズ: 終了時に再生を停止');
     quizReplayRef.current = null;
     setQuizReplaying(false);
     setShowQuiz(false);

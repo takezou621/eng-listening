@@ -445,15 +445,15 @@ export function computeTypeMasteryList(
       };
     }
 
-    // 診断 + クイズの合算正答率を基本点にする。診断 0 問でクイズのみの場合は
-    // 診断なし扱い (24/40) を維持し、クイズは practiceBoost 側に反映する
-    const testedTotal = rec.diagnosticTotal + rec.quizTotal;
-    const hasDiagnostic = rec.diagnosticTotal > 0;
-    const diagnosticBase = hasDiagnostic
-      ? ((rec.diagnosticCorrect + rec.quizCorrect) / testedTotal) * 55
-      : activeWeakCount > 0 && practiceCount === 0
-        ? 24
-        : 40;
+    // 基本点は診断単独の正答率のまま (診断 0 問時は従来どおり 24/40)。
+    // クイズは practiceBoost 側にのみ反映する (両方に乗せると二重加算になり、
+    // 診断件数が少ないときに数問のクイズでスコアが大きく振れるため)
+    const diagnosticBase =
+      rec.diagnosticTotal > 0
+        ? (rec.diagnosticCorrect / rec.diagnosticTotal) * 55
+        : activeWeakCount > 0 && practiceCount === 0
+          ? 24
+          : 40;
 
     const practiceBoost = Math.min(
       35,

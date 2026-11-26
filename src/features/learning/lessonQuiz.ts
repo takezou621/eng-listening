@@ -75,6 +75,11 @@ export function sentenceToPrompt(
   if (!span) return null;
   const at = indexOfIgnoreCase(sentence.text, span);
   if (at < 0) return null;
+  // 単語途中の一致 (例: span "go" が "good" に部分一致) は空欄問題にならないため除外する
+  const isWordChar = (ch: string) => /[A-Za-z0-9']/.test(ch);
+  const before = at > 0 ? sentence.text[at - 1] : ' ';
+  const after = at + span.length < sentence.text.length ? sentence.text[at + span.length] : ' ';
+  if (isWordChar(before) || isWordChar(after)) return null;
   const prompt = sentence.text.slice(0, at) + QUIZ_BLANK + sentence.text.slice(at + span.length);
   if (indexOfIgnoreCase(prompt, span) >= 0) return null;
   return prompt;
@@ -91,24 +96,26 @@ interface NoteCandidate {
   noteCount: number;
 }
 
-/** 外注 (正解以外の span) を最大 3 つ選ぶ。設問文に見えている span は後回し */
+/** 外注 (正解以外の span) を最大 3 つ選ぶ。正解と部分一致する span・設問文に見えている span は外す */
 function pickDistractors(
   correct: string,
   prompt: string,
   allSpans: readonly string[],
   random: () => number,
 ): string[] {
-  const preferred: string[] = [];
-  const fallback: string[] = [];
+  const correctLower = correct.toLowerCase();
+  const picked: string[] = [];
   for (const span of shuffle(allSpans, random)) {
-    if (span.toLowerCase() === correct.toLowerCase()) continue;
-    if (indexOfIgnoreCase(prompt, span) >= 0) {
-      fallback.push(span);
-      continue;
-    }
-    preferred.push(span);
+    const lower = span.toLowerCase();
+    if (lower === correctLower) continue;
+    // 正解と部分一致する span は空欄に複数の答えが成立するため外す
+    if (correctLower.includes(lower) || lower.includes(correctLower)) continue;
+    // 設問文にすでに見えている span は外す (消去法で正解が確定するため)
+    if (indexOfIgnoreCase(prompt, span) >= 0) continue;
+    picked.push(span);
+    if (picked.length >= QUIZ_OPTION_COUNT - 1) break;
   }
-  return [...preferred, ...fallback].slice(0, QUIZ_OPTION_COUNT - 1);
+  return picked;
 }
 
 /**
