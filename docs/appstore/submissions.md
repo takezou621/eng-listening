@@ -2,6 +2,69 @@
 
 ミミトレ (App ID 6837503600) の審査提出記録。run ID・時刻・ゲート結果を残す。
 
+## v1.6 (build 13) — 2026-11-27
+
+- セッション開始: 2026-11-27 02:03 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 03:01:55 JST**
+  (所要 **59 分** — 3 時間ルール内)
+- 内容テーマ: #103 レッスン内ミニ聞き分けクイズ (検索練習)。レッスン最終文の再生完了後・完了サマリの前に
+  「聞き分けチェック」(最大 2 問・4 択の空欄選択) を差し込む。純関数 `lessonQuiz.ts` が音変化ノートの span を
+  空欄にした設問を作り (苦手フレーズ登録済みの文を優先、選択肢は問ごとにシャッフル、正解と部分一致する span・
+  設問文に見える span は外注にしない)、解答後にのみ正解と音の変化を示す。正誤は苦手フレーズの間隔反復
+  (登録済みなら `recordWeakSentenceReview`、未登録で不正解なら自動登録) と音変化タイプ別習熟度
+  (`quizCorrect` / `quizTotal` を practiceBoost に反映) に連動。新規計測イベント
+  `lesson_quiz_shown` / `_answered` / `_skipped` を `docs/metrics.md` に先行定義。
+
+### 経路の記録
+
+| 手順 | 経路 | 時刻 (JST) | 結果 |
+|---|---|---|---|
+| 着手前事前確認 | ローカル + ASC API (読み取り) | 02:04–02:30 | (a) Watch: `expo-target.config.js` に icon 設定、`CFBundleIconName=AppIcon`、`UIBackgroundModes=audio`、`WKBackgroundModes` なしを確認 (b) Watch スクリーンショット: 1.5 の ja ローカライズに `APP_WATCH_SERIES_10` セット (2 枚 COMPLETE) を確認 → 既存を再利用 (c) `usesNonExemptEncryption` は spec に含まれない → VALID 後に API PATCH (v1.2〜1.5 と同一手順) |
+| 実装 | Orchestrator + DSH ワーカー → Orchestrator レビュー (omp は API キー環境変数が無く起動せず、規定により DSH 本体で実施) | 02:04–02:35 | metrics.md → 純関数 → モーダル → lesson.tsx 接続 → masteryStore。lint / typecheck PASS。シミュレータ (Mimitore-67) で Light/Dark 撮影 (`docs/ui/lesson-quiz-103/`) |
+| PR | PR #123 → squash マージ `bb3a844` | 02:36–02:51 | cubic: skipping / GitGuardian: PASS。CodeRabbit 指摘 2 件 (Major: 2 コミット目で `LessonQuizModal.tsx` の追加漏れ → 修正コミットで解消 / Minor: `markLessonCompleted` を初回判定の外へ → 対応)。セルフレビューの指摘のうち外注選抜の厳格化・単語境界チェック・終了時の再生停止・習熟度の二重加算解消を同一コミットで対応。スレッド解決後にマージ |
+| upload (第一候補) | **m4 (Mac mini) ローカル** `appstore-upload.sh --version 1.6 --build 13 --upload` (Aqua セッション直実行) | 02:51–02:56 | **アップロード成功** (altool "UPLOAD SUCCEEDED with no errors")。build id `e4664f48-796b-47bc-8931-b2d805437cac`。アーカイブ検証 OK: version=1.6 build=13 |
+| VALID 確認 | ASC API (builds) | 02:59 | **build 13 = VALID** (uploadedDate 2026-11-26T09:57:41-08:00) |
+| 暗号申告 | ASC API PATCH | 02:59 | `usesNonExemptEncryption = false` を build 13 に事前適用 |
+| apply | ローカル asc-submit run (run `20261127-030107-6807`) | 03:01:28 | version 1.6 作成 (`53dfa628-78f1-42a6-abcf-5fd9ec0d01c0`) + build 13 割当 + メタデータ (What's New ja / 説明 / キーワード / サブタイトル / 審査メモ / phased release) 反映 |
+| submit | ローカル asc-submit submit | 03:01:53 | **提出成功** (version 1.6 submitted for review) |
+| status | ローカル asc-submit + ASC API | 03:01:55 | **version 1.6 = WAITING_FOR_REVIEW** / releaseType AFTER_APPROVAL。reviewSubmission `96cbf194-21f2-4405-8d24-5cc8b0e64f77` = WAITING_FOR_REVIEW。サブスクは IAP 変更なしのため提出対象外 (v1.4・v1.5 と同じ) |
+
+- **upload 経路: m4 (Mac mini) ローカルのみ** (第一候補で成功。m1 ワークフローは v1.4・v1.5 で Code=513 が
+  繰り返し発生しているため本版では試行していない)。
+- **CI**: PR 向け GitHub Actions ワークフローは無し (App Store ワークフローのみ、runs-on は変更なし)。
+  PR のチェックは cubic / CodeRabbit / GitGuardian。ローカル `npm run lint` / `npm run typecheck` PASS。
+- iTunes Lookup (jp) は提出時点で version 1.4 を返した (ストア反映の遅延。ASC API では 1.5 = READY_FOR_SALE を確認)。
+
+### 提出前ゲートの結果
+
+- **最終バイナリ NS*UsageDescription 監査** (docs/operations.md §1.2、アップロードした `.ipa` を展開した
+  `Payload/app.app/Info.plist` で全件列挙。ネストした全バンドル (frameworks / plugins / bundles / Watch) の
+  Info.plist も走査 — アプリ本体以外は 0 件):
+  - `NSMicrophoneUsageDescription` =
+    「シャドーイング練習であなたの発音を録音し、この端末の中でお手本の音声と聞き比べるために使用します。録音した音声が外部に送信されることはありません。」
+    — 確定文を維持 (スクリプトの用途文字列ゲート `[4/7]` PASS + アーカイブ済み .app で再検査 PASS)
+  - `NSLocalNetworkUsageDescription` =
+    "Expo Dev Launcher uses the local network to discover and connect to development servers running on your computer."
+    — expo-dev-client の既定文 (v1.1〜v1.5 と同一条件、審査通過実績あり)
+  - 上記 2 件のみ (プラグイン既定文 "Allow ... to access" は 0 件)。クイズは新規権限を要求しない。
+  - 同梱 Watch バンドル: NS*UsageDescription 0 件・`CFBundleIconName = AppIcon`・version 1.6 / build 13 を確認
+- **spec**: `dist/appstore/release-1.6.json` (version 1.6 / build 13 / AFTER_APPROVAL / phasedRelease false / What's New ja) — validate PASS
+- **UI ルールブック** (PR #123 に §3 点検数値を記載): P1 プライマリ = 0 (解答前) / 1 (解答後「次へ」) / P2 初期ブロック 3 / P3 固定枠 0 / P4 2 行超 0 / P5 内部文字列 0 / P6 見出し 1 / P7 新規色定数なし。Light/Dark 実画面確認済み。
+- **W7 / W8**: W7 = クイズの設問画面・解答後画面を Light/Dark 両モードで撮影・確認 (`docs/ui/lesson-quiz-103/`)。
+  W8 = 全 15 レッスン / 30 問をコードで検査: 設問文に正解が含まれる問 0・外注が設問文に見える問 0・選択肢重複 0。
+  正解位置の分布 (30 問 × 200 回シャッフル) = 1477 / 1483 / 1493 / 1547 (固定なし)。モーダル背景は 0.85 の暗転にし、
+  背面の本文・キーフレーズから正解を読めないようにした。診断設問の変更はない。
+- watch スクリーンショット: 既存登録済みの実物を引き継ぎ (watch バンドルの内容変更なし・新規取得不要)。
+- iPhone Duo XCUITest: レイアウト大変更ではない (完了後のモーダル 1 つ) ため未実施 — 実機確認は TestFlight で実施。
+
+### 教訓 (次回改善)
+
+- 複数ファイルを一度に staged する際は `git show --stat HEAD` で新規ファイルの取り込みを確認する
+  (本版ではモーダルの新規ファイルが初回コミットから漏れ、レビューで発覚した)。
+- `usesNonExemptEncryption=false` は spec / asc-submit に依然含まれておらず、VALID 後の手動 PATCH が必要
+  (v1.5 の教訓を繰り越しました)。
+
+---
+
 ## v1.5 (build 12) — 2026-11-26
 
 - セッション開始: 2026-11-26 07:34 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 08:56:52 JST**
