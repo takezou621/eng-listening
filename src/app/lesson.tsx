@@ -37,8 +37,13 @@ import {
   recordMasteryLessonCompleted,
   recordMasteryLinkingNoteOpened,
   recordMasteryOvercomingCompleted,
+  recordMasteryQuiz,
   recordMasteryShadowing,
 } from '@/features/learning/masteryStore';
+import {
+  buildLessonQuiz,
+  type LessonQuizQuestion,
+} from '@/features/learning/lessonQuiz';
 import {
   getTargetSentenceIndicesForType,
   parseFocusType,
@@ -51,6 +56,7 @@ import {
   LinkingNoteSheet,
   PlaybackToolsSheet,
 } from '@/features/lesson/components/LessonSheets';
+import { LessonQuizModal } from '@/features/lesson/components/LessonQuizModal';
 import {
   ShadowingFooterBar,
   ShadowingStage,
@@ -348,7 +354,7 @@ function LessonPlayerScreen({
   const lesson = bundle.data;
   const sentences = lesson.sentences;
   const { scheme, colors } = useTheme();
-  const { isSentenceWeak, toggleWeakSentence, dailyGoalMinutes } = useUserData();
+  const { isSentenceWeak, toggleWeakSentence, recordWeakSentenceReview, weakSentences, dailyGoalMinutes } = useUserData();
   const router = useRouter();
   const progressDays = useProgressData();
   const { isPremium } = useEntitlement();
@@ -356,6 +362,15 @@ function LessonPlayerScreen({
   const [showSummary, setShowSummary] = useState(false);
   const [summarySeconds, setSummarySeconds] = useState(0);
   const summaryShownRef = useRef(false);
+  // lesson_completed (完了の記録・習熟度加算・計測) を初回完了時の 1 回だけ発火させる
+  const lessonCompletedFiredRef = useRef(false);
+  // 完了直後のミニ聞き分けクイズ (#103)。設問が作れないレッスンでは従来どおり完了サマリへ
+  const [quizQuestions, setQuizQuestions] = useState<LessonQuizQuestion[]>([]);
+  const [quizRun, setQuizRun] = useState(0);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [quizReplaying, setQuizReplaying] = useState(false);
+  const quizReplayRef = useRef<number | null>(null);
+  const quizReplayPlayingRef = useRef(false);
   // 計測用: 完了済みフラグ (lesson_abandoned を完了後に発火しない) と現在位置の ref
   const completedRef = useRef(false);
   const effectivePosRef = useRef(0);
@@ -946,21 +961,127 @@ function LessonPlayerScreen({
   useEffect(() => {
     if (status.didJustFinish) {
       completedRef.current = true;
+      // 完了後の再生 (クイズの「もう一度聞く」等) で音声終端に再到達しても、
+      // 完了の記録・習熟度加算・計測は初回の 1 回だけ発火させる
+      // 日別の完了記録は画面を開いたまま日付をまたいで再完走したときも残すため、
+      // 初回判定の外で呼ぶ (同日の重複は markLessonCompleted 側で除外される)
       markLessonCompleted(lesson.id);
-      recordMasteryLessonCompleted(
-        sentences.flatMap((s) => s.linking.map((n) => n.type)),
-      );
-      logEvent('lesson_completed', {
-        lessonId: lesson.id,
-        seconds: Math.round(sessionTotalSecondsRef.current),
-      });
+      if (!lessonCompletedFiredRef.current) {
+        lessonCompletedFiredRef.current = true;
+        recordMasteryLessonCompleted(
+          sentences.flatMap((s) => s.linking.map((n) => n.type)),
+        );
+        logEvent('lesson_completed', {
+          lessonId: lesson.id,
+          seconds: Math.round(sessionTotalSecondsRef.current),
+        });
+      }
       if (!summaryShownRef.current) {
         summaryShownRef.current = true;
         setSummarySeconds(Math.round(sessionTotalSecondsRef.current));
-        setShowSummary(true);
+        // デモ時はクイズを出さず従来どおり。0 問なら完了サマリへフォールバック
+        const questions = demoParam ? [] : buildLessonQuiz(lesson, weakSentences);
+        if (questions.length > 0) {
+          setQuizQuestions(questions);
+          setQuizRun((n) => n + 1);
+          setShowQuiz(true);
+          logEvent('lesson_quiz_shown', { lessonId: lesson.id, questionCount: questions.length });
+        } else {
+          setShowSummary(true);
+        }
       }
     }
-  }, [status.didJustFinish, lesson.id, sentences]);
+  }, [status.didJustFinish, lesson, sentences, demoParam, weakSentences]);
+
+  // --- ミニ聞き分けクイズ (#103): 文区間の再生・解答・終了 ---
+  // 既存 player のシーク→再生→文末 pause を使う (新しい Audio は作らない)。
+  // AB リピート・単文リピートと競合しないよう、再生前にそれらを解除する
+  const replayQuizSentence = (question: LessonQuizQuestion) => {
+    if (quizReplaying) return;
+    const sentence = sentences.find((s) => s.index === question.sentenceIndex);
+    if (!sentence) return;
+    cancelAsyncFlow();
+    setAb(null);
+    setRepeatSentence(null);
+    setQuizReplaying(true);
+    quizReplayPlayingRef.current = false;
+    quizReplayRef.current = sentence.index;
+    const token = ++seekTokenRef.current;
+    seekTo(
+      sentence.startSec,
+      `クイズ: 文${sentence.index + 1} をもう一度聞く`,
+      () => {
+        if (seekTokenRef.current !== token) return;
+        play();
+        // play() は失敗を通知しないため、シーク後すぐに再生が始まらなければ状態を戻す
+        // (「再生中…」でボタンが固まるのを防ぐフォールバック)
+        setTimeout(() => {
+          if (quizReplayRef.current !== sentence.index) return;
+          if (!quizReplayPlayingRef.current) {
+            quizReplayRef.current = null;
+            setQuizReplaying(false);
+          }
+        }, 1500);
+      },
+      () => {
+        quizReplayRef.current = null;
+        setQuizReplaying(false);
+      },
+    );
+  };
+
+  useEffect(() => {
+    const target = quizReplayRef.current;
+    if (target === null || !showQuiz) return;
+    const sentence = sentences.find((s) => s.index === target);
+    if (!sentence) return;
+    const endThreshold =
+      status.duration > 0 ? Math.min(sentence.endSec, status.duration - 0.05) : sentence.endSec;
+    if (status.playing) quizReplayPlayingRef.current = true;
+    const reachedEnd =
+      status.playing &&
+      (status.didJustFinish || status.currentTime >= endThreshold - 0.02);
+    const stoppedAfterStart = quizReplayPlayingRef.current && !status.playing;
+    // 文末 (または音声終端) に達したら停止し、再生中状態を解除する
+    if (reachedEnd || stoppedAfterStart) {
+      if (reachedEnd) pause('クイズ: 文末で停止');
+      quizReplayPlayingRef.current = false;
+      quizReplayRef.current = null;
+      setQuizReplaying(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status.currentTime, status.playing, status.didJustFinish, status.duration, showQuiz]);
+
+  const finishQuiz = () => {
+    // 再生中に閉じた場合は音声を止める (完了サマリの裏で鳴り続けないように)
+    if (quizReplayRef.current !== null) pause('クイズ: 終了時に再生を停止');
+    quizReplayRef.current = null;
+    setQuizReplaying(false);
+    setShowQuiz(false);
+    setShowSummary(true);
+  };
+
+  const handleQuizAnswered = (
+    question: LessonQuizQuestion,
+    _selectedText: string,
+    correct: boolean,
+  ) => {
+    logEvent('lesson_quiz_answered', {
+      lessonId: lesson.id,
+      questionIndex: quizQuestions.indexOf(question),
+      correct,
+      soundChangeType: question.soundChangeType,
+      wasWeak: question.wasWeak,
+    });
+    // 正誤連動: 登録済み文は復習結果を記録。未登録で不正解なら苦手フレーズに追加してから記録
+    if (isSentenceWeak(lesson.id, question.sentenceIndex)) {
+      recordWeakSentenceReview(lesson.id, question.sentenceIndex, correct);
+    } else if (!correct) {
+      toggleWeakSentence(lesson.id, question.sentenceIndex);
+      recordWeakSentenceReview(lesson.id, question.sentenceIndex, false);
+    }
+    recordMasteryQuiz([{ type: question.soundChangeType, correct }]);
+  };
 
   // AB リピート
   useEffect(() => {
@@ -1771,6 +1892,20 @@ function LessonPlayerScreen({
         autoRecordAfterModel={autoRecordAfterModel}
         onToggleAutoRecord={toggleAutoRecord}
         onClose={() => setShowToolsSheet(false)}
+      />
+
+      <LessonQuizModal
+        key={quizRun}
+        visible={showQuiz}
+        questions={quizQuestions}
+        replaying={quizReplaying}
+        onReplay={replayQuizSentence}
+        onAnswered={handleQuizAnswered}
+        onFinished={() => finishQuiz()}
+        onSkip={(answeredCount) => {
+          logEvent('lesson_quiz_skipped', { lessonId: lesson.id, answeredCount });
+          finishQuiz();
+        }}
       />
 
       <CompletionSummaryModal

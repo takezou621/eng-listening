@@ -1,6 +1,6 @@
 # ミミトレ 計測設計
 
-最終更新: 2026-11-26（計測計画 v2: イベント拡充・ユーザープロパティ・Crashlytics）
+最終更新: 2026-11-27（v1.6: レッスン内ミニ聞き分けクイズ `lesson_quiz_*` を追加。計測計画 v2: イベント拡充・ユーザープロパティ・Crashlytics）
 
 事業の最重要目的は「リリース」ではなく、インストールしたユーザーが使い続け、課金につながることです。その判断に使う指標と、アプリが記録するイベントを定義します。本書が計測の正であり、イベント名・意味を変更するときは本書を先に更新します。
 
@@ -51,7 +51,12 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `weak_phrase_graduated` | `lesson_id`, `review_count` | 苦手フレーズの定着・卒業到達数 |
 | `weak_phrase_playlist_started` | `item_count`, `sound_change_type`（タイプ別フィルタ中はそのタイプ名、すべてのときは省略） | 連続復習プレイリストの開始数・利用規模 |
 | `weak_phrase_playlist_finished` | `item_count`, `played_count`, `completed` | 連続復習の完走率と中断位置の把握 |
+| `lesson_quiz_shown` | `lesson_id`, `question_count` | レッスン完了直後に差し込むミニ聞き分けクイズ (#103) の提示数。設問を作れないレッスンでは発火しない |
+| `lesson_quiz_answered` | `lesson_id`, `question_index`, `correct`, `sound_change_type`, `was_weak` | 検索練習 (空欄選択) の正答動向。`was_weak` は出題文が事前に苦手フレーズ登録済みだったか |
+| `lesson_quiz_skipped` | `lesson_id`, `answered_count` | クイズを中断して完了画面へ進めた割合 (導線の負担になりすぎていないか) |
 | `screen_view` | `screen_name`（home/phrases/progress/settings/lesson/onboarding/paywall/legal） | 画面遷移・滞在の把握（自動収集と併用） |
+
+クイズ (`lesson_quiz_*`) はレッスン最終文の再生完了後・完了画面の前に最大 2 問を出す。正誤は苦手フレーズの復習スケジュール (`weak_phrase_reviewed` と同じ間隔反復) と音変化タイプ別習熟度にも反映されるため、クイズ経由で苦手フレーズが追加・昇段した場合は `weak_phrase_added` / `weak_phrase_graduated` も併発する。`sound_change_type` は出題した空欄の音変化タイプ。
 
 `weak_phrase_playlist_finished` の `played_count` は、モデル音声を文末まで聞いた、または録音を完了したフレーズの件数（「次へ」で読み飛ばした分は含まない）。`completed` は最後のフレーズまで到達したときに `true`、途中で閉じたときに `false`。
 

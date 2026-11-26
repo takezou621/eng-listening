@@ -37,5 +37,7 @@ New in version 1.2: three new lessons focus on assimilation, intrusion, and weak
 
 New in version 1.3: the personal curriculum (three-step lesson order on the home screen) can now be adjusted manually — learners can pick up to three sound-change types to focus on and a difficulty level (all / beginner / intermediate). Untouched items keep the automatic recommendations. No changes to billing, pricing, or accounts in this release. The release adds one analytics event, `curriculum_customized`, which sends the chosen action, sound-change type, and difficulty level to the existing Firebase Analytics integration — values already collected by other events, with no new personal data.
 
+New in version 1.6: after finishing a lesson, the app shows a mini listening quiz of up to two fill-in-the-blank questions so the learner can check right away whether they heard the targeted sound change. Phrases answered incorrectly are added automatically to the in-app "difficult phrases" list and its review queue (stored on the device). To verify: complete any lesson, answer the quiz (one correct, one incorrect), then open the "苦手フレーズ" (difficult phrases) screen — the missed phrase appears in the list and in its review queue. The quiz requires no sign-in, no new permissions, no network call beyond the existing analytics, and is available to free users. No changes to billing or pricing in this release.
+
 ---
 
