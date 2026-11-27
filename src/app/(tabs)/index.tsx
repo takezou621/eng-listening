@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View, AppState } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
 import { Chip } from '@/components/Chip';
@@ -61,7 +61,7 @@ export default function LibraryScreen() {
     openLessonWithResume({
       lessonId,
       resumeAt: lessonResume[lessonId] ?? null,
-      push: (path) => router.push(path as never),
+      push: (path) => router.push(path as Href),
       alert: Alert.alert,
     });
   const [curriculumVisible, setCurriculumVisible] = useState(false);
@@ -338,7 +338,7 @@ export default function LibraryScreen() {
               {todaysLesson.item.entry.title}
             </ThemedText>
             {lessonResume[todaysLesson.item.entry.id] ? (
-              <ThemedText variant="caption" color="primary" style={{ fontWeight: '600' }}>
+              <ThemedText variant="caption" color="primary" style={styles.resumeHint}>
                 文 {lessonResume[todaysLesson.item.entry.id] + 1} から再開できます
               </ThemedText>
             ) : null}
@@ -599,6 +599,7 @@ export default function LibraryScreen() {
 }
 
 const styles = StyleSheet.create({
+  resumeHint: { fontWeight: '600' },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',

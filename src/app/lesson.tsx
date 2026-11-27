@@ -1196,6 +1196,14 @@ function LessonPlayerScreen({
     effectivePosRef.current = effectivePos;
   }, [effectivePos]);
 
+  // 再開位置は文が進むたびに保存する (アンマウント時にアプリが殺されても失わないようにする)。
+  // 完了後は保存しない (完了処理で clear される)。
+  useEffect(() => {
+    if (completedRef.current) return;
+    saveLessonResumePosition(lesson.id, effectivePos);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectivePos]);
+
   // 未完了のままレッスンを離れたら lesson_abandoned を記録する (完了後は記録しない)。
   // このコンポーネントはレッスン ID で key 付けされるため、アンマウント = 離脱とみなせる。
   useEffect(() => {

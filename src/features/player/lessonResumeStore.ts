@@ -35,7 +35,7 @@ function parseResume(json: string): ResumeData {
   if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
   const out: ResumeData = {};
   for (const [lessonId, value] of Object.entries(parsed as Record<string, unknown>)) {
-    if (typeof lessonId !== 'string' || lessonId.length === 0) continue;
+    if (lessonId.length === 0) continue;
     if (typeof value !== 'number' || !Number.isFinite(value) || value < 1) continue;
     out[lessonId] = Math.floor(value);
   }
@@ -69,8 +69,9 @@ function loadAsync(): Promise<void> {
       canPersist = true;
     } catch (e) {
       console.error('Failed to load lesson resume data:', e);
+      // 再試行可能にする: isLoaded は立てず、次回の ensureLoaded() で読み込みをやり直す
+      // (canPersist は false のまま = 既存ファイルを保護する)
       loadPromise = null;
-      isLoaded = true;
       return;
     }
     isLoaded = true;
@@ -196,7 +197,7 @@ export function openLessonWithResume({
     `このレッスンは文 ${sentenceNumber} まで進んでいます。どこからはじめますか？`,
     [
       { text: 'キャンセル', style: 'cancel' },
-      { text: '先頭から', style: 'cancel', onPress: () => choose('restart') },
+      { text: '先頭から', onPress: () => choose('restart') },
       // iOS では style 'default' が太字 (プライマリ相当) で表示される
       { text: `文 ${sentenceNumber} から再開`, style: 'default', onPress: () => choose('resume') },
     ],
