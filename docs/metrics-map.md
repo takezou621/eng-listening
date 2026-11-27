@@ -124,9 +124,9 @@
 | K2 | 再開利用率 | `lesson_resume_chosen` (`choice` = `resume`) ÷ `lesson_resume_offered` | 「先頭から」率は `choice` = `restart`。再開提案の出現率 = `lesson_resume_offered` ÷ `lesson_started` |
 | K3 | 復習完走率 | `weak_phrase_playlist_finished` (`completed` = `true`) ÷ `weak_phrase_playlist_finished` (全体) | 到達度の補助に `played_count ÷ item_count`。定着は `weak_phrase_graduated` 件数、自己想起正答は `weak_phrase_reviewed` (`remembered` = `true`) ÷ 全体 |
 | K4 | クイズ正答率 | `lesson_quiz_answered` (`correct` = `true`) ÷ `lesson_quiz_answered` (全体) | `sound_change_type` 別、`was_weak` 別に分ける。スキップ率 = `lesson_quiz_skipped` ÷ `lesson_quiz_shown` |
-| K5 | ペイウォール CVR | `purchase_completed` (`product_id` ≠ `restored`) ÷ `paywall_viewed` | 中間に `paywall_plan_selected`、`purchase_started`。`from` 別、`plan` 別に分ける。収益は `purchase_completed` の `value` 合計。トライアル開始と有料購入は区別できない (`trial_started` 未実装) |
+| K5 | ペイウォール CVR | `purchase_completed` (`product_id` ≠ `restored`) ÷ `paywall_viewed`。単位は **ユーザー単位** (期間内にペイウォールを見たユーザー数を分母に、そのうち購入完了イベントを持つユーザー数を分子にする GA4 のユーザー数指標)。イベント数の比は同じユーザーの複数回閲覧で過小評価になる | プランは `product_id` で判定する (`com.takezou.englistening.premium.monthly` = 月額、`…premium.annual` = 年額)。中間に `paywall_plan_selected`、`purchase_started`。**`from` 別はユーザー単位では分離できない** (`purchase_completed` に `from` が無いため。D-12)。`from` 別は `paywall_viewed` → `purchase_started` の **セッション単位** の比較に留める。`paywall_plan_selected` はユーザーがタップしたときだけ発火し、既定の年額のまま購入した場合は出ない。収益は `purchase_completed` の `value` 合計。トライアル開始と有料購入は区別できない (`trial_started` 未実装) |
 | K6 | D1 / D7 継続 | GA4 の継続レポート (初回起動日 `first_open` を起点に 1 日後・7 日後にイベントのあるユーザーの割合) | アプリ独自イベントは使わない (GA4 の自動収集が正)。`diagnostic_level`・`lessons_completed_bucket`・`premium_status` で分割する |
-| K7 | Aha 到達率 | `onboarding_completed` ÷ `app_first_open` | `docs/metrics.md` §6 の目標 60%。`onboarding_skipped` ÷ `app_first_open` がスキップ率 |
+| K7 | Aha 到達率 | **初回起動ユーザーのコホート** (初回起動日ごと) のうち、`onboarding_completed` を持つユーザーの割合。GA4 では探索で `app_first_open` を持つユーザーを軸に `onboarding_completed` の有無で分ける | `docs/metrics.md` §6 の目標 60%。スキップ率も同じコホート基準 (`onboarding_skipped` を持つユーザー ÷ コホート)。同じ期間のイベント数の比は、期間前に初回起動したユーザーが分子だけに入り 100% を超え得るため使わない |
 | — | North Star | 週に 3 回以上 `lesson_completed` したユーザー数 | `docs/metrics.md` §6 の定義どおり |
 
 ## 5. 乖離・留意点一覧 (次版候補)
@@ -137,15 +137,16 @@
 |---|---|---|---|
 | D-1 | 定義と実装の違い | `screen_view` は GA4 にだけ送られ、端末内ログ (`analytics-log.json`) には残らない (`logEvent` を通さず `logScreenView` を直接呼ぶ)。`AnalyticsEventType` 型にも含まれない | GA4 の集計には影響なし。端末内ログで画面遷移を確認できない。Firebase 自動収集の `screen_view` と同じイベント名で混ざるため、GA4 では `firebase_screen` パラメータも併記される |
 | D-2 | 文書の古さ | `docs/metrics.md` §2 冒頭の「v1 で 9 イベントに v2 で 13 イベントを追加」は現在の 37 行と合わない | v1.8 で修正済み |
-| D-3 | 定義に無い値 | `purchase_completed` の復元時に `restored: true` が送られるが、§2 のパラメータ欄に `restored` が無い (本文中には記載あり) | K5 で除外条件に使うため、パラメータ欄への追記が望ましい |
+| D-3 | 定義に無い値 | `purchase_completed` の復元時に `restored: true` が送られるが、`docs/metrics.md` §2 のパラメータ欄に `restored` が無かった | **v1.8 で解消** (パラメータ欄に追記。コード変更なし) |
 | D-4 | 定義に無い値 | `onboarding_completed` の種別別 correct/missed は `linking` / `reduction` / `flapping` の 3 種のみ。診断は 8 種に拡張されたが、残り 5 種 (同化・挿入・弱読など) の内訳は入っていない | 8 種別の内訳は `diagnostic_answered` の `sound_change_type` で代用できる |
 | D-5 | 値の意味 | `diagnostic_answered` / `lesson_quiz_answered` の `question_index` は 0 始点 | 1 問目を「0」として集計すること |
-| D-6 | 値の意味 | `weak_phrase_reviewed` の `stage` は判定を反映した **後** の段 (0 が「聞き取れなかった」直後) | 段別の正答を見るときは 1 つ前の段として解釈する |
+| D-6 | 値の意味 | `weak_phrase_reviewed` の `stage` は判定を反映した **後** の段。`remembered: true` では回答前の段は `stage − 1`。`remembered: false` では `applyReviewOutcome` が段を 0 に戻すため、どの段で不正解だったかは分からない | 段別の正答率は **成功イベントだけで**見る (`remembered: true` の `stage − 1` = 昇段できた段)。不正解は段別に分離できないため、「段 N の正答率」ではなく「段 N からの昇段件数」と「不正解の総件数」を併記する |
 | D-7 | 値の意味 | `lesson_abandoned` は最終文の再生中に離脱した場合も `75-99` に入る (`ratio` が 1 でも同じ括くり)。`lesson_completed.seconds` は再開をまたがない今回のセッション分のみ | 完走率には影響しない |
 | D-8 | 識別不能 | `lesson_started` に入口 (今日の1本 / 推薦 / 復習キュー / ライブラリ / 診断結果) を表すパラメータが無い (レッスンルートに `from` を渡していない) | v1.4 (#93) の推薦接続の効果を GA4 だけで直接測れない |
 | D-9 | 識別不能 | `weak_phrase_added` は手動登録とクイズ不正解による自動登録が同じ関数から発火し、区別できない | v1.6 の「クイズ → 苦手フレーズ登録」の数を単独で数えられない (近似値: `lesson_quiz_answered` (`correct` = `false`, `was_weak` = `false`) の件数) |
 | D-10 | 識別不能 | `shadowing_recorded` はレッスン内と復習プレイリスト内の両方から発火し、同じ `lesson_id` のみ | 復習プレイリストでのシャドーイング実施数を単独で数えられない |
 | D-11 | コメントの古さ | `analyticsStore.ts` の `logEvent` にある JSDoc に「課金関連イベントの呼び出し箇所は現状存在しない」とあるが、`paywall.tsx` で発火している | 挙動への影響なし。次にコードに触れる版でコメントを直す |
+| D-12 | 識別不能 | `purchase_completed` / `purchase_started` に `from` (ペイウォールの流入元) と `plan` が無い。`from` は `paywall_viewed` にだけある | K5 を流入元別に分離できない (§4 K5)。`paywall_viewed` 時点の `from` を購入完了まで持ち回すパラメータの追加が次版候補 |
 
 ## 6. GA4 側の確認事項 (オーナー作業)
 
