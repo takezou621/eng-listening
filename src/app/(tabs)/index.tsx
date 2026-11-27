@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, View, AppState } from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View, AppState } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
@@ -18,6 +18,7 @@ import { summarizeReviewQueue } from '@/features/learning/spacedRepetition';
 import { getLessonList, getTodaysLesson } from '@/features/lesson/registry';
 import { isOnboardingDone, loadUserDataAsync, useUserData } from '@/features/library/userStore';
 import { logEvent } from '@/features/analytics/analyticsStore';
+import { openLessonWithResume, useLessonResumeData } from '@/features/player/lessonResumeStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 import {
   computeDailyGoalStatus,
@@ -54,6 +55,15 @@ export default function LibraryScreen() {
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [filterLevel, setFilterLevel] = useState<FilterLevel>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  // レッスンごとの再開位置 (#97)。ホームの 3 箇所 (今日の1本 / レッスンカード / カリキュラム) で使う
+  const lessonResume = useLessonResumeData();
+  const openLesson = (lessonId: string) =>
+    openLessonWithResume({
+      lessonId,
+      resumeAt: lessonResume[lessonId] ?? null,
+      push: (path) => router.push(path as never),
+      alert: Alert.alert,
+    });
   const [curriculumVisible, setCurriculumVisible] = useState(false);
   const [customizeVisible, setCustomizeVisible] = useState(false);
 
@@ -284,7 +294,7 @@ export default function LibraryScreen() {
       {isFilterDefault && todaysLesson ? (
         <View style={styles.heroStack}>
           <Pressable
-            onPress={() => router.push(`/lesson?lesson=${todaysLesson.item.entry.id}`)}
+            onPress={() => openLesson(todaysLesson.item.entry.id)}
             accessibilityRole="button"
             accessibilityLabel={`${todaysLesson.isReview ? '復習におすすめ' : '今日の1本'}: ${todayBundle?.data.titleJa ?? todaysLesson.item.entry.title}。今日の目標は ${goalStatus.todayMinutes} 分 / ${goalStatus.goalMinutes} 分${goalStatus.achieved ? '、目標達成' : ''}`}
             accessibilityHint="タップでレッスンをはじめる"
@@ -327,6 +337,11 @@ export default function LibraryScreen() {
             <ThemedText variant="caption" color="muted" numberOfLines={1}>
               {todaysLesson.item.entry.title}
             </ThemedText>
+            {lessonResume[todaysLesson.item.entry.id] ? (
+              <ThemedText variant="caption" color="primary" style={{ fontWeight: '600' }}>
+                文 {lessonResume[todaysLesson.item.entry.id] + 1} から再開できます
+              </ThemedText>
+            ) : null}
             <ThemedText variant="caption" color="muted">
               約 {Math.round(todayBundle?.data.durationSec ?? 0)} 秒 ・{' '}
               {todayBundle?.data.sentences.length ?? 0} 文
@@ -446,7 +461,7 @@ export default function LibraryScreen() {
           return (
             <Pressable
               disabled={bundle === null}
-              onPress={() => router.push(`/lesson?lesson=${entry.id}`)}
+              onPress={() => openLesson(entry.id)}
               accessibilityRole="button"
               accessibilityState={{ disabled: bundle === null }}
               accessibilityLabel={`${entry.titleJa}（${CONTENT_TYPE_LABELS[entry.type]}・${entry.level === 'beginner' ? '初級' : '中級'}${completedLessonIds.has(entry.id) ? '・完了済み' : ''}）${bundle ? `、約 ${bundle.data.durationSec.toFixed(0)} 秒・${bundle.data.sentences.length} 文` : '、準備中'}`}
@@ -513,7 +528,7 @@ export default function LibraryScreen() {
               </ThemedText>
               <ThemedText variant="caption" color="muted">
                 {bundle
-                  ? `約 ${bundle.data.durationSec.toFixed(0)} 秒 ・ ${bundle.data.sentences.length} 文${noteCount > 0 ? ` ・ 音変化 ${noteCount} 箇所` : ''}`
+                  ? `約 ${bundle.data.durationSec.toFixed(0)} 秒 ・ ${bundle.data.sentences.length} 文${noteCount > 0 ? ` ・ 音変化 ${noteCount} 箇所` : ''}${lessonResume[entry.id] ? ` ・ 文 ${lessonResume[entry.id] + 1} から再開可` : ''}`
                   : '準備中'}
               </ThemedText>
             </Pressable>
@@ -524,7 +539,7 @@ export default function LibraryScreen() {
       <CurriculumSheet
         visible={curriculumVisible}
         curriculum={curriculum}
-        onSelectLesson={(lessonId) => router.push(`/lesson?lesson=${lessonId}`)}
+        onSelectLesson={(lessonId) => openLesson(lessonId)}
         onClose={() => setCurriculumVisible(false)}
         isCustomized={curriculum.isCustomizedManually}
         onOpenCustomize={() => {

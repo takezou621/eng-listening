@@ -29,6 +29,8 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `lesson_started` | `lesson_id` | レッスン別の開始数 |
 | `lesson_completed` | `lesson_id`, `seconds` | 完了率・North Star の分子 |
 | `lesson_abandoned` | `lesson_id`, `progress_bucket`（0-25/25-50/50-75/75-99） | **離脱箇所**: どこまで進めて辞めたか |
+| `lesson_resume_offered` | `lesson_id`, `sentence_index`（1 始点の文番号） | ホームから再開選択ダイアログを表示した回数（#97 前半） |
+| `lesson_resume_chosen` | `lesson_id`, `sentence_index`, `choice`（resume/restart） | 再開するか先頭からかの選択結果 |
 | `lesson_mode_changed` | `lesson_id`, `mode`（listen/read/speak/script） | コア機能（3モード）の利用動向 |
 | `linking_note_opened` | `lesson_id`, `sound_change_type` | 差別化機能（音変化の解説）が使われているか |
 | `playback_control` | `lesson_id`, `action`（speed/jump/replay/ab_repeat） | 再生操作の利用動向 |

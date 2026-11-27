@@ -31,6 +31,8 @@ export type AnalyticsEventType =
   | 'lesson_quiz_answered'
   | 'lesson_quiz_skipped'
   | 'lesson_abandoned'
+  | 'lesson_resume_offered'
+  | 'lesson_resume_chosen'
   | 'lesson_mode_changed'
   | 'linking_note_opened'
   | 'playback_control'

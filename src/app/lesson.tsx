@@ -95,6 +95,10 @@ import {
   markLessonCompleted,
   useProgressData,
 } from '@/features/progress/progressStore';
+import {
+  clearLessonResumePosition,
+  saveLessonResumePosition,
+} from '@/features/player/lessonResumeStore';
 import { useTheme } from '@/theme/AppThemeProvider';
 
 const LESSON_MODES: readonly { key: LessonMode; label: string }[] = [
@@ -966,6 +970,8 @@ function LessonPlayerScreen({
       // 日別の完了記録は画面を開いたまま日付をまたいで再完走したときも残すため、
       // 初回判定の外で呼ぶ (同日の重複は markLessonCompleted 側で除外される)
       markLessonCompleted(lesson.id);
+      // 完了したレッスンに再開位置は不要なので消す (ホームで再開ダイアログを出さない)
+      clearLessonResumePosition(lesson.id);
       if (!lessonCompletedFiredRef.current) {
         lessonCompletedFiredRef.current = true;
         recordMasteryLessonCompleted(
@@ -1200,6 +1206,12 @@ function LessonPlayerScreen({
       const progressBucket =
         ratio < 0.25 ? '0-25' : ratio < 0.5 ? '25-50' : ratio < 0.75 ? '50-75' : '75-99';
       logEvent('lesson_abandoned', { lessonId: lesson.id, progressBucket });
+      // 未完了のまま離脱したら、最終再生文位置を保存してホームから再開できるようにする
+      if (effectivePosRef.current >= 1) {
+        saveLessonResumePosition(lesson.id, effectivePosRef.current);
+      } else {
+        clearLessonResumePosition(lesson.id);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
