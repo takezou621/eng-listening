@@ -39,5 +39,7 @@ New in version 1.3: the personal curriculum (three-step lesson order on the home
 
 New in version 1.6: after finishing a lesson, the app shows a mini listening quiz of up to two fill-in-the-blank questions so the learner can check right away whether they heard the targeted sound change. Phrases answered incorrectly are added automatically to the in-app "difficult phrases" list and its review queue (stored on the device). To verify: complete any lesson, answer the quiz (one correct, one incorrect), then open the "苦手フレーズ" (difficult phrases) screen — the missed phrase appears in the list and in its review queue. The quiz requires no sign-in, no new permissions, no network call beyond the existing analytics, and is available to free users. No changes to billing or pricing in this release.
 
+
+New in version 1.7: when a learner leaves a lesson partway through, the app remembers the last sentence played (stored only on the device) and, the next time that lesson is opened from the home screen, offers to resume from that sentence or start from the beginning. To verify: open any lesson, play to sentence 4, go back, tap the same lesson card — a dialog offers "文 4 から再開" / "先頭から". Finishing a lesson clears the saved position. No sign-in, no new permissions, no network call beyond the existing analytics, and available to free users. No changes to billing or pricing in this release.
 ---
 
