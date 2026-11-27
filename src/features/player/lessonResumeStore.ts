@@ -107,6 +107,7 @@ export function saveLessonResumePosition(lessonId: string, sentenceIndex: number
     clearLessonResumePosition(lessonId);
     return;
   }
+  if (cachedData[lessonId] === idx) return; // 同値は再書き込みしない
   const rest = { ...cachedData };
   delete rest[lessonId];
   const entries = Object.entries(rest);
