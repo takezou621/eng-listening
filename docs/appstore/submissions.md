@@ -2,6 +2,60 @@
 
 ミミトレ (App ID 6837503600) の審査提出記録。run ID・時刻・ゲート結果を残す。
 
+## v1.8 (build 15) — 2026-11-28
+
+- セッション開始: 2026-11-28 05:33 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 05:52:45 JST** (submit 05:52:37)
+  (所要 **約 20 分** — 3 時間ルール内)
+- 内容テーマ: v1.1〜v1.7 の学習ループ計測の **定義と実装の棚卸し・突合 (docs のみ・挙動変更なし)**。
+  `docs/metrics-map.md` を新設し、`docs/metrics.md` §2/§3 の全イベント (37 行・38 種) を `logEvent` 51 箇所・
+  `logScreenView` 1 箇所・ユーザープロパティ設定 4 箇所と突合 (定義のみ/実装のみの乖離は 0 件)。版別テーマ (v1.1〜v1.7) ↔
+  イベント ↔ KPI の対応表、KPI 7 項目の GA4 集計定義、乖離・留意点 12 件 (次版候補) を記録。
+  **#97 は前半完了・後半 (聞くだけ／ハンズフリー連続再生モード) は未実装** であることを対応表に明記。
+  アプリコードの変更は `appConfig.json` の version 1.7 → 1.8 のみ。イベントの追加・削除・改名・画面・文言の変更は無し。
+
+### 経路の記録
+
+| 手順 | 経路 | 時刻 (JST) | 結果 |
+|---|---|---|---|
+| 着手前事前確認 | ローカル + ASC API (読み取り) | 05:35–05:36 | (a) Watch: `targets/watch/expo-target.config.js` の icon を確認。最終バイナリで `CFBundleIconName=AppIcon`・`WKBackgroundModes` なしを確認 (下記ゲート) (b) Watch スクリーンショット: v1.7 の ja ローカライズに `APP_WATCH_SERIES_10` セット 2 枚 COMPLETE → ASC が引き継ぎ (再取得不要) (c) `usesNonExemptEncryption` は spec / asc-submit に含まれない → VALID 後に API PATCH |
+| 実装 | DSH 本体 (omp は未インストール・`ZAI_API_KEY` 未設定のため、規定により DSH 本体で実施) | 05:37–05:41 | 突合スクリプトで発火箇所を抽出 → metrics-map.md → metrics.md → metadata-ja.md → appConfig.json。lint / typecheck PASS |
+| PR | PR #127 → squash マージ `ce1ab0f` | 05:41–05:51 | GitGuardian: PASS / cubic: skipping / CodeRabbit: pass (Actionable 4 件) / Greptile: pass (指摘 2 件)。全 6 件を実コードで検証し成立 (`applyReviewOutcome` が不正解時に段を 0 に戻す、`purchase_completed` に `from`/`plan` が無い、既定プランは年額、K7 の分母) → K5/K7 の集計単位・D-3 (解消済み)・D-6 を修正し D-12 を追加。返信 + resolve 後にマージ |
+| upload | **m4 (Mac mini) ローカル** `appstore-upload.sh --version 1.8 --build 15 --upload` (Aqua セッション直実行、ブランチの作業ツリーから。アプリコードはマージ後の main と同一) | 05:41:59–05:47:45 | **アップロード成功** (altool "UPLOAD SUCCEEDED with no errors"、build id `00967f35-7a41-439e-a798-976c060822ed`)。アーカイブ検証 OK: version=1.8 build=15 |
+| VALID 確認 | ASC API (builds) | 05:51 | **build 15 = VALID** (uploadedDate 2026-11-27T12:48:53-08:00) |
+| 暗号申告 | ASC API PATCH | 05:51 | `usesNonExemptEncryption = false` を build 15 に適用 (再取得で false を確認) |
+| apply | ローカル asc-submit run (run `20261128-055204-b2c8`) | 05:52:04–05:52:20 | version 1.8 作成 (`12559553-80ab-4c31-842b-3b8cdf273344`) + build 15 割当 + メタデータ (What's New ja / 説明 / キーワード / サブタイトル / 審査メモ / phased release) 反映 |
+| submit | ローカル asc-submit submit --version 1.8 | 05:52:37 | **提出成功** (version 1.8 submitted for review) |
+| status | ASC API | 05:52:45 | **version 1.8 = WAITING_FOR_REVIEW** / releaseType AFTER_APPROVAL。reviewSubmission `617ab7cb-dfac-44e9-9d97-e881cb006157` (iOS) = WAITING_FOR_REVIEW、item は appStoreVersion 1 件 (READY_FOR_REVIEW)。サブスクは IAP 変更なしのため提出対象外 (v1.4〜v1.7 と同じ) |
+
+- **upload 経路: m4 (Mac mini) ローカルのみ** (第一候補で成功。m1 ワークフローは前例の Code=513 があるため本版では試行していない)。
+- **CI**: PR 向け GitHub Actions ワークフローは無し (App Store ワークフローのみ、runs-on は変更なし)。ローカル `npm run lint` / `npm run typecheck` PASS。
+- What's New (1.8) = 「・新しい機能や画面の変更はありません」(挙動変更が無いことを明示)。審査メモ (review-notes.md) は 3,890 字で上限 4,000 字に近く、v1.8 の追記は見送り (v1.4・v1.5 も同様に追記なし)。
+
+### 提出前ゲートの結果
+
+- **最終バイナリ NS*UsageDescription 監査** (docs/operations.md §1.2、アップロードした `.ipa` を展開し、
+  `Payload/` 配下の全 Info.plist を走査):
+  - `app.app/Info.plist` `NSMicrophoneUsageDescription` =
+    「シャドーイング練習であなたの発音を録音し、この端末の中でお手本の音声と聞き比べるために使用します。録音した音声が外部に送信されることはありません。」
+    — 確定文を維持 (スクリプトの用途文字列ゲート `[4/7]` PASS)
+  - `app.app/Info.plist` `NSLocalNetworkUsageDescription` =
+    "Expo Dev Launcher uses the local network to discover and connect to development servers running on your computer."
+    — expo-dev-client の既定文 (v1.1〜v1.7 と同一条件、審査通過実績あり)
+  - 上記 2 件のみ (プラグイン既定文 "Allow ... to access" は 0 件)。本版は新規権限を要求しない。
+  - 同梱 Watch バンドル (`Watch/watch.app`): NS*UsageDescription 0 件・`CFBundleIconName = AppIcon`・version 1.8 / build 15 を確認
+- **spec**: `dist/appstore/release-1.8.json` (version 1.8 / build 15 / AFTER_APPROVAL / phasedRelease false / What's New ja) — validate PASS
+- **UI ゲート (W2/W3/W7/W8)・iPhone Duo XCUITest**: 画面・レイアウト・設問の変更が無いため対象外 (v1.7 の確認を踏襲)。
+- watch スクリーンショット: 既存登録済みの実物を引き継ぎ (watch バンドルの内容変更なし・新規取得不要)。
+
+### 教訓 (次回改善)
+
+- `usesNonExemptEncryption=false` は spec / asc-submit に依然含まれておらず、VALID 後の手動 PATCH が必要 (v1.5〜v1.7 の教訓を繰り越し)。
+- 審査メモ (review-notes.md) が上限 4,000 字まで残り約 110 字。次にユーザーから見える変更を出す版では、過去版の記述を要点に圧縮する必要がある。
+- KPI の集計定義を書く際は「イベント数の比」で済まないものがある (コホート基準の K7、ユーザー単位の K5)。`purchase_completed` に `from` / `plan` が無いことは GA4 側の設定では解決できないため、次版候補 (metrics-map.md D-12)。
+- GA4 コンソール側の確認 (キーイベント 3 件、v1.4〜v1.7 パラメータのカスタム定義登録) はアプリ外の作業。12 月の実測判断前に実施する (metrics-map.md §6)。
+
+---
+
 ## v1.7 (build 14) — 2026-11-27
 
 - セッション開始: 2026-11-27 16:52 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 18:23:06 JST** (submit 18:22:38)
