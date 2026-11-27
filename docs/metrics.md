@@ -1,6 +1,6 @@
 # ミミトレ 計測設計
 
-最終更新: 2026-11-27（v1.6: レッスン内ミニ聞き分けクイズ `lesson_quiz_*` を追加。計測計画 v2: イベント拡充・ユーザープロパティ・Crashlytics）
+最終更新: 2026-11-28（v1.8: イベント ↔ 発火箇所 ↔ KPI の対応表を `docs/metrics-map.md` に新設。v1.7: `lesson_resume_*` を追加。計測計画 v2: イベント拡充・ユーザープロパティ・Crashlytics）
 
 事業の最重要目的は「リリース」ではなく、インストールしたユーザーが使い続け、課金につながることです。その判断に使う指標と、アプリが記録するイベントを定義します。本書が計測の正であり、イベント名・意味を変更するときは本書を先に更新します。
 
@@ -16,7 +16,9 @@
 
 ## 2. 記録イベント（計測計画 v2）
 
-v1 で実装した 9 イベントに、v2 で 13 イベントを追加しました。パラメータは GA4 送信時の名前（snake_case）で記載します。
+v1 で実装した 9 イベントに、計測計画 v2 と v1.1〜v1.7 の各版でイベントを追加し、現在 **37 行・38 種**（`logEvent` で記録する 37 種 + GA4 にだけ送る `screen_view`）です。パラメータは GA4 送信時の名前（snake_case）で記載します。
+
+各イベントの実コードの発火箇所、版ごとのテーマとの対応、KPI の集計定義は **`docs/metrics-map.md`** を参照してください。イベントを追加・変更するときは本書と `docs/metrics-map.md` を同じ PR で更新します。
 
 | イベント | パラメータ | 目的・答える問い |
 |---|---|---|
@@ -24,7 +26,7 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `onboarding_started` | — | 診断の開始率 |
 | `onboarding_skipped` | — | 診断を避ける割合 |
 | `diagnostic_answered` | `question_index`, `correct`, `sound_change_type` | どの音変化でつまずくか（問題別の正答率） |
-| `onboarding_completed` | 種別ごとの correct/missed、`score`, `total`, `accuracy_percent`, `mode`, `level` | Aha 到達。全 8 種診断スコア分布 |
+| `onboarding_completed` | 種別ごとの correct/missed（`linking` / `reduction` / `flapping` の 3 種。残り 5 種の内訳は `diagnostic_answered` で見る）、`score`, `total`, `accuracy_percent`, `mode`, `level` | Aha 到達。全 8 種診断スコア分布 |
 | `rediagnosis_completed` | `mode`, `score`, `total`, `accuracy_percent`, `delta_accuracy` | 学習後の再診断実施と前回比の伸長計測 |
 | `lesson_started` | `lesson_id` | レッスン別の開始数 |
 | `lesson_completed` | `lesson_id`, `seconds` | 完了率・North Star の分子 |
@@ -40,7 +42,7 @@ v1 で実装した 9 イベントに、v2 で 13 イベントを追加しまし�
 | `paywall_viewed` | `from` | 課金ファネルの入口と流入元 |
 | `paywall_plan_selected` | `plan`（monthly/annual） | プラン選好 |
 | `purchase_started` | `product_id` | 購入フローの開始 |
-| `purchase_completed` | `product_id`, `value`, `currency`（JPY）, `premium_active` | 収益（LTV・ファネル）。復元時も発火するため集計では `restored: true` を除外 |
+| `purchase_completed` | `product_id`, `value`, `currency`（JPY）, `premium_active`, `restored`（復元による発火時のみ `true`。このとき `product_id` は `restored`） | 収益（LTV・ファネル）。復元時も発火するため集計では `restored: true` を除外 |
 | `purchase_failed` | `product_id`, `reason`（user_cancelled/network/store_error/unknown） | 購入失敗の内訳（生のエラー文は送らない） |
 | `restore_completed` | `result`（restored/nothing） | 復元の成否 |
 | `subscription_manage_tapped` | — | 設定のプラン導線タップ = **解約意図のシグナル** |
