@@ -23,6 +23,8 @@ let isLoaded = false;
 let canPersist = false;
 let saveQueue: Promise<void> = Promise.resolve();
 const listeners = new Set<() => void>();
+/** 読み込み完了前に行われた削除。読み込み後に反映する (古い位置の復元を防ぐ) */
+const pendingClears = new Set<string>();
 
 /** 寛容なパース: 不正 JSON / 不正型は空扱い。文 0 は「再開位置なし」と同義なので捨てる */
 function parseResume(json: string): ResumeData {
@@ -65,6 +67,7 @@ function loadAsync(): Promise<void> {
         const parsed = parseResume(await STORAGE_FILE.text());
         // 読み込み前にメモリへ蓄積された分を優先してマージ
         cachedData = { ...parsed, ...cachedData };
+        for (const id of pendingClears) delete cachedData[id];
       }
       canPersist = true;
     } catch (e) {
@@ -74,8 +77,8 @@ function loadAsync(): Promise<void> {
       loadPromise = null;
       return;
     }
+    pendingClears.clear();
     isLoaded = true;
-    notify();
     flushToDisk();
   })();
   return loadPromise;
@@ -103,6 +106,7 @@ export function saveLessonResumePosition(lessonId: string, sentenceIndex: number
   ensureLoaded();
   if (!lessonId) return;
   const idx = Math.floor(sentenceIndex);
+  if (Number.isFinite(idx) && idx >= 1) pendingClears.delete(lessonId);
   if (!Number.isFinite(idx) || idx < 1) {
     clearLessonResumePosition(lessonId);
     return;
@@ -120,6 +124,7 @@ export function saveLessonResumePosition(lessonId: string, sentenceIndex: number
 
 export function clearLessonResumePosition(lessonId: string) {
   ensureLoaded();
+  if (!canPersist) pendingClears.add(lessonId);
   if (!(lessonId in cachedData)) return;
   const next = { ...cachedData };
   delete next[lessonId];
