@@ -2,6 +2,64 @@
 
 ミミトレ (App ID 6837503600) の審査提出記録。run ID・時刻・ゲート結果を残す。
 
+## v1.7 (build 14) — 2026-11-27
+
+- セッション開始: 2026-11-27 16:52 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 18:23:06 JST** (submit 18:22:38)
+  (所要 **約 1 時間 31 分** — 3 時間ルール内)
+- 内容テーマ: #97 の**前半のみ** — レッスン中断時の最終文位置の永続化と「続きから再開」導線。
+  新規 `src/features/player/lessonResumeStore.ts` がレッスンごとの最終再生文位置 (0 始点) を端末内の
+  `lesson-resume-data.json` に保存 (progressStore / playerPrefs のスキーマは無変更)。`lesson.tsx` は文が進む
+  たびと未完了離脱時に保存し、完了時に削除。ホーム (「今日の1本」カード / レッスンカード / カリキュラムシート)
+  から開くとき、再開位置があれば OS 標準の Alert で「文 N から再開」/「先頭から」を選ばせる。
+  カードの `accessibilityLabel` (「今日の1本: …」) は無変更。新規計測イベント
+  `lesson_resume_offered` / `lesson_resume_chosen` を `docs/metrics.md` に先行定義。
+  **#97 後半 (聞くだけ／ハンズフリー連続再生モード) は未実装** — #97 は OPEN のまま。
+
+### 経路の記録
+
+| 手順 | 経路 | 時刻 (JST) | 結果 |
+|---|---|---|---|
+| 着手前事前確認 | ローカル + ASC API (読み取り) | 16:55–16:57 | (a) Watch: `expo-target.config.js` の icon、`CFBundleIconName=AppIcon`、`UIBackgroundModes=audio`、`WKBackgroundModes` なしを確認 (b) Watch スクリーンショット: v1.6 の ja ローカライズに `APP_WATCH_SERIES_10` セット 2 枚 COMPLETE → 再利用 (v1.7 でも引き継ぎを確認) (c) `usesNonExemptEncryption` は spec に含まれない → VALID 後に API PATCH |
+| 実装 | Orchestrator + DSH ワーカー → Orchestrator レビュー (omp 19.1.1 は `ZAI_API_KEY` 未設定で「Set an API key environment variable」と停止、規定により DSH 本体で実施) | 16:58–17:40 | metrics.md → ストア → lesson.tsx → index.tsx。lint / typecheck PASS。シミュレータ (Mimitore-67) で Light/Dark 撮影 (`docs/ui/lesson-resume-97/`) |
+| PR | PR #125 → squash マージ `a5fe8a2` | 17:46–18:06 | cubic: skipping / GitGuardian: PASS / CodeRabbit: 無料枠上限で skipping。Greptile 指 1 件 (読み込み完了前の削除が読み込み後に戻る) → 実コードで成立を確認し修正。セルフレビュー指摘のうち読み込み失敗時の再試行・文進行時の保存・同値の再保存スキップを対応。CodeRabbit Minor (コールド起動直後の読み込み中は先頭から開く) は影響軽微として対応せずスレッドに理由を記載。スレッド解決後にマージ |
+| upload | **m4 (Mac mini) ローカル** `appstore-upload.sh --version 1.7 --build 14 --upload` (Aqua セッション直実行) | 18:06–18:16 | **アップロード成功** (altool "UPLOAD SUCCEEDED with no errors"、Delivery UUID `0405ea8c-a181-44d1-81f7-42004b3a7187` = build id)。アーカイブ検証 OK: version=1.7 build=14 |
+| VALID 確認 | ASC API (builds) | 18:21 | **build 14 = VALID** (uploadedDate 2026-11-27T01:17:56-08:00) |
+| 暗号申告 | ASC API PATCH | 18:21 | `usesNonExemptEncryption = false` を build 14 に適用 |
+| apply | ローカル asc-submit run (run `20261127-182127-f290`) | 18:21:45 | version 1.7 作成 (`b685fe97-d1da-4abb-8d6b-e7a846dc96db`) + build 14 割当 + メタデータ (What's New ja / 説明 / キーワード / サブタイトル / 審査メモ / phased release) 反映 |
+| submit | ローカル asc-submit submit --version 1.7 | 18:22:38 | **提出成功** (version 1.7 submitted for review) |
+| status | ローカル asc-submit + ASC API | 18:23:06 | **version 1.7 = WAITING_FOR_REVIEW** / releaseType AFTER_APPROVAL。reviewSubmission `7184073b-c56e-4e58-a4ab-66315dbf1788` (iOS) = WAITING_FOR_REVIEW。サブスクは IAP 変更なしのため提出対象外 (v1.4〜v1.6 と同じ) |
+
+- **upload 経路: m4 (Mac mini) ローカルのみ** (第一候補で成功。m1 ワークフローは前例の Code=513 があるため本版では試行していない)。
+- **CI**: PR 向け GitHub Actions ワークフローは無し (App Store ワークフローのみ、runs-on は変更なし)。ローカル `npm run lint` / `npm run typecheck` PASS。
+
+### 提出前ゲートの結果
+
+- **最終バイナリ NS*UsageDescription 監査** (docs/operations.md §1.2、アップロードした `.ipa` を展開し、
+  `Payload/` 配下の全 Info.plist を走査):
+  - `app.app/Info.plist` `NSMicrophoneUsageDescription` =
+    「シャドーイング練習であなたの発音を録音し、この端末の中でお手本の音声と聞き比べるために使用します。録音した音声が外部に送信されることはありません。」
+    — 確定文を維持 (スクリプトの用途文字列ゲート `[4/7]` PASS)
+  - `app.app/Info.plist` `NSLocalNetworkUsageDescription` =
+    "Expo Dev Launcher uses the local network to discover and connect to development servers running on your computer."
+    — expo-dev-client の既定文 (v1.1〜v1.6 と同一条件、審査通過実績あり)
+  - 上記 2 件のみ (プラグイン既定文 "Allow ... to access" は 0 件)。再開機能は新規権限を要求しない。
+  - 同梱 Watch バンドル (`Watch/watch.app`): NS*UsageDescription 0 件・`CFBundleIconName = AppIcon`・version 1.7 / build 14 を確認
+- **spec**: `dist/appstore/release-1.7.json` (version 1.7 / build 14 / AFTER_APPROVAL / phasedRelease false / What's New ja) — validate PASS
+- **UI ルールブック** (PR #125 に §3 点検数値を記載): P1 プライマリ = 1 (変更なし) / P2 初期ブロック = 5 (既存カード内の 1 行で増加なし) / P3 変更なし / P4 2 行超 0 / P5 内部文字列 0 / P6 見出し追加 0 / P7 新規カスタムボタン 0 (OS 標準 Alert)。Light/Dark 実画面確認済み。
+- **W7 / W8**: W7 = ホーム (再開ヒント)・再開選択ダイアログ・文 4 から再開したレッスン画面を Light/Dark 両モードで撮影・確認 (`docs/ui/lesson-resume-97/`)。W8 = 設問コンテンツの変更なし (v1.6 の全問検査を踏襲)。
+- watch スクリーンショット: 既存登録済みの実物を引き継ぎ (watch バンドルの内容変更なし・新規取得不要)。
+- iPhone Duo XCUITest: レイアウト大変更ではない (カード内 1 行 + OS 標準 Alert) のため未実施 — 「今日の1本」ラベルは無変更。
+
+### 教訓 (次回改善)
+
+- PR のマージにはレビュースレッドの解決が必要 (Repository rule)。bot の指摘は修正後に返信 + resolve すること。
+- CodeRabbit は無料枠 (OSS) の上限に達すると `skipping` になる。次回利用まで 50 分。Greptile は引き続き 1 件指摘 → 実コードで成立。
+- `usesNonExemptEncryption=false` は spec / asc-submit に依然含まれておらず、VALID 後の手動 PATCH が必要 (v1.5・v1.6 の教訓を繰り越しました)。
+- レッスン画面のアンマウントでマイク権限未許可のシミュレータだと expo-audio の stop 失敗が LogBox に出る (main 既存・今回の変更非起因)。撮影時は `xcrun simctl privacy grant microphone` で潰す。
+- コールド起動直後の再開位置読み込み完了前 (数ミリ秒) にカードを押すと、その回だけ先頭から開く (CodeRabbit Minor・対応せず)。読み込み状態の公開と待機は今後の改善案。
+
+---
+
 ## v1.6 (build 13) — 2026-11-27
 
 - セッション開始: 2026-11-27 02:03 JST / **審査提出 (WAITING_FOR_REVIEW 確認): 03:01:55 JST**
